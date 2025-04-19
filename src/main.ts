@@ -20,6 +20,11 @@ import '@mdi/font/css/materialdesignicons.css'
 // Custom Theme
 import { customDefaults, customTheme } from '@/utils/vuetify/config'
 
+// Font Style
+import { createFont } from './utils/vuetify/font'
+
+createFont()
+
 const vuetify = createVuetify({
   theme: {
     themes: customTheme,
