@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import TopProfileNavigation from './navigation/TopProfileNavigation.vue'
-import LogoBd from '@images/logos/bd-logo-with-text.png'
+// import LogoBd from '@images/logos/bd-logo-with-text.png'
 // import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
@@ -43,7 +43,7 @@ onMounted(() => {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <v-img max-width="228" :src="LogoBd"></v-img>
+            <!-- <v-img max-width="228" :src="LogoBd"></v-img> -->
           </RouterLink>
         </v-app-bar-title>
 

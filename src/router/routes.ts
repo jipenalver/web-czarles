@@ -3,7 +3,7 @@ import LoginView from '@/views/auth/LoginView.vue'
 export const routes = [
   // Landing
   {
-    path: '/login',
+    path: '/',
     name: 'login',
     component: LoginView,
     meta: { requiresAuth: false },
