@@ -15,6 +15,10 @@ export const customTheme = {
     colors: {
       primary: '#6159a9',
       secondary: '#f26925',
+      background: '#282A42',
+      'on-background': '#EAEAFF',
+      surface: '#30334E',
+      'on-surface': '#EAEAFF',
     },
   },
 }
