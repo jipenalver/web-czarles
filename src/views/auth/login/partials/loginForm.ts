@@ -25,7 +25,7 @@ export function useLoginForm() {
       formAction.value = {
         ...formActionDefault,
         formMessage: error.message,
-        formStatus: 400,
+        formStatus: error.status as number,
         formAlert: true,
       }
     } else if (data) {
