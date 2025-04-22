@@ -2,7 +2,8 @@ export const customTheme = {
   light: {
     dark: false,
     colors: {
-      primary: '#b12fd8',
+      primary: '#352c73',
+      secondary: '#f26925',
       background: '#F7F7F9',
       'on-background': '#262B43',
       surface: '#fff',
@@ -12,11 +13,8 @@ export const customTheme = {
   dark: {
     dark: true,
     colors: {
-      primary: '#b12fd8',
-      background: '#282A42',
-      'on-background': '#EAEAFF',
-      surface: '#30334E',
-      'on-surface': '#EAEAFF',
+      primary: '#6159a9',
+      secondary: '#f26925',
     },
   },
 }
