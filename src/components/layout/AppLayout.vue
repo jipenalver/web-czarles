@@ -1,7 +1,9 @@
 <script setup lang="ts">
-// import TopProfileNavigation from './navigation/TopProfileNavigation.vue'
+import TopProfileNavigation from './navigation/TopProfileNavigation.vue'
 import headerCzarles from '@/assets/images/image-header-title.png'
-// import { useAuthUserStore } from '@/stores/authUser'
+import logoCzarles from '@/assets/logos/logo-czarles.png'
+import { useAuthUserStore } from '@/stores/authUser'
+import imageBg from '@/assets/images/image-bg.jpg'
 import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -13,7 +15,7 @@ const emit = defineEmits(['isDrawerVisible', 'theme'])
 
 const { mobile } = useDisplay()
 
-// const authUserStore = useAuthUserStore()
+const authUserStore = useAuthUserStore()
 
 const isLoggedIn = ref(false)
 const theme = ref(localStorage.getItem('theme') ?? 'light')
@@ -24,8 +26,8 @@ function onToggleTheme() {
   emit('theme', theme.value)
 }
 
-onMounted(() => {
-  // isLoggedIn.value = authUserStore.isAuthenticated()
+onMounted(async () => {
+  isLoggedIn.value = await authUserStore.isAuthenticated()
 })
 </script>
 
@@ -43,7 +45,8 @@ onMounted(() => {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <v-img max-width="265" :src="headerCzarles"></v-img>
+            <v-img v-if="theme === 'light'" max-width="265" :src="headerCzarles"></v-img>
+            <v-img v-else max-width="75" :src="logoCzarles"></v-img>
           </RouterLink>
         </v-app-bar-title>
 
@@ -51,20 +54,21 @@ onMounted(() => {
           class="me-2"
           :icon="theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
           variant="elevated"
-          color="primary"
           @click="onToggleTheme"
           slim
         ></v-btn>
 
         <template v-if="isLoggedIn">
-          <!-- <TopProfileNavigation></TopProfileNavigation> -->
+          <TopProfileNavigation></TopProfileNavigation>
         </template>
       </v-app-bar>
 
       <slot name="navigation"></slot>
 
       <v-main>
-        <slot name="content"></slot>
+        <v-img :src="imageBg" class="h-100" cover>
+          <slot name="content"></slot>
+        </v-img>
       </v-main>
 
       <v-footer class="d-flex" :class="mobile ? 'justify-center' : 'justify-between'" border app>
