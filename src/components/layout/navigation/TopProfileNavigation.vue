@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { formActionDefault } from '@/utils/helpers/constants'
-// import { handleFormError } from '@/utils/helpers/forms'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { getAvatarText } from '@/utils/helpers/others'
-// import { useAuthUserStore } from '@/stores/authUser'
+import { useAuthUserStore } from '@/stores/authUser'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
-// import axios from 'axios'
 
 const router = useRouter()
 
@@ -77,7 +75,7 @@ const onLogout = async () => {
             <template #prepend>
               <v-avatar
                 v-if="authUserStore.userData?.avatar"
-                :image="appStorageUrl + authUserStore.userData.avatar"
+                :image="authUserStore.userData.avatar"
                 color="primary"
                 size="large"
               >
@@ -96,11 +94,9 @@ const onLogout = async () => {
           </v-list-item>
         </v-list>
 
-        <template v-if="authUserStore.userData?.email_verified_at">
-          <v-divider class="my-3"></v-divider>
+        <v-divider class="my-3"></v-divider>
 
-          <v-btn prepend-icon="mdi-wrench" variant="plain" to="/settings/account"> Settings </v-btn>
-        </template>
+        <v-btn prepend-icon="mdi-wrench" variant="plain" to="/settings/account"> Settings </v-btn>
 
         <v-divider class="my-3"></v-divider>
 

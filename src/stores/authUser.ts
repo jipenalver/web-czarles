@@ -9,7 +9,7 @@ type UserData = {
   lastname: string
   is_admin: boolean
   user_role: string
-  image_url: string
+  avatar: string
 }
 
 export const useAuthUserStore = defineStore('authUser', () => {
@@ -99,7 +99,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
       const { data: imageData } = supabase.storage.from('shirlix').getPublicUrl(data.path)
 
       // Update the user information with the new image_url
-      return await updateUserInformation({ ...userData.value, image_url: imageData.publicUrl })
+      return await updateUserInformation({ ...userData.value, avatar: imageData.publicUrl })
     }
   }
 
