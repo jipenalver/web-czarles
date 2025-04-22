@@ -1,4 +1,5 @@
 import LoginView from '@/views/auth/login/LoginView.vue'
+import RegisterView from '@/views/auth/register/RegisterView.vue'
 
 export const routes = [
   // Landing
@@ -8,12 +9,12 @@ export const routes = [
     component: LoginView,
     meta: { requiresAuth: false },
   },
-  // {
-  //   path: '/register',
-  //   name: 'register',
-  //   component: RegisterView,
-  //   meta: { requiresAuth: false }
-  // },
+  {
+    path: '/register',
+    name: 'register',
+    component: RegisterView,
+    meta: { requiresAuth: false },
+  },
   // {
   //   path: '/password/forgot',
   //   name: 'password-forgot',
