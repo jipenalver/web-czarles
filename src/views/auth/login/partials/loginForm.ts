@@ -1,18 +1,15 @@
 import { formActionDefault } from '@/utils/helpers/constants'
-import { useAuthUserStore } from '@/stores/authUser'
+import { supabase } from '@/utils/supabase'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 
 export function useLoginForm() {
   const router = useRouter()
 
-  // const authUserStore = useAuthUserStore()
-
   // States
   const formDataDefault = {
     email: '',
     password: '',
-    remember: true,
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -22,27 +19,29 @@ export function useLoginForm() {
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // try {
-    //   const { data } = await axios.post('/api/v1/auth/login', formData.value)
+    const { data, error } = await supabase.auth.signInWithPassword(formData.value)
 
-    //   formAction.value.formMessage = 'Successfully Logged Account.'
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formAlert: true,
+      }
+    } else if (data) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: 'Successfully Logged Account.',
+        formStatus: 200,
+        formAlert: true,
+      }
 
-    //   authUserStore.setAuthData(data)
+      router.replace('/dashboard')
+    }
 
-    //   if (data.userData.email_verified_at === null) router.replace('/verify/email')
-    //   else router.replace('/dashboard')
-    // } catch (error) {
-    //   const { message, status } = handleFormError(error)
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: message,
-    //     formStatus: status,
-    //   }
-    // } finally {
-    //   refVForm.value?.reset()
-    //   formAction.value.formAlert = true
-    //   formAction.value.formProcess = false
-    // }
+    refVForm.value?.reset()
+
+    formAction.value.formProcess = false
   }
 
   // Trigger Validators
