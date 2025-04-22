@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import TopProfileNavigation from './navigation/TopProfileNavigation.vue'
-// import LogoBd from '@images/logos/bd-logo-with-text.png'
+import headerCzarles from '@/assets/images/image-header-title.png'
 // import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
@@ -11,7 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['isDrawerVisible', 'theme'])
 
-const { mobile, xs } = useDisplay()
+const { mobile } = useDisplay()
 
 // const authUserStore = useAuthUserStore()
 
@@ -43,61 +43,21 @@ onMounted(() => {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <!-- <v-img max-width="228" :src="LogoBd"></v-img> -->
+            <v-img max-width="265" :src="headerCzarles"></v-img>
           </RouterLink>
         </v-app-bar-title>
 
         <v-btn
           class="me-2"
           :icon="theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
+          variant="elevated"
+          color="primary"
           @click="onToggleTheme"
+          slim
         ></v-btn>
 
         <template v-if="isLoggedIn">
           <!-- <TopProfileNavigation></TopProfileNavigation> -->
-        </template>
-
-        <template v-else>
-          <div v-if="mobile" class="d-flex align-center ga-1">
-            <v-menu>
-              <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
-              </template>
-
-              <v-list>
-                <v-list-item prepend-icon="mdi-login" to="/login">
-                  <v-list-item-title class="font-weight-bold text-uppercase">
-                    Sign In
-                  </v-list-item-title>
-                </v-list-item>
-
-                <v-list-item
-                  prepend-icon="mdi-account-plus"
-                  class="bg-primary"
-                  rounded="lg"
-                  to="/register"
-                >
-                  <v-list-item-title class="font-weight-bold text-uppercase">
-                    Sign Up
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </div>
-
-          <div v-else class="d-flex align-center ga-5">
-            <v-btn prepend-icon="mdi-login" rounded="lg" to="/login"> Sign In </v-btn>
-
-            <v-btn
-              prepend-icon="mdi-account-plus"
-              color="primary"
-              variant="elevated"
-              rounded="lg"
-              to="/register"
-            >
-              Sign Up
-            </v-btn>
-          </div>
         </template>
       </v-app-bar>
 
@@ -107,10 +67,10 @@ onMounted(() => {
         <slot name="content"></slot>
       </v-main>
 
-      <v-footer :class="mobile ? 'd-flex flex-column' : 'd-flex justify-between'" border app>
-        <div class="font-weight-bold text-center">Czarles Construction and Supplies</div>
-
-        <div :class="xs ? '' : 'd-flex align-center'"></div>
+      <v-footer class="d-flex" :class="mobile ? 'justify-center' : 'justify-between'" border app>
+        <div class="font-weight-bold text-center">
+          Copyright © 2025 | Czarles Construction and Supplies
+        </div>
       </v-footer>
     </v-app>
   </v-responsive>

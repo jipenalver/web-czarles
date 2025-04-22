@@ -1,4 +1,4 @@
-import LoginView from '@/views/auth/LoginView.vue'
+import LoginView from '@/views/auth/login/LoginView.vue'
 
 export const routes = [
   // Landing
