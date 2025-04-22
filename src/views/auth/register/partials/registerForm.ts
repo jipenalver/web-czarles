@@ -27,7 +27,7 @@ export function useRegisterForm() {
       email,
       password,
       options: {
-        data: otherData,
+        data: { ...otherData, is_admin: true },
       },
     })
 
@@ -46,7 +46,7 @@ export function useRegisterForm() {
         formAlert: true,
       }
 
-      router.push('/login')
+      router.push('/dashboard')
     }
 
     refVForm.value?.reset()
