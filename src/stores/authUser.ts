@@ -2,7 +2,7 @@ import { supabase } from '@/utils/supabase'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-type UserData = {
+type AuthUser = {
   id: string
   email: string
   firstname: string
@@ -14,11 +14,10 @@ type UserData = {
 
 export const useAuthUserStore = defineStore('authUser', () => {
   // States
-  const userData = ref<Partial<UserData> | null>(null)
+  const userData = ref<Partial<AuthUser> | null>(null)
   const authPages = ref<string[]>([])
 
   // Getters
-  // Computed Properties; Use for getting the state but not modifying its reactive state
   const userRole = computed(() => {
     return userData.value?.is_admin ? 'Super Administrator' : userData.value?.user_role
   })
@@ -30,7 +29,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
   }
 
   // Actions
-  // Retrieve User Session if Logged
   async function isAuthenticated() {
     const { data } = await supabase.auth.getSession()
 
@@ -56,20 +54,16 @@ export const useAuthUserStore = defineStore('authUser', () => {
   }
 
   // Update User Information
-  async function updateUserInformation(updatedData: Partial<UserData>) {
+  async function updateUserInformation(updatedData: Partial<AuthUser>) {
     const {
       data: { user },
       error,
     } = await supabase.auth.updateUser({
-      data: {
-        ...updatedData,
-      },
+      data: updatedData,
     })
 
     // Check if it has error
-    if (error) {
-      return { error }
-    }
+    if (error) return { error }
     // If no error set updatedData to userData state
     else if (user) {
       const { id, email, user_metadata } = user
@@ -90,9 +84,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
       })
 
     // Check if it has error
-    if (error) {
-      return { error }
-    }
+    if (error) return { error }
     // If no error set data to userData state with the image_url
     else if (data) {
       // Retrieve Image Public Url
