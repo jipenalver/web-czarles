@@ -3,6 +3,7 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { getAvatarText } from '@/utils/helpers/others'
 import { useAuthUserStore } from '@/stores/authUser'
+import { supabase } from '@/utils/supabase'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 
@@ -15,23 +16,13 @@ const formAction = ref({ ...formActionDefault })
 const onLogout = async () => {
   formAction.value = { ...formActionDefault, formProcess: true }
 
-  // try {
-  //   await axios.post('/api/v1/auth/logout')
+  await supabase.auth.signOut()
 
-  //   authUserStore.removeAuthData()
-  //   dreamsStore.$reset()
-  //   groupsStore.$reset()
-  //   router.replace('/')
-  // } catch (error) {
-  //   const { message, status } = handleFormError(error)
-  //   formAction.value = {
-  //     ...formActionDefault,
-  //     formMessage: message,
-  //     formStatus: status,
-  //   }
-  // } finally {
-  //   formAction.value.formProcess = false
-  // }
+  setTimeout(() => {
+    authUserStore.$reset()
+  }, 2500)
+
+  router.replace('/')
 }
 </script>
 
