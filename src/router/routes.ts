@@ -1,5 +1,6 @@
 import LoginView from '@/views/auth/login/LoginView.vue'
 import RegisterView from '@/views/auth/register/RegisterView.vue'
+import DashboardView from '@/views/system/dashboard/DashboardView.vue'
 
 export const routes = [
   // Landing
@@ -29,12 +30,12 @@ export const routes = [
   // },
 
   // System
-  // {
-  //   path: '/dashboard',
-  //   name: 'dashboard',
-  //   component: DashboardView,
-  //   meta: { requiresAuth: true, isDefault: true }
-  // },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: DashboardView,
+    meta: { requiresAuth: true, isDefault: true },
+  },
   // {
   //   path: '/settings/:tab?',
   //   name: 'settings',
