@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MiscWelcomeJohn from '@images/misc/illustration-john-light.png'
+import MiscWelcomeJohn from '@/assets/misc/illustration-john-light.png'
 import { useAuthUserStore } from '@/stores/authUser'
 import { useDisplay } from 'vuetify'
 
