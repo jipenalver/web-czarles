@@ -94,10 +94,8 @@ export const useAuthUserStore = defineStore('authUser', () => {
       .select('*, pages: user_role_pages (page)')
       .eq('user_role', name)
 
-    console.log('Auth Pages:', data)
-
-    // Set the retrieved data to state
-    // if (data && data.length > 0) authPages.value = data[0].pages.map((p) => p.page)
+    if (data && data.length > 0)
+      authPages.value = data[0].pages.map((p: { page: string }) => p.page)
   }
 
   return {
