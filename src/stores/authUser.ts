@@ -46,7 +46,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
       data: { user },
     } = await supabase.auth.getUser()
 
-    // Set the retrieved information to state
     if (user) {
       const { id, email, user_metadata } = user
       userData.value = { id, email, ...user_metadata }
@@ -62,9 +61,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
       data: updatedData,
     })
 
-    // Check if it has error
     if (error) return { error }
-    // If no error set updatedData to userData state
     else if (user) {
       const { id, email, user_metadata } = user
       userData.value = { id, email, ...user_metadata }
@@ -75,7 +72,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
   // Update User Profile Image
   async function updateUserImage(file: File) {
-    // Upload the file with the user ID and file extension
     const { data, error } = await supabase.storage
       .from('czarles')
       .upload('avatars/' + userData.value?.id + '-avatar.png', file, {
@@ -83,14 +79,10 @@ export const useAuthUserStore = defineStore('authUser', () => {
         upsert: true,
       })
 
-    // Check if it has error
     if (error) return { error }
-    // If no error set data to userData state with the image_url
     else if (data) {
-      // Retrieve Image Public Url
       const { data: imageData } = supabase.storage.from('shirlix').getPublicUrl(data.path)
 
-      // Update the user information with the new image_url
       return await updateUserInformation({ ...userData.value, avatar: imageData.publicUrl })
     }
   }
