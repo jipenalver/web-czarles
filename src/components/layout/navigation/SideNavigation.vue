@@ -44,6 +44,7 @@ onMounted(() => {
     if (!items.value) return
 
     items.value = items.value.filter((item) => authUserStore.authPages.includes(item[3]))
+
     if (items.value.length === 0) noAccessPages.value.push(title)
   })
 })
@@ -58,7 +59,13 @@ onMounted(() => {
     :width="275"
   >
     <v-list density="compact" lines="one" nav>
-      <v-list-item prepend-icon="mdi-view-dashboard" to="/dashboard" color="primary" variant="flat">
+      <v-list-item
+        prepend-icon="mdi-view-dashboard"
+        to="/dashboard"
+        color="primary"
+        variant="flat"
+        slim
+      >
         <template #title>
           <span class="font-weight-black"> Dashboard </span>
         </template>
@@ -68,7 +75,7 @@ onMounted(() => {
 
       <v-list-group v-for="([title, icon], i) in mainNav" :key="i">
         <template #activator="{ props }" v-if="!noAccessPages.includes(title)">
-          <v-list-item v-bind="props" :prepend-icon="icon" color="primary" variant="flat">
+          <v-list-item v-bind="props" :prepend-icon="icon" color="primary" variant="flat" slim>
             <template #title>
               <span class="font-weight-black">
                 {{ title }}
@@ -86,6 +93,7 @@ onMounted(() => {
             :to="to ?? undefined"
             color="primary"
             variant="flat"
+            slim
           >
             <template #title>
               <span class="font-weight-black"> {{ title }} </span>
@@ -98,7 +106,7 @@ onMounted(() => {
 
       <v-list-group>
         <template #activator="{ props }">
-          <v-list-item v-bind="props" prepend-icon="mdi-wrench" color="primary" variant="flat">
+          <v-list-item v-bind="props" prepend-icon="mdi-wrench" color="primary" variant="flat" slim>
             <template #title>
               <span class="font-weight-black"> Settings </span>
             </template>
@@ -113,6 +121,7 @@ onMounted(() => {
           :to="to ?? undefined"
           color="primary"
           variant="flat"
+          slim
         >
           <template #title>
             <span class="font-weight-black"> {{ title }} </span>
