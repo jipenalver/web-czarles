@@ -26,25 +26,21 @@ router.beforeEach(async (to) => {
   }
 
   // Check if the user is logged in
-  // if (isLoggedIn) {
-  //   // Check if user role is User
-  //   if (authUserStore.userAccount) {
-  //     // Forbid access to admin pages
-  //     if (to.path.includes('/admin')) return { name: 'forbidden' }
-  //     // Check if user is not verified
-  //     if (!authUserStore.userData?.email_verified_at && to.name !== 'verify-email') {
-  //       // Redirect to verify email page
-  //       return { name: 'verify-email' }
-  //     }
-  //   }
-  //   // Check if user role is not Super Administrator
-  //   else if (!authUserStore.userAdmin) {
-  //     // Check page that is going to if it is in role pages
-  //     const isAccessible = authUserStore.authPages.includes(to.path)
-  //     // Forbid access if not in role pages and if page is not default page
-  //     if (!isAccessible && !to.meta.isDefault) return { name: 'forbidden' }
-  //   }
-  // }
+  if (isLoggedIn) {
+    const isSuperAdmin = authUserStore.userRole === 'Super Administrator'
+
+    // Check if user role is not Super Administrator
+    if (!isSuperAdmin) {
+      if (authUserStore.authPages.length === 0)
+        await authUserStore.getAuthPages(authUserStore.userRole as string)
+
+      // Check page that is going to if it is in role pages
+      const isAccessible = authUserStore.authPages.includes(to.path)
+
+      // Forbid access if not in role pages and if page is not default page
+      if (!isAccessible && !to.meta.isDefault) return { name: 'forbidden' }
+    }
+  }
 })
 
 export default router
