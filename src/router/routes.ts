@@ -1,5 +1,7 @@
 import LoginView from '@/views/auth/login/LoginView.vue'
 import RegisterView from '@/views/auth/register/RegisterView.vue'
+import ForbiddenView from '@/views/errors/ForbiddenView.vue'
+import NotFoundView from '@/views/errors/NotFoundView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
 
 export const routes = [
@@ -58,16 +60,16 @@ export const routes = [
   // },
 
   // Errors Pages
-  // {
-  //   path: '/forbidden',
-  //   name: 'forbidden',
-  //   component: ForbiddenView,
-  //   meta: { isDefault: true },
-  // },
-  // {
-  //   path: '/:catchAll(.*)',
-  //   name: 'not-found',
-  //   component: NotFoundView,
-  //   meta: { isDefault: true },
-  // },
+  {
+    path: '/forbidden',
+    name: 'forbidden',
+    component: ForbiddenView,
+    meta: { isDefault: true },
+  },
+  {
+    path: '/:catchAll(.*)',
+    name: 'not-found',
+    component: NotFoundView,
+    meta: { isDefault: true },
+  },
 ]
