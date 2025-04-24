@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['isDrawerVisible', 'theme'])
 
-const { mobile } = useDisplay()
+const { mobile, smAndUp } = useDisplay()
 
 const authUserStore = useAuthUserStore()
 
@@ -45,7 +45,7 @@ onMounted(async () => {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <v-img v-if="theme === 'light'" max-width="265" :src="headerCzarles"></v-img>
+            <v-img v-if="theme === 'light' && smAndUp" max-width="265" :src="headerCzarles"></v-img>
             <v-img v-else max-width="75" :src="logoCzarles"></v-img>
           </RouterLink>
         </v-app-bar-title>
