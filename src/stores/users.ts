@@ -5,8 +5,10 @@ import { supabaseAdmin } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-type AdminUser = {
+export type AdminUser = {
   id: string
+  firstname: string
+  lastname: string
   email: string
   password: string
   user_role: string
@@ -31,12 +33,18 @@ export const useUsersStore = defineStore('users', () => {
     })
 
     const { users, total } = data as { users: User[]; total: number }
-    usersTable.value = users.map((user) => ({
-      id: user.id,
-      email: user.email as string,
-      password: user.user_metadata.password,
-      user_role: user.user_metadata.user_role,
-    }))
+    usersTable.value = users.map((user) => {
+      const { id, email, user_metadata } = user
+
+      return {
+        id,
+        email: email as string,
+        firstname: user_metadata.firstname,
+        lastname: user_metadata.lastname,
+        password: user_metadata.password,
+        user_role: user_metadata.user_role,
+      }
+    })
     usersTotal.value = total
   }
 
