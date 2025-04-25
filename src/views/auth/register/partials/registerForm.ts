@@ -42,7 +42,6 @@ export function useRegisterForm() {
       formAction.value = {
         ...formActionDefault,
         formMessage: 'Successfully Created Account.',
-        formStatus: 200,
         formAlert: true,
       }
 
@@ -50,8 +49,6 @@ export function useRegisterForm() {
     }
 
     refVForm.value?.reset()
-
-    formAction.value.formProcess = false
   }
 
   // Trigger Validators

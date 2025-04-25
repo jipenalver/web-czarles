@@ -32,7 +32,6 @@ export function useLoginForm() {
       formAction.value = {
         ...formActionDefault,
         formMessage: 'Successfully Logged Account.',
-        formStatus: 200,
         formAlert: true,
       }
 
@@ -40,8 +39,6 @@ export function useLoginForm() {
     }
 
     refVForm.value?.reset()
-
-    formAction.value.formProcess = false
   }
 
   // Trigger Validators
