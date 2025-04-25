@@ -4,7 +4,7 @@ export type SubNavigation = [string, string, string, string]
 
 // 👉 ADMINISTRATOR; Main Navigation; Title, Icon
 export const adminNav: MainNavigation[] = [
-  ['Admin Users', 'mdi-account-box-multiple'],
+  ['Users Management', 'mdi-account-box-multiple'],
   // ['Subscribers', 'mdi-account-star'],
   // ['Management', 'mdi-cog'],
 ]
