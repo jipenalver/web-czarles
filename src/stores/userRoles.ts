@@ -6,6 +6,7 @@ export type UserRole = {
   id: number
   user_role: string
   user_role_pages: { page: string }[]
+  [key: string]: unknown
 }
 
 export const useUserRolesStore = defineStore('userRoles', () => {
