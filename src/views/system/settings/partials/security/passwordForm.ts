@@ -1,8 +1,11 @@
 import { formActionDefault } from '@/utils/helpers/constants'
+import { useAuthUserStore } from '@/stores/authUser'
 import { supabase } from '@/utils/supabase'
 import { ref } from 'vue'
 
 export function usePasswordForm() {
+  const authUserStore = useAuthUserStore()
+
   // States
   const formDataDefault = {
     password: '',
@@ -16,9 +19,7 @@ export function usePasswordForm() {
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    const { data, error } = await supabase.auth.updateUser({
-      password: formData.value.password,
-    })
+    const { data, error } = await supabase.auth.updateUser({ password: formData.value.password })
 
     if (error) {
       formAction.value = {
@@ -33,6 +34,9 @@ export function usePasswordForm() {
         formMessage: 'Successfully Updated Password.',
         formAlert: true,
       }
+
+      if (!authUserStore.userData?.is_admin)
+        await supabase.auth.updateUser({ data: { password: formData.value.password } })
     }
 
     refVForm.value?.reset()
