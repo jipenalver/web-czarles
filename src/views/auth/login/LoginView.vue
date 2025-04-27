@@ -16,7 +16,7 @@ const { mobile } = useDisplay()
           <v-col v-if="!mobile" cols="12" lg="8" class="h-screen pa-0"> </v-col>
 
           <v-col cols="12" lg="4" sm="7" :class="mobile ? 'mx-auto' : 'bg-background pt-16'">
-            <v-card class="bg-background mx-auto mt-10 pa-8" elevation="0">
+            <v-card class="bg-background mx-auto pa-8" elevation="0">
               <RouterLink to="/">
                 <v-img class="mx-auto my-6" max-width="900" :src="headerCzarles"></v-img>
               </RouterLink>
