@@ -44,10 +44,10 @@ export function useUserRolesFormDialog(
 
     if (error) {
       formAction.value = {
+        ...formActionDefault,
         formMessage: error.message,
-        formStatus: 400,
+        formStatus: Number(error.code),
         formAlert: true,
-        formProcess: false,
       }
     } else if (data) {
       formAction.value = {

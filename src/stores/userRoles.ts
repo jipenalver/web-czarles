@@ -23,7 +23,6 @@ export const useUserRolesStore = defineStore('userRoles', () => {
     userRoles.value = data as UserRole[]
   }
 
-  // Add User Roles
   async function addUserRole(formData: Partial<UserRole>) {
     const { pages, ...roleData } = formData
 
@@ -34,7 +33,6 @@ export const useUserRolesStore = defineStore('userRoles', () => {
     return { data, error }
   }
 
-  // Update User Roles
   async function updateUserRole(formData: Partial<UserRole>) {
     const { pages, ...roleData } = formData
 
@@ -49,7 +47,6 @@ export const useUserRolesStore = defineStore('userRoles', () => {
     return { data, error }
   }
 
-  // Update User Roles Pages
   async function updateUserRolePages(id: number, pages: string[]) {
     const { error: deleteError } = await supabase
       .from('user_role_pages')
