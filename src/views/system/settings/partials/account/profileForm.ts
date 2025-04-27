@@ -21,27 +21,22 @@ export function useProfileForm() {
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // try {
-    //   formData.value = {
-    //     ...formData.value,
-    //     postal_zip: preparePostalZip(formData.value.postal_zip, formData.value.country),
-    //   }
-    //   const { data } = await axios.put('/api/v1/user', formData.value)
+    const { data, error } = await authUserStore.updateUserInformation(formData.value)
 
-    //   formAction.value.formMessage = 'Successfully Updated Profile Information.'
-
-    //   authUserStore.setAuthUserData(data)
-    // } catch (error) {
-    //   const { message, status } = handleFormError(error)
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: message,
-    //     formStatus: status,
-    //   }
-    // } finally {
-    //   formAction.value.formAlert = true
-    //   formAction.value.formProcess = false
-    // }
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formAlert: true,
+      }
+    } else if (data) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: 'Successfully Updated Profile Information.',
+        formAlert: true,
+      }
+    }
   }
 
   // Trigger Validators
