@@ -44,7 +44,7 @@ export const useUserRolesStore = defineStore('userRoles', () => {
       .eq('id', roleData.id)
       .select()
 
-    await updateUserRolePages(formData.id as number, pages as string[])
+    await updateUserRolePages(roleData.id as number, pages as string[])
 
     return { data, error }
   }
