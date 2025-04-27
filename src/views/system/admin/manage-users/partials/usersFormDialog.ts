@@ -42,28 +42,24 @@ export function useUsersFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // try {
-    //   if (isUpdate.value) await axios.put('/api/v1/users/' + formData.value.id, formData.value)
-    //   else await axios.post('/api/v1/users', formData.value)
+    const { data, error } = isUpdate.value
+      ? await usersStore.updateUser(formData.value)
+      : await usersStore.addUser(formData.value)
 
-    //   formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Users.`
+    if (error) {
+      formAction.value.formMessage = error.message
+      formAction.value.formStatus = 400
+    } else if (data) {
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User.`
 
-    //   await usersStore.getUsersTable(props.tableOptions)
-    //   await userRolesStore.getUserRoles()
+      await usersStore.getUsersTable(props.tableOptions)
 
-    //   setTimeout(() => {
-    //     onFormReset()
-    //   }, 1500)
-    // } catch (error) {
-    //   const { message, status } = handleFormError(error)
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: message,
-    //     formStatus: status,
-    //   }
-    // } finally {
-    //   formAction.value.formAlert = true
-    // }
+      setTimeout(() => {
+        onFormReset()
+      }, 1500)
+    }
+
+    formAction.value.formAlert = true
   }
 
   // Trigger Validators
