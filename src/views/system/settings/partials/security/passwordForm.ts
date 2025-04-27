@@ -1,9 +1,10 @@
 import { formActionDefault } from '@/utils/helpers/constants'
+import { supabase } from '@/utils/supabase'
 import { ref } from 'vue'
 
 export function usePasswordForm() {
+  // States
   const formDataDefault = {
-    password_current: '',
     password: '',
     password_confirmation: '',
   }
@@ -11,27 +12,33 @@ export function usePasswordForm() {
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
 
+  // Actions
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // try {
-    //   await axios.put('/api/v1/user/password', formData.value)
+    const { data, error } = await supabase.auth.updateUser({
+      password: formData.value.password,
+    })
 
-    //   formAction.value.formMessage = 'Successfully Updated Password.'
-    // } catch (error) {
-    //   const { message, status } = handleFormError(error)
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: message,
-    //     formStatus: status,
-    //   }
-    // } finally {
-    //   refVForm.value?.reset()
-    //   formAction.value.formAlert = true
-    //   formAction.value.formProcess = false
-    // }
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formAlert: true,
+      }
+    } else if (data) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: 'Successfully Updated Password.',
+        formAlert: true,
+      }
+    }
+
+    refVForm.value?.reset()
   }
 
+  // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
     if (valid) onSubmit()

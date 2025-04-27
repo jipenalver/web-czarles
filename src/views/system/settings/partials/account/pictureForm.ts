@@ -7,6 +7,7 @@ import { ref } from 'vue'
 export function usePictureForm() {
   const authUserStore = useAuthUserStore()
 
+  // States
   const formDataDefault = {
     avatar: null as File | null,
   }
@@ -54,6 +55,7 @@ export function usePictureForm() {
     refVForm.value?.reset()
   }
 
+  // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
     if (valid) onSubmit()
