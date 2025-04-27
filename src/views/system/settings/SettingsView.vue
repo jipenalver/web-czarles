@@ -74,7 +74,7 @@ onMounted(() => {
 
                 <v-card class="mb-5" title="Profile Information">
                   <v-card-text>
-                    <!-- <ProfileForm></ProfileForm> -->
+                    <ProfileForm></ProfileForm>
                   </v-card-text>
                 </v-card>
               </v-tabs-window-item>
@@ -82,7 +82,7 @@ onMounted(() => {
               <v-tabs-window-item value="security">
                 <v-card class="mb-5" title="Change Password">
                   <v-card-text>
-                    <!-- <PasswordForm></PasswordForm> -->
+                    <PasswordForm></PasswordForm>
                   </v-card-text>
                 </v-card>
               </v-tabs-window-item>
