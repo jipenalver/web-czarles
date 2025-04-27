@@ -43,18 +43,12 @@ export function useUserRolesFormDialog(
       : await userRolesStore.addUserRole(formData.value)
 
     if (error) {
-      formAction.value = {
-        ...formActionDefault,
-        formMessage: error.message,
-        formStatus: Number(error.code),
-        formAlert: true,
-      }
+      formAction.value.formMessage = error.message
+      formAction.value.formStatus = Number(error.code)
+      formAction.value.formAlert = true
     } else if (data) {
-      formAction.value = {
-        ...formActionDefault,
-        formMessage: `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`,
-        formAlert: true,
-      }
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`
+      formAction.value.formAlert = true
 
       await userRolesStore.getUserRoles()
 
