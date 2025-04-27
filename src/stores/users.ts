@@ -8,7 +8,7 @@ import { ref } from 'vue'
 export type AdminUser = {
   id: string
   created_at: string
-  user_role: string
+  user_role: string | null
   firstname: string
   middlename: string
   lastname: string
