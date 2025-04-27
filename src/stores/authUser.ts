@@ -59,19 +59,17 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
     const {
       data: { user },
-      error: updateError,
+      error,
     } = await supabase.auth.updateUser({
       data: otherData,
     })
-
-    if (updateError) return { data: user, updateError }
 
     if (user) {
       const { id, email, user_metadata } = user
       userData.value = { id, email, ...user_metadata }
     }
 
-    return { data: userData.value, error: null }
+    return { data: user, error }
   }
 
   async function updateUserImage(file: File) {
