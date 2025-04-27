@@ -5,6 +5,7 @@ import NotFoundView from '@/views/errors/NotFoundView.vue'
 import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
 import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
+import SettingsView from '@/views/system/settings/SettingsView.vue'
 
 export const routes = [
   // Landing
@@ -40,12 +41,12 @@ export const routes = [
     component: DashboardView,
     meta: { requiresAuth: true, isDefault: true },
   },
-  // {
-  //   path: '/settings/:tab?',
-  //   name: 'settings',
-  //   component: SettingsView,
-  //   meta: { requiresAuth: true, isDefault: true }
-  // },
+  {
+    path: '/settings/:tab?',
+    name: 'settings',
+    component: SettingsView,
+    meta: { requiresAuth: true, isDefault: true },
+  },
 
   // Users
   {
