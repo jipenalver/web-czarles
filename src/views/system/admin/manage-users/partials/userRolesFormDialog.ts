@@ -45,7 +45,7 @@ export function useUserRolesFormDialog(
 
     if (error) {
       formAction.value.formMessage = error.message
-      formAction.value.formStatus = Number(error.code)
+      formAction.value.formStatus = 400
       formAction.value.formAlert = true
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`

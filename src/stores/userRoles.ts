@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -35,7 +36,7 @@ export const useUserRolesStore = defineStore('userRoles', () => {
   }
 
   async function updateUserRole(formData: Partial<UserRole>) {
-    const { pages, ...roleData } = formData
+    const { user_role_pages, pages, ...roleData } = formData
 
     const { data, error } = await supabase
       .from('user_roles')
@@ -49,9 +50,9 @@ export const useUserRolesStore = defineStore('userRoles', () => {
   }
 
   async function deleteUserRole(id: number) {
-    const { error: deleteError } = await deleteUserRolePages(id)
+    const { data, error: deleteError } = await deleteUserRolePages(id)
 
-    if (deleteError) return { error: deleteError }
+    if (deleteError) return { data, error: deleteError }
 
     return await supabase.from('user_roles').delete().eq('id', id).select()
   }
@@ -63,9 +64,9 @@ export const useUserRolesStore = defineStore('userRoles', () => {
   }
 
   async function updateUserRolePages(id: number, pages: string[]) {
-    const { error: deleteError } = await deleteUserRolePages(id)
+    const { data, error: deleteError } = await deleteUserRolePages(id)
 
-    if (deleteError) return { error: deleteError }
+    if (deleteError) return { data, error: deleteError }
 
     return await addUserRolePages(id, pages)
   }
