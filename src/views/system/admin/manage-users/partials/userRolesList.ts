@@ -35,7 +35,7 @@ export function useUserRolesList() {
 
     if (error) {
       formAction.value.formMessage = error.message
-      formAction.value.formStatus = Number(error.code)
+      formAction.value.formStatus = 400
     } else if (data) {
       formAction.value.formMessage = 'Successfully Deleted User Role.'
 

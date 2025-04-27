@@ -39,6 +39,16 @@ export function useUserRolesFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
+    if (formData.value.pages?.length === 0) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: 'Please select at least 1 page.',
+        formStatus: 400,
+        formAlert: true,
+      }
+      return
+    }
+
     const { data, error } = isUpdate.value
       ? await userRolesStore.updateUserRole(formData.value)
       : await userRolesStore.addUserRole(formData.value)
@@ -46,10 +56,8 @@ export function useUserRolesFormDialog(
     if (error) {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
-      formAction.value.formAlert = true
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`
-      formAction.value.formAlert = true
 
       await userRolesStore.getUserRoles()
 
@@ -57,6 +65,8 @@ export function useUserRolesFormDialog(
         onFormReset()
       }, 1500)
     }
+
+    formAction.value.formAlert = true
   }
 
   // Trigger Validators
