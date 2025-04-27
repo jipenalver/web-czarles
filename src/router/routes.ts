@@ -3,6 +3,7 @@ import RegisterView from '@/views/auth/register/RegisterView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
 import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
+import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
 
 export const routes = [
@@ -53,12 +54,12 @@ export const routes = [
     component: UserRolesView,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: '/admin/users/list',
-  //   name: 'admin-users-list',
-  //   component: UsersView,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: '/admin/users/list',
+    name: 'admin-users-list',
+    component: UsersView,
+    meta: { requiresAuth: true },
+  },
 
   // Errors Pages
   {
