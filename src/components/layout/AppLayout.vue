@@ -66,7 +66,7 @@ onMounted(async () => {
       <slot name="navigation"></slot>
 
       <v-main>
-        <v-img :src="imageBg" class="h-100" cover>
+        <v-img :src="imageBg" class="h-screen" cover>
           <slot name="content"></slot>
         </v-img>
       </v-main>
