@@ -4,7 +4,6 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { usePasswordForm } from './passwordForm'
 import { ref } from 'vue'
 
-const isPasswordCurrentVisible = ref(false)
 const isPasswordVisible = ref(false)
 const isPasswordConfirmVisible = ref(false)
 
@@ -20,20 +19,6 @@ const { formData, formAction, refVForm, onFormSubmit } = usePasswordForm()
 
   <v-form ref="refVForm" @submit.prevent="onFormSubmit">
     <v-row dense>
-      <v-col cols="12" sm="6">
-        <v-text-field
-          v-model="formData.password_current"
-          prepend-inner-icon="mdi-lock-outline"
-          label="Current Password"
-          :type="isPasswordCurrentVisible ? 'text' : 'password'"
-          :append-inner-icon="isPasswordCurrentVisible ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append-inner="isPasswordCurrentVisible = !isPasswordCurrentVisible"
-          :rules="[requiredValidator]"
-        ></v-text-field>
-      </v-col>
-
-      <v-col cols="12" sm="6"></v-col>
-
       <v-col cols="12" sm="6">
         <v-text-field
           v-model="formData.password"
