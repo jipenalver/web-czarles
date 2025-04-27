@@ -22,6 +22,12 @@ const onLogout = async () => {
     authUserStore.$reset()
   }, 2500)
 
+  formAction.value = {
+    ...formActionDefault,
+    formMessage: 'Logout Successful.',
+    formAlert: true,
+  }
+
   router.replace('/')
 }
 </script>
