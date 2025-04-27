@@ -1,9 +1,11 @@
 import LoginView from '@/views/auth/login/LoginView.vue'
-import RegisterView from '@/views/auth/register/RegisterView.vue'
+// import RegisterView from '@/views/auth/register/RegisterView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
 import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
+import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
+import SettingsView from '@/views/system/settings/SettingsView.vue'
 
 export const routes = [
   // Landing
@@ -13,23 +15,11 @@ export const routes = [
     component: LoginView,
     meta: { requiresAuth: false },
   },
-  {
-    path: '/register',
-    name: 'register',
-    component: RegisterView,
-    meta: { requiresAuth: false },
-  },
   // {
-  //   path: '/password/forgot',
-  //   name: 'password-forgot',
-  //   component: ForgotPasswordView,
-  //   meta: { requiresAuth: false }
-  // },
-  // {
-  //   path: '/password/reset/:token',
-  //   name: 'password-reset',
-  //   component: ResetPasswordView,
-  //   meta: { requiresAuth: false }
+  //   path: '/register',
+  //   name: 'register',
+  //   component: RegisterView,
+  //   meta: { requiresAuth: false },
   // },
 
   // System
@@ -39,12 +29,12 @@ export const routes = [
     component: DashboardView,
     meta: { requiresAuth: true, isDefault: true },
   },
-  // {
-  //   path: '/settings/:tab?',
-  //   name: 'settings',
-  //   component: SettingsView,
-  //   meta: { requiresAuth: true, isDefault: true }
-  // },
+  {
+    path: '/settings/:tab?',
+    name: 'settings',
+    component: SettingsView,
+    meta: { requiresAuth: true, isDefault: true },
+  },
 
   // Users
   {
@@ -53,12 +43,12 @@ export const routes = [
     component: UserRolesView,
     meta: { requiresAuth: true },
   },
-  // {
-  //   path: '/admin/users/list',
-  //   name: 'admin-users-list',
-  //   component: UsersView,
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: '/admin/users/list',
+    name: 'admin-users-list',
+    component: UsersView,
+    meta: { requiresAuth: true },
+  },
 
   // Errors Pages
   {

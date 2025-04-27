@@ -36,5 +36,4 @@ export const adminItemsNav1: SubNavigation[] = [
 export const settingsItemsNav: SubNavigation[] = [
   ['Account', 'mdi-account', '', '/settings/account'],
   ['Security', 'mdi-lock', '', '/settings/security'],
-  ['Billings & Plans', 'mdi-bookmark', '', '/settings/billings-plans'],
 ]

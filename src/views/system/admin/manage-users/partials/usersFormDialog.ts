@@ -1,23 +1,31 @@
-import { type UserRole, useUserRolesStore } from '@/stores/userRoles'
+import { type AdminUser, useUsersStore } from '@/stores/users'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { ref, watch } from 'vue'
+import { type TableOptions } from '@/utils/helpers/tables'
+import { useUserRolesStore } from '@/stores/userRoles'
+import { onMounted, ref, watch } from 'vue'
 
-export function useUserRolesFormDialog(
+export function useUsersFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: UserRole | null
+    itemData: AdminUser | null
+    tableOptions: TableOptions
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const userRolesStore = useUserRolesStore()
+  const usersStore = useUsersStore()
 
   // States
   const formDataDefault = {
-    user_role: '',
-    description: '',
-    pages: [],
+    email: '',
+    password: '',
+    firstname: '',
+    middlename: '',
+    lastname: '',
+    phone: '',
+    user_role: null,
   }
-  const formData = ref<Partial<UserRole>>({ ...formDataDefault })
+  const formData = ref<Partial<AdminUser>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -26,12 +34,7 @@ export function useUserRolesFormDialog(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
-      formData.value = props.itemData
-        ? {
-            ...props.itemData,
-            pages: props.itemData.user_role_pages.map((item) => item.page),
-          }
-        : { ...formDataDefault }
+      formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
     },
   )
 
@@ -39,27 +42,17 @@ export function useUserRolesFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    if (formData.value.pages?.length === 0) {
-      formAction.value = {
-        ...formActionDefault,
-        formMessage: 'Please select at least 1 page.',
-        formStatus: 400,
-        formAlert: true,
-      }
-      return
-    }
-
     const { data, error } = isUpdate.value
-      ? await userRolesStore.updateUserRole(formData.value)
-      : await userRolesStore.addUserRole(formData.value)
+      ? await usersStore.updateUser(formData.value)
+      : await usersStore.addUser(formData.value)
 
     if (error) {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User.`
 
-      await userRolesStore.getUserRoles()
+      await usersStore.getUsersTable(props.tableOptions)
 
       setTimeout(() => {
         onFormReset()
@@ -81,6 +74,10 @@ export function useUserRolesFormDialog(
     emit('update:isDialogVisible', false)
   }
 
+  onMounted(async () => {
+    if (userRolesStore.userRoles.length === 0) await userRolesStore.getUserRoles()
+  })
+
   // Expose State and Actions
   return {
     formData,
@@ -89,5 +86,6 @@ export function useUserRolesFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
+    userRolesStore,
   }
 }
