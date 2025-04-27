@@ -2,7 +2,7 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-// import UsersFormDialog from './UsersFormDialog.vue'
+import UsersFormDialog from './UsersFormDialog.vue'
 import { useUsersTable } from './usersTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -51,9 +51,9 @@ const tableHeaders: TableHeader[] = [
 
 const {
   tableOptions,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -147,11 +147,11 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- <UsersFormDialog
+  <UsersFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
-  ></UsersFormDialog> -->
+  ></UsersFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
