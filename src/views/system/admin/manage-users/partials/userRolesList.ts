@@ -1,7 +1,6 @@
 import { type UserRole, useUserRolesStore } from '@/stores/userRoles'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { onMounted, ref } from 'vue'
-// import axios from 'axios'
 
 export function useUserRolesList() {
   const userRolesStore = useUserRolesStore()
@@ -32,27 +31,23 @@ export function useUserRolesList() {
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // try {
-    //   await axios.delete('/api/v1/user-roles/' + deleteId.value)
+    const { data, error } = await userRolesStore.deleteUserRole(deleteId.value)
 
-    //   formAction.value.formMessage = 'Successfully Deleted User Role.'
+    if (error) {
+      formAction.value.formMessage = error.message
+      formAction.value.formStatus = Number(error.code)
+    } else if (data) {
+      formAction.value.formMessage = 'Successfully Deleted User Role.'
 
-    //   await userRolesStore.getUserRoles()
-    // } catch (error) {
-    //   const { message, status } = handleFormError(error)
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: message,
-    //     formStatus: status,
-    //   }
-    // } finally {
-    //   formAction.value.formAlert = true
-    //   formAction.value.formProcess = false
-    // }
+      await userRolesStore.getUserRoles()
+    }
+
+    formAction.value.formAlert = true
+    formAction.value.formProcess = false
   }
 
   onMounted(async () => {
-    if (userRolesStore.userRolesList.length === 0) await userRolesStore.getUserRoles()
+    if (userRolesStore.userRoles.length === 0) await userRolesStore.getUserRoles()
   })
 
   // Expose State and Actions
