@@ -1,5 +1,5 @@
 import LoginView from '@/views/auth/login/LoginView.vue'
-import RegisterView from '@/views/auth/register/RegisterView.vue'
+// import RegisterView from '@/views/auth/register/RegisterView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
 import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
@@ -15,23 +15,11 @@ export const routes = [
     component: LoginView,
     meta: { requiresAuth: false },
   },
-  {
-    path: '/register',
-    name: 'register',
-    component: RegisterView,
-    meta: { requiresAuth: false },
-  },
   // {
-  //   path: '/password/forgot',
-  //   name: 'password-forgot',
-  //   component: ForgotPasswordView,
-  //   meta: { requiresAuth: false }
-  // },
-  // {
-  //   path: '/password/reset/:token',
-  //   name: 'password-reset',
-  //   component: ResetPasswordView,
-  //   meta: { requiresAuth: false }
+  //   path: '/register',
+  //   name: 'register',
+  //   component: RegisterView,
+  //   meta: { requiresAuth: false },
   // },
 
   // System
