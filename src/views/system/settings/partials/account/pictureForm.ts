@@ -29,27 +29,29 @@ export function usePictureForm() {
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // try {
-    //   const avatarData = new FormData()
-    //   avatarData.append('avatar', formData.value.avatar as File)
+    const { data, error } = await authUserStore.updateUserImage(formData.value.avatar as File)
 
-    //   const { data } = await axios.post('/api/v1/user/avatar', avatarData)
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formAlert: true,
+      }
+    } else if (data) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: 'Successfully Updated Profile Image.',
+        formAlert: true,
+      }
 
-    //   formAction.value.formMessage = 'Successfully Updated Profile Image.'
+      await authUserStore.updateUserInformation({
+        ...authUserStore.userData,
+        avatar: data.publicUrl,
+      })
+    }
 
-    //   authUserStore.setAuthUserData(data)
-    // } catch (error) {
-    //   const { message, status } = handleFormError(error)
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: message,
-    //     formStatus: status,
-    //   }
-    // } finally {
-    //   refVForm.value?.reset()
-    //   formAction.value.formAlert = true
-    //   formAction.value.formProcess = false
-    // }
+    refVForm.value?.reset()
   }
 
   const onFormSubmit = async () => {
