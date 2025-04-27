@@ -14,6 +14,7 @@ export function useUserRolesFormDialog(
   // States
   const formDataDefault = {
     user_role: '',
+    description: '',
     pages: [],
   }
   const formData = ref<Partial<UserRole>>({ ...formDataDefault })

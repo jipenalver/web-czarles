@@ -53,6 +53,15 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
             </v-col>
 
             <v-col cols="12">
+              <v-textarea
+                v-model="formData.description"
+                label="Description"
+                :rules="[requiredValidator]"
+                rows="2"
+              ></v-textarea>
+            </v-col>
+
+            <v-col cols="12">
               <v-list v-model:opened="openedPages" density="compact" nav>
                 <v-list-group v-for="([title, icon], i) in adminNav" :key="i" :value="title">
                   <template #activator="{ props }">
