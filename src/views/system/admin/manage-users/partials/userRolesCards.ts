@@ -2,7 +2,7 @@ import { type UserRole, useUserRolesStore } from '@/stores/userRoles'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { onMounted, ref } from 'vue'
 
-export function useUserRolesList() {
+export function useUserRolesCards() {
   const userRolesStore = useUserRolesStore()
 
   // States

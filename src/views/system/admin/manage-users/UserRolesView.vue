@@ -2,7 +2,7 @@
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import UserRolesList from './partials/UserRolesList.vue'
+import UserRolesList from './partials/UserRolesCards.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
