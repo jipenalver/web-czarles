@@ -57,7 +57,7 @@ export const useUsersStore = defineStore('users', () => {
     usersTableTotal.value = total
   }
 
-  async function addUser(formData: AdminUser) {
+  async function addUser(formData: Partial<AdminUser>) {
     const { email, password, ...userMetadata } = formData
 
     return await supabaseAdmin.auth.admin.createUser({
@@ -68,11 +68,11 @@ export const useUsersStore = defineStore('users', () => {
     })
   }
 
-  async function updateUser(formData: AdminUser) {
-    const { id, email, password, ...userMetadata } = formData
+  async function updateUser(formData: Partial<AdminUser>) {
+    const { id, email, created_at, ...userMetadata } = formData
 
-    return await supabaseAdmin.auth.admin.updateUserById(id, {
-      user_metadata: { ...userMetadata, password },
+    return await supabaseAdmin.auth.admin.updateUserById(id as string, {
+      user_metadata: { ...userMetadata },
     })
   }
 
