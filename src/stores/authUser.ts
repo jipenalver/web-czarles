@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { supabase } from '@/utils/supabase'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
@@ -24,7 +25,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
     return userData.value?.is_admin ? 'Super Administrator' : userData.value?.user_role
   })
 
-  // Reset State Action
+  // Reset State
   function $reset() {
     userData.value = null
     authPages.value = []
@@ -42,7 +43,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
     return !!data.session
   }
 
-  // Retrieve User Information
   async function getUserInformation() {
     const {
       data: { user },
@@ -54,25 +54,26 @@ export const useAuthUserStore = defineStore('authUser', () => {
     }
   }
 
-  // Update User Information
   async function updateUserInformation(updatedData: Partial<AuthUser>) {
+    const { id, email, ...otherData } = updatedData
+
     const {
       data: { user },
-      error,
+      error: updateError,
     } = await supabase.auth.updateUser({
-      data: updatedData,
+      data: otherData,
     })
 
-    if (error) return { error }
-    else if (user) {
+    if (updateError) return { data: user, updateError }
+
+    if (user) {
       const { id, email, user_metadata } = user
       userData.value = { id, email, ...user_metadata }
-
-      return { data: userData.value }
     }
+
+    return { data: userData.value, error: null }
   }
 
-  // Update User Profile Image
   async function updateUserImage(file: File) {
     const { data, error } = await supabase.storage
       .from('czarles')
@@ -81,15 +82,13 @@ export const useAuthUserStore = defineStore('authUser', () => {
         upsert: true,
       })
 
-    if (error) return { error }
-    else if (data) {
-      const { data: imageData } = supabase.storage.from('shirlix').getPublicUrl(data.path)
+    if (error) return { data, error }
 
-      return await updateUserInformation({ ...userData.value, avatar: imageData.publicUrl })
-    }
+    const { data: imageData } = supabase.storage.from('czarles').getPublicUrl(data.path)
+
+    return { data: imageData, error: null }
   }
 
-  // Retrieve User Roles Pages
   async function getAuthPages(name: string) {
     const { data } = await supabase
       .from('user_roles')
