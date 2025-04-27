@@ -5,6 +5,7 @@ import { ref } from 'vue'
 export type UserRole = {
   id: number
   user_role: string
+  description: string
   user_role_pages: { page: string }[]
   pages: string[]
 }
@@ -17,7 +18,7 @@ export const useUserRolesStore = defineStore('userRoles', () => {
   async function getUserRoles() {
     const { data } = await supabase
       .from('user_roles')
-      .select('*, pages: user_role_pages (page)')
+      .select('*, user_role_pages (page)')
       .order('user_role', { ascending: true })
 
     userRoles.value = data as UserRole[]
@@ -28,7 +29,7 @@ export const useUserRolesStore = defineStore('userRoles', () => {
 
     const { data, error } = await supabase.from('user_roles').insert(roleData).select()
 
-    if (data) await updateUserRolePages(data[0].id, pages as string[])
+    if (data) await addUserRolePages(data[0].id, pages as string[])
 
     return { data, error }
   }
@@ -47,24 +48,32 @@ export const useUserRolesStore = defineStore('userRoles', () => {
     return { data, error }
   }
 
-  async function updateUserRolePages(id: number, pages: string[]) {
-    const { error: deleteError } = await supabase
-      .from('user_role_pages')
-      .delete()
-      .eq('user_role_id', id)
+  async function deleteUserRole(id: number) {
+    const { error: deleteError } = await deleteUserRolePages(id)
 
     if (deleteError) return { error: deleteError }
 
+    return await supabase.from('user_roles').delete().eq('id', id).select()
+  }
+
+  async function addUserRolePages(id: number, pages: string[]) {
     const pageData = pages.map((page) => ({ page, user_role_id: id }))
 
-    const { data, error: insertError } = await supabase
-      .from('user_role_pages')
-      .insert(pageData)
-      .select()
+    return await supabase.from('user_role_pages').insert(pageData).select()
+  }
 
-    return { data, error: insertError }
+  async function updateUserRolePages(id: number, pages: string[]) {
+    const { error: deleteError } = await deleteUserRolePages(id)
+
+    if (deleteError) return { error: deleteError }
+
+    return await addUserRolePages(id, pages)
+  }
+
+  async function deleteUserRolePages(id: number) {
+    return await supabase.from('user_role_pages').delete().eq('user_role_id', id).select()
   }
 
   // Expose States and Actions
-  return { userRoles, getUserRoles, addUserRole, updateUserRole }
+  return { userRoles, getUserRoles, addUserRole, updateUserRole, deleteUserRole }
 })
