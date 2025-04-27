@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-// import UserRolesFormDialog from './UserRolesFormDialog.vue'
+import UserRolesFormDialog from './UserRolesFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useUserRolesList } from './userRolesList'
 
@@ -25,25 +25,19 @@ const {
   ></AppAlert>
 
   <v-row>
-    <v-col cols="12" sm="4" v-for="item in userRolesStore.userRolesList" :key="item.id">
+    <v-col cols="12" sm="4" v-for="item in userRolesStore.userRoles" :key="item.id">
       <v-card>
-        <v-card-title class="mt-3 font-weight-bold"> {{ item.role }} </v-card-title>
+        <v-card-title class="mt-3 font-weight-bold"> {{ item.user_role }} </v-card-title>
 
         <v-card-text class="d-flex align-center justify-space-between">
-          <h3>{{ item.users_count }} User(s)</h3>
+          <v-spacer></v-spacer>
 
           <div class="d-flex flex-wrap ga-2">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-tag-edit"></v-icon>
               <v-tooltip activator="parent" location="top">Edit Role</v-tooltip>
             </v-btn>
-            <v-btn
-              variant="text"
-              density="comfortable"
-              @click="onDelete(item.id)"
-              :disabled="item.users_count > 0"
-              icon
-            >
+            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-tag-remove" color="error"> </v-icon>
               <v-tooltip activator="parent" location="top">Delete Role</v-tooltip>
             </v-btn>
@@ -61,11 +55,11 @@ const {
       </v-card>
     </v-col>
   </v-row>
-  <!--
+
   <UserRolesFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
-  ></UserRolesFormDialog> -->
+  ></UserRolesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
