@@ -56,12 +56,12 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   async function addUser(formData: AdminUser) {
-    const { password, ...userMetadata } = formData
+    const { email, password, ...userMetadata } = formData
 
     return await supabaseAdmin.auth.admin.createUser({
-      email: formData.email,
+      email,
+      password,
       email_confirm: true,
-      password: formData.password,
       user_metadata: { ...userMetadata, password },
     })
   }
