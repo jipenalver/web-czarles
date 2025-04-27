@@ -1,9 +1,11 @@
 import { type AdminUser, useUsersStore } from '@/stores/users'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useAuthUserStore } from '@/stores/authUser'
 import { ref } from 'vue'
 
 export function useUsersTable() {
+  const authUserStore = useAuthUserStore()
   const usersStore = useUsersStore()
 
   // States
@@ -74,5 +76,6 @@ export function useUsersTable() {
     onConfirmDelete,
     onLoadItems,
     usersStore,
+    authUserStore,
   }
 }

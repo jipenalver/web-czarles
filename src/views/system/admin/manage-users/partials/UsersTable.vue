@@ -61,6 +61,7 @@ const {
   onConfirmDelete,
   onLoadItems,
   usersStore,
+  authUserStore,
 } = useUsersTable()
 </script>
 
@@ -129,7 +130,7 @@ const {
             <v-btn
               variant="text"
               density="comfortable"
-              :disabled="item.is_admin"
+              :disabled="item.is_admin || authUserStore.userData?.id === item.id"
               @click="onUpdate(item)"
               icon
             >
@@ -140,7 +141,7 @@ const {
             <v-btn
               variant="text"
               density="comfortable"
-              :disabled="item.is_admin"
+              :disabled="item.is_admin || authUserStore.userData?.id === item.id"
               @click="onDelete(item.id)"
               icon
             >
