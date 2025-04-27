@@ -5,7 +5,9 @@ import { defineStore } from 'pinia'
 type AuthUser = {
   id: string
   email: string
+  phone: string
   firstname: string
+  middlename: string
   lastname: string
   is_admin: boolean
   user_role: string
