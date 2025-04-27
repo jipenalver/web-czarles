@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  adminNav,
-  adminItemsNav1,
-  // adminItemsNav2,
-  // adminItemsNav3
-} from '@/components/layout/navigation/sideNavigation'
+import { adminNav, adminItemsNav1 } from '@/components/layout/navigation/sideNavigation'
 import { useUserRolesFormDialog } from './userRolesFormDialog'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
