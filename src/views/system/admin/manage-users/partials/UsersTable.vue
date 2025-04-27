@@ -111,7 +111,7 @@ const {
         </template>
 
         <template #item.phone="{ item }">
-          {{ item.phone }}
+          {{ item.phone ? '+63 ' + item.phone : '' }}
         </template>
 
         <template #item.user_role="{ item }">
@@ -126,7 +126,13 @@ const {
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
-            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
+            <v-btn
+              variant="text"
+              density="comfortable"
+              :disabled="item.is_admin"
+              @click="onUpdate(item)"
+              icon
+            >
               <v-icon icon="mdi-pencil"></v-icon>
               <v-tooltip activator="parent" location="top">Edit User</v-tooltip>
             </v-btn>
