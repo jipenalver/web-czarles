@@ -7,6 +7,7 @@ import { ref } from 'vue'
 
 export type AdminUser = {
   id: string
+  created_at: string
   user_role: string
   firstname: string
   middlename: string
@@ -14,7 +15,7 @@ export type AdminUser = {
   email: string
   phone: string
   password: string
-  created_at: string
+  is_admin: boolean
 }
 
 export const useUsersStore = defineStore('users', () => {
@@ -42,6 +43,7 @@ export const useUsersStore = defineStore('users', () => {
 
       return {
         id,
+        created_at,
         user_role: user_metadata.user_role,
         firstname: user_metadata.firstname,
         middlename: user_metadata.middlename,
@@ -49,7 +51,7 @@ export const useUsersStore = defineStore('users', () => {
         email: email as string,
         phone: user_metadata.phone,
         password: user_metadata.password,
-        created_at,
+        is_admin: user_metadata.is_admin,
       }
     })
     usersTableTotal.value = total
