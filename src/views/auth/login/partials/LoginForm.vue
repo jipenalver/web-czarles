@@ -27,13 +27,7 @@ const isPasswordVisible = ref(false)
       :rules="[requiredValidator, emailValidator]"
     ></v-text-field>
 
-    <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
-      Password
-
-      <RouterLink class="text-caption text-primary" to="/password/forgot">
-        Forgot Password?
-      </RouterLink>
-    </div>
+    <div class="text-subtitle-1 text-medium-emphasis">Password</div>
 
     <v-text-field
       v-model="formData.password"
