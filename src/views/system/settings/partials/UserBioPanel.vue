@@ -56,11 +56,5 @@ const authUserStore = useAuthUserStore()
         </v-card-text>
       </v-card>
     </v-col>
-
-    <v-col cols="12">
-      <v-card class="border-md border-solid border-opacity-100 border-primary">
-        <v-card-text> </v-card-text>
-      </v-card>
-    </v-col>
   </v-row>
 </template>
