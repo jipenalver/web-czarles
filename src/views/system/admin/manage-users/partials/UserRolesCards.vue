@@ -51,9 +51,7 @@ const {
         <v-card-title class="mt-3 d-flex justify-end">
           <v-btn prepend-icon="mdi-tag-plus" color="primary" @click="onAdd"> Add Role </v-btn>
         </v-card-title>
-        <v-card-text class="mt-2 mb-1 text-end">
-          Create Role if it doesn't already exist.
-        </v-card-text>
+        <v-card-text class="mt-2 mb-1 text-end"> Add Role if it doesn't exist. </v-card-text>
       </v-card>
     </v-col>
   </v-row>
