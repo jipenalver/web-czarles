@@ -4,8 +4,9 @@ import {
   type SubNavigation,
   adminNav,
   adminItemsNav1,
-  // adminItemsNav2,
-  // adminItemsNav3,
+  adminItemsNav2,
+  adminItemsNav3,
+  adminItemsNav4,
   settingsItemsNav,
 } from './sideNavigation'
 import { useAuthUserStore } from '@/stores/authUser'
@@ -22,22 +23,21 @@ const authUserStore = useAuthUserStore()
 
 const noAccessPages = ref<string[]>([])
 const mainNav = ref<MainNavigation[] | SubNavigation[]>([])
-const editableItemsNav1 = ref<SubNavigation[]>([])
-// const editableItemsNav2 = ref<SubNavigation[]>([])
-// const editableItemsNav3 = ref<SubNavigation[]>([])
+const editableItemsNav1 = ref<SubNavigation[]>([...adminItemsNav1])
+const editableItemsNav2 = ref<SubNavigation[]>([...adminItemsNav2])
+const editableItemsNav3 = ref<SubNavigation[]>([...adminItemsNav3])
+const editableItemsNav4 = ref<SubNavigation[]>([...adminItemsNav4])
 
 onMounted(() => {
   mainNav.value = adminNav
-  editableItemsNav1.value = [...adminItemsNav1]
-  // editableItemsNav2.value = [...adminItemsNav2]
-  // editableItemsNav3.value = [...adminItemsNav3]
 
   if (authUserStore.userRole === 'Super Administrator') return
 
   const menuItems = [
     { items: editableItemsNav1, title: adminNav[0][0] },
-    // { items: editableItemsNav2, title: adminNav[1][0] },
-    // { items: editableItemsNav3, title: adminNav[2][0] },
+    { items: editableItemsNav2, title: adminNav[1][0] },
+    { items: editableItemsNav3, title: adminNav[2][0] },
+    { items: editableItemsNav4, title: adminNav[3][0] },
   ]
 
   menuItems.forEach(({ items, title }) => {
@@ -56,7 +56,7 @@ onMounted(() => {
     :persistent="mobile"
     :temporary="mobile"
     :permanent="!mobile"
-    :width="275"
+    :width="300"
   >
     <v-list density="compact" lines="one" nav>
       <v-list-item
@@ -87,6 +87,57 @@ onMounted(() => {
         <template v-if="mainNav[0] && title === mainNav[0][0]">
           <v-list-item
             v-for="([title, icon, subtitle, to], i) in editableItemsNav1"
+            :key="i"
+            :prepend-icon="icon"
+            :subtitle="subtitle ?? undefined"
+            :to="to ?? undefined"
+            color="primary"
+            variant="flat"
+            slim
+          >
+            <template #title>
+              <span class="font-weight-black"> {{ title }} </span>
+            </template>
+          </v-list-item>
+        </template>
+
+        <template v-if="mainNav[1] && title === mainNav[1][0]">
+          <v-list-item
+            v-for="([title, icon, subtitle, to], i) in editableItemsNav2"
+            :key="i"
+            :prepend-icon="icon"
+            :subtitle="subtitle ?? undefined"
+            :to="to ?? undefined"
+            color="primary"
+            variant="flat"
+            slim
+          >
+            <template #title>
+              <span class="font-weight-black"> {{ title }} </span>
+            </template>
+          </v-list-item>
+        </template>
+
+        <template v-if="mainNav[2] && title === mainNav[2][0]">
+          <v-list-item
+            v-for="([title, icon, subtitle, to], i) in editableItemsNav3"
+            :key="i"
+            :prepend-icon="icon"
+            :subtitle="subtitle ?? undefined"
+            :to="to ?? undefined"
+            color="primary"
+            variant="flat"
+            slim
+          >
+            <template #title>
+              <span class="font-weight-black"> {{ title }} </span>
+            </template>
+          </v-list-item>
+        </template>
+
+        <template v-if="mainNav[3] && title === mainNav[3][0]">
+          <v-list-item
+            v-for="([title, icon, subtitle, to], i) in editableItemsNav4"
             :key="i"
             :prepend-icon="icon"
             :subtitle="subtitle ?? undefined"
