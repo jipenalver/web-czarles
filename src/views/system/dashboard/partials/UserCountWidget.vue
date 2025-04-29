@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { useUsersStore } from '@/stores/users'
+import { onMounted } from 'vue'
 
 const usersStore = useUsersStore()
+
+onMounted(async () => {
+  if (usersStore.usersTable.length === 0)
+    await usersStore.getUsersTable({ page: 1, itemsPerPage: 10, sortBy: [] })
+})
 </script>
 
 <template>
