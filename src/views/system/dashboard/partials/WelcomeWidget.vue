@@ -22,8 +22,8 @@ const authUserStore = useAuthUserStore()
 
           <p class="mt-4">
             We’re excited to have you onboard. If you encounter any issues or have any questions
-            about the system, feel free to reach out the technical support, <b>jianchris2k14@gmail.com</b>.
-            We're here to support you every step of the way.
+            about the system, feel free to reach out the technical support,
+            <b>jianchris2k14@gmail.com</b>. We're here to support you every step of the way.
           </p>
         </v-col>
 
