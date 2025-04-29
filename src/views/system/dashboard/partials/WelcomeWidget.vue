@@ -9,7 +9,7 @@ const authUserStore = useAuthUserStore()
 </script>
 
 <template>
-  <v-card elevation="8">
+  <v-card elevation="8" min-height="175">
     <v-card-text>
       <v-row>
         <v-col class="order-2 order-sm-1 pa-4" cols="12" lg="8" sm="9">

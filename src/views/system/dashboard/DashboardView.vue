@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import UserCountWidget from './partials/UserCountWidget.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import WelcomeWidget from './partials/WelcomeWidget.vue'
 import { useDisplay } from 'vuetify'
@@ -23,7 +24,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <WelcomeWidget></WelcomeWidget>
           </v-col>
 
-          <v-col cols="12" lg="3"> </v-col>
+          <v-col cols="12" lg="3">
+            <UserCountWidget></UserCountWidget>
+          </v-col>
         </v-row>
       </v-container>
     </template>
