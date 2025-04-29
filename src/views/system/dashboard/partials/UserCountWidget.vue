@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useUsersStore } from '@/stores/users'
+
+const usersStore = useUsersStore()
+</script>
 
 <template>
   <v-card elevation="8">
@@ -9,7 +13,7 @@
     </template>
 
     <v-card-text class="text-center">
-      <h2 class="text-h3">99</h2>
+      <h2 class="text-h3">{{ usersStore.usersTableTotal }}</h2>
       <p class="mb-3">Total Users</p>
 
       <v-chip class="font-weight-bold" density="compact" color="secondary"> System Wide </v-chip>
