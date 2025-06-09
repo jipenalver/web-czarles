@@ -2,6 +2,7 @@ import LoginView from '@/views/auth/login/LoginView.vue'
 // import RegisterView from '@/views/auth/register/RegisterView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
 import NotFoundView from '@/views/errors/NotFoundView.vue'
+import EmployeesView from '@/views/system/admin/manage-employees/EmployeesView.vue'
 import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
 import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
@@ -47,6 +48,14 @@ export const routes = [
     path: '/admin/users/list',
     name: 'admin-users-list',
     component: UsersView,
+    meta: { requiresAuth: true },
+  },
+
+  // Employees
+  {
+    path: '/hrms/employees/list',
+    name: 'hrms-employees-list',
+    component: EmployeesView,
     meta: { requiresAuth: true },
   },
 
