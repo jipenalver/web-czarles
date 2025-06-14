@@ -20,7 +20,7 @@ export type Employee = {
   philhealth_no: string
   id_no: string
   address: string
-  designation_id: number
+  designation_id: null | number
   designations: {
     designation: string
   }
