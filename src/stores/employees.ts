@@ -21,6 +21,9 @@ export type Employee = {
   id_no: string
   address: string
   designation_id: number
+  designations: {
+    designation: string
+  }
 }
 
 export const useEmployeesStore = defineStore('employees', () => {
