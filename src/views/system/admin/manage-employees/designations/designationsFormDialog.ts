@@ -51,6 +51,7 @@ export function useDesignationsFormDialog(
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Designation.`
 
       await designationsStore.getDesignationsTable(props.tableOptions, props.tableFilters)
+      await designationsStore.getDesignations()
 
       setTimeout(() => {
         onFormReset()
