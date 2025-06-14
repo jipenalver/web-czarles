@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
+import EmployeesTable from './employees/EmployeesTable.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
@@ -21,8 +22,10 @@ const isDrawerVisible = ref(xs.value ? false : true)
         <HeaderPanel
           :header-items="['Employees Management', 'List of Employees']"
           header-icon="mdi-account-multiple"
-          headline="Add and Manage employees."
+          headline="Onboard and Manage employees."
         ></HeaderPanel>
+
+        <EmployeesTable></EmployeesTable>
       </v-container>
     </template>
   </AppLayout>

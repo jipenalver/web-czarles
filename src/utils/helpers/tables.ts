@@ -21,7 +21,7 @@ export type SortBy = {
 
 // 👉 Table Pagination
 export const tablePagination = (
-  { page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: SortBy[] },
+  { page, itemsPerPage, sortBy }: TableOptions,
   defaultColumn = 'id',
   isAscending = true,
 ) => {
