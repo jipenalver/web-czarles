@@ -68,10 +68,7 @@ export const useDesignationsStore = defineStore('designations', () => {
     query: PostgrestFilterBuilder<any, any, any>,
     { search }: TableFilter,
   ) {
-    if (search)
-      query = query.or(
-        `firstname.ilike.%${search}%,lastname.ilike.%${search}%,email.ilike.%${search}%`,
-      )
+    if (search) query = query.or(`designation.ilike.%${search}%, description.ilike.%${search}%`)
 
     return query
   }

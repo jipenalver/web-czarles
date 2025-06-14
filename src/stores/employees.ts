@@ -81,7 +81,7 @@ export const useEmployeesStore = defineStore('employees', () => {
   ) {
     if (search)
       query = query.or(
-        `firstname.ilike.%${search}%,lastname.ilike.%${search}%,email.ilike.%${search}%`,
+        `firstname.ilike.%${search}%, lastname.ilike.%${search}%, email.ilike.%${search}%`,
       )
 
     if (designation_id) query = query.eq('designation_id', designation_id)
