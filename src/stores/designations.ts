@@ -26,7 +26,7 @@ export const useDesignationsStore = defineStore('designations', () => {
     tableOptions: TableOptions,
     { search }: { search: string | null },
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'lastname')
+    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'designation')
     search = tableSearch(search)
 
     const query = supabase
