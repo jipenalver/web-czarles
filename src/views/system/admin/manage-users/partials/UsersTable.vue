@@ -145,7 +145,7 @@ const {
               @click="onDelete(item.id)"
               icon
             >
-              <v-icon icon="mdi-trash-can" color="primary"></v-icon>
+              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
               <v-tooltip activator="parent" location="top">Delete User</v-tooltip>
             </v-btn>
           </div>

@@ -140,7 +140,7 @@ const {
             </v-btn>
 
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-              <v-icon icon="mdi-trash-can" color="primary"></v-icon>
+              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
               <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
             </v-btn>
           </div>
