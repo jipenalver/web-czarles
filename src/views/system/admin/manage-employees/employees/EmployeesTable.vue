@@ -3,6 +3,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { getPadLeftText } from '@/utils/helpers/others'
 import { useEmployeesTable } from './employeesTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -11,11 +12,6 @@ const date = useDate()
 const { mobile } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
-  {
-    title: 'Email',
-    key: 'email',
-    align: 'start',
-  },
   {
     title: 'Fullname',
     key: 'lastname',
@@ -27,8 +23,13 @@ const tableHeaders: TableHeader[] = [
     align: 'start',
   },
   {
+    title: 'Email',
+    key: 'email',
+    align: 'start',
+  },
+  {
     title: 'Designation',
-    key: 'designation',
+    key: 'designations',
     sortable: false,
     align: 'start',
   },
@@ -126,7 +127,9 @@ const {
         </template>
 
         <template #item.designations="{ item }">
-          {{ item.designations.designation }}
+          <v-chip class="font-weight-bold" color="secondary" variant="flat" size="small">
+            {{ item.designations.designation }}
+          </v-chip>
         </template>
 
         <template #item.created_at="{ item }">
@@ -154,7 +157,6 @@ const {
             :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
             :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
             class="text-none"
-            color="medium-emphasis"
             size="small"
             variant="text"
             border
@@ -166,25 +168,98 @@ const {
         <template #expanded-row="{ columns, item }">
           <tr>
             <td :colspan="columns.length" class="py-2">
-              <v-sheet rounded="lg" border>
-                <v-table density="compact">
-                  <tbody class="bg-surface-light">
-                    <tr>
-                      <th>Designation</th>
-                      <th>Field/Office</th>
-                      <th>Hired Date</th>
-                    </tr>
-                  </tbody>
+              <v-row dense>
+                <v-col
+                  cols="12"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">ID No.:</span>
+                  <p class="text-body-2 font-weight-black">{{ getPadLeftText(item.id) }}</p>
+                </v-col>
 
-                  <tbody>
-                    <tr>
-                      <td>{{ item.designations.designation }}</td>
-                      <td>{{ item.is_field_staff ? 'Field' : 'Office' }}</td>
-                      <td>{{ date.format(item.hired_at, 'fullDate') }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </v-sheet>
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <p class="text-body-2 font-weight-bold me-2">Birthdate:</p>
+                  <p class="text-body-2">{{ date.format(item.birthdate, 'fullDate') }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <p class="text-body-2 font-weight-bold me-2">Address:</p>
+                  <p class="text-body-2">{{ item.address }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Hired Date:</span>
+                  <p class="text-body-2">{{ date.format(item.hired_at, 'fullDate') }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Field/Office:</span>
+                  <p class="text-body-2">{{ item.is_field_staff ? 'Field' : 'Office' }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="3"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">TIN No.:</span>
+                  <p class="text-body-2">{{ item.tin_no }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="3"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">SSS No.:</span>
+                  <p class="text-body-2">{{ item.sss_no }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="3"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Philhealth No.:</span>
+                  <p class="text-body-2">{{ item.philhealth_no }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="3"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Pag-ibig No.:</span>
+                  <p class="text-body-2">{{ item.philhealth_no }}</p>
+                </v-col>
+              </v-row>
+
+              <v-divider class="my-3" thickness="1"></v-divider>
             </td>
           </tr>
         </template>
