@@ -1,4 +1,4 @@
-import { type Employee, useEmployeesStore } from '@/stores/employees'
+import { type Employee, type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
 import { useDesignationsStore } from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -9,7 +9,7 @@ export function useEmployeesFormDialog(
     isDialogVisible: boolean
     itemData: Employee | null
     tableOptions: TableOptions
-    tableFilters: { search: string }
+    tableFilters: EmployeeTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {

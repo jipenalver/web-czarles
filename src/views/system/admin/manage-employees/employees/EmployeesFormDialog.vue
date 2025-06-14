@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
 import { emailValidator, requiredValidator } from '@/utils/validators'
 import { useEmployeesFormDialog } from './employeesFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import type { Employee } from '@/stores/employees'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: Employee | null
   tableOptions: TableOptions
-  tableFilters: { search: string }
+  tableFilters: EmployeeTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
