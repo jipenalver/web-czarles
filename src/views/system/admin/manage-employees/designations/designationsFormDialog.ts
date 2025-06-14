@@ -1,4 +1,8 @@
-import { type Designation, useDesignationsStore } from '@/stores/designations'
+import {
+  type Designation,
+  type DesignationTableFilter,
+  useDesignationsStore,
+} from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { ref, watch } from 'vue'
@@ -8,7 +12,7 @@ export function useDesignationsFormDialog(
     isDialogVisible: boolean
     itemData: Designation | null
     tableOptions: TableOptions
-    tableFilters: { search: string }
+    tableFilters: DesignationTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {

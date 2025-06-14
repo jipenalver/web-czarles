@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { type Designation, type DesignationTableFilter } from '@/stores/designations'
 import { useDesignationsFormDialog } from './designationsFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { type Designation } from '@/stores/designations'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
@@ -10,7 +10,7 @@ const props = defineProps<{
   isDialogVisible: boolean
   itemData: Designation | null
   tableOptions: TableOptions
-  tableFilters: { search: string }
+  tableFilters: DesignationTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
