@@ -1,4 +1,5 @@
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
+import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -8,6 +9,10 @@ export type Designation = {
   created_at: string
   designation: string
   description: string
+}
+
+type TableFilter = {
+  search: string | null
 }
 
 export const useDesignationsStore = defineStore('designations', () => {
@@ -30,19 +35,17 @@ export const useDesignationsStore = defineStore('designations', () => {
     designations.value = data as Designation[]
   }
 
-  async function getDesignationsTable(
-    tableOptions: TableOptions,
-    { search }: { search: string | null },
-  ) {
+  async function getDesignationsTable(tableOptions: TableOptions, { search }: TableFilter) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'designation')
     search = tableSearch(search)
 
-    const query = supabase
+    let query = supabase
       .from('designations')
       .select()
-      .or(`designation.ilike.%${search}%, description.ilike.%${search}%`)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
+
+    query = getDesignationsFilter(query, { search })
 
     const { data } = await query
 
@@ -52,11 +55,25 @@ export const useDesignationsStore = defineStore('designations', () => {
     designationsTableTotal.value = count as number
   }
 
-  async function getDesignationsCount({ search }: { search: string | null }) {
-    return await supabase
-      .from('designations')
-      .select('*', { count: 'exact', head: true })
-      .or(`designation.ilike.%${search}%, description.ilike.%${search}%`)
+  async function getDesignationsCount({ search }: TableFilter) {
+    let query = supabase.from('designations').select('*', { count: 'exact', head: true })
+
+    query = getDesignationsFilter(query, { search })
+
+    return await query
+  }
+
+  function getDesignationsFilter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query: PostgrestFilterBuilder<any, any, any>,
+    { search }: TableFilter,
+  ) {
+    if (search)
+      query = query.or(
+        `firstname.ilike.%${search}%,lastname.ilike.%${search}%,email.ilike.%${search}%`,
+      )
+
+    return query
   }
 
   async function addDesignation(formData: Partial<Designation>) {
