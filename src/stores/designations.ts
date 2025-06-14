@@ -1,4 +1,4 @@
-import { tablePagination, tableSearch, type TableOptions } from '@/utils/helpers/tables'
+import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
