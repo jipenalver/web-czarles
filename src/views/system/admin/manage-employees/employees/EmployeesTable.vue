@@ -81,6 +81,7 @@ const {
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
+        show-expand
       >
         <template #top>
           <v-row dense>
@@ -144,6 +145,46 @@ const {
               <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
             </v-btn>
           </div>
+        </template>
+
+        <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+          <v-btn
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            class="text-none"
+            color="medium-emphasis"
+            size="small"
+            variant="text"
+            border
+            slim
+            @click="toggleExpand(internalItem)"
+          ></v-btn>
+        </template>
+
+        <template #expanded-row="{ columns, item }">
+          <tr>
+            <td :colspan="columns.length" class="py-2">
+              <v-sheet rounded="lg" border>
+                <v-table density="compact">
+                  <tbody class="bg-surface-light">
+                    <tr>
+                      <th>Designation</th>
+                      <th>Field/Office</th>
+                      <th>Hired Date</th>
+                    </tr>
+                  </tbody>
+
+                  <tbody>
+                    <tr>
+                      <td>{{ item.designations.designation }}</td>
+                      <td>{{ item.is_field_staff ? 'Field' : 'Office' }}</td>
+                      <td>{{ date.format(item.hired_at, 'fullDate') }}</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-sheet>
+            </td>
+          </tr>
         </template>
       </v-data-table-server>
     </v-card-text>
