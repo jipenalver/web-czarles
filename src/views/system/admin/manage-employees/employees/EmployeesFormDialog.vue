@@ -59,14 +59,25 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
             </v-col>
 
             <v-col cols="12">
-              <v-autocomplete
-                v-model="formData.designation_id"
-                label="Designation"
-                :items="designationsStore.designations"
-                item-title="designation"
-                item-value="id"
+              <v-date-input
+                v-model="formData.birthdate"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
+                label="Birthdate"
+                placeholder="Select Date"
                 :rules="[requiredValidator]"
-              ></v-autocomplete>
+                hide-actions
+              ></v-date-input>
+            </v-col>
+
+            <v-col cols="12">
+              <v-textarea
+                v-model="formData.address"
+                label="Address"
+                placeholder="Address"
+                rows="3"
+                :rules="[requiredValidator]"
+              ></v-textarea>
             </v-col>
 
             <v-col cols="12" sm="6">
@@ -75,7 +86,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
                 label="Email"
                 prepend-inner-icon="mdi-email-outline"
                 :readonly="isUpdate"
-                :rules="[requiredValidator, emailValidator]"
+                :rules="[emailValidator]"
               ></v-text-field>
             </v-col>
 
@@ -87,6 +98,58 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
                 prefix="+63"
                 :rules="[requiredValidator]"
               ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="formData.tin_no" label="TIN No."></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="formData.sss_no" label="SSS No."></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="formData.philhealth_no" label="PhilHealth No."></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-text-field v-model="formData.pagibig_no" label="Pag-ibig No."></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-text-field v-model="formData.id_no" label="ID No."></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-autocomplete
+                v-model="formData.designation_id"
+                label="Designation"
+                :items="designationsStore.designations"
+                item-title="designation"
+                item-value="id"
+                :rules="[requiredValidator]"
+              ></v-autocomplete>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-date-input
+                v-model="formData.hired_at"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
+                label="Hired Date"
+                placeholder="Select Date"
+                :rules="[requiredValidator]"
+                hide-actions
+              ></v-date-input>
+            </v-col>
+
+            <v-col cols="12">
+              <v-switch
+                v-model="formData.is_field_staff"
+                class="ms-2"
+                color="primary"
+                label="Is Field Staff?"
+              ></v-switch>
             </v-col>
           </v-row>
         </v-card-text>
