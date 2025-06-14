@@ -37,6 +37,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     employeesTableTotal.value = 0
   }
 
+  // Actions
   async function getEmployeesTable(
     tableOptions: TableOptions,
     { search }: { search: string | null },
@@ -55,12 +56,10 @@ export const useEmployeesStore = defineStore('employees', () => {
 
     const { count } = await getEmployeesCount({ search })
 
-    // Set the retrieved data to state
     employeesTable.value = data as Employee[]
     employeesTableTotal.value = count as number
   }
 
-  // Count Employees
   async function getEmployeesCount({ search }: { search: string | null }) {
     return await supabase
       .from('employees')
@@ -69,26 +68,18 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function addEmployee(formData: Partial<Employee>) {
-    // const { email, password, ...userMetadata } = formData
-    // return await supabaseAdmin.auth.admin.createUser({
-    //   email,
-    //   password,
-    //   email_confirm: true,
-    //   user_metadata: { ...userMetadata, password },
-    // })
+    return await supabase.from('employees').insert(formData).select()
   }
 
   async function updateEmployee(formData: Partial<Employee>) {
-    // const { id, email, created_at, ...userMetadata } = formData
-    // return await supabaseAdmin.auth.admin.updateUserById(id as string, {
-    //   user_metadata: { ...userMetadata },
-    // })
+    return await supabase.from('employees').update(formData).eq('id', formData.id).select()
   }
 
   async function deleteEmployee(id: number) {
-    // return await supabaseAdmin.auth.admin.deleteUser(id)
+    return await supabase.from('employees').delete().eq('id', id).select()
   }
 
+  // Expose States and Actions
   return {
     employeesTable,
     employeesTableTotal,

@@ -56,11 +56,11 @@ export const useDesignationsStore = defineStore('designations', () => {
   }
 
   async function updateDesignation(formData: Partial<Designation>) {
-    return await supabase.from('designations').update(formData).eq('id', formData.id)
+    return await supabase.from('designations').update(formData).eq('id', formData.id).select()
   }
 
   async function deleteDesignation(id: number) {
-    return await supabase.from('designations').delete().eq('id', id)
+    return await supabase.from('designations').delete().eq('id', id).select()
   }
 
   // Expose States and Actions
