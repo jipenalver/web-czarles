@@ -12,16 +12,24 @@ export type Designation = {
 
 export const useDesignationsStore = defineStore('designations', () => {
   // States
+  const designations = ref<Designation[]>([])
   const designationsTable = ref<Designation[]>([])
   const designationsTableTotal = ref(0)
 
   // Reset State
   function $reset() {
+    designations.value = []
     designationsTable.value = []
     designationsTableTotal.value = 0
   }
 
   // Actions
+  async function getDesignations() {
+    const { data } = await supabase.from('designations').select()
+
+    designations.value = data as Designation[]
+  }
+
   async function getDesignationsTable(
     tableOptions: TableOptions,
     { search }: { search: string | null },
@@ -65,9 +73,11 @@ export const useDesignationsStore = defineStore('designations', () => {
 
   // Expose States and Actions
   return {
+    designations,
     designationsTable,
     designationsTableTotal,
     $reset,
+    getDesignations,
     getDesignationsTable,
     addDesignation,
     updateDesignation,
