@@ -38,7 +38,7 @@ const {
               <v-tooltip activator="parent" location="top">Edit Role</v-tooltip>
             </v-btn>
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-              <v-icon icon="mdi-tag-remove" color="error"> </v-icon>
+              <v-icon icon="mdi-tag-remove" color="secondary"> </v-icon>
               <v-tooltip activator="parent" location="top">Delete Role</v-tooltip>
             </v-btn>
           </div>
