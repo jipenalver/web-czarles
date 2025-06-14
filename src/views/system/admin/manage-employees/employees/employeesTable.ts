@@ -56,6 +56,16 @@ export function useEmployeesTable() {
     formAction.value.formProcess = false
   }
 
+  // Retrieve Data based on Search
+  const onSearchItems = () => {
+    if (
+      tableFilters.value.search?.length >= 2 ||
+      tableFilters.value.search?.length == 0 ||
+      tableFilters.value.search === null
+    )
+      onLoadItems(tableOptions.value)
+  }
+
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
     tableOptions.value.isLoading = true
 
@@ -67,6 +77,7 @@ export function useEmployeesTable() {
   // Expose State and Actions
   return {
     tableOptions,
+    tableFilters,
     isDialogVisible,
     isConfirmDeleteDialog,
     itemData,
@@ -75,6 +86,7 @@ export function useEmployeesTable() {
     onUpdate,
     onDelete,
     onConfirmDelete,
+    onSearchItems,
     onLoadItems,
     employeesStore,
   }
