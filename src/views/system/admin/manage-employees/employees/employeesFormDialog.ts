@@ -1,31 +1,39 @@
-import { type AdminUser, useUsersStore } from '@/stores/users'
+import { type Employee, useEmployeesStore } from '@/stores/employees'
+import { useDesignationsStore } from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { useUserRolesStore } from '@/stores/userRoles'
 import { onMounted, ref, watch } from 'vue'
 
-export function useUsersFormDialog(
+export function useEmployeesFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: AdminUser | null
+    itemData: Employee | null
     tableOptions: TableOptions
+    tableFilters: { search: string }
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const userRolesStore = useUserRolesStore()
-  const usersStore = useUsersStore()
+  const employeesStore = useEmployeesStore()
+  const designationsStore = useDesignationsStore()
 
   // States
   const formDataDefault = {
-    email: '',
-    password: '',
     firstname: '',
     middlename: '',
     lastname: '',
+    email: '',
     phone: '',
-    user_role: null,
+    is_field_staff: false,
+    hired_at: '',
+    birthdate: '',
+    tin_no: '',
+    sss_no: '',
+    pagibig_no: '',
+    philhealth_no: '',
+    address: '',
+    designation_id: null,
   }
-  const formData = ref<Partial<AdminUser>>({ ...formDataDefault })
+  const formData = ref<Partial<Employee>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -43,8 +51,8 @@ export function useUsersFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await usersStore.updateUser(formData.value)
-      : await usersStore.addUser(formData.value)
+      ? await employeesStore.updateEmployee(formData.value)
+      : await employeesStore.addEmployee(formData.value)
 
     if (error) {
       formAction.value = {
@@ -54,9 +62,9 @@ export function useUsersFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Employee.`
 
-      await usersStore.getUsersTable(props.tableOptions)
+      await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
 
       setTimeout(() => {
         onFormReset()
@@ -79,7 +87,7 @@ export function useUsersFormDialog(
   }
 
   onMounted(async () => {
-    if (userRolesStore.userRoles.length === 0) await userRolesStore.getUserRoles()
+    if (designationsStore.designations.length === 0) await designationsStore.getDesignations()
   })
 
   // Expose State and Actions
@@ -90,6 +98,6 @@ export function useUsersFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
-    userRolesStore,
+    designationsStore,
   }
 }

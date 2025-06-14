@@ -97,6 +97,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
       authPages.value = data[0].pages.map((p: { page: string }) => p.page)
   }
 
+  // Expose States and Actions
   return {
     userData,
     userRole,

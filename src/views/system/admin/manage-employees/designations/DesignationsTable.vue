@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import DesignationsFormDialog from './DesignationsFormDialog.vue'
+import { useDesignationsTable } from './designationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import UsersFormDialog from './UsersFormDialog.vue'
-import { useUsersTable } from './usersTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -12,33 +12,18 @@ const { mobile } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
-    title: 'Email',
-    key: 'email',
-    sortable: false,
+    title: 'Designation',
+    key: 'designation',
     align: 'start',
   },
   {
-    title: 'Fullname',
-    key: 'lastname',
-    sortable: false,
+    title: 'Description',
+    key: 'description',
     align: 'start',
   },
   {
-    title: 'Phone',
-    key: 'phone',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Role',
-    key: 'user_role',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Registered Date',
+    title: 'Added Date',
     key: 'created_at',
-    sortable: false,
     align: 'center',
   },
   {
@@ -51,6 +36,7 @@ const tableHeaders: TableHeader[] = [
 
 const {
   tableOptions,
+  tableFilters,
   isDialogVisible,
   isConfirmDeleteDialog,
   itemData,
@@ -59,10 +45,10 @@ const {
   onUpdate,
   onDelete,
   onConfirmDelete,
+  onSearchItems,
   onLoadItems,
-  usersStore,
-  authUserStore,
-} = useUsersTable()
+  designationsStore,
+} = useDesignationsTable()
 </script>
 
 <template>
@@ -81,8 +67,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="usersStore.usersTable"
-        :items-length="usersStore.usersTableTotal"
+        :items="designationsStore.designationsTable"
+        :items-length="designationsStore.designationsTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
@@ -91,15 +77,21 @@ const {
           <v-row dense>
             <v-spacer></v-spacer>
 
+            <v-col cols="12" sm="4">
+              <v-text-field
+                v-model="tableFilters.search"
+                density="compact"
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Search Designation, Description"
+                clearable
+                @click:clear="onSearchItems"
+                @input="onSearchItems"
+              ></v-text-field>
+            </v-col>
+
             <v-col cols="12" sm="3">
-              <v-btn
-                class="my-1"
-                prepend-icon="mdi-account-plus"
-                color="primary"
-                block
-                @click="onAdd"
-              >
-                Add User
+              <v-btn class="my-1" prepend-icon="mdi-tag-plus" color="primary" block @click="onAdd">
+                Add Designation
               </v-btn>
             </v-col>
           </v-row>
@@ -107,16 +99,12 @@ const {
           <v-divider class="my-5"></v-divider>
         </template>
 
-        <template #item.lastname="{ item }">
-          <span class="font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
+        <template #item.designation="{ item }">
+          <span class="font-weight-bold"> {{ item.designation }} </span>
         </template>
 
-        <template #item.phone="{ item }">
-          {{ item.phone ? '+63 ' + item.phone : '' }}
-        </template>
-
-        <template #item.user_role="{ item }">
-          {{ item.user_role }}
+        <template #item.description="{ item }">
+          {{ item.description }}
         </template>
 
         <template #item.created_at="{ item }">
@@ -127,26 +115,14 @@ const {
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
-            <v-btn
-              variant="text"
-              density="comfortable"
-              :disabled="item.is_admin || authUserStore.userData?.id === item.id"
-              @click="onUpdate(item)"
-              icon
-            >
+            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit User</v-tooltip>
+              <v-tooltip activator="parent" location="top">Edit Designation</v-tooltip>
             </v-btn>
 
-            <v-btn
-              variant="text"
-              density="comfortable"
-              :disabled="item.is_admin || authUserStore.userData?.id === item.id"
-              @click="onDelete(item.id)"
-              icon
-            >
+            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete User</v-tooltip>
+              <v-tooltip activator="parent" location="top">Delete Designation</v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -154,16 +130,17 @@ const {
     </v-card-text>
   </v-card>
 
-  <UsersFormDialog
+  <DesignationsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
-  ></UsersFormDialog>
+    :table-filters="tableFilters"
+  ></DesignationsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete user?"
+    text="Are you sure you want to delete this designation?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>

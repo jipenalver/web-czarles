@@ -1,31 +1,25 @@
-import { type AdminUser, useUsersStore } from '@/stores/users'
+import { type Designation, useDesignationsStore } from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { useUserRolesStore } from '@/stores/userRoles'
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
-export function useUsersFormDialog(
+export function useDesignationsFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: AdminUser | null
+    itemData: Designation | null
     tableOptions: TableOptions
+    tableFilters: { search: string }
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const userRolesStore = useUserRolesStore()
-  const usersStore = useUsersStore()
+  const designationsStore = useDesignationsStore()
 
   // States
   const formDataDefault = {
-    email: '',
-    password: '',
-    firstname: '',
-    middlename: '',
-    lastname: '',
-    phone: '',
-    user_role: null,
+    designation: '',
+    description: '',
   }
-  const formData = ref<Partial<AdminUser>>({ ...formDataDefault })
+  const formData = ref<Partial<Designation>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -43,8 +37,8 @@ export function useUsersFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await usersStore.updateUser(formData.value)
-      : await usersStore.addUser(formData.value)
+      ? await designationsStore.updateDesignation(formData.value)
+      : await designationsStore.addDesignation(formData.value)
 
     if (error) {
       formAction.value = {
@@ -54,9 +48,9 @@ export function useUsersFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Designation.`
 
-      await usersStore.getUsersTable(props.tableOptions)
+      await designationsStore.getDesignationsTable(props.tableOptions, props.tableFilters)
 
       setTimeout(() => {
         onFormReset()
@@ -78,10 +72,6 @@ export function useUsersFormDialog(
     emit('update:isDialogVisible', false)
   }
 
-  onMounted(async () => {
-    if (userRolesStore.userRoles.length === 0) await userRolesStore.getUserRoles()
-  })
-
   // Expose State and Actions
   return {
     formData,
@@ -90,6 +80,5 @@ export function useUsersFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
-    userRolesStore,
   }
 }

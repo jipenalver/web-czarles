@@ -54,8 +54,12 @@ export function useUserRolesFormDialog(
       : await userRolesStore.addUserRole(formData.value)
 
     if (error) {
-      formAction.value.formMessage = error.message
-      formAction.value.formStatus = 400
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formProcess: false,
+      }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`
 
