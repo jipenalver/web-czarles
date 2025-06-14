@@ -1,9 +1,10 @@
 import { type Employee, useEmployeesStore } from '@/stores/employees'
+import { useDesignationsStore } from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
-export function useDesignationsFormDialog(
+export function useEmployeesFormDialog(
   props: {
     isDialogVisible: boolean
     itemData: Employee | null
@@ -13,6 +14,7 @@ export function useDesignationsFormDialog(
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const employeesStore = useEmployeesStore()
+  const designationsStore = useDesignationsStore()
 
   // States
   const formDataDefault = {
@@ -81,6 +83,10 @@ export function useDesignationsFormDialog(
     emit('update:isDialogVisible', false)
   }
 
+  onMounted(async () => {
+    if (designationsStore.designations.length === 0) await designationsStore.getDesignations()
+  })
+
   // Expose State and Actions
   return {
     formData,
@@ -89,5 +95,6 @@ export function useDesignationsFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
+    designationsStore,
   }
 }
