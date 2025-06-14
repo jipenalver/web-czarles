@@ -26,7 +26,7 @@ export type Employee = {
   }
 }
 
-type TableFilter = {
+export type EmployeeTableFilter = {
   search: string | null
   designation_id: number | null
 }
@@ -45,7 +45,7 @@ export const useEmployeesStore = defineStore('employees', () => {
   // Actions
   async function getEmployeesTable(
     tableOptions: TableOptions,
-    { search, designation_id }: TableFilter,
+    { search, designation_id }: EmployeeTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'lastname')
     search = tableSearch(search)
@@ -66,7 +66,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     employeesTableTotal.value = count as number
   }
 
-  async function getEmployeesCount({ search, designation_id }: TableFilter) {
+  async function getEmployeesCount({ search, designation_id }: EmployeeTableFilter) {
     let query = supabase.from('employees').select('*', { count: 'exact', head: true })
 
     query = getEmployeesFilter(query, { search, designation_id })
@@ -77,7 +77,7 @@ export const useEmployeesStore = defineStore('employees', () => {
   function getEmployeesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { search, designation_id }: TableFilter,
+    { search, designation_id }: EmployeeTableFilter,
   ) {
     if (search)
       query = query.or(

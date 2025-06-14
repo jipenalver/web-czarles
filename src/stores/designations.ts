@@ -11,7 +11,7 @@ export type Designation = {
   description: string
 }
 
-type TableFilter = {
+export type DesignationTableFilter = {
   search: string | null
 }
 
@@ -35,7 +35,10 @@ export const useDesignationsStore = defineStore('designations', () => {
     designations.value = data as Designation[]
   }
 
-  async function getDesignationsTable(tableOptions: TableOptions, { search }: TableFilter) {
+  async function getDesignationsTable(
+    tableOptions: TableOptions,
+    { search }: DesignationTableFilter,
+  ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'designation')
     search = tableSearch(search)
 
@@ -55,7 +58,7 @@ export const useDesignationsStore = defineStore('designations', () => {
     designationsTableTotal.value = count as number
   }
 
-  async function getDesignationsCount({ search }: TableFilter) {
+  async function getDesignationsCount({ search }: DesignationTableFilter) {
     let query = supabase.from('designations').select('*', { count: 'exact', head: true })
 
     query = getDesignationsFilter(query, { search })
@@ -66,7 +69,7 @@ export const useDesignationsStore = defineStore('designations', () => {
   function getDesignationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { search }: TableFilter,
+    { search }: DesignationTableFilter,
   ) {
     if (search) query = query.or(`designation.ilike.%${search}%, description.ilike.%${search}%`)
 
