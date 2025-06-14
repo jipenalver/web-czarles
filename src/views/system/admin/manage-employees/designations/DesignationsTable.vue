@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import DesignationsFormDialog from './DesignationsFormDialog.vue'
 import { useDesignationsTable } from './designationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -88,7 +90,7 @@ const {
             </v-col>
 
             <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
+              <v-btn class="my-1" prepend-icon="mdi-tag-plus" color="primary" block @click="onAdd">
                 Add Designation
               </v-btn>
             </v-col>
@@ -127,4 +129,18 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <DesignationsFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></DesignationsFormDialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmDeleteDialog"
+    title="Confirm Delete"
+    text="Are you sure you want to delete this designation?"
+    @confirm="onConfirmDelete"
+  ></ConfirmDialog>
 </template>
