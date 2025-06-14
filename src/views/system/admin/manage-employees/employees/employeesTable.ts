@@ -41,22 +41,21 @@ export function useEmployeesTable() {
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // const { data, error } = await employeesStore.deleteEmployee(deleteId.value)
+    const { data, error } = await employeesStore.deleteEmployee(deleteId.value)
 
-    // if (error) {
-    //   formAction.value.formMessage = error.message
-    //   formAction.value.formStatus = 400
-    // } else if (data) {
-    //   formAction.value.formMessage = 'Successfully Deleted Employee.'
+    if (error) {
+      formAction.value.formMessage = error.message
+      formAction.value.formStatus = 400
+    } else if (data) {
+      formAction.value.formMessage = 'Successfully Deleted Employee.'
 
-    //   await onLoadItems(tableOptions.value)
-    // }
+      await onLoadItems(tableOptions.value)
+    }
 
     formAction.value.formAlert = true
     formAction.value.formProcess = false
   }
 
-  // Retrieve Data based on Search
   const onSearchItems = () => {
     if (
       tableFilters.value.search?.length >= 2 ||
