@@ -58,8 +58,10 @@ const {
   onDelete,
   onConfirmDelete,
   onSearchItems,
+  onFilterItems,
   onLoadItems,
   employeesStore,
+  designationsStore,
 } = useEmployeesTable()
 </script>
 
@@ -90,7 +92,7 @@ const {
           <v-row dense>
             <v-spacer></v-spacer>
 
-            <v-col cols="12" sm="5">
+            <v-col cols="12" sm="4">
               <v-text-field
                 v-model="tableFilters.search"
                 density="compact"
@@ -100,6 +102,19 @@ const {
                 @click:clear="onSearchItems"
                 @input="onSearchItems"
               ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="3">
+              <v-autocomplete
+                v-model="tableFilters.designation_id"
+                :items="designationsStore.designations"
+                density="compact"
+                label="Designation"
+                item-title="designation"
+                item-value="id"
+                clearable
+                @update:model-value="onFilterItems"
+              ></v-autocomplete>
             </v-col>
 
             <v-col cols="12" sm="3">

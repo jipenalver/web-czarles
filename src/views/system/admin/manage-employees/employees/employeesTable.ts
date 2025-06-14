@@ -1,3 +1,4 @@
+import { useDesignationsStore } from '@/stores/designations'
 import { type Employee, useEmployeesStore } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -5,6 +6,7 @@ import { ref } from 'vue'
 
 export function useEmployeesTable() {
   const employeesStore = useEmployeesStore()
+  const designationsStore = useDesignationsStore()
 
   // States
   const tableOptions = ref({
@@ -15,6 +17,7 @@ export function useEmployeesTable() {
   })
   const tableFilters = ref({
     search: '',
+    designation_id: null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -56,6 +59,10 @@ export function useEmployeesTable() {
     formAction.value.formProcess = false
   }
 
+  const onFilterItems = () => {
+    onLoadItems(tableOptions.value)
+  }
+
   const onSearchItems = () => {
     if (
       tableFilters.value.search?.length >= 2 ||
@@ -86,7 +93,9 @@ export function useEmployeesTable() {
     onDelete,
     onConfirmDelete,
     onSearchItems,
+    onFilterItems,
     onLoadItems,
     employeesStore,
+    designationsStore,
   }
 }
