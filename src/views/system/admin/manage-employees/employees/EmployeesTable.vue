@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useEmployeesTable } from './employeesTable'
@@ -189,4 +191,18 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <EmployeesFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></EmployeesFormDialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmDeleteDialog"
+    title="Confirm Delete"
+    text="Are you sure you want to delete this employee?"
+    @confirm="onConfirmDelete"
+  ></ConfirmDialog>
 </template>
