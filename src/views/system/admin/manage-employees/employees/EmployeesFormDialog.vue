@@ -116,10 +116,6 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
               <v-text-field v-model="formData.pagibig_no" label="Pag-ibig No."></v-text-field>
             </v-col>
 
-            <v-col cols="12">
-              <v-text-field v-model="formData.id_no" label="ID No."></v-text-field>
-            </v-col>
-
             <v-col cols="12" sm="6">
               <v-autocomplete
                 v-model="formData.designation_id"

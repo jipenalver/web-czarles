@@ -30,7 +30,6 @@ export function useEmployeesFormDialog(
     sss_no: '',
     pagibig_no: '',
     philhealth_no: '',
-    id_no: '',
     address: '',
     designation_id: null,
   }

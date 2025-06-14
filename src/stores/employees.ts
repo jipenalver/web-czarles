@@ -18,7 +18,6 @@ export type Employee = {
   sss_no: string
   pagibig_no: string
   philhealth_no: string
-  id_no: string
   address: string
   designation_id: null | number
   designations: {
