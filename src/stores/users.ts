@@ -80,5 +80,6 @@ export const useUsersStore = defineStore('users', () => {
     return await supabaseAdmin.auth.admin.deleteUser(id)
   }
 
+  // Expose States and Actions
   return { usersTable, usersTableTotal, $reset, getUsersTable, addUser, updateUser, deleteUser }
 })
