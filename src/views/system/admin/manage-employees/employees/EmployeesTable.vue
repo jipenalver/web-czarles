@@ -109,7 +109,7 @@ const {
                 v-model="tableFilters.designation_id"
                 :items="designationsStore.designations"
                 density="compact"
-                label="Designation"
+                label="Filter Designation"
                 item-title="designation"
                 item-value="id"
                 clearable
@@ -215,7 +215,7 @@ const {
 
                 <v-col
                   cols="12"
-                  sm="6"
+                  sm="3"
                   class="d-flex align-center my-2"
                   :class="mobile ? 'justify-space-between' : 'justify-start'"
                 >
@@ -225,12 +225,32 @@ const {
 
                 <v-col
                   cols="12"
-                  sm="6"
+                  sm="3"
                   class="d-flex align-center my-2"
                   :class="mobile ? 'justify-space-between' : 'justify-start'"
                 >
-                  <span class="text-body-2 font-weight-bold me-2">Field/Office:</span>
-                  <p class="text-body-2">{{ item.is_field_staff ? 'Field' : 'Office' }}</p>
+                  <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
+                  <p class="text-body-2">{{ item.is_field_staff ? 'Yes' : 'No' }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="3"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Contract Status:</span>
+                  <p class="text-body-2">{{ item.is_permanent ? 'Permanent' : 'Contractual' }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="3"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">With Accident Insurance:</span>
+                  <p class="text-body-2">{{ item.is_insured ? 'Yes' : 'No' }}</p>
                 </v-col>
 
                 <v-col
