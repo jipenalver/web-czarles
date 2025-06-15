@@ -195,6 +195,7 @@ export const getDaysDiff = (date1: Date, date2: string, isRound = true) => {
   return isRound ? Math.round(differenceInDay) : differenceInDay
 }
 
+// 👉 Get Years of Service
 export const getYearsOfService = (hiredAt: string) => {
   if (!hiredAt) return 'n/a'
 
@@ -225,6 +226,17 @@ export const getYearsOfService = (hiredAt: string) => {
   }
 
   return result || 'Less than 1 month'
+}
+
+// 👉 Get Employee ID Number
+export const getIDNumber = (hiredAt: string, employeeId: number) => {
+  if (!hiredAt || !employeeId) return 'n/a'
+
+  const hiredDate = new Date(hiredAt)
+
+  const year = hiredDate.getFullYear().toString().slice(-2)
+
+  return `2${year}-${getPadLeftText(employeeId)}`
 }
 
 // 👉 Generate CSV

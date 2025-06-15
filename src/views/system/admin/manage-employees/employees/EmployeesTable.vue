@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getPadLeftText, getYearsOfService } from '@/utils/helpers/others'
+import { getIDNumber, getYearsOfService } from '@/utils/helpers/others'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
@@ -192,7 +192,7 @@ const {
                 >
                   <span class="text-body-2 font-weight-bold me-2">ID No.:</span>
                   <v-chip class="font-weight-black" color="default" size="small">
-                    {{ getPadLeftText(item.id) }}
+                    {{ getIDNumber(item.hired_at, item.id) }}
                   </v-chip>
                 </v-col>
 
