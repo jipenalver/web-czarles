@@ -35,6 +35,7 @@ export type Employee = {
   area_assignment: {
     area: string
   }
+  daily_rate: number
 }
 
 export type EmployeeTableFilter = {
