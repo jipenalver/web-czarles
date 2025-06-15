@@ -292,6 +292,28 @@ const {
                   <span class="text-body-2 font-weight-bold me-2">Pag-ibig No.:</span>
                   <p class="text-body-2">{{ item.philhealth_no }}</p>
                 </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Area of Origin:</span>
+                  <p class="text-body-2">{{ item.area_origin ? item.area_origin.area : 'n/a' }}</p>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">Area of Assignment:</span>
+                  <p class="text-body-2">
+                    {{ item.area_assignment ? item.area_assignment.area : 'n/a' }}
+                  </p>
+                </v-col>
               </v-row>
 
               <v-divider class="my-3" thickness="1"></v-divider>
