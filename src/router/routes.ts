@@ -5,7 +5,6 @@ import NotFoundView from '@/views/errors/NotFoundView.vue'
 import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
 import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
-import DesignationsAreasView from '@/views/system/admin/manage-employees/DesignationsAreasView.vue'
 import EmployeesView from '@/views/system/admin/manage-employees/EmployeesView.vue'
 import BenefitsRatesView from '@/views/system/admin/manage-employees/BenefitsRatesView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
@@ -54,12 +53,6 @@ export const routes = [
   },
 
   // Employees
-  {
-    path: '/hrms/employees/designations',
-    name: 'hrms-employees-designations',
-    component: DesignationsAreasView,
-    meta: { requiresAuth: true },
-  },
   {
     path: '/hrms/employees/list',
     name: 'hrms-employees-list',
