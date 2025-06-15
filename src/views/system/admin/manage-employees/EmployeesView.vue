@@ -22,7 +22,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
         <HeaderPanel
           :header-items="['Employees Management', 'List of Employees']"
           header-icon="mdi-account-multiple"
-          headline="Onboard and Manage employees."
+          headline="Onboard and manage employees."
         ></HeaderPanel>
 
         <EmployeesTable component-view="employees"></EmployeesTable>
