@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { emailValidator, lengthMinValidator, requiredValidator } from '@/utils/validators'
 import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
-import { emailValidator, requiredValidator } from '@/utils/validators'
 import { useEmployeesFormDialog } from './employeesFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -103,7 +103,7 @@ const {
                 v-model="formData.phone"
                 label="Phone"
                 prepend-inner-icon="mdi-phone"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, lengthMinValidator(formData.phone as string, 11)]"
               ></v-text-field>
             </v-col>
 
