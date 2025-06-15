@@ -59,9 +59,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <EmployeesTable component-view="benefits"></EmployeesTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="benefits">
-            <BenefitsTable></BenefitsTable>
-          </v-tabs-window-item>
+          <v-tabs-window-item value="benefits"> </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
     </template>
