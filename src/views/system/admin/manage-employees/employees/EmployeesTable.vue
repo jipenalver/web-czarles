@@ -39,8 +39,8 @@ const tableHeaders: TableHeader[] = [
     align: 'start',
   },
   {
-    title: 'Onboard Date',
-    key: 'created_at',
+    title: 'Hired Date',
+    key: 'hired_at',
     align: 'center',
   },
   {
@@ -152,9 +152,9 @@ const {
           </v-chip>
         </template>
 
-        <template #item.created_at="{ item }">
+        <template #item.hired_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.created_at, 'fullDateTime') }}
+            {{ date.format(item.hired_at, 'fullDate') }}
           </span>
         </template>
 
