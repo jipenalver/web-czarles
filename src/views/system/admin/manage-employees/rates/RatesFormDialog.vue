@@ -78,7 +78,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Update Employee
+            Update Rate
           </v-btn>
         </v-card-actions>
       </v-form>

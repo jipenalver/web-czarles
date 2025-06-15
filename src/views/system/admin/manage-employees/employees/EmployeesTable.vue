@@ -10,7 +10,7 @@ import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'benefits' | 'employees' | 'attendance' | 'payroll'
+  componentView: 'employees' | 'benefits' | 'attendance' | 'payroll'
 }>()
 
 const date = useDate()
@@ -174,8 +174,13 @@ const {
 
             <template v-else-if="props.componentView === 'benefits'">
               <v-btn variant="text" density="comfortable" @click="onRate(item)" icon>
-                <v-icon icon="mdi-account-cash"></v-icon>
+                <v-icon icon="mdi-cash-edit" color="warning"></v-icon>
                 <v-tooltip activator="parent" location="top">Edit Employee Rate</v-tooltip>
+              </v-btn>
+
+              <v-btn variant="text" density="comfortable" icon>
+                <v-icon icon="mdi-account-cash" color="info"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Employee Deductions</v-tooltip>
               </v-btn>
             </template>
           </div>
@@ -196,6 +201,7 @@ const {
 
         <template #expanded-row="{ columns, item }">
           <EmployeesExpandedRow
+            :component-view="props.componentView"
             :columns-length="columns.length"
             :item-data="item"
           ></EmployeesExpandedRow>
