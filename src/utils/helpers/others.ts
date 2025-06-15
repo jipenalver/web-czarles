@@ -195,6 +195,38 @@ export const getDaysDiff = (date1: Date, date2: string, isRound = true) => {
   return isRound ? Math.round(differenceInDay) : differenceInDay
 }
 
+export const getYearsOfService = (hiredAt: string) => {
+  if (!hiredAt) return 'n/a'
+
+  const hiredDate = new Date(hiredAt)
+  const currentDate = new Date()
+
+  let years = currentDate.getFullYear() - hiredDate.getFullYear()
+  let months = currentDate.getMonth() - hiredDate.getMonth()
+
+  if (months < 0) {
+    years--
+    months += 12
+  }
+
+  if (currentDate.getDate() < hiredDate.getDate()) {
+    months--
+    if (months < 0) {
+      years--
+      months += 12
+    }
+  }
+
+  let result = ''
+  if (years > 0) result += `${years} year${years !== 1 ? 's' : ''}`
+  if (months > 0) {
+    if (result) result += ' & '
+    result += `${months} month${months !== 1 ? 's' : ''}`
+  }
+
+  return result || 'Less than 1 month'
+}
+
 // 👉 Generate CSV
 export const generateCSV = (filename: string, csvData: string) => {
   const blob = new Blob([csvData], { type: 'text/csv; charset=utf-8' })
