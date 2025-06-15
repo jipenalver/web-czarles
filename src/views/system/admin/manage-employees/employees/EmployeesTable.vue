@@ -8,6 +8,10 @@ import { useEmployeesTable } from './employeesTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
+const props = defineProps<{
+  componentView: 'benefits' | 'employees' | 'attendance' | 'payroll'
+}>()
+
 const date = useDate()
 const { mobile } = useDisplay()
 
@@ -155,28 +159,31 @@ const {
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
-            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
-              <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Employee</v-tooltip>
-            </v-btn>
+            <template v-if="props.componentView === 'employees'">
+              <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
+                <v-icon icon="mdi-pencil"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Employee</v-tooltip>
+              </v-btn>
 
-            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
-            </v-btn>
+              <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
+              </v-btn>
+            </template>
+            <template v-else-if="props.componentView === 'benefits'"></template>
           </div>
         </template>
 
         <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
           <v-btn
-            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
             class="text-none"
             size="small"
             variant="text"
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            @click="toggleExpand(internalItem)"
             border
             slim
-            @click="toggleExpand(internalItem)"
           ></v-btn>
         </template>
 

@@ -25,7 +25,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
           headline="Onboard and Manage employees."
         ></HeaderPanel>
 
-        <EmployeesTable></EmployeesTable>
+        <EmployeesTable component-view="employees"></EmployeesTable>
       </v-container>
     </template>
   </AppLayout>
