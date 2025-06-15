@@ -16,7 +16,7 @@ export const adminItemsNav1: SubNavigation[] = [
   ['List of Users', 'mdi-list-box', 'Add and Manage Users', '/admin/users/list'],
 ]
 export const adminItemsNav2: SubNavigation[] = [
-  ['Designations & Areas', 'mdi-tag', '', '/hrms/designations-areas/list'],
+  ['Designations & Areas', 'mdi-account-tag', '', '/hrms/designations-areas/list'],
   ['Employee Information', 'mdi-account-multiple', '', '/hrms/employees/list'],
   ['Rates & Benefits', 'mdi-cash-clock', '', '/hrms/employees/benefits'],
 ]

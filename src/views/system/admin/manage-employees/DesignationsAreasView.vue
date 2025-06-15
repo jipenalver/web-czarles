@@ -8,6 +8,20 @@ import { ref } from 'vue'
 
 const { xs } = useDisplay()
 
+const tabsItems = [
+  {
+    icon: 'mdi-account-tag',
+    text: 'Designations',
+    value: 'designations',
+  },
+  {
+    icon: 'mdi-map-marker',
+    text: 'Areas',
+    value: 'areas',
+  },
+]
+
+const tabWindow = ref('designations')
 const isDrawerVisible = ref(xs.value ? false : true)
 </script>
 
@@ -21,11 +35,32 @@ const isDrawerVisible = ref(xs.value ? false : true)
       <v-container fluid>
         <HeaderPanel
           :header-items="['Employees Management', 'Designations & Areas']"
-          header-icon="mdi-tag"
+          header-icon="mdi-account-tag"
           headline="Manage employee designations and areas."
         ></HeaderPanel>
 
-        <DesignationsTable></DesignationsTable>
+        <v-tabs v-model="tabWindow" class="mb-5">
+          <v-tab
+            v-for="item in tabsItems"
+            :key="item.value"
+            class="mx-1"
+            :prepend-icon="item.icon"
+            :text="item.text"
+            :value="item.value"
+            min-width="200"
+            color="primary"
+            variant="flat"
+            rounded="lg"
+          ></v-tab>
+        </v-tabs>
+
+        <v-tabs-window v-model="tabWindow">
+          <v-tabs-window-item value="designations">
+            <DesignationsTable></DesignationsTable>
+          </v-tabs-window-item>
+
+          <v-tabs-window-item value="areas"> </v-tabs-window-item>
+        </v-tabs-window>
       </v-container>
     </template>
   </AppLayout>
