@@ -1,12 +1,10 @@
-import { type Employee, useEmployeesStore } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { useDesignationsStore } from '@/stores/designations'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { type Area, useAreasStore } from '@/stores/areas'
 import { ref } from 'vue'
 
-export function useEmployeesTable() {
-  const employeesStore = useEmployeesStore()
-  const designationsStore = useDesignationsStore()
+export function useAreasTable() {
+  const areasStore = useAreasStore()
 
   // States
   const tableOptions = ref({
@@ -17,12 +15,11 @@ export function useEmployeesTable() {
   })
   const tableFilters = ref({
     search: '',
-    designation_id: null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
-  const itemData = ref<Employee | null>(null)
+  const itemData = ref<Area | null>(null)
   const formAction = ref({ ...formActionDefault })
 
   // Actions
@@ -31,7 +28,7 @@ export function useEmployeesTable() {
     isDialogVisible.value = true
   }
 
-  const onUpdate = (item: Employee) => {
+  const onUpdate = (item: Area) => {
     itemData.value = item
     isDialogVisible.value = true
   }
@@ -44,23 +41,19 @@ export function useEmployeesTable() {
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    const { data, error } = await employeesStore.deleteEmployee(deleteId.value)
+    const { data, error } = await areasStore.deleteArea(deleteId.value)
 
     if (error) {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Employee.'
+      formAction.value.formMessage = 'Successfully Deleted Area.'
 
       await onLoadItems(tableOptions.value)
     }
 
     formAction.value.formAlert = true
     formAction.value.formProcess = false
-  }
-
-  const onFilterItems = () => {
-    onLoadItems(tableOptions.value)
   }
 
   const onSearchItems = () => {
@@ -75,7 +68,7 @@ export function useEmployeesTable() {
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
     tableOptions.value.isLoading = true
 
-    await employeesStore.getEmployeesTable({ page, itemsPerPage, sortBy }, tableFilters.value)
+    await areasStore.getAreasTable({ page, itemsPerPage, sortBy }, tableFilters.value)
 
     tableOptions.value.isLoading = false
   }
@@ -93,9 +86,7 @@ export function useEmployeesTable() {
     onDelete,
     onConfirmDelete,
     onSearchItems,
-    onFilterItems,
     onLoadItems,
-    employeesStore,
-    designationsStore,
+    areasStore,
   }
 }

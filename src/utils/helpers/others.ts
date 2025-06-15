@@ -46,6 +46,17 @@ export const getAccumulatedNumber = (object: Record<string, unknown>[], key: str
   return object.reduce((acc, cur) => acc + (isNaN(Number(cur[key])) ? 0 : Number(cur[key])), 0)
 }
 
+// 👉 Get Employee ID Number
+export const getIDNumber = (hiredAt: string, employeeId: number) => {
+  if (!hiredAt || !employeeId) return 'n/a'
+
+  const hiredDate = new Date(hiredAt)
+
+  const year = hiredDate.getFullYear().toString().slice(-2)
+
+  return `2${year}-${getPadLeftText(employeeId)}`
+}
+
 // 👉 Alpha-numeric Random Code
 export const getRandomCode = (length = 6) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -193,6 +204,39 @@ export const getDaysDiff = (date1: Date, date2: string, isRound = true) => {
   const differenceInDay = differenceInTime / (1000 * 3600 * 24)
 
   return isRound ? Math.round(differenceInDay) : differenceInDay
+}
+
+// 👉 Get Years of Service
+export const getYearsOfService = (hiredAt: string) => {
+  if (!hiredAt) return 'n/a'
+
+  const hiredDate = new Date(hiredAt)
+  const currentDate = new Date()
+
+  let years = currentDate.getFullYear() - hiredDate.getFullYear()
+  let months = currentDate.getMonth() - hiredDate.getMonth()
+
+  if (months < 0) {
+    years--
+    months += 12
+  }
+
+  if (currentDate.getDate() < hiredDate.getDate()) {
+    months--
+    if (months < 0) {
+      years--
+      months += 12
+    }
+  }
+
+  let result = ''
+  if (years > 0) result += `${years} year${years !== 1 ? 's' : ''}`
+  if (months > 0) {
+    if (result) result += ' & '
+    result += `${months} month${months !== 1 ? 's' : ''}`
+  }
+
+  return result || 'Less than 1 month'
 }
 
 // 👉 Generate CSV

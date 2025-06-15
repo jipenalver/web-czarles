@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
-import DesignationsTable from './designations/DesignationsTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import EmployeesTable from './employees/EmployeesTable.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import AreasTable from './areas/AreasTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -17,14 +15,9 @@ const tabsItems = [
     value: 'employees',
   },
   {
-    icon: 'mdi-account-tag',
-    text: 'Designations',
-    value: 'designations',
-  },
-  {
-    icon: 'mdi-map-marker',
-    text: 'Areas',
-    value: 'areas',
+    icon: 'mdi-account-cash',
+    text: 'Benefits',
+    value: 'benefits',
   },
 ]
 
@@ -41,9 +34,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Employees Management', 'List of Employees']"
-          header-icon="mdi-account-multiple"
-          headline="Onboard and manage employees."
+          :header-items="['Employees Management', 'Rates and Benefits']"
+          header-icon="mdi-cash-clock"
+          headline="Manage employees rates and benefits."
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
@@ -63,16 +56,10 @@ const isDrawerVisible = ref(xs.value ? false : true)
 
         <v-tabs-window v-model="tabWindow">
           <v-tabs-window-item value="employees">
-            <EmployeesTable component-view="employees"></EmployeesTable>
+            <EmployeesTable component-view="benefits"></EmployeesTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="designations">
-            <DesignationsTable></DesignationsTable>
-          </v-tabs-window-item>
-
-          <v-tabs-window-item value="areas">
-            <AreasTable></AreasTable>
-          </v-tabs-window-item>
+          <v-tabs-window-item value="benefits"> </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
     </template>

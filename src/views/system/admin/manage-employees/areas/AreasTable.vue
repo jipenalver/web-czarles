@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import DesignationsFormDialog from './DesignationsFormDialog.vue'
-import { useDesignationsTable } from './designationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import AreasFormDialog from './AreasFormDialog.vue'
+import { useAreasTable } from './areasTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -12,8 +12,8 @@ const { mobile } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
-    title: 'Designation',
-    key: 'designation',
+    title: 'Area',
+    key: 'area',
     align: 'start',
   },
   {
@@ -47,8 +47,8 @@ const {
   onConfirmDelete,
   onSearchItems,
   onLoadItems,
-  designationsStore,
-} = useDesignationsTable()
+  areasStore,
+} = useAreasTable()
 </script>
 
 <template>
@@ -67,8 +67,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="designationsStore.designationsTable"
-        :items-length="designationsStore.designationsTableTotal"
+        :items="areasStore.areasTable"
+        :items-length="areasStore.areasTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
@@ -82,7 +82,7 @@ const {
                 v-model="tableFilters.search"
                 density="compact"
                 prepend-inner-icon="mdi-magnify"
-                placeholder="Search Designation, Description"
+                placeholder="Search Area, Description"
                 clearable
                 @click:clear="onSearchItems"
                 @input="onSearchItems"
@@ -90,8 +90,14 @@ const {
             </v-col>
 
             <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-tag-plus" color="primary" block @click="onAdd">
-                Add Designation
+              <v-btn
+                class="my-1"
+                prepend-icon="mdi-map-marker-plus"
+                color="primary"
+                block
+                @click="onAdd"
+              >
+                Add Area
               </v-btn>
             </v-col>
           </v-row>
@@ -99,8 +105,8 @@ const {
           <v-divider class="my-5"></v-divider>
         </template>
 
-        <template #item.designation="{ item }">
-          <span class="font-weight-bold"> {{ item.designation }} </span>
+        <template #item.area="{ item }">
+          <span class="font-weight-bold"> {{ item.area }} </span>
         </template>
 
         <template #item.created_at="{ item }">
@@ -113,12 +119,12 @@ const {
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Designation</v-tooltip>
+              <v-tooltip activator="parent" location="top">Edit Area</v-tooltip>
             </v-btn>
 
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Designation</v-tooltip>
+              <v-tooltip activator="parent" location="top">Delete Area</v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -126,17 +132,17 @@ const {
     </v-card-text>
   </v-card>
 
-  <DesignationsFormDialog
+  <AreasFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></DesignationsFormDialog>
+  ></AreasFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this designation?"
+    text="Are you sure you want to delete this area?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>

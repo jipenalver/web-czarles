@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { type Designation, type DesignationTableFilter } from '@/stores/designations'
-import { useDesignationsFormDialog } from './designationsFormDialog'
+import { type Area, type AreaTableFilter } from '@/stores/areas'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { useAreasFormDialog } from './areasFormDialog'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Designation | null
+  itemData: Area | null
   tableOptions: TableOptions
-  tableFilters: DesignationTableFilter
+  tableFilters: AreaTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
-  useDesignationsFormDialog(props, emit)
+const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useAreasFormDialog(
+  props,
+  emit,
+)
 </script>
 
 <template>
@@ -34,14 +36,14 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-tag" title="Designation Details">
+    <v-card prepend-icon="mdi-map-marker" title="Area Information">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
               <v-text-field
-                v-model="formData.designation"
-                label="Designation"
+                v-model="formData.area"
+                label="Area"
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
@@ -67,7 +69,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Designation' : 'Add Designation' }}
+            {{ isUpdate ? 'Update Area' : 'Add Area' }}
           </v-btn>
         </v-card-actions>
       </v-form>

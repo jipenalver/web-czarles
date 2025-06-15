@@ -1,44 +1,25 @@
-import { type Employee, type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
-import { useDesignationsStore } from '@/stores/designations'
+import { type Area, type AreaTableFilter, useAreasStore } from '@/stores/areas'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { useAreasStore } from '@/stores/areas'
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
-export function useEmployeesFormDialog(
+export function useAreasFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: Employee | null
+    itemData: Area | null
     tableOptions: TableOptions
-    tableFilters: EmployeeTableFilter
+    tableFilters: AreaTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const employeesStore = useEmployeesStore()
-  const designationsStore = useDesignationsStore()
   const areasStore = useAreasStore()
 
   // States
   const formDataDefault = {
-    firstname: '',
-    middlename: '',
-    lastname: '',
-    email: '',
-    phone: '',
-    hired_at: '',
-    birthdate: '',
-    address: '',
-    tin_no: '',
-    sss_no: '',
-    pagibig_no: '',
-    philhealth_no: '',
-    is_field_staff: false,
-    is_permanent: false,
-    designation_id: null,
-    area_origin_id: null,
-    area_assignment_id: null,
+    area: '',
+    description: '',
   }
-  const formData = ref<Partial<Employee>>({ ...formDataDefault })
+  const formData = ref<Partial<Area>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -56,8 +37,8 @@ export function useEmployeesFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await employeesStore.updateEmployee(formData.value)
-      : await employeesStore.addEmployee(formData.value)
+      ? await areasStore.updateArea(formData.value)
+      : await areasStore.addArea(formData.value)
 
     if (error) {
       formAction.value = {
@@ -67,9 +48,10 @@ export function useEmployeesFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Employee.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Area.`
 
-      await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
+      await areasStore.getAreasTable(props.tableOptions, props.tableFilters)
+      await areasStore.getAreas()
 
       setTimeout(() => {
         onFormReset()
@@ -91,11 +73,6 @@ export function useEmployeesFormDialog(
     emit('update:isDialogVisible', false)
   }
 
-  onMounted(async () => {
-    if (designationsStore.designations.length === 0) await designationsStore.getDesignations()
-    if (areasStore.areas.length === 0) await areasStore.getAreas()
-  })
-
   // Expose State and Actions
   return {
     formData,
@@ -104,7 +81,5 @@ export function useEmployeesFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
-    designationsStore,
-    areasStore,
   }
 }

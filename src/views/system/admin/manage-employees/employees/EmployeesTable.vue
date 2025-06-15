@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { getPadLeftText } from '@/utils/helpers/others'
 import { useEmployeesTable } from './employeesTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
+
+const props = defineProps<{
+  componentView: 'benefits' | 'employees' | 'attendance' | 'payroll'
+}>()
 
 const date = useDate()
 const { mobile } = useDisplay()
@@ -29,7 +33,7 @@ const tableHeaders: TableHeader[] = [
   },
   {
     title: 'Designation',
-    key: 'designations',
+    key: 'designation',
     sortable: false,
     align: 'start',
   },
@@ -109,7 +113,7 @@ const {
                 v-model="tableFilters.designation_id"
                 :items="designationsStore.designations"
                 density="compact"
-                label="Designation"
+                label="Filter Designation"
                 item-title="designation"
                 item-value="id"
                 clearable
@@ -117,17 +121,19 @@ const {
               ></v-autocomplete>
             </v-col>
 
-            <v-col cols="12" sm="3">
-              <v-btn
-                class="my-1"
-                prepend-icon="mdi-account-plus"
-                color="primary"
-                block
-                @click="onAdd"
-              >
-                Onboard Employee
-              </v-btn>
-            </v-col>
+            <template v-if="props.componentView === 'employees'">
+              <v-col cols="12" sm="3">
+                <v-btn
+                  class="my-1"
+                  prepend-icon="mdi-account-plus"
+                  color="primary"
+                  block
+                  @click="onAdd"
+                >
+                  Onboard Employee
+                </v-btn>
+              </v-col>
+            </template>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
@@ -141,9 +147,9 @@ const {
           {{ item.phone ? '+63 ' + item.phone : '' }}
         </template>
 
-        <template #item.designations="{ item }">
+        <template #item.designation="{ item }">
           <v-chip class="font-weight-bold" color="secondary" variant="flat" size="small">
-            {{ item.designations.designation }}
+            {{ item.designation.designation }}
           </v-chip>
         </template>
 
@@ -155,128 +161,39 @@ const {
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
-            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
-              <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Employee</v-tooltip>
-            </v-btn>
+            <template v-if="props.componentView === 'employees'">
+              <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
+                <v-icon icon="mdi-pencil"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Employee</v-tooltip>
+              </v-btn>
 
-            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
-            </v-btn>
+              <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
+              </v-btn>
+            </template>
+            <template v-else-if="props.componentView === 'benefits'"></template>
           </div>
         </template>
 
         <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
           <v-btn
-            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
             class="text-none"
             size="small"
             variant="text"
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            @click="toggleExpand(internalItem)"
             border
             slim
-            @click="toggleExpand(internalItem)"
           ></v-btn>
         </template>
 
         <template #expanded-row="{ columns, item }">
-          <tr>
-            <td :colspan="columns.length" class="py-2">
-              <v-row dense>
-                <v-col
-                  cols="12"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">ID No.:</span>
-                  <p class="text-body-2 font-weight-black">{{ getPadLeftText(item.id) }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="6"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <p class="text-body-2 font-weight-bold me-2">Birthdate:</p>
-                  <p class="text-body-2">{{ date.format(item.birthdate, 'fullDate') }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="6"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <p class="text-body-2 font-weight-bold me-2">Address:</p>
-                  <p class="text-body-2">{{ item.address }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="6"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">Hired Date:</span>
-                  <p class="text-body-2">{{ date.format(item.hired_at, 'fullDate') }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="6"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">Field/Office:</span>
-                  <p class="text-body-2">{{ item.is_field_staff ? 'Field' : 'Office' }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="3"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">TIN No.:</span>
-                  <p class="text-body-2">{{ item.tin_no }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="3"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">SSS No.:</span>
-                  <p class="text-body-2">{{ item.sss_no }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="3"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">Philhealth No.:</span>
-                  <p class="text-body-2">{{ item.philhealth_no }}</p>
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  sm="3"
-                  class="d-flex align-center my-2"
-                  :class="mobile ? 'justify-space-between' : 'justify-start'"
-                >
-                  <span class="text-body-2 font-weight-bold me-2">Pag-ibig No.:</span>
-                  <p class="text-body-2">{{ item.philhealth_no }}</p>
-                </v-col>
-              </v-row>
-
-              <v-divider class="my-3" thickness="1"></v-divider>
-            </td>
-          </tr>
+          <EmployeesExpandedRow
+            :columns-length="columns.length"
+            :item-data="item"
+          ></EmployeesExpandedRow>
         </template>
       </v-data-table-server>
     </v-card-text>

@@ -86,7 +86,6 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, use
                 v-model="formData.phone"
                 label="Phone"
                 prepend-inner-icon="mdi-phone"
-                prefix="+63"
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>

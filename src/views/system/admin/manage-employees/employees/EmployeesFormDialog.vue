@@ -17,8 +17,16 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, designationsStore } =
-  useEmployeesFormDialog(props, emit)
+const {
+  formData,
+  formAction,
+  refVForm,
+  isUpdate,
+  onFormSubmit,
+  onFormReset,
+  designationsStore,
+  areasStore,
+} = useEmployeesFormDialog(props, emit)
 </script>
 
 <template>
@@ -95,7 +103,6 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
                 v-model="formData.phone"
                 label="Phone"
                 prepend-inner-icon="mdi-phone"
-                prefix="+63"
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
@@ -139,13 +146,46 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
               ></v-date-input>
             </v-col>
 
-            <v-col cols="12">
-              <v-switch
-                v-model="formData.is_field_staff"
-                class="ms-2"
-                color="primary"
-                label="Is Field Staff?"
-              ></v-switch>
+            <v-col cols="12" sm="6">
+              <v-autocomplete
+                v-model="formData.area_origin_id"
+                label="Area of Origin"
+                :items="areasStore.areas"
+                item-title="area"
+                item-value="id"
+              ></v-autocomplete>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-autocomplete
+                v-model="formData.area_assignment_id"
+                label="Area of Assignment"
+                :items="areasStore.areas"
+                item-title="area"
+                item-value="id"
+              ></v-autocomplete>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Field Staff?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_field_staff ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Permanent Status?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
+                  </span>
+                </template>
+              </v-switch>
             </v-col>
           </v-row>
         </v-card-text>
