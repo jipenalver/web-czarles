@@ -103,10 +103,6 @@ const {
           <span class="font-weight-bold"> {{ item.designation }} </span>
         </template>
 
-        <template #item.description="{ item }">
-          {{ item.description }}
-        </template>
-
         <template #item.created_at="{ item }">
           <span class="font-weight-bold">
             {{ date.format(item.created_at, 'fullDateTime') }}
