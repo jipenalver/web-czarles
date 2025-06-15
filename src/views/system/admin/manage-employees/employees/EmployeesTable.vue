@@ -2,6 +2,7 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
+import RatesFormDialog from '../rates/RatesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useEmployeesTable } from './employeesTable'
@@ -54,11 +55,13 @@ const {
   tableOptions,
   tableFilters,
   isDialogVisible,
+  isRateDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
   onAdd,
   onUpdate,
+  onRate,
   onDelete,
   onConfirmDelete,
   onSearchItems,
@@ -168,7 +171,13 @@ const {
                 <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
               </v-btn>
             </template>
-            <template v-else-if="props.componentView === 'benefits'"></template>
+
+            <template v-else-if="props.componentView === 'benefits'">
+              <v-btn variant="text" density="comfortable" @click="onRate(item)" icon>
+                <v-icon icon="mdi-account-cash"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Employee Rate</v-tooltip>
+              </v-btn>
+            </template>
           </div>
         </template>
 
@@ -201,6 +210,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></EmployeesFormDialog>
+
+  <RatesFormDialog
+    v-model:is-dialog-visible="isRateDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></RatesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
