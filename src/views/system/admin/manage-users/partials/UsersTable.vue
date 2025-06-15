@@ -111,12 +111,16 @@ const {
           <span class="font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
         </template>
 
-        <template #item.phone="{ item }">
-          {{ item.phone ? '+63 ' + item.phone : '' }}
-        </template>
-
         <template #item.user_role="{ item }">
-          {{ item.user_role }}
+          <v-chip
+            v-if="item.user_role"
+            class="font-weight-bold"
+            color="secondary"
+            variant="flat"
+            size="small"
+          >
+            {{ item.user_role }}
+          </v-chip>
         </template>
 
         <template #item.created_at="{ item }">

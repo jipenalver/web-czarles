@@ -143,10 +143,6 @@ const {
           <span class="font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
         </template>
 
-        <template #item.phone="{ item }">
-          {{ item.phone ? '+63 ' + item.phone : '' }}
-        </template>
-
         <template #item.designation="{ item }">
           <v-chip class="font-weight-bold" color="secondary" variant="flat" size="small">
             {{ item.designation.designation }}
