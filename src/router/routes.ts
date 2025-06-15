@@ -6,7 +6,7 @@ import UserRolesView from '@/views/system/admin/manage-users/UserRolesView.vue'
 import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
 import EmployeesView from '@/views/system/admin/manage-employees/EmployeesView.vue'
-import BenefitsRatesView from '@/views/system/admin/manage-employees/BenefitsRatesView.vue'
+import RatesBenefitsView from '@/views/system/admin/manage-employees/RatesBenefitsView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
 
 export const routes = [
@@ -62,7 +62,7 @@ export const routes = [
   {
     path: '/hrms/employees/benefits',
     name: 'hrms-employees-benefits',
-    component: BenefitsRatesView,
+    component: RatesBenefitsView,
     meta: { requiresAuth: true },
   },
 
