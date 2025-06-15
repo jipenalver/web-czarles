@@ -24,8 +24,16 @@ export type Employee = {
   philhealth_no: string
   address: string
   designation_id: null | number
-  designations: {
+  designation: {
     designation: string
+  }
+  area_origin_id: null | number
+  area_origin: {
+    area: string
+  }
+  area_assignment_id: null | number
+  area_assignment: {
+    area: string
   }
 }
 
@@ -55,7 +63,9 @@ export const useEmployeesStore = defineStore('employees', () => {
 
     let query = supabase
       .from('employees')
-      .select('*, designations ( designation )')
+      .select(
+        '*, designation:designation_id (designation), area_origin:area_origin_id (area), area_assignment:area_assignment_id (area)',
+      )
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -97,7 +107,7 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function updateEmployee(formData: Partial<Employee>) {
-    const { designations, ...updateData } = formData
+    const { designation, area_origin, area_assignment, ...updateData } = formData
 
     return await supabase.from('employees').update(updateData).eq('id', formData.id).select()
   }
