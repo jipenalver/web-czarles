@@ -30,7 +30,7 @@ export const useDesignationsStore = defineStore('designations', () => {
 
   // Actions
   async function getDesignations() {
-    const { data } = await supabase.from('designations').select()
+    const { data } = await supabase.from('employee_designations').select()
 
     designations.value = data as Designation[]
   }
@@ -43,7 +43,7 @@ export const useDesignationsStore = defineStore('designations', () => {
     search = tableSearch(search)
 
     let query = supabase
-      .from('designations')
+      .from('employee_designations')
       .select()
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
@@ -59,7 +59,7 @@ export const useDesignationsStore = defineStore('designations', () => {
   }
 
   async function getDesignationsCount({ search }: DesignationTableFilter) {
-    let query = supabase.from('designations').select('*', { count: 'exact', head: true })
+    let query = supabase.from('employee_designations').select('*', { count: 'exact', head: true })
 
     query = getDesignationsFilter(query, { search })
 
@@ -77,15 +77,19 @@ export const useDesignationsStore = defineStore('designations', () => {
   }
 
   async function addDesignation(formData: Partial<Designation>) {
-    return await supabase.from('designations').insert(formData).select()
+    return await supabase.from('employee_designations').insert(formData).select()
   }
 
   async function updateDesignation(formData: Partial<Designation>) {
-    return await supabase.from('designations').update(formData).eq('id', formData.id).select()
+    return await supabase
+      .from('employee_designations')
+      .update(formData)
+      .eq('id', formData.id)
+      .select()
   }
 
   async function deleteDesignation(id: number) {
-    return await supabase.from('designations').delete().eq('id', id).select()
+    return await supabase.from('employee_designations').delete().eq('id', id).select()
   }
 
   // Expose States and Actions
