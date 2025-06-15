@@ -2,6 +2,7 @@
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import DesignationsTable from './designations-areas/DesignationsTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
+import AreasTable from './designations-areas/AreasTable.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
@@ -59,7 +60,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <DesignationsTable></DesignationsTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="areas"> </v-tabs-window-item>
+          <v-tabs-window-item value="areas">
+            <AreasTable></AreasTable>
+          </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
     </template>
