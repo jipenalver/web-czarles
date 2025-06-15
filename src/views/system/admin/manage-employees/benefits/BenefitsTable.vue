@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
+import BenefitsFormDialog from './BenefitsFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { useBenefitsTable } from './benefitsTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
-import { useBenefitsTable } from './benefitsTable'
 
 const date = useDate()
 const { mobile } = useDisplay()
@@ -74,13 +76,7 @@ const {
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="3">
-              <v-btn
-                class="my-1"
-                prepend-icon="mdi-account-cash"
-                color="primary"
-                block
-                @click="onAdd"
-              >
+              <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
                 Add Benefit
               </v-btn>
             </v-col>
@@ -115,4 +111,17 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <BenefitsFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+  ></BenefitsFormDialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmDeleteDialog"
+    title="Confirm Delete"
+    text="Are you sure you want to delete this benefit?"
+    @confirm="onConfirmDelete"
+  ></ConfirmDialog>
 </template>
