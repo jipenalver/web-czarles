@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import type { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
@@ -13,6 +14,8 @@ export type Employee = {
   email: string
   phone: string
   is_field_staff: boolean
+  is_permanent: boolean
+  is_insured: boolean
   hired_at: string
   birthdate: string
   tin_no: string
@@ -94,7 +97,9 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function updateEmployee(formData: Partial<Employee>) {
-    return await supabase.from('employees').update(formData).eq('id', formData.id).select()
+    const { designations, ...updateData } = formData
+
+    return await supabase.from('employees').update(updateData).eq('id', formData.id).select()
   }
 
   async function deleteEmployee(id: number) {
