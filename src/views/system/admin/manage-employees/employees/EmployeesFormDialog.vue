@@ -139,13 +139,37 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, des
               ></v-date-input>
             </v-col>
 
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Field Staff?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_field_staff ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Permanent Status?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
             <v-col cols="12">
-              <v-switch
-                v-model="formData.is_field_staff"
-                class="ms-2"
-                color="primary"
-                label="Is Field Staff?"
-              ></v-switch>
+              <v-switch v-model="formData.is_insured" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  With Accident Insurance?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_insured ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
             </v-col>
           </v-row>
         </v-card-text>
