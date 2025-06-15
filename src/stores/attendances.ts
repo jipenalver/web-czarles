@@ -48,7 +48,7 @@ export const useAttendanceStore = defineStore('attendances', () => {
 
     let query = supabase
       .from('attendances')
-      .select()
+      .select('*, employee:employee_id (*)')
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
