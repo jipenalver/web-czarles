@@ -16,10 +16,9 @@ export const adminItemsNav1: SubNavigation[] = [
   ['List of Users', 'mdi-list-box', 'Add and Manage Users', '/admin/users/list'],
 ]
 export const adminItemsNav2: SubNavigation[] = [
-  ['Designations', 'mdi-tag', '', '/hrms/designations/list'],
+  ['Designations & Areas', 'mdi-tag', '', '/hrms/designations-areas/list'],
   ['Employee Information', 'mdi-account-multiple', '', '/hrms/employees/list'],
-  ['Employee Rates', 'mdi-cash-clock', '', '/hrms/employees/salaries'],
-  ['Employee Benefits', 'mdi-cash-plus', '', '/hrms/employees/benefits'],
+  ['Rates & Benefits', 'mdi-cash-clock', '', '/hrms/employees/benefits'],
 ]
 export const adminItemsNav3: SubNavigation[] = [
   ['Attendance', 'mdi-clock-in', '', '/hrms/attendance/list'],
