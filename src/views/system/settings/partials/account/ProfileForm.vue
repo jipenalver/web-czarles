@@ -49,7 +49,6 @@ const { formData, formAction, refVForm, onFormSubmit } = useProfileForm()
           v-model="formData.phone"
           label="Phone Number"
           prepend-inner-icon="mdi-phone"
-          prefix="+63"
           :rules="[requiredValidator]"
         ></v-text-field>
       </v-col>
