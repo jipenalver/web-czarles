@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
-import DesignationsTable from './designations-areas/DesignationsTable.vue'
+import DesignationsTable from './designations/DesignationsTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
-import AreasTable from './designations-areas/AreasTable.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import AreasTable from './designations/AreasTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 

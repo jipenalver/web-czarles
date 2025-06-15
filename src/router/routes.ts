@@ -54,8 +54,8 @@ export const routes = [
 
   // Employees
   {
-    path: '/hrms/designations-areas/list',
-    name: 'hrms-designations-areas-list',
+    path: '/hrms/employees/designations',
+    name: 'hrms-employees-designations',
     component: DesignationsAreasView,
     meta: { requiresAuth: true },
   },
