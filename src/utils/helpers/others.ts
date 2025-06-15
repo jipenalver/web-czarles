@@ -46,6 +46,17 @@ export const getAccumulatedNumber = (object: Record<string, unknown>[], key: str
   return object.reduce((acc, cur) => acc + (isNaN(Number(cur[key])) ? 0 : Number(cur[key])), 0)
 }
 
+// 👉 Get Employee ID Number
+export const getIDNumber = (hiredAt: string, employeeId: number) => {
+  if (!hiredAt || !employeeId) return 'n/a'
+
+  const hiredDate = new Date(hiredAt)
+
+  const year = hiredDate.getFullYear().toString().slice(-2)
+
+  return `2${year}-${getPadLeftText(employeeId)}`
+}
+
 // 👉 Alpha-numeric Random Code
 export const getRandomCode = (length = 6) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -226,17 +237,6 @@ export const getYearsOfService = (hiredAt: string) => {
   }
 
   return result || 'Less than 1 month'
-}
-
-// 👉 Get Employee ID Number
-export const getIDNumber = (hiredAt: string, employeeId: number) => {
-  if (!hiredAt || !employeeId) return 'n/a'
-
-  const hiredDate = new Date(hiredAt)
-
-  const year = hiredDate.getFullYear().toString().slice(-2)
-
-  return `2${year}-${getPadLeftText(employeeId)}`
 }
 
 // 👉 Generate CSV
