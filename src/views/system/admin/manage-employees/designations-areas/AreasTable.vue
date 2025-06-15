@@ -2,6 +2,7 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import AreasFormDialog from './AreasFormDialog.vue'
 import { useAreasTable } from './areasTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -134,6 +135,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <AreasFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></AreasFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
