@@ -1,6 +1,6 @@
-import { useDesignationsStore } from '@/stores/designations'
 import { type Employee, useEmployeesStore } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { useDesignationsStore } from '@/stores/designations'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { ref } from 'vue'
 

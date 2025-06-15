@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { getPadLeftText, getYearsOfService } from '@/utils/helpers/others'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { getPadLeftText } from '@/utils/helpers/others'
 import { useEmployeesTable } from './employeesTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -186,11 +186,26 @@ const {
               <v-row dense>
                 <v-col
                   cols="12"
+                  sm="6"
                   class="d-flex align-center my-2"
                   :class="mobile ? 'justify-space-between' : 'justify-start'"
                 >
                   <span class="text-body-2 font-weight-bold me-2">ID No.:</span>
-                  <p class="text-body-2 font-weight-black">{{ getPadLeftText(item.id) }}</p>
+                  <v-chip class="font-weight-black" color="default" size="small">
+                    {{ getPadLeftText(item.id) }}
+                  </v-chip>
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  sm="6"
+                  class="d-flex align-center my-2"
+                  :class="mobile ? 'justify-space-between' : 'justify-start'"
+                >
+                  <span class="text-body-2 font-weight-bold me-2">No. of Years:</span>
+                  <v-chip class="font-weight-black" color="default" size="small">
+                    {{ getYearsOfService(item.hired_at) }}
+                  </v-chip>
                 </v-col>
 
                 <v-col
