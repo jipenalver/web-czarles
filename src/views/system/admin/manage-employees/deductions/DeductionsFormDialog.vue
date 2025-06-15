@@ -69,7 +69,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset, benefitsStore
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Update Deductions
+            Update
           </v-btn>
         </v-card-actions>
       </v-form>

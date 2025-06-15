@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getIDNumber, getYearsOfService } from '@/utils/helpers/others'
+import { getIDNumber, getMoneyText, getYearsOfService } from '@/utils/helpers/others'
 import { type Employee } from '@/stores/employees'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -51,7 +51,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          sm="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -79,16 +79,6 @@ const { mobile } = useDisplay()
         >
           <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
           <p class="text-body-2">{{ props.itemData.is_field_staff ? 'Yes' : 'No' }}</p>
-        </v-col>
-
-        <v-col
-          cols="12"
-          sm="3"
-          class="d-flex align-center my-2"
-          :class="mobile ? 'justify-space-between' : 'justify-start'"
-        >
-          <span class="text-body-2 font-weight-bold me-2">With Accident Insurance:</span>
-          <p class="text-body-2">{{ props.itemData.is_insured ? 'Yes' : 'No' }}</p>
         </v-col>
 
         <v-col
@@ -155,10 +145,34 @@ const { mobile } = useDisplay()
           </p>
         </v-col>
 
-        <template v-if="props.componentView === 'benefits'"> </template>
-      </v-row>
+        <template v-if="props.componentView === 'benefits'">
+          <v-divider class="my-3" thickness="1"></v-divider>
 
-      <v-divider class="my-3" thickness="1"></v-divider>
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">Daily Rate:</span>
+            <v-chip class="font-weight-black" color="default" size="small">
+              {{ props.itemData.daily_rate ? getMoneyText(props.itemData.daily_rate) : 'n/a' }}
+            </v-chip>
+          </v-col>
+
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">With Accident Insurance:</span>
+            <p class="text-body-2">{{ props.itemData.is_insured ? 'Yes' : 'No' }}</p>
+          </v-col>
+        </template>
+
+        <v-divider class="my-3" thickness="1"></v-divider>
+      </v-row>
     </td>
   </tr>
 </template>
