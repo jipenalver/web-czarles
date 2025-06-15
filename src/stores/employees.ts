@@ -13,16 +13,16 @@ export type Employee = {
   lastname: string
   email: string
   phone: string
-  is_field_staff: boolean
-  is_permanent: boolean
-  is_insured: boolean
   hired_at: string
   birthdate: string
+  address: string
   tin_no: string
   sss_no: string
   pagibig_no: string
   philhealth_no: string
-  address: string
+  is_field_staff: boolean
+  is_permanent: boolean
+  is_insured: boolean
   designation_id: null | number
   designation: {
     designation: string

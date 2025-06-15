@@ -2,6 +2,7 @@ import { type Employee, type EmployeeTableFilter, useEmployeesStore } from '@/st
 import { useDesignationsStore } from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useAreasStore } from '@/stores/areas'
 import { onMounted, ref, watch } from 'vue'
 
 export function useEmployeesFormDialog(
@@ -15,6 +16,7 @@ export function useEmployeesFormDialog(
 ) {
   const employeesStore = useEmployeesStore()
   const designationsStore = useDesignationsStore()
+  const areasStore = useAreasStore()
 
   // States
   const formDataDefault = {
@@ -23,14 +25,15 @@ export function useEmployeesFormDialog(
     lastname: '',
     email: '',
     phone: '',
-    is_field_staff: false,
     hired_at: '',
     birthdate: '',
+    address: '',
     tin_no: '',
     sss_no: '',
     pagibig_no: '',
     philhealth_no: '',
-    address: '',
+    is_field_staff: false,
+    is_permanent: false,
     designation_id: null,
     area_origin_id: null,
     area_assignment_id: null,
@@ -90,6 +93,7 @@ export function useEmployeesFormDialog(
 
   onMounted(async () => {
     if (designationsStore.designations.length === 0) await designationsStore.getDesignations()
+    if (areasStore.areas.length === 0) await areasStore.getAreas()
   })
 
   // Expose State and Actions
@@ -101,5 +105,6 @@ export function useEmployeesFormDialog(
     onFormSubmit,
     onFormReset,
     designationsStore,
+    areasStore,
   }
 }
