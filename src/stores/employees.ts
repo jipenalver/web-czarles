@@ -45,16 +45,28 @@ export type EmployeeTableFilter = {
 
 export const useEmployeesStore = defineStore('employees', () => {
   // States
+  const employees = ref<Employee[]>([])
   const employeesTable = ref<Employee[]>([])
   const employeesTableTotal = ref(0)
 
   // Reset State
   function $reset() {
+    employees.value = []
     employeesTable.value = []
     employeesTableTotal.value = 0
   }
 
   // Actions
+  async function getEmployees() {
+    const { data } = await supabase.from('employees').select()
+
+    employees.value = data?.map((item) => ({
+      ...item,
+      label: `${item.firstname} ${item.middlename ? item.middlename + ' ' : ''}${item.lastname}`,
+      value: item.id,
+    })) as Employee[]
+  }
+
   async function getEmployeesTable(
     tableOptions: TableOptions,
     { search, designation_id }: EmployeeTableFilter,
@@ -119,9 +131,11 @@ export const useEmployeesStore = defineStore('employees', () => {
 
   // Expose States and Actions
   return {
+    employees,
     employeesTable,
     employeesTableTotal,
     $reset,
+    getEmployees,
     getEmployeesTable,
     addEmployee,
     updateEmployee,
