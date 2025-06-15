@@ -8,6 +8,20 @@ import { ref } from 'vue'
 
 const { xs } = useDisplay()
 
+const tabsItems = [
+  {
+    icon: 'mdi-account-multiple',
+    text: 'Employees',
+    value: 'employees',
+  },
+  {
+    icon: 'mdi-account-cash',
+    text: 'Benefits',
+    value: 'benefits',
+  },
+]
+
+const tabWindow = ref('employees')
 const isDrawerVisible = ref(xs.value ? false : true)
 </script>
 
@@ -25,7 +39,30 @@ const isDrawerVisible = ref(xs.value ? false : true)
           headline="Manage employees rates and benefits."
         ></HeaderPanel>
 
-        <EmployeesTable component-view="benefits"></EmployeesTable>
+        <v-tabs v-model="tabWindow" class="mb-5">
+          <v-tab
+            v-for="item in tabsItems"
+            :key="item.value"
+            class="mx-1"
+            :prepend-icon="item.icon"
+            :text="item.text"
+            :value="item.value"
+            min-width="200"
+            color="primary"
+            variant="flat"
+            rounded="lg"
+          ></v-tab>
+        </v-tabs>
+
+        <v-tabs-window v-model="tabWindow">
+          <v-tabs-window-item value="employees">
+            <EmployeesTable component-view="benefits"></EmployeesTable>
+          </v-tabs-window-item>
+
+          <v-tabs-window-item value="benefits">
+            <BenefitsTable></BenefitsTable>
+          </v-tabs-window-item>
+        </v-tabs-window>
       </v-container>
     </template>
   </AppLayout>
