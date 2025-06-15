@@ -36,7 +36,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-account-cash" title="Employee Rate Information">
+    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate Information">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
@@ -78,7 +78,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Update Rate
+            Update
           </v-btn>
         </v-card-actions>
       </v-form>
