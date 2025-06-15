@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DeductionsFormDialog from '../deductions/DeductionsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
@@ -56,12 +57,14 @@ const {
   tableFilters,
   isDialogVisible,
   isRateDialogVisible,
+  isDeductionsDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
   onAdd,
   onUpdate,
   onRate,
+  onDeductions,
   onDelete,
   onConfirmDelete,
   onSearchItems,
@@ -178,7 +181,7 @@ const {
                 <v-tooltip activator="parent" location="top">Edit Employee Rate</v-tooltip>
               </v-btn>
 
-              <v-btn variant="text" density="comfortable" icon>
+              <v-btn variant="text" density="comfortable" @click="onDeductions(item)" icon>
                 <v-icon icon="mdi-account-cash" color="info"></v-icon>
                 <v-tooltip activator="parent" location="top">Edit Employee Deductions</v-tooltip>
               </v-btn>
@@ -223,6 +226,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></RatesFormDialog>
+
+  <DeductionsFormDialog
+    v-model:is-dialog-visible="isDeductionsDialogVisible"
+    :item-id="itemData?.id"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></DeductionsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
