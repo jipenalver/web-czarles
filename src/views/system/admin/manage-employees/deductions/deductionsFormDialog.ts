@@ -5,12 +5,12 @@ import {
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useBenefitsStore } from '@/stores/benefits'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 export function useDeductionsFormDialog(
   props: {
     isDialogVisible: boolean
-    itemId: number
+    itemId?: number
     tableOptions: TableOptions
     tableFilters: EmployeeTableFilter
   },
@@ -21,12 +21,18 @@ export function useDeductionsFormDialog(
 
   // States
   const formDataDefault = {
-    amount: false,
-    daily_rate: undefined,
+    amount: [] as number[],
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
+
+  watch(
+    () => props.isDialogVisible,
+    () => {
+      // formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+    },
+  )
 
   // Actions
   const onSubmit = async () => {
