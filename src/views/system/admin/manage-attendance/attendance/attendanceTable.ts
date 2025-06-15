@@ -1,10 +1,12 @@
 import { type Attendance, useAttendanceStore } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { ref } from 'vue'
+import { useEmployeesStore } from '@/stores/employees'
+import { onMounted, ref } from 'vue'
 
-export function useDesignationsTable() {
+export function useAttendanceTable() {
   const attendanceStore = useAttendanceStore()
+  const employeeStore = useEmployeesStore()
 
   // States
   const tableOptions = ref({
@@ -44,6 +46,10 @@ export function useDesignationsTable() {
     tableOptions.value.isLoading = false
   }
 
+  onMounted(async () => {
+    if (employeeStore.employees.length === 0) await employeeStore.getEmployees()
+  })
+
   // Expose State and Actions
   return {
     tableOptions,
@@ -57,5 +63,6 @@ export function useDesignationsTable() {
     onFilterItems,
     onLoadItems,
     attendanceStore,
+    employeeStore,
   }
 }
