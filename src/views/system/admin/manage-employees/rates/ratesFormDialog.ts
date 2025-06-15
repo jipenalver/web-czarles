@@ -44,7 +44,7 @@ export function useRatesFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully Updated Employee Record.`
+      formAction.value.formMessage = `Successfully Updated Employee Rate.`
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
 

@@ -41,6 +41,16 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
+              <v-text-field
+                v-model="formData.daily_rate"
+                prepend-inner-icon="mdi-currency-php"
+                label="Daily Rate"
+                type="number"
+                :rules="[requiredValidator]"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
               <v-switch v-model="formData.is_insured" class="ms-2" color="primary" hide-details>
                 <template #label>
                   With Accident Insurance?
@@ -49,16 +59,6 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
                   </span>
                 </template>
               </v-switch>
-            </v-col>
-
-            <v-col cols="12">
-              <v-text-field
-                v-model="formData.daily_rate"
-                prepend-icon="mdi-currency-php"
-                label="Daily Rate"
-                type="number"
-                :rules="[requiredValidator]"
-              ></v-text-field>
             </v-col>
           </v-row>
         </v-card-text>
