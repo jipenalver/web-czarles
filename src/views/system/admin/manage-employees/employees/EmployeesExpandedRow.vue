@@ -19,25 +19,12 @@ const { mobile } = useDisplay()
       <v-row dense>
         <v-col
           cols="12"
-          sm="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">ID No.:</span>
           <v-chip class="font-weight-black" color="default" size="small">
             {{ getIDNumber(props.itemData.hired_at, props.itemData.id) }}
-          </v-chip>
-        </v-col>
-
-        <v-col
-          cols="12"
-          sm="6"
-          class="d-flex align-center my-2"
-          :class="mobile ? 'justify-space-between' : 'justify-start'"
-        >
-          <span class="text-body-2 font-weight-bold me-2">No. of Years:</span>
-          <v-chip class="font-weight-black" color="default" size="small">
-            {{ getYearsOfService(props.itemData.hired_at) }}
           </v-chip>
         </v-col>
 
@@ -67,18 +54,10 @@ const { mobile } = useDisplay()
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
-          <span class="text-body-2 font-weight-bold me-2">Hired Date:</span>
-          <p class="text-body-2">{{ date.format(props.itemData.hired_at, 'fullDate') }}</p>
-        </v-col>
-
-        <v-col
-          cols="12"
-          sm="3"
-          class="d-flex align-center my-2"
-          :class="mobile ? 'justify-space-between' : 'justify-start'"
-        >
-          <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
-          <p class="text-body-2">{{ props.itemData.is_field_staff ? 'Yes' : 'No' }}</p>
+          <span class="text-body-2 font-weight-bold me-2">Years of Service:</span>
+          <v-chip class="font-weight-black" color="default" size="small">
+            {{ getYearsOfService(props.itemData.hired_at) }}
+          </v-chip>
         </v-col>
 
         <v-col
@@ -89,6 +68,16 @@ const { mobile } = useDisplay()
         >
           <span class="text-body-2 font-weight-bold me-2">Contract Status:</span>
           <p class="text-body-2">{{ props.itemData.is_permanent ? 'Permanent' : 'Contractual' }}</p>
+        </v-col>
+
+        <v-col
+          cols="12"
+          sm="3"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
+          <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
+          <p class="text-body-2">{{ props.itemData.is_field_staff ? 'Yes' : 'No' }}</p>
         </v-col>
 
         <v-col

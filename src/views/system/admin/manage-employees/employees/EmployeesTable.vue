@@ -2,6 +2,7 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
+import RatesFormDialog from '../rates/RatesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useEmployeesTable } from './employeesTable'
@@ -38,8 +39,8 @@ const tableHeaders: TableHeader[] = [
     align: 'start',
   },
   {
-    title: 'Onboard Date',
-    key: 'created_at',
+    title: 'Hired Date',
+    key: 'hired_at',
     align: 'center',
   },
   {
@@ -54,11 +55,13 @@ const {
   tableOptions,
   tableFilters,
   isDialogVisible,
+  isRateDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
   onAdd,
   onUpdate,
+  onRate,
   onDelete,
   onConfirmDelete,
   onSearchItems,
@@ -143,19 +146,15 @@ const {
           <span class="font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
         </template>
 
-        <template #item.phone="{ item }">
-          {{ item.phone ? '+63 ' + item.phone : '' }}
-        </template>
-
         <template #item.designation="{ item }">
           <v-chip class="font-weight-bold" color="secondary" variant="flat" size="small">
             {{ item.designation.designation }}
           </v-chip>
         </template>
 
-        <template #item.created_at="{ item }">
+        <template #item.hired_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.created_at, 'fullDateTime') }}
+            {{ date.format(item.hired_at, 'fullDate') }}
           </span>
         </template>
 
@@ -172,7 +171,13 @@ const {
                 <v-tooltip activator="parent" location="top">Delete Employee</v-tooltip>
               </v-btn>
             </template>
-            <template v-else-if="props.componentView === 'benefits'"></template>
+
+            <template v-else-if="props.componentView === 'benefits'">
+              <v-btn variant="text" density="comfortable" @click="onRate(item)" icon>
+                <v-icon icon="mdi-account-cash"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Employee Rate</v-tooltip>
+              </v-btn>
+            </template>
           </div>
         </template>
 
@@ -205,6 +210,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></EmployeesFormDialog>
+
+  <RatesFormDialog
+    v-model:is-dialog-visible="isRateDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></RatesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"

@@ -3,6 +3,7 @@ import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import EmployeesTable from './employees/EmployeesTable.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import BenefitsTable from './benefits/BenefitsTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -59,7 +60,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <EmployeesTable component-view="benefits"></EmployeesTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="benefits"> </v-tabs-window-item>
+          <v-tabs-window-item value="benefits">
+            <BenefitsTable></BenefitsTable>
+          </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
     </template>

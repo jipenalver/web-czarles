@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { emailValidator, lengthMinValidator, requiredValidator } from '@/utils/validators'
 import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
-import { emailValidator, requiredValidator } from '@/utils/validators'
 import { useEmployeesFormDialog } from './employeesFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -103,7 +103,7 @@ const {
                 v-model="formData.phone"
                 label="Phone"
                 prepend-inner-icon="mdi-phone"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, lengthMinValidator(formData.phone as string, 11)]"
               ></v-text-field>
             </v-col>
 
@@ -167,22 +167,22 @@ const {
             </v-col>
 
             <v-col cols="12" sm="6">
-              <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
+              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
                 <template #label>
-                  Is Field Staff?
+                  Is Permanent Status?
                   <span class="font-weight-black ms-1">
-                    {{ formData.is_field_staff ? 'Yes' : 'No' }}
+                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
                   </span>
                 </template>
               </v-switch>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+              <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
                 <template #label>
-                  Is Permanent Status?
+                  Is Field Staff?
                   <span class="font-weight-black ms-1">
-                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
+                    {{ formData.is_field_staff ? 'Yes' : 'No' }}
                   </span>
                 </template>
               </v-switch>
