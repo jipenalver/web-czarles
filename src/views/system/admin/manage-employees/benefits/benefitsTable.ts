@@ -44,7 +44,7 @@ export function useBenefitsTable() {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Area.'
+      formAction.value.formMessage = 'Successfully Deleted Benefit.'
 
       await onLoadItems(tableOptions.value)
     }
