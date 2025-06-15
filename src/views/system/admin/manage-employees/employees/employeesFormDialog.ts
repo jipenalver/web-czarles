@@ -32,6 +32,8 @@ export function useEmployeesFormDialog(
     philhealth_no: '',
     address: '',
     designation_id: null,
+    area_origin_id: null,
+    area_assignment_id: null,
   }
   const formData = ref<Partial<Employee>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })

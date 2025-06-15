@@ -29,7 +29,7 @@ const tableHeaders: TableHeader[] = [
   },
   {
     title: 'Designation',
-    key: 'designations',
+    key: 'designation',
     sortable: false,
     align: 'start',
   },
@@ -141,9 +141,9 @@ const {
           {{ item.phone ? '+63 ' + item.phone : '' }}
         </template>
 
-        <template #item.designations="{ item }">
+        <template #item.designation="{ item }">
           <v-chip class="font-weight-bold" color="secondary" variant="flat" size="small">
-            {{ item.designations.designation }}
+            {{ item.designation.designation }}
           </v-chip>
         </template>
 
