@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import AttendanceTable from './attendance/AttendanceTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useDisplay } from 'vuetify'
@@ -23,6 +24,8 @@ const isDrawerVisible = ref(xs.value ? false : true)
           header-icon="mdi-clock-in"
           headline="Manage employee attendance."
         ></HeaderPanel>
+
+        <AttendanceTable></AttendanceTable>
       </v-container>
     </template>
   </AppLayout>

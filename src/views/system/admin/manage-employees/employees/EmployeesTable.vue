@@ -119,7 +119,7 @@ const {
                 v-model="tableFilters.designation_id"
                 :items="designationsStore.designations"
                 density="compact"
-                label="Filter Designation"
+                label="Filter by Designation"
                 item-title="designation"
                 item-value="id"
                 clearable
