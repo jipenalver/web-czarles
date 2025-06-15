@@ -30,7 +30,7 @@ export const useAreasStore = defineStore('areas', () => {
 
   // Actions
   async function getAreas() {
-    const { data } = await supabase.from('areas').select()
+    const { data } = await supabase.from('employee_areas').select()
 
     areas.value = data as Area[]
   }
@@ -40,30 +40,30 @@ export const useAreasStore = defineStore('areas', () => {
     search = tableSearch(search)
 
     let query = supabase
-      .from('areas')
+      .from('employee_areas')
       .select()
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getDesignationsFilter(query, { search })
+    query = getAreasFilter(query, { search })
 
     const { data } = await query
 
-    const { count } = await getDesignationsCount({ search })
+    const { count } = await getAreasCount({ search })
 
     areasTable.value = data as Area[]
     areasTableTotal.value = count as number
   }
 
-  async function getDesignationsCount({ search }: AreaTableFilter) {
-    let query = supabase.from('designations').select('*', { count: 'exact', head: true })
+  async function getAreasCount({ search }: AreaTableFilter) {
+    let query = supabase.from('employee_areas').select('*', { count: 'exact', head: true })
 
-    query = getDesignationsFilter(query, { search })
+    query = getAreasFilter(query, { search })
 
     return await query
   }
 
-  function getDesignationsFilter(
+  function getAreasFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
     { search }: AreaTableFilter,
@@ -74,15 +74,15 @@ export const useAreasStore = defineStore('areas', () => {
   }
 
   async function addArea(formData: Partial<Area>) {
-    return await supabase.from('areas').insert(formData).select()
+    return await supabase.from('employee_areas').insert(formData).select()
   }
 
   async function updateArea(formData: Partial<Area>) {
-    return await supabase.from('areas').update(formData).eq('id', formData.id).select()
+    return await supabase.from('employee_areas').update(formData).eq('id', formData.id).select()
   }
 
   async function deleteArea(id: number) {
-    return await supabase.from('areas').delete().eq('id', id).select()
+    return await supabase.from('employee_areas').delete().eq('id', id).select()
   }
 
   // Expose States and Actions
