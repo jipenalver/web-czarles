@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
+import { useDeductionsFormDialog } from './deductionsFormDialog'
+import { type EmployeeTableFilter } from '@/stores/employees'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { useRatesFormDialog } from './ratesFormDialog'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Employee | null
+  itemId?: number
   tableOptions: TableOptions
   tableFilters: EmployeeTableFilter
 }>()
@@ -17,10 +17,8 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFormDialog(
-  props,
-  emit,
-)
+const { formData, formAction, refVForm, onFormSubmit, onFormReset, benefitsStore } =
+  useDeductionsFormDialog(props, emit)
 </script>
 
 <template>
@@ -36,29 +34,22 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate Information">
+    <v-card
+      prepend-icon="mdi-account-cash"
+      title="Employee Deduction(s)"
+      subtitle="Update Deduction(s) based on Benefits"
+    >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-            <v-col cols="12">
+            <v-col cols="12" v-for="benefit in benefitsStore.benefits" :key="benefit.id">
               <v-text-field
-                v-model="formData.daily_rate"
+                v-model="formData.amount"
                 prepend-inner-icon="mdi-currency-php"
-                label="Daily Rate"
+                :label="benefit.benefit"
                 type="number"
                 :rules="[requiredValidator]"
               ></v-text-field>
-            </v-col>
-
-            <v-col cols="12">
-              <v-switch v-model="formData.is_insured" class="ms-2" color="primary" hide-details>
-                <template #label>
-                  With Accident Insurance?
-                  <span class="font-weight-black ms-1">
-                    {{ formData.is_insured ? 'Yes' : 'No' }}
-                  </span>
-                </template>
-              </v-switch>
             </v-col>
           </v-row>
         </v-card-text>
