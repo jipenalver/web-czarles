@@ -1,6 +1,6 @@
+import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Attendance, useAttendanceStore } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 
@@ -9,6 +9,50 @@ export function useAttendanceTable() {
   const employeeStore = useEmployeesStore()
 
   // States
+  const tableHeadersDefault: TableHeader[] = [
+    {
+      title: 'Employee',
+      key: 'employee',
+      sortable: false,
+      align: 'start',
+    },
+    {
+      title: 'Date',
+      key: 'created_at',
+      align: 'start',
+    },
+    {
+      title: 'AM - Time In',
+      key: 'am_time_in',
+      sortable: false,
+      align: 'start',
+    },
+    {
+      title: 'AM - Time Out',
+      key: 'am_time_out',
+      sortable: false,
+      align: 'start',
+    },
+    {
+      title: 'PM - Time In',
+      key: 'pm_time_in',
+      sortable: false,
+      align: 'start',
+    },
+    {
+      title: 'PM - Time Out',
+      key: 'pm_time_out',
+      sortable: false,
+      align: 'start',
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      sortable: false,
+      align: 'center',
+    },
+  ]
+  const tableHeaders = ref<TableHeader[]>(tableHeadersDefault)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
@@ -35,6 +79,9 @@ export function useAttendanceTable() {
   }
 
   const onFilterItems = () => {
+    if (tableFilters.value.employee_id !== null) tableHeaders.value = tableHeadersDefault.slice(1)
+    else tableHeaders.value = tableHeadersDefault
+
     onLoadItems(tableOptions.value)
   }
 
@@ -52,6 +99,7 @@ export function useAttendanceTable() {
 
   // Expose State and Actions
   return {
+    tableHeaders,
     tableOptions,
     tableFilters,
     isDialogVisible,

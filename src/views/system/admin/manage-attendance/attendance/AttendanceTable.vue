@@ -1,58 +1,14 @@
 <script setup lang="ts">
 import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
-import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
 
 const { mobile } = useDisplay()
 
-const tableHeaders: TableHeader[] = [
-  {
-    title: 'Employee',
-    key: 'employee',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Date',
-    key: 'created_at',
-    align: 'start',
-  },
-  {
-    title: 'AM - Time In',
-    key: 'am_time_in',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'AM - Time Out',
-    key: 'am_time_out',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'PM - Time In',
-    key: 'pm_time_in',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'PM - Time Out',
-    key: 'pm_time_out',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Actions',
-    key: 'actions',
-    sortable: false,
-    align: 'center',
-  },
-]
-
 const {
+  tableHeaders,
   tableOptions,
   tableFilters,
   // isDialogVisible,
