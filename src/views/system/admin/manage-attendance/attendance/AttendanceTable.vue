@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
@@ -89,6 +90,7 @@ const {
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
+        show-expand
       >
         <template #top>
           <v-row dense>
@@ -131,25 +133,25 @@ const {
 
         <template #item.am_time_in="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.am_time_in, 'fullTime12h') }}
+            {{ item.am_time_in ? date.format(item.am_time_in, 'fullTime12h') : '-' }}
           </span>
         </template>
 
         <template #item.am_time_out="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.am_time_in, 'fullTime12h') }}
+            {{ item.am_time_out ? date.format(item.am_time_out, 'fullTime12h') : '-' }}
           </span>
         </template>
 
         <template #item.pm_time_in="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.pm_time_in, 'fullTime12h') }}
+            {{ item.pm_time_in ? date.format(item.pm_time_in, 'fullTime12h') : '-' }}
           </span>
         </template>
 
         <template #item.pm_time_out="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.pm_time_out, 'fullTime12h') }}
+            {{ item.pm_time_out ? date.format(item.pm_time_out, 'fullTime12h') : '-' }}
           </span>
         </template>
 
@@ -160,6 +162,26 @@ const {
               <v-tooltip activator="parent" location="top">Rectify Attendance</v-tooltip>
             </v-btn>
           </div>
+        </template>
+
+        <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+          <v-btn
+            class="text-none"
+            size="small"
+            variant="text"
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            @click="toggleExpand(internalItem)"
+            border
+            slim
+          ></v-btn>
+        </template>
+
+        <template #expanded-row="{ columns, item }">
+          <AttendanceExpandedRow
+            :columns-length="columns.length"
+            :item-data="item"
+          ></AttendanceExpandedRow>
         </template>
       </v-data-table-server>
     </v-card-text>
