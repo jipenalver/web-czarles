@@ -1,12 +1,11 @@
 <script setup lang="ts">
+import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
-import { useDate } from 'vuetify'
 
-const date = useDate()
 const { mobile } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
@@ -18,8 +17,7 @@ const tableHeaders: TableHeader[] = [
   },
   {
     title: 'Date',
-    key: 'date',
-    sortable: false,
+    key: 'created_at',
     align: 'start',
   },
   {
@@ -125,33 +123,33 @@ const {
           </span>
         </template>
 
-        <template #item.date="{ item }">
+        <template #item.created_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.am_time_in, 'fullDateWithWeekday') }}
+            {{ getDateWithWeekday(item.created_at) }}
           </span>
         </template>
 
         <template #item.am_time_in="{ item }">
           <span class="font-weight-bold">
-            {{ item.am_time_in ? date.format(item.am_time_in, 'fullTime12h') : '-' }}
+            {{ item.am_time_in ? getTime(item.am_time_in) : '-' }}
           </span>
         </template>
 
         <template #item.am_time_out="{ item }">
           <span class="font-weight-bold">
-            {{ item.am_time_out ? date.format(item.am_time_out, 'fullTime12h') : '-' }}
+            {{ item.am_time_out ? getTime(item.am_time_out) : '-' }}
           </span>
         </template>
 
         <template #item.pm_time_in="{ item }">
           <span class="font-weight-bold">
-            {{ item.pm_time_in ? date.format(item.pm_time_in, 'fullTime12h') : '-' }}
+            {{ item.pm_time_in ? getTime(item.pm_time_in) : '-' }}
           </span>
         </template>
 
         <template #item.pm_time_out="{ item }">
           <span class="font-weight-bold">
-            {{ item.pm_time_out ? date.format(item.pm_time_out, 'fullTime12h') : '-' }}
+            {{ item.pm_time_out ? getTime(item.pm_time_out) : '-' }}
           </span>
         </template>
 
