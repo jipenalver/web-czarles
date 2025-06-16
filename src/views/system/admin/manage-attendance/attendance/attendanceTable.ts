@@ -1,12 +1,12 @@
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
-import { type Attendance, useAttendanceStore } from '@/stores/attendances'
+import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 
 export function useAttendanceTable() {
-  const attendanceStore = useAttendanceStore()
-  const employeeStore = useEmployeesStore()
+  const attendancesStore = useAttendancesStore()
+  const employeesStore = useEmployeesStore()
 
   // States
   const tableHeadersDefault: TableHeader[] = [
@@ -88,13 +88,13 @@ export function useAttendanceTable() {
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
     tableOptions.value.isLoading = true
 
-    await attendanceStore.getAttendancesTable({ page, itemsPerPage, sortBy }, tableFilters.value)
+    await attendancesStore.getAttendancesTable({ page, itemsPerPage, sortBy }, tableFilters.value)
 
     tableOptions.value.isLoading = false
   }
 
   onMounted(async () => {
-    if (employeeStore.employees.length === 0) await employeeStore.getEmployees()
+    if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
   })
 
   // Expose State and Actions
@@ -110,7 +110,7 @@ export function useAttendanceTable() {
     onUpdate,
     onFilterItems,
     onLoadItems,
-    attendanceStore,
-    employeeStore,
+    attendancesStore,
+    employeesStore,
   }
 }

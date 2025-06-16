@@ -18,8 +18,8 @@ const {
   onUpdate,
   onFilterItems,
   onLoadItems,
-  attendanceStore,
-  employeeStore,
+  attendancesStore,
+  employeesStore,
 } = useAttendanceTable()
 </script>
 
@@ -39,8 +39,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="attendanceStore.attendancesTable"
-        :items-length="attendanceStore.attendancesTableTotal"
+        :items="attendancesStore.attendancesTable"
+        :items-length="attendancesStore.attendancesTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
@@ -53,7 +53,7 @@ const {
             <v-col cols="12" sm="4">
               <v-autocomplete
                 v-model="tableFilters.employee_id"
-                :items="employeeStore.employees"
+                :items="employeesStore.employees"
                 density="compact"
                 label="Filter by Employee"
                 item-title="label"

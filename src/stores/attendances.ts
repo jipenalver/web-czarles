@@ -20,7 +20,7 @@ export type AttendanceTableFilter = {
   employee_id: string | null
 }
 
-export const useAttendanceStore = defineStore('attendances', () => {
+export const useAttendancesStore = defineStore('attendances', () => {
   // States
   const attendances = ref<Attendance[]>([])
   const attendancesTable = ref<Attendance[]>([])
