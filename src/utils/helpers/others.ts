@@ -168,9 +168,8 @@ export const getISODate = (date: Date | string | null) => {
 
   const dateValue = new Date(date)
 
-  // Extract components in the local timezone
   const year = dateValue.getFullYear()
-  const month = String(dateValue.getMonth() + 1).padStart(2, '0') // Months are 0-based
+  const month = String(dateValue.getMonth() + 1).padStart(2, '0')
   const day = String(dateValue.getDate()).padStart(2, '0')
 
   return `${year}-${month}-${day}`
@@ -182,7 +181,6 @@ export const getISOTime = (date: Date | string | null) => {
 
   const dateValue = new Date(date)
 
-  // Extract time components in the local timezone
   const hours = String(dateValue.getHours()).padStart(2, '0')
   const minutes = String(dateValue.getMinutes()).padStart(2, '0')
   const seconds = String(dateValue.getSeconds()).padStart(2, '0')
@@ -190,13 +188,55 @@ export const getISOTime = (date: Date | string | null) => {
   return `${hours}:${minutes}:${seconds}`
 }
 
-// 👉 Get date in YMD format from database
-export const getYMDDate = (date: string) => {
-  return date.slice(0, 10)
+// 👉 Get formatted date with weekday and full month name
+export const getDate = (date: Date | string | null) => {
+  if (!date) return null
+
+  const dateString = typeof date === 'string' ? date.replace(/[+\-]\d{2}:?\d{0,2}$/, '') : date
+  const dateValue = new Date(dateString)
+
+  const month = dateValue.toLocaleDateString('en-US', { month: 'long' })
+  const day = dateValue.getDate()
+  const year = dateValue.getFullYear()
+
+  return `${month} ${day}, ${year}`
+}
+
+// 👉 Get formatted date with weekday and full month name
+export const getDateWithWeekday = (date: Date | string | null) => {
+  if (!date) return null
+
+  const dateString = typeof date === 'string' ? date.replace(/[+\-]\d{2}:?\d{0,2}$/, '') : date
+  const dateValue = new Date(dateString)
+
+  const weekday = dateValue.toLocaleDateString('en-US', { weekday: 'long' })
+  const month = dateValue.toLocaleDateString('en-US', { month: 'long' })
+  const day = dateValue.getDate()
+  const year = dateValue.getFullYear()
+
+  return `${weekday}, ${month} ${day}, ${year}`
+}
+
+// 👉 Get formatted time in 12-hour format without UTC conversion
+export const getTime = (date: Date | string | null) => {
+  if (!date) return null
+
+  const dateString = typeof date === 'string' ? date.replace(/[+\-]\d{2}:?\d{0,2}$/, '') : date
+  const dateValue = new Date(dateString)
+
+  let hours = dateValue.getHours()
+  const minutes = String(dateValue.getMinutes()).padStart(2, '0')
+
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+
+  hours = hours % 12
+  hours = hours ? hours : 12
+
+  return `${hours}:${minutes} ${ampm}`
 }
 
 // 👉 Get Days Difference
-export const getDaysDiff = (date1: Date, date2: string, isRound = true) => {
+export const getDaysDiff = (date1: Date, date2: Date, isRound = true) => {
   const startDate = new Date(date1).getTime()
   const endDate = new Date(date2).getTime()
 

@@ -1,59 +1,14 @@
 <script setup lang="ts">
-import { type TableHeader } from '@/utils/helpers/tables'
+import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
+import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
-import { useDate } from 'vuetify'
 
-const date = useDate()
 const { mobile } = useDisplay()
 
-const tableHeaders: TableHeader[] = [
-  {
-    title: 'Employee',
-    key: 'employee',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Date',
-    key: 'date',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'AM - Time In',
-    key: 'am_time_in',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'AM - Time Out',
-    key: 'am_time_out',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'PM - Time In',
-    key: 'pm_time_in',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'PM - Time Out',
-    key: 'pm_time_out',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Actions',
-    key: 'actions',
-    sortable: false,
-    align: 'center',
-  },
-]
-
 const {
+  tableHeaders,
   tableOptions,
   tableFilters,
   // isDialogVisible,
@@ -89,6 +44,7 @@ const {
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
+        show-expand
       >
         <template #top>
           <v-row dense>
@@ -123,33 +79,33 @@ const {
           </span>
         </template>
 
-        <template #item.date="{ item }">
+        <template #item.created_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.am_time_in, 'fullDateWithWeekday') }}
+            {{ getDateWithWeekday(item.created_at) }}
           </span>
         </template>
 
         <template #item.am_time_in="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.am_time_in, 'fullTime12h') }}
+            {{ item.am_time_in ? getTime(item.am_time_in) : '-' }}
           </span>
         </template>
 
         <template #item.am_time_out="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.am_time_in, 'fullTime12h') }}
+            {{ item.am_time_out ? getTime(item.am_time_out) : '-' }}
           </span>
         </template>
 
         <template #item.pm_time_in="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.pm_time_in, 'fullTime12h') }}
+            {{ item.pm_time_in ? getTime(item.pm_time_in) : '-' }}
           </span>
         </template>
 
         <template #item.pm_time_out="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.pm_time_out, 'fullTime12h') }}
+            {{ item.pm_time_out ? getTime(item.pm_time_out) : '-' }}
           </span>
         </template>
 
@@ -160,6 +116,26 @@ const {
               <v-tooltip activator="parent" location="top">Rectify Attendance</v-tooltip>
             </v-btn>
           </div>
+        </template>
+
+        <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+          <v-btn
+            class="text-none"
+            size="small"
+            variant="text"
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            @click="toggleExpand(internalItem)"
+            border
+            slim
+          ></v-btn>
+        </template>
+
+        <template #expanded-row="{ columns, item }">
+          <AttendanceExpandedRow
+            :columns-length="columns.length"
+            :item-data="item"
+          ></AttendanceExpandedRow>
         </template>
       </v-data-table-server>
     </v-card-text>
