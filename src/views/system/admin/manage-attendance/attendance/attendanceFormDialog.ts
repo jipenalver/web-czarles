@@ -30,20 +30,30 @@ export function useAttendanceFormDialog(
     pm_time_in: '',
     pm_time_out: '',
     employee_id: null as string | null,
-    is_am_in_rectified: true,
-    is_am_out_rectified: true,
-    is_pm_in_rectified: true,
-    is_pm_out_rectified: true,
+    is_am_in_rectified: false,
+    is_am_out_rectified: false,
+    is_pm_in_rectified: false,
+    is_pm_out_rectified: false,
+  }
+  const formCheckBoxDefault = {
+    isRectifyAMTimeIn: false,
+    isRectifyAMTimeOut: false,
+    isRectifyPMTimeIn: false,
+    isRectifyPMTimeOut: false,
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
+  const formCheckBox = ref({ ...formCheckBoxDefault })
+  const isConfirmSubmitDialog = ref(false)
+  const confirmText = ref('')
 
   watch(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
+      formCheckBox.value = { ...formCheckBoxDefault }
 
       if (isUpdate.value) {
         const { employee, ...itemData } = props.itemData as Attendance
@@ -63,8 +73,6 @@ export function useAttendanceFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    if (onFormValidate()) return
-
     const { date, ...newFormData } = {
       ...formData.value,
       am_time_in: formData.value.am_time_in
@@ -79,10 +87,10 @@ export function useAttendanceFormDialog(
       pm_time_out: formData.value.pm_time_out
         ? getDate(formData.value.date) + ' ' + formData.value.pm_time_out
         : null,
-      is_am_in_rectified: formData.value.am_time_in ? true : false,
-      is_am_out_rectified: formData.value.am_time_out ? true : false,
-      is_pm_in_rectified: formData.value.pm_time_in ? true : false,
-      is_pm_out_rectified: formData.value.pm_time_out ? true : false,
+      is_am_in_rectified: formCheckBox.value.isRectifyAMTimeIn,
+      is_am_out_rectified: formCheckBox.value.isRectifyAMTimeOut,
+      is_pm_in_rectified: formCheckBox.value.isRectifyPMTimeIn,
+      is_pm_out_rectified: formCheckBox.value.isRectifyPMTimeOut,
     }
 
     const { data, error } = isUpdate.value
@@ -97,7 +105,7 @@ export function useAttendanceFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully Added Attendance.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Attendance.`
 
       await attendancesStore.getAttendancesTable(props.tableOptions, props.tableFilters)
 
@@ -121,6 +129,13 @@ export function useAttendanceFormDialog(
       return true
     }
 
+    if (isUpdate.value) {
+      const hasChecked = Object.values(formCheckBox.value).some((value) => value)
+
+      if (!hasChecked)
+        return setError('Please check at least one checkbox to rectify the attendance.')
+    }
+
     if (!isUpdate.value) {
       const hasAttendance = attendancesStore.attendances.some(
         (attendance) =>
@@ -137,7 +152,20 @@ export function useAttendanceFormDialog(
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
-    if (valid) onSubmit()
+    if (valid) {
+      if (onFormValidate()) return
+
+      if (isUpdate.value) {
+        confirmText.value = 'Are you sure you want to update'
+        if (formCheckBox.value.isRectifyAMTimeIn) confirmText.value += ', AM - Time In, '
+        if (formCheckBox.value.isRectifyAMTimeOut) confirmText.value += ', AM - Time Out, '
+        if (formCheckBox.value.isRectifyPMTimeIn) confirmText.value += ', PM - Time In, '
+        if (formCheckBox.value.isRectifyPMTimeOut) confirmText.value += ', PM - Time Out, '
+        confirmText.value += ' attendance?'
+      } else confirmText.value = 'Are you sure you want to add this attendance?'
+
+      isConfirmSubmitDialog.value = true
+    }
   }
 
   const onFormReset = () => {
@@ -157,6 +185,10 @@ export function useAttendanceFormDialog(
     formAction,
     refVForm,
     isUpdate,
+    formCheckBox,
+    isConfirmSubmitDialog,
+    confirmText,
+    onSubmit,
     onFormSubmit,
     onFormReset,
     employeesStore,
