@@ -70,6 +70,7 @@ export function useEmployeesFormDialog(
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Employee.`
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
+      await employeesStore.getEmployees()
 
       setTimeout(() => {
         onFormReset()
