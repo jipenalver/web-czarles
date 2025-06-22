@@ -82,7 +82,6 @@ const {
               <v-textarea
                 v-model="formData.address"
                 label="Address"
-                placeholder="Address"
                 rows="3"
                 :rules="[requiredValidator]"
               ></v-textarea>
