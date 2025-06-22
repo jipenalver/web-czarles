@@ -1,5 +1,6 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { getDate } from '@/utils/helpers/others'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -8,6 +9,7 @@ import { ref } from 'vue'
 export type Attendance = {
   id: number
   created_at: string
+  date: string | null
   am_time_in: string | null
   am_time_out: string | null
   pm_time_in: string | null
@@ -15,10 +17,6 @@ export type Attendance = {
   employee_id: string | null
   is_rectified: boolean
   employee: Employee
-}
-
-export type AttendanceForm = Omit<Attendance, 'employee'> & {
-  date: string | null
 }
 
 export type AttendanceTableFilter = {
@@ -63,7 +61,12 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { count } = await getAttendancesCount({ employee_id })
 
-    attendancesTable.value = data as Attendance[]
+    attendancesTable.value = data?.map((item) => {
+      return {
+        ...item,
+        date: item.am_time_in ? getDate(item.am_time_in) : null,
+      }
+    }) as Attendance[]
     attendancesTableTotal.value = count as number
   }
 
@@ -93,6 +96,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
     return await supabase.from('attendances').update(formData).eq('id', formData.id).select()
   }
 
+  async function deleteAttendance(id: number) {
+    return await supabase.from('attendances').delete().eq('id', id).select()
+  }
+
   // Expose States and Actions
   return {
     attendances,
@@ -103,5 +110,6 @@ export const useAttendancesStore = defineStore('attendances', () => {
     getAttendancesTable,
     addAttendance,
     updateAttendance,
+    deleteAttendance,
   }
 })
