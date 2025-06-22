@@ -29,10 +29,18 @@ export const getMoneyText = (value: string | number) => {
   }).format(Number(value))
 }
 
-// 👉 Pad String Left
-export const getPadLeftText = (value: string | number, length = 4, char = '0') => {
+// 👉 Pad String
+export const getPaddedText = (
+  value: string | number,
+  length = 4,
+  char = '0',
+  direction = 'left' as 'left' | 'right',
+) => {
   value = String(value)
   if (value.length >= length) return value
+
+  if (direction === 'right') return value + char.repeat(length - value.length)
+
   return char.repeat(length - value.length) + value
 }
 
@@ -54,7 +62,7 @@ export const getIDNumber = (hiredAt: string, employeeId: number) => {
 
   const year = hiredDate.getFullYear().toString().slice(-2)
 
-  return `2${year}-${getPadLeftText(employeeId)}`
+  return `2${year}-${getPaddedText(employeeId)}`
 }
 
 // 👉 Alpha-numeric Random Code
