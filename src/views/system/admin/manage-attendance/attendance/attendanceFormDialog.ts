@@ -30,7 +30,10 @@ export function useAttendanceFormDialog(
     pm_time_in: '',
     pm_time_out: '',
     employee_id: null as string | null,
-    is_rectified: true,
+    is_am_in_rectified: true,
+    is_am_out_rectified: true,
+    is_pm_in_rectified: true,
+    is_pm_out_rectified: true,
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -76,6 +79,10 @@ export function useAttendanceFormDialog(
       pm_time_out: formData.value.pm_time_out
         ? getDate(formData.value.date) + ' ' + formData.value.pm_time_out
         : null,
+      is_am_in_rectified: formData.value.am_time_in ? true : false,
+      is_am_out_rectified: formData.value.am_time_out ? true : false,
+      is_pm_in_rectified: formData.value.pm_time_in ? true : false,
+      is_pm_out_rectified: formData.value.pm_time_out ? true : false,
     }
 
     const { data, error } = isUpdate.value
