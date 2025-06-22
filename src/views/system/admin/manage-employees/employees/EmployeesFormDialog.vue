@@ -73,6 +73,7 @@ const {
                 prepend-inner-icon="mdi-calendar"
                 label="Birthdate"
                 placeholder="Select Date"
+                view-mode="year"
                 :rules="[requiredValidator]"
                 hide-actions
               ></v-date-input>
