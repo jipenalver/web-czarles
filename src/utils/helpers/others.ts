@@ -160,7 +160,7 @@ export const prepareDate = (date: Date | string) => {
 export const prepareDateRange = (daterange: string[] | null) => {
   if (daterange === null) return null
 
-  const formattedDates = daterange.map((date) => getISODate(new Date(date)))
+  const formattedDates = daterange.map((date) => getDateISO(new Date(date)))
 
   const dates =
     formattedDates.length > 1
@@ -171,29 +171,17 @@ export const prepareDateRange = (daterange: string[] | null) => {
 }
 
 // 👉 Get date in ISO format without UTC conversion
-export const getISODate = (date: Date | string | null) => {
+export const getDateISO = (date: Date | string | null) => {
   if (!date) return null
 
-  const dateValue = new Date(date)
+  const dateString = typeof date === 'string' ? date.replace(/[+\-]\d{2}:?\d{0,2}$/, '') : date
+  const dateValue = new Date(dateString)
 
   const year = dateValue.getFullYear()
   const month = String(dateValue.getMonth() + 1).padStart(2, '0')
   const day = String(dateValue.getDate()).padStart(2, '0')
 
   return `${year}-${month}-${day}`
-}
-
-// 👉 Get time in ISO format without UTC conversion
-export const getISOTime = (date: Date | string | null) => {
-  if (!date) return null
-
-  const dateValue = new Date(date)
-
-  const hours = String(dateValue.getHours()).padStart(2, '0')
-  const minutes = String(dateValue.getMinutes()).padStart(2, '0')
-  const seconds = String(dateValue.getSeconds()).padStart(2, '0')
-
-  return `${hours}:${minutes}:${seconds}`
 }
 
 // 👉 Get formatted date with weekday and full month name
