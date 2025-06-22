@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
+import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
@@ -11,8 +12,8 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  // isDialogVisible,
-  // itemData,
+  isDialogVisible,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -140,4 +141,11 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <AttendanceFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></AttendanceFormDialog>
 </template>
