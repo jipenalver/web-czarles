@@ -1,14 +1,13 @@
 <script setup lang="ts">
+import { getTotalWorkHours } from '@/utils/helpers/others'
 import { type Attendance } from '@/stores/attendances'
 import { useDisplay } from 'vuetify'
-import { useDate } from 'vuetify'
 
 const props = defineProps<{
   columnsLength: number
   itemData: Attendance
 }>()
 
-const date = useDate()
 const { mobile } = useDisplay()
 </script>
 
@@ -23,8 +22,15 @@ const { mobile } = useDisplay()
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">Rendered Time:</span>
-          <span class="text-body-2">
-            {{ date.getDiff(props.itemData.am_time_in, props.itemData.am_time_out, 'hours') }} hours
+          <span class="text-body-2 font-weight-bold text-secondary">
+            {{
+              getTotalWorkHours(
+                props.itemData.am_time_in,
+                props.itemData.am_time_out,
+                props.itemData.pm_time_in,
+                props.itemData.pm_time_out,
+              )
+            }}
           </span>
         </v-col>
 
