@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   type Attendance,
-  type AttendanceForm,
   type AttendanceTableFilter,
   useAttendancesStore,
 } from '@/stores/attendances'
@@ -25,15 +24,15 @@ export function useAttendanceFormDialog(
 
   // States
   const formDataDefault = {
-    date: null,
+    date: null as string | null,
     am_time_in: '',
     am_time_out: '',
     pm_time_in: '',
     pm_time_out: '',
-    employee_id: null,
+    employee_id: null as string | null,
     is_rectified: true,
   }
-  const formData = ref<Partial<AttendanceForm>>({ ...formDataDefault })
+  const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -51,7 +50,7 @@ export function useAttendanceFormDialog(
           am_time_out: getTime24Hour(itemData.am_time_out) as string,
           pm_time_in: getTime24Hour(itemData.pm_time_in) as string,
           pm_time_out: getTime24Hour(itemData.pm_time_out) as string,
-          date: getDate(itemData.am_time_in) as string,
+          date: getDate(itemData.am_time_in),
         }
       } else formData.value = { ...formDataDefault }
     },
@@ -61,42 +60,21 @@ export function useAttendanceFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    if (!isUpdate.value) {
-      const hasAttendance = attendancesStore.attendances.find((attendance) => {
-        const attendanceDate = new Date(formData.value.date as string)
-
-        if (
-          getDate(attendance.am_time_in) === getDate(attendanceDate) &&
-          attendance.employee_id === formData.value.employee_id
-        )
-          return true
-      })
-
-      if (hasAttendance) {
-        formAction.value = {
-          ...formActionDefault,
-          formMessage: 'Attendance for this date and employee already exists.',
-          formStatus: 400,
-          formProcess: false,
-          formAlert: true,
-        }
-        return
-      }
-    }
+    if (onFormValidate()) return
 
     const { date, ...newFormData } = {
       ...formData.value,
       am_time_in: formData.value.am_time_in
-        ? formData.value.date + ' ' + formData.value.am_time_in
+        ? getDate(formData.value.date) + ' ' + formData.value.am_time_in
         : null,
       am_time_out: formData.value.am_time_out
-        ? formData.value.date + ' ' + formData.value.am_time_out
+        ? getDate(formData.value.date) + ' ' + formData.value.am_time_out
         : null,
       pm_time_in: formData.value.pm_time_in
-        ? formData.value.date + ' ' + formData.value.pm_time_in
+        ? getDate(formData.value.date) + ' ' + formData.value.pm_time_in
         : null,
       pm_time_out: formData.value.pm_time_out
-        ? formData.value.date + ' ' + formData.value.pm_time_out
+        ? getDate(formData.value.date) + ' ' + formData.value.pm_time_out
         : null,
     }
 
@@ -122,6 +100,31 @@ export function useAttendanceFormDialog(
     }
 
     formAction.value.formAlert = true
+  }
+
+  const onFormValidate = () => {
+    const setError = (message: string) => {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: message,
+        formStatus: 400,
+        formProcess: false,
+        formAlert: true,
+      }
+      return true
+    }
+
+    if (!isUpdate.value) {
+      const hasAttendance = attendancesStore.attendances.some(
+        (attendance) =>
+          getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
+          attendance.employee_id === formData.value.employee_id,
+      )
+
+      if (hasAttendance) return setError('Attendance for this date and employee already exists.')
+    }
+
+    if (!formData.value.am_time_in) return setError('AM - Time In is required.')
   }
 
   // Trigger Validators
