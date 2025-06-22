@@ -52,7 +52,11 @@ export const useAttendancesStore = defineStore('attendances', () => {
     tableOptions: TableOptions,
     { employee_id }: AttendanceTableFilter,
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'id', false)
+    const { rangeStart, rangeEnd, column, order } = tablePagination(
+      tableOptions,
+      'am_time_in',
+      false,
+    )
 
     let query = supabase
       .from('attendances')
