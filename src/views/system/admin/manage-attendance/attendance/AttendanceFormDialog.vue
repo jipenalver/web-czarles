@@ -71,6 +71,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 title="AM - Time In"
                 color="secondary"
                 ampm-in-title
+                scrollable
               ></v-time-picker>
             </v-col>
 
@@ -80,6 +81,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 title="AM - Time Out"
                 color="secondary"
                 ampm-in-title
+                scrollable
               ></v-time-picker>
             </v-col>
 
@@ -89,6 +91,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 title="PM - Time In"
                 color="secondary"
                 ampm-in-title
+                scrollable
               ></v-time-picker>
             </v-col>
 
@@ -98,6 +101,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 title="PM - Time Out"
                 color="secondary"
                 ampm-in-title
+                scrollable
               ></v-time-picker>
             </v-col>
           </v-row>
