@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { type Attendance, type AttendanceTableFilter } from '@/stores/attendances'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useAttendanceFormDialog } from './attendanceFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -17,8 +18,19 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, employeesStore } =
-  useAttendanceFormDialog(props, emit)
+const {
+  formData,
+  formAction,
+  refVForm,
+  isUpdate,
+  formCheckBox,
+  isConfirmSubmitDialog,
+  confirmText,
+  onSubmit,
+  onFormSubmit,
+  onFormReset,
+  employeesStore,
+} = useAttendanceFormDialog(props, emit)
 </script>
 
 <template>
@@ -37,7 +49,11 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
     <v-card
       prepend-icon="mdi-account-cash"
       title="Attendance"
-      :subtitle="isUpdate ? 'Rectify Attendance Record' : 'Add Employee\'s Attendance Record'"
+      :subtitle="
+        isUpdate
+          ? 'Rectify Attendance Record. Check the checkboxes to modify the time.'
+          : 'Add Employee\'s Attendance Record. Check the checkboxes to modify the time.'
+      "
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
@@ -65,40 +81,68 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
               ></v-date-input>
             </v-col>
 
-            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+            <v-col cols="12" sm="6" class="d-flex justify-center">
               <v-time-picker
                 v-model="formData.am_time_in"
-                title="AM - Time In"
                 color="secondary"
+                :disabled="!formCheckBox.isRectifyAMTimeIn"
                 ampm-in-title
-              ></v-time-picker>
+              >
+                <template #title>
+                  <v-checkbox-btn
+                    v-model="formCheckBox.isRectifyAMTimeIn"
+                    label="AM - Time In"
+                  ></v-checkbox-btn>
+                </template>
+              </v-time-picker>
             </v-col>
 
-            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+            <v-col cols="12" sm="6" class="d-flex justify-center">
               <v-time-picker
                 v-model="formData.am_time_out"
-                title="AM - Time Out"
                 color="secondary"
+                :disabled="!formCheckBox.isRectifyAMTimeOut"
                 ampm-in-title
-              ></v-time-picker>
+              >
+                <template #title>
+                  <v-checkbox-btn
+                    v-model="formCheckBox.isRectifyAMTimeOut"
+                    label="AM - Time Out"
+                  ></v-checkbox-btn>
+                </template>
+              </v-time-picker>
             </v-col>
 
-            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+            <v-col cols="12" sm="6" class="d-flex justify-center">
               <v-time-picker
                 v-model="formData.pm_time_in"
-                title="PM - Time In"
                 color="secondary"
+                :disabled="!formCheckBox.isRectifyPMTimeIn"
                 ampm-in-title
-              ></v-time-picker>
+              >
+                <template #title>
+                  <v-checkbox-btn
+                    v-model="formCheckBox.isRectifyPMTimeIn"
+                    label="PM - Time In"
+                  ></v-checkbox-btn>
+                </template>
+              </v-time-picker>
             </v-col>
 
-            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+            <v-col cols="12" sm="6" class="d-flex justify-center">
               <v-time-picker
                 v-model="formData.pm_time_out"
-                title="PM - Time Out"
                 color="secondary"
+                :disabled="!formCheckBox.isRectifyPMTimeOut"
                 ampm-in-title
-              ></v-time-picker>
+              >
+                <template #title>
+                  <v-checkbox-btn
+                    v-model="formCheckBox.isRectifyPMTimeOut"
+                    label="PM - Time Out"
+                  ></v-checkbox-btn>
+                </template>
+              </v-time-picker>
             </v-col>
           </v-row>
         </v-card-text>
@@ -124,4 +168,11 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
       </v-form>
     </v-card>
   </v-dialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmSubmitDialog"
+    :title="isUpdate ? 'Confirm Attendance Rectification' : 'Confirm Attendance Submission'"
+    :text="confirmText"
+    @confirm="onSubmit"
+  ></ConfirmDialog>
 </template>
