@@ -29,7 +29,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
   ></AppAlert>
 
   <v-dialog
-    :max-width="mdAndDown ? undefined : '600'"
+    :max-width="mdAndDown ? undefined : '800'"
     :model-value="props.isDialogVisible"
     :fullscreen="mdAndDown"
     persistent
@@ -37,12 +37,12 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
     <v-card
       prepend-icon="mdi-account-cash"
       title="Attendance"
-      :subtitle="isUpdate ? 'Update Attendance Record' : 'Add Employee\'s Attendance Record'"
+      :subtitle="isUpdate ? 'Rectify Attendance Record' : 'Add Employee\'s Attendance Record'"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-            <v-col cols="12">
+            <v-col cols="12" sm="7">
               <v-autocomplete
                 v-model="formData.employee_id"
                 :items="employeesStore.employees"
@@ -51,6 +51,54 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 item-value="id"
                 :rules="[requiredValidator]"
               ></v-autocomplete>
+            </v-col>
+
+            <v-col cols="12" sm="5">
+              <v-date-input
+                v-model="formData.date"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
+                label="Attendance Date"
+                placeholder="Select Date"
+                :rules="[requiredValidator]"
+                hide-actions
+              ></v-date-input>
+            </v-col>
+
+            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+              <v-time-picker
+                v-model="formData.am_time_in"
+                title="AM - Time In"
+                color="secondary"
+                ampm-in-title
+              ></v-time-picker>
+            </v-col>
+
+            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+              <v-time-picker
+                v-model="formData.am_time_out"
+                title="AM - Time Out"
+                color="secondary"
+                ampm-in-title
+              ></v-time-picker>
+            </v-col>
+
+            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+              <v-time-picker
+                v-model="formData.pm_time_in"
+                title="PM - Time In"
+                color="secondary"
+                ampm-in-title
+              ></v-time-picker>
+            </v-col>
+
+            <v-col cols="12" sm="6" class="d-flex justify-center text-center">
+              <v-time-picker
+                v-model="formData.pm_time_out"
+                title="PM - Time Out"
+                color="secondary"
+                ampm-in-title
+              ></v-time-picker>
             </v-col>
           </v-row>
         </v-card-text>
@@ -70,7 +118,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Attendance' : 'Add Attendance' }}
+            {{ isUpdate ? 'Rectify Attendance' : 'Add Attendance' }}
           </v-btn>
         </v-card-actions>
       </v-form>
