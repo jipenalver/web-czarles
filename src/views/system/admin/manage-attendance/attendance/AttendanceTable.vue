@@ -80,9 +80,9 @@ const {
           </span>
         </template>
 
-        <template #item.created_at="{ item }">
+        <template #item.date="{ item }">
           <span class="font-weight-bold">
-            {{ getDateWithWeekday(item.created_at) }}
+            {{ item.date ? getDateWithWeekday(item.date) : '-' }}
           </span>
         </template>
 

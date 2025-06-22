@@ -18,7 +18,8 @@ export function useAttendanceTable() {
     },
     {
       title: 'Date',
-      key: 'created_at',
+      key: 'date',
+      sortable: false,
       align: 'start',
     },
     {
