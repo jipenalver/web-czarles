@@ -12,8 +12,12 @@ export type Attendance = {
   am_time_out: string
   pm_time_in: string
   pm_time_out: string
-  employee_id: string
+  employee_id: string | null
   employee: Employee
+}
+
+export type AttendanceForm = Omit<Attendance, 'employee'> & {
+  date: string | null
 }
 
 export type AttendanceTableFilter = {
