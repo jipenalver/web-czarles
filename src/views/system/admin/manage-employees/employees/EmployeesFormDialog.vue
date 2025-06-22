@@ -73,6 +73,7 @@ const {
                 prepend-inner-icon="mdi-calendar"
                 label="Birthdate"
                 placeholder="Select Date"
+                view-mode="year"
                 :rules="[requiredValidator]"
                 hide-actions
               ></v-date-input>
@@ -82,7 +83,6 @@ const {
               <v-textarea
                 v-model="formData.address"
                 label="Address"
-                placeholder="Address"
                 rows="3"
                 :rules="[requiredValidator]"
               ></v-textarea>

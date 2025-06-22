@@ -30,6 +30,9 @@ export const customDefaults = {
   VTextField: {
     variant: 'outlined',
   },
+  VTextarea: {
+    variant: 'outlined',
+  },
   VAutocomplete: {
     variant: 'outlined',
   },
@@ -43,9 +46,6 @@ export const customDefaults = {
     variant: 'outlined',
   },
   VDateInput: {
-    variant: 'outlined',
-  },
-  VTextarea: {
     variant: 'outlined',
   },
 }

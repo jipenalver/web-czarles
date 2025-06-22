@@ -23,15 +23,15 @@ export type Employee = {
   is_field_staff: boolean
   is_permanent: boolean
   is_insured: boolean
-  designation_id: null | number
+  designation_id: number | null
   designation: {
     designation: string
   }
-  area_origin_id: null | number
+  area_origin_id: number | null
   area_origin: {
     area: string
   }
-  area_assignment_id: null | number
+  area_assignment_id: number | null
   area_assignment: {
     area: string
   }

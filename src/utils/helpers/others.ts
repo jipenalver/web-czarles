@@ -235,6 +235,19 @@ export const getTime = (date: Date | string | null) => {
   return `${hours}:${minutes} ${ampm}`
 }
 
+// 👉 Get formatted time in 24-hour format without UTC conversion
+export const getTime24Hour = (date: Date | string | null) => {
+  if (!date) return null
+
+  const dateString = typeof date === 'string' ? date.replace(/[+\-]\d{2}:?\d{0,2}$/, '') : date
+  const dateValue = new Date(dateString)
+
+  const hours = String(dateValue.getHours()).padStart(2, '0')
+  const minutes = String(dateValue.getMinutes()).padStart(2, '0')
+
+  return `${hours}:${minutes}`
+}
+
 // 👉 Get Days Difference
 export const getDaysDiff = (date1: Date, date2: Date, isRound = true) => {
   const startDate = new Date(date1).getTime()
