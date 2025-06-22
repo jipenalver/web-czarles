@@ -92,6 +92,7 @@ export function useAttendanceFormDialog(
     formData,
     formAction,
     refVForm,
+    isUpdate,
     onFormSubmit,
     onFormReset,
     employeesStore,
