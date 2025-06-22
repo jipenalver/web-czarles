@@ -8,11 +8,12 @@ import { ref } from 'vue'
 export type Attendance = {
   id: number
   created_at: string
-  am_time_in: string
-  am_time_out: string
-  pm_time_in: string
-  pm_time_out: string
+  am_time_in: string | null
+  am_time_out: string | null
+  pm_time_in: string | null
+  pm_time_out: string | null
   employee_id: string | null
+  is_rectified: boolean
   employee: Employee
 }
 
