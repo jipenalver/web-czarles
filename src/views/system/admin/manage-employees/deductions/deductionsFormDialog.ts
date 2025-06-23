@@ -42,12 +42,7 @@ export function useDeductionsFormDialog(
       amount: formAmounts.value[index],
     }))
 
-    console.log('Submitting form data:', formData.value)
-
-    const { data, error } = await benefitsStore.updateDeductionsById(
-      props.itemId as number,
-      formData.value,
-    )
+    const { data, error } = await benefitsStore.updateDeductionsById(formData.value)
 
     if (error) {
       formAction.value = {
