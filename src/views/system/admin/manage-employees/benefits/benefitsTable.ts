@@ -47,6 +47,7 @@ export function useBenefitsTable() {
       formAction.value.formMessage = 'Successfully Deleted Benefit.'
 
       await onLoadItems(tableOptions.value)
+      await benefitsStore.getBenefits()
     }
 
     formAction.value.formAlert = true

@@ -50,6 +50,7 @@ export function useAreasTable() {
       formAction.value.formMessage = 'Successfully Deleted Area.'
 
       await onLoadItems(tableOptions.value)
+      await areasStore.getAreas()
     }
 
     formAction.value.formAlert = true

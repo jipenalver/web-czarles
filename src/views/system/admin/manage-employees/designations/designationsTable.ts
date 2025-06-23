@@ -47,9 +47,10 @@ export function useDesignationsTable() {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Employee.'
+      formAction.value.formMessage = 'Successfully Deleted Designation.'
 
       await onLoadItems(tableOptions.value)
+      await designationsStore.getDesignations()
     }
 
     formAction.value.formAlert = true
