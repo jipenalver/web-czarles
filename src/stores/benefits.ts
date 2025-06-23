@@ -80,16 +80,15 @@ export const useBenefitsStore = defineStore('benefits', () => {
     return data as EmployeeDeduction[]
   }
 
-  async function updateDeductionsById(
-    employeeId: number,
-    deductions: Partial<EmployeeDeduction>[],
-  ) {
-    const updateDatas = deductions.map((deduction) => ({
-      ...deduction,
-      employee_id: employeeId,
-    }))
+  async function updateDeductionsById(formData: Partial<EmployeeDeduction>[]) {
+    const { error: deleteError } = await supabase
+      .from('employee_deductions')
+      .delete()
+      .eq('employee_id', formData[0].employee_id)
 
-    return await supabase.from('employee_deductions').upsert(updateDatas).select()
+    if (deleteError) return { data: null, error: deleteError }
+
+    return await supabase.from('employee_deductions').upsert(formData).select()
   }
 
   // Expose States and Actions
