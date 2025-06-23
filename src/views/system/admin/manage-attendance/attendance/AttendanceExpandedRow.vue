@@ -4,6 +4,7 @@ import { type Attendance } from '@/stores/attendances'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
+  componentView: 'attendance' | 'leave'
   columnsLength: number
   itemData: Attendance
 }>()
@@ -41,26 +42,6 @@ const { mobile } = useDisplay()
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">Undertime:</span>
-          <span></span>
-        </v-col>
-
-        <v-col
-          cols="12"
-          sm="6"
-          class="d-flex align-center my-2"
-          :class="mobile ? 'justify-space-between' : 'justify-start'"
-        >
-          <span class="text-body-2 font-weight-bold me-2">Is Overtime Applied:</span>
-          <span></span>
-        </v-col>
-
-        <v-col
-          cols="12"
-          sm="6"
-          class="d-flex align-center my-2"
-          :class="mobile ? 'justify-space-between' : 'justify-start'"
-        >
-          <span class="text-body-2 font-weight-bold me-2">Overtime:</span>
           <span></span>
         </v-col>
 
@@ -127,6 +108,32 @@ const { mobile } = useDisplay()
             {{ props.itemData.is_pm_out_rectified ? 'Rectified' : 'Not Rectified' }}
           </v-chip>
         </v-col>
+
+        <template v-if="props.componentView === 'leave'">
+          <v-divider class="my-3" thickness="1"></v-divider>
+
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">Is Overtime Applied:</span>
+            <span></span>
+          </v-col>
+
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">Overtime:</span>
+            <span></span>
+          </v-col>
+        </template>
+
+        <v-divider class="my-3" thickness="1"></v-divider>
       </v-row>
     </td>
   </tr>
