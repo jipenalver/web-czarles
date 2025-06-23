@@ -42,11 +42,11 @@ const { formAction, formAmounts, refVForm, onFormSubmit, onFormReset, benefitsSt
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-            <v-col cols="12" v-for="{ id, benefit } in benefitsStore.benefits" :key="id">
+            <v-col cols="12" v-for="(benefit, index) in benefitsStore.benefits" :key="benefit.id">
               <v-text-field
-                v-model="formAmounts"
+                v-model="formAmounts[index]"
                 prepend-inner-icon="mdi-currency-php"
-                :label="benefit"
+                :label="benefit.benefit"
                 type="number"
                 :rules="[requiredValidator]"
               ></v-text-field>
