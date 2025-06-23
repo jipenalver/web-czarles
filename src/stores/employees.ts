@@ -78,7 +78,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     let query = supabase
       .from('employees')
       .select(
-        '*, designation:designation_id (designation), area_origin:area_origin_id (area), area_assignment:area_assignment_id (area)',
+        '*, designation:designation_id (designation), area_origin:area_origin_id (area), area_assignment:area_assignment_id (area), employee_deductions (amount, benefit_id, employee_benefit:benefit_id (benefit))',
       )
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
