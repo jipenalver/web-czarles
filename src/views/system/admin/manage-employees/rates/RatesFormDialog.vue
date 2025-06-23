@@ -36,7 +36,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate Information">
+    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
