@@ -3,7 +3,6 @@ import { useDeductionsFormDialog } from './deductionsFormDialog'
 import { type EmployeeTableFilter } from '@/stores/employees'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -48,7 +47,6 @@ const { formAction, formAmounts, refVForm, onFormSubmit, onFormReset, benefitsSt
                 prepend-inner-icon="mdi-currency-php"
                 :label="benefit.benefit"
                 type="number"
-                :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
           </v-row>
