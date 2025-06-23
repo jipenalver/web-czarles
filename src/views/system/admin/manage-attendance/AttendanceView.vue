@@ -25,7 +25,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
           headline="Manage employee attendance."
         ></HeaderPanel>
 
-        <AttendanceTable></AttendanceTable>
+        <AttendanceTable component-view="attendance"></AttendanceTable>
       </v-container>
     </template>
   </AppLayout>
