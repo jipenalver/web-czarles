@@ -8,6 +8,8 @@ import DashboardView from '@/views/system/dashboard/DashboardView.vue'
 import EmployeesView from '@/views/system/admin/manage-employees/EmployeesView.vue'
 import RatesBenefitsView from '@/views/system/admin/manage-employees/RatesBenefitsView.vue'
 import AttendanceView from '@/views/system/admin/manage-attendance/AttendanceView.vue'
+import LeaveOvertimeView from '@/views/system/admin/manage-attendance/LeaveOvertimeView.vue'
+import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
 
 export const routes = [
@@ -72,6 +74,20 @@ export const routes = [
     path: '/hrms/attendance/list',
     name: 'hrms-attendance-list',
     component: AttendanceView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/hrms/attendance/leave',
+    name: 'hrms-attendance-leave',
+    component: LeaveOvertimeView,
+    meta: { requiresAuth: true },
+  },
+
+  // Payroll
+  {
+    path: '/hrms/payroll/list',
+    name: 'hrms-payroll-list',
+    component: PayrollView,
     meta: { requiresAuth: true },
   },
 
