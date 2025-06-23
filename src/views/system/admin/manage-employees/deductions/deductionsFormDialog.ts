@@ -1,10 +1,7 @@
-import {
-  type EmployeeTableFilter,
-  // useEmployeesStore
-} from '@/stores/employees'
+import { type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
+import { type EmployeeDeduction, useBenefitsStore } from '@/stores/benefits'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { useBenefitsStore } from '@/stores/benefits'
 import { onMounted, ref, watch } from 'vue'
 
 export function useDeductionsFormDialog(
@@ -16,21 +13,22 @@ export function useDeductionsFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  // const employeesStore = useEmployeesStore()
+  const employeesStore = useEmployeesStore()
   const benefitsStore = useBenefitsStore()
 
   // States
-  const formDataDefault = {
-    amount: [] as number[],
-  }
+  const formDataDefault: Partial<EmployeeDeduction>[] = []
   const formData = ref({ ...formDataDefault })
+  const formAmounts = ref<number[]>([])
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
 
   watch(
     () => props.isDialogVisible,
-    () => {
-      // formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+    async () => {
+      const deductionsData = await benefitsStore.getDeductionsById(props.itemId as number)
+
+      formAmounts.value = deductionsData.map((deduction) => deduction.amount)
     },
   )
 
@@ -38,24 +36,35 @@ export function useDeductionsFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // const { data, error } = await employeesStore.updateEmployee(formData.value)
+    formData.value = benefitsStore.benefits.map((benefit, index) => ({
+      employee_id: props.itemId as number,
+      benefit_id: benefit.id,
+      amount: formAmounts.value[index],
+    }))
 
-    // if (error) {
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: error.message,
-    //     formStatus: 400,
-    //     formProcess: false,
-    //   }
-    // } else if (data) {
-    //   formAction.value.formMessage = `Successfully Updated Employee Deduction(s).`
+    console.log('Submitting form data:', formData.value)
 
-    //   await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
+    const { data, error } = await benefitsStore.updateDeductionsById(
+      props.itemId as number,
+      formData.value,
+    )
 
-    //   setTimeout(() => {
-    //     onFormReset()
-    //   }, 1500)
-    // }
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formProcess: false,
+      }
+    } else if (data) {
+      formAction.value.formMessage = `Successfully Updated Employee Deduction(s).`
+
+      await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
+
+      setTimeout(() => {
+        onFormReset()
+      }, 1500)
+    }
 
     formAction.value.formAlert = true
   }
@@ -80,6 +89,7 @@ export function useDeductionsFormDialog(
   return {
     formData,
     formAction,
+    formAmounts,
     refVForm,
     onFormSubmit,
     onFormReset,
