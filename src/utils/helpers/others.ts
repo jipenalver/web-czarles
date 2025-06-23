@@ -29,10 +29,18 @@ export const getMoneyText = (value: string | number) => {
   }).format(Number(value))
 }
 
-// 👉 Pad String Left
-export const getPadLeftText = (value: string | number, length = 4, char = '0') => {
+// 👉 Pad String
+export const getPaddedText = (
+  value: string | number,
+  length = 4,
+  char = '0',
+  direction = 'left' as 'left' | 'right',
+) => {
   value = String(value)
   if (value.length >= length) return value
+
+  if (direction === 'right') return value + char.repeat(length - value.length)
+
   return char.repeat(length - value.length) + value
 }
 
@@ -54,7 +62,7 @@ export const getIDNumber = (hiredAt: string, employeeId: number) => {
 
   const year = hiredDate.getFullYear().toString().slice(-2)
 
-  return `2${year}-${getPadLeftText(employeeId)}`
+  return `2${year}-${getPaddedText(employeeId)}`
 }
 
 // 👉 Alpha-numeric Random Code
@@ -152,7 +160,7 @@ export const prepareDate = (date: Date | string) => {
 export const prepareDateRange = (daterange: string[] | null) => {
   if (daterange === null) return null
 
-  const formattedDates = daterange.map((date) => getISODate(new Date(date)))
+  const formattedDates = daterange.map((date) => getDateISO(new Date(date)))
 
   const dates =
     formattedDates.length > 1
@@ -163,29 +171,17 @@ export const prepareDateRange = (daterange: string[] | null) => {
 }
 
 // 👉 Get date in ISO format without UTC conversion
-export const getISODate = (date: Date | string | null) => {
+export const getDateISO = (date: Date | string | null) => {
   if (!date) return null
 
-  const dateValue = new Date(date)
+  const dateString = typeof date === 'string' ? date.replace(/[+\-]\d{2}:?\d{0,2}$/, '') : date
+  const dateValue = new Date(dateString)
 
   const year = dateValue.getFullYear()
   const month = String(dateValue.getMonth() + 1).padStart(2, '0')
   const day = String(dateValue.getDate()).padStart(2, '0')
 
   return `${year}-${month}-${day}`
-}
-
-// 👉 Get time in ISO format without UTC conversion
-export const getISOTime = (date: Date | string | null) => {
-  if (!date) return null
-
-  const dateValue = new Date(date)
-
-  const hours = String(dateValue.getHours()).padStart(2, '0')
-  const minutes = String(dateValue.getMinutes()).padStart(2, '0')
-  const seconds = String(dateValue.getSeconds()).padStart(2, '0')
-
-  return `${hours}:${minutes}:${seconds}`
 }
 
 // 👉 Get formatted date with weekday and full month name
@@ -248,15 +244,47 @@ export const getTime24Hour = (date: Date | string | null) => {
   return `${hours}:${minutes}`
 }
 
-// 👉 Get Days Difference
-export const getDaysDiff = (date1: Date, date2: Date, isRound = true) => {
-  const startDate = new Date(date1).getTime()
-  const endDate = new Date(date2).getTime()
+// 👉 Get total work hours (AM + PM sessions combined)
+export const getTotalWorkHours = (
+  amTimeIn: string | Date | null,
+  amTimeOut: string | Date | null,
+  pmTimeIn: string | Date | null,
+  pmTimeOut: string | Date | null,
+  isDecimal = false,
+) => {
+  const getMinutes = (startTime: string | Date | null, endTime: string | Date | null) => {
+    if (!startTime || !endTime) return 0
 
-  const differenceInTime = endDate - startDate
-  const differenceInDay = differenceInTime / (1000 * 3600 * 24)
+    const start = new Date(startTime)
+    const end = new Date(endTime)
 
-  return isRound ? Math.round(differenceInDay) : differenceInDay
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
+
+    const diffMs = end.getTime() - start.getTime()
+    return diffMs < 0 ? 0 : Math.floor(diffMs / (1000 * 60))
+  }
+
+  const amMinutes = getMinutes(amTimeIn, amTimeOut)
+  const pmMinutes = getMinutes(pmTimeIn, pmTimeOut)
+  const totalMinutes = amMinutes + pmMinutes
+
+  if (totalMinutes === 0) return isDecimal ? '0 hours' : '0 minutes'
+
+  if (isDecimal) {
+    const decimalHours = totalMinutes / 60
+    const formatted = decimalHours.toFixed(2).replace(/\.00$/, '')
+    const hourText = decimalHours === 1 ? 'hour' : 'hours'
+    return `${formatted} ${hourText}`
+  }
+
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  const hourText = hours === 1 ? 'hour' : 'hours'
+  const minuteText = minutes === 1 ? 'minute' : 'minutes'
+
+  if (hours === 0) return `${minutes} ${minuteText}`
+  if (minutes === 0) return `${hours} ${hourText}`
+  return `${hours} ${hourText} ${minutes} ${minuteText}`
 }
 
 // 👉 Get Years of Service

@@ -65,6 +65,7 @@ export function useAttendanceTable() {
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
+  const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
   const formAction = ref({ ...formActionDefault })
 
@@ -77,6 +78,29 @@ export function useAttendanceTable() {
   const onUpdate = (item: Attendance) => {
     itemData.value = item
     isDialogVisible.value = true
+  }
+
+  const onDelete = (id: number) => {
+    deleteId.value = id
+    isConfirmDeleteDialog.value = true
+  }
+
+  const onConfirmDelete = async () => {
+    formAction.value = { ...formActionDefault, formProcess: true }
+
+    const { data, error } = await attendancesStore.deleteAttendance(deleteId.value)
+
+    if (error) {
+      formAction.value.formMessage = error.message
+      formAction.value.formStatus = 400
+    } else if (data) {
+      formAction.value.formMessage = 'Successfully Deleted Attendance.'
+
+      await onLoadItems(tableOptions.value)
+    }
+
+    formAction.value.formAlert = true
+    formAction.value.formProcess = false
   }
 
   const onFilterItems = () => {
@@ -109,6 +133,8 @@ export function useAttendanceTable() {
     formAction,
     onAdd,
     onUpdate,
+    onDelete,
+    onConfirmDelete,
     onFilterItems,
     onLoadItems,
     attendancesStore,

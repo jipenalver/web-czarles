@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -13,10 +14,13 @@ const {
   tableOptions,
   tableFilters,
   isDialogVisible,
+  isConfirmDeleteDialog,
   itemData,
   formAction,
   onAdd,
   onUpdate,
+  onDelete,
+  onConfirmDelete,
   onFilterItems,
   onLoadItems,
   attendancesStore,
@@ -116,6 +120,11 @@ const {
               <v-icon icon="mdi-pencil"></v-icon>
               <v-tooltip activator="parent" location="top">Rectify Attendance</v-tooltip>
             </v-btn>
+
+            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+              <v-tooltip activator="parent" location="top">Delete Attendance</v-tooltip>
+            </v-btn>
           </div>
         </template>
 
@@ -148,4 +157,11 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></AttendanceFormDialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmDeleteDialog"
+    title="Confirm Delete"
+    text="Are you sure you want to delete this attendance?"
+    @confirm="onConfirmDelete"
+  ></ConfirmDialog>
 </template>

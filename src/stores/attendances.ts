@@ -15,7 +15,12 @@ export type Attendance = {
   pm_time_in: string | null
   pm_time_out: string | null
   employee_id: string | null
-  is_rectified: boolean
+  is_am_in_rectified: boolean
+  is_am_out_rectified: boolean
+  is_pm_in_rectified: boolean
+  is_pm_out_rectified: boolean
+  is_am_leave: boolean
+  is_pm_leave: boolean
   employee: Employee
 }
 
@@ -47,7 +52,11 @@ export const useAttendancesStore = defineStore('attendances', () => {
     tableOptions: TableOptions,
     { employee_id }: AttendanceTableFilter,
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'id', false)
+    const { rangeStart, rangeEnd, column, order } = tablePagination(
+      tableOptions,
+      'am_time_in',
+      false,
+    )
 
     let query = supabase
       .from('attendances')
