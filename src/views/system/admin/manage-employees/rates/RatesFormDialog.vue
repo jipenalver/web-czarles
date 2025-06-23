@@ -50,7 +50,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
               ></v-text-field>
             </v-col>
 
-            <v-col cols="12">
+            <v-col v-if="false" cols="12">
               <v-switch v-model="formData.is_flexible" class="ms-2" color="primary" hide-details>
                 <template #label>
                   Has Flexible Working Hours?

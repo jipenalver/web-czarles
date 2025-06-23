@@ -7,6 +7,10 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
 
+const props = defineProps<{
+  componentView: 'attendance' | 'leave'
+}>()
+
 const { mobile } = useDisplay()
 
 const {
@@ -68,11 +72,20 @@ const {
               ></v-autocomplete>
             </v-col>
 
-            <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
-                Add Attendance
-              </v-btn>
-            </v-col>
+            <template v-if="props.componentView === 'attendance'">
+              <v-col cols="12" sm="3">
+                <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
+                  Add Attendance
+                </v-btn>
+              </v-col>
+            </template>
+            <template v-else-if="props.componentView === 'leave'">
+              <v-col cols="12" sm="3">
+                <v-btn class="my-1" prepend-icon="mdi-account-arrow-left" color="primary" block>
+                  Apply Leave
+                </v-btn>
+              </v-col>
+            </template>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
@@ -116,15 +129,24 @@ const {
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
-            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
-              <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Rectify Attendance</v-tooltip>
-            </v-btn>
+            <template v-if="props.componentView === 'attendance'">
+              <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
+                <v-icon icon="mdi-pencil"></v-icon>
+                <v-tooltip activator="parent" location="top">Rectify Attendance</v-tooltip>
+              </v-btn>
 
-            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Attendance</v-tooltip>
-            </v-btn>
+              <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                <v-tooltip activator="parent" location="top">Delete Attendance</v-tooltip>
+              </v-btn>
+            </template>
+
+            <template v-else-if="props.componentView === 'leave'">
+              <v-btn variant="text" density="comfortable" icon>
+                <v-icon icon="mdi-clock-plus" color="secondary"></v-icon>
+                <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>
+              </v-btn>
+            </template>
           </div>
         </template>
 
@@ -143,6 +165,7 @@ const {
 
         <template #expanded-row="{ columns, item }">
           <AttendanceExpandedRow
+            :component-view="props.componentView"
             :columns-length="columns.length"
             :item-data="item"
           ></AttendanceExpandedRow>
