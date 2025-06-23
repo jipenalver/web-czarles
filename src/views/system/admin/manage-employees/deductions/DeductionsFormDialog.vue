@@ -3,7 +3,6 @@ import { useDeductionsFormDialog } from './deductionsFormDialog'
 import { type EmployeeTableFilter } from '@/stores/employees'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -17,7 +16,7 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, onFormSubmit, onFormReset, benefitsStore } =
+const { formAction, formAmounts, refVForm, onFormSubmit, onFormReset, benefitsStore } =
   useDeductionsFormDialog(props, emit)
 </script>
 
@@ -42,13 +41,12 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset, benefitsStore
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-            <v-col cols="12" v-for="benefit in benefitsStore.benefits" :key="benefit.id">
+            <v-col cols="12" v-for="(benefit, index) in benefitsStore.benefits" :key="benefit.id">
               <v-text-field
-                v-model="formData.amount"
+                v-model="formAmounts[index]"
                 prepend-inner-icon="mdi-currency-php"
                 :label="benefit.benefit"
                 type="number"
-                :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
           </v-row>

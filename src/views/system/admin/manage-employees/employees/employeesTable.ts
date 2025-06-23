@@ -65,6 +65,7 @@ export function useEmployeesTable() {
       formAction.value.formMessage = 'Successfully Deleted Employee.'
 
       await onLoadItems(tableOptions.value)
+      await employeesStore.getEmployees()
     }
 
     formAction.value.formAlert = true

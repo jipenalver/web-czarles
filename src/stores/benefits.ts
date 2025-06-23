@@ -10,6 +10,14 @@ export type Benefit = {
   description: string
 }
 
+export type EmployeeDeduction = {
+  id: number
+  employee_id: number
+  benefit_id: number
+  amount: number
+  created_at: string
+}
+
 export const useBenefitsStore = defineStore('benefits', () => {
   // States
   const benefits = ref<Benefit[]>([])
@@ -63,6 +71,26 @@ export const useBenefitsStore = defineStore('benefits', () => {
     return await supabase.from('employee_benefits').delete().eq('id', id).select()
   }
 
+  async function getDeductionsById(employeeId: number) {
+    const { data } = await supabase
+      .from('employee_deductions')
+      .select()
+      .eq('employee_id', employeeId)
+
+    return data as EmployeeDeduction[]
+  }
+
+  async function updateDeductionsById(formData: Partial<EmployeeDeduction>[]) {
+    const { error: deleteError } = await supabase
+      .from('employee_deductions')
+      .delete()
+      .eq('employee_id', formData[0].employee_id)
+
+    if (deleteError) return { data: null, error: deleteError }
+
+    return await supabase.from('employee_deductions').upsert(formData).select()
+  }
+
   // Expose States and Actions
   return {
     benefits,
@@ -74,5 +102,7 @@ export const useBenefitsStore = defineStore('benefits', () => {
     addBenefit,
     updateBenefit,
     deleteBenefit,
+    getDeductionsById,
+    updateDeductionsById,
   }
 })

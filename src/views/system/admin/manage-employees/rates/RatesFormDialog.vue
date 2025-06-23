@@ -36,7 +36,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate Information">
+    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
@@ -48,6 +48,17 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
                 type="number"
                 :rules="[requiredValidator]"
               ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-switch v-model="formData.is_flexible" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Has Flexible Working Hours?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_flexible ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
             </v-col>
 
             <v-col cols="12">

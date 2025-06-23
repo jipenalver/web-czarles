@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
 import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -158,10 +158,11 @@ const {
     :table-filters="tableFilters"
   ></AttendanceFormDialog>
 
-  <ConfirmDialog
+  <ConfirmFieldDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this attendance?"
+    subtitle="Are you sure you want to delete this attendance?"
+    confirm-text="DELETE"
     @confirm="onConfirmDelete"
-  ></ConfirmDialog>
+  ></ConfirmFieldDialog>
 </template>

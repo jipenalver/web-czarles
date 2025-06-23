@@ -16,8 +16,9 @@ export function useRatesFormDialog(
 
   // States
   const formDataDefault = {
-    is_insured: false,
     daily_rate: undefined,
+    is_flexible: false,
+    is_insured: false,
   }
   const formData = ref<Partial<Employee>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
