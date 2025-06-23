@@ -179,6 +179,24 @@ const { mobile } = useDisplay()
             <span class="text-body-2 font-weight-bold me-2">With Accident Insurance:</span>
             <p class="text-body-2">{{ props.itemData.is_insured ? 'Yes' : 'No' }}</p>
           </v-col>
+
+          <template v-if="props.itemData.employee_deductions.length > 0">
+            <v-divider class="my-3" thickness="1"></v-divider>
+
+            <v-col
+              v-for="benefit in props.itemData.employee_deductions"
+              :key="benefit.benefit_id"
+              cols="12"
+              sm="4"
+              class="d-flex align-center my-2"
+              :class="mobile ? 'justify-space-between' : 'justify-start'"
+            >
+              <span class="text-body-2 font-weight-bold me-2">
+                {{ benefit.employee_benefit.benefit }}:
+              </span>
+              <p class="text-body-2">{{ getMoneyText(benefit.amount as number) }}</p>
+            </v-col>
+          </template>
         </template>
 
         <v-divider class="my-3" thickness="1"></v-divider>

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { type EmployeeDeduction } from './benefits'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -37,6 +38,9 @@ export type Employee = {
     area: string
   }
   daily_rate: number
+  employee_deductions: (Partial<EmployeeDeduction> & {
+    employee_benefit: { benefit: string }
+  })[]
 }
 
 export type EmployeeTableFilter = {
