@@ -21,7 +21,7 @@ export const adminItemsNav2: SubNavigation[] = [
 ]
 export const adminItemsNav3: SubNavigation[] = [
   ['Attendance', 'mdi-clock-in', '', '/hrms/attendance/list'],
-  ['Leave Application', 'mdi-account-arrow-left', '', '/hrms/attendance/leave'],
+  ['Leave & Overtime', 'mdi-account-arrow-left', '', '/hrms/attendance/leave'],
 ]
 export const adminItemsNav4: SubNavigation[] = [
   ['Payroll', 'mdi-account-cash', '', '/hrms/payroll/list'],
