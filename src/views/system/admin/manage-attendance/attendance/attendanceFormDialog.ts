@@ -156,11 +156,11 @@ export function useAttendanceFormDialog(
       if (onFormValidate()) return
 
       if (isUpdate.value) {
-        confirmText.value = 'Are you sure you want to update'
-        if (formCheckBox.value.isRectifyAMTimeIn) confirmText.value += ', AM - Time In, '
-        if (formCheckBox.value.isRectifyAMTimeOut) confirmText.value += ', AM - Time Out, '
-        if (formCheckBox.value.isRectifyPMTimeIn) confirmText.value += ', PM - Time In, '
-        if (formCheckBox.value.isRectifyPMTimeOut) confirmText.value += ', PM - Time Out, '
+        confirmText.value = 'Are you sure you want to update, '
+        if (formCheckBox.value.isRectifyAMTimeIn) confirmText.value += ' AM - Time In, '
+        if (formCheckBox.value.isRectifyAMTimeOut) confirmText.value += ' AM - Time Out, '
+        if (formCheckBox.value.isRectifyPMTimeIn) confirmText.value += ' PM - Time In, '
+        if (formCheckBox.value.isRectifyPMTimeOut) confirmText.value += ' PM - Time Out, '
         confirmText.value += ' attendance?'
       } else confirmText.value = 'Are you sure you want to add this attendance?'
 
