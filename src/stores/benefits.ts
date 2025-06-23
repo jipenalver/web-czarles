@@ -80,6 +80,18 @@ export const useBenefitsStore = defineStore('benefits', () => {
     return data as EmployeeDeduction[]
   }
 
+  async function updateDeductionsById(
+    employeeId: number,
+    deductions: Partial<EmployeeDeduction>[],
+  ) {
+    const updateDatas = deductions.map((deduction) => ({
+      ...deduction,
+      employee_id: employeeId,
+    }))
+
+    return await supabase.from('employee_deductions').upsert(updateDatas).select()
+  }
+
   // Expose States and Actions
   return {
     benefits,
@@ -92,5 +104,6 @@ export const useBenefitsStore = defineStore('benefits', () => {
     updateBenefit,
     deleteBenefit,
     getDeductionsById,
+    updateDeductionsById,
   }
 })
