@@ -14,7 +14,7 @@ const { mobile } = useDisplay()
 <template>
   <tr>
     <td :colspan="props.columnsLength" class="py-2">
-      <v-row dense>
+      <v-row :class="mobile ? '' : 'px-4'" :no-gutters="!mobile" dense>
         <v-col
           cols="12"
           sm="6"
