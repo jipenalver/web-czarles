@@ -66,8 +66,10 @@ export const getIDNumber = (hiredAt: string, employeeId: number) => {
 }
 
 // 👉 Alpha-numeric Random Code
-export const getRandomCode = (length = 6) => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+export const getRandomCode = (length = 6, isAllCaps = false) => {
+  const chars = isAllCaps
+    ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
   return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join(
     '',
