@@ -8,7 +8,7 @@ export type Holiday = {
   id: number
   created_at: string
   name: string
-  type: string
+  type: string | null
   description: string
   holiday_at: string
 }

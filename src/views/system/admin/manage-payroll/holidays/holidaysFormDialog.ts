@@ -1,9 +1,9 @@
-import { useHolidaysStore, type Holiday, type HolidayTableFilter } from '@/stores/holidays'
+import { type Holiday, type HolidayTableFilter, useHolidaysStore } from '@/stores/holidays'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { ref, watch } from 'vue'
 
-export function useDesignationsFormDialog(
+export function useHolidaysFormDialog(
   props: {
     isDialogVisible: boolean
     itemData: Holiday | null
@@ -17,7 +17,7 @@ export function useDesignationsFormDialog(
   // States
   const formDataDefault = {
     name: '',
-    type: '',
+    type: null,
     description: '',
     holiday_at: '',
   }
