@@ -108,6 +108,12 @@ const {
           <v-divider class="my-5"></v-divider>
         </template>
 
+        <template #item.holiday_at="{ item }">
+          <span class="font-weight-bold">
+            {{ date.format(item.holiday_at, 'fullDate') }}
+          </span>
+        </template>
+
         <template #item.name="{ item }">
           <span class="font-weight-bold"> {{ item.name }} </span>
         </template>
