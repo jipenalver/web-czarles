@@ -1,5 +1,6 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { prepareFormDates } from '@/utils/helpers/others'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -38,11 +39,7 @@ export const useHolidaysStore = defineStore('holidays', () => {
   }
 
   async function getHolidaysTable(tableOptions: TableOptions, { year }: HolidayTableFilter) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(
-      tableOptions,
-      'holiday_at',
-      false,
-    )
+    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'holiday_at')
 
     let query = supabase
       .from('holidays')
@@ -79,11 +76,15 @@ export const useHolidaysStore = defineStore('holidays', () => {
   }
 
   async function addHoliday(formData: Partial<Holiday>) {
-    return await supabase.from('holidays').insert(formData).select()
+    const preparedData = prepareFormDates(formData, ['holiday_at'])
+
+    return await supabase.from('holidays').insert(preparedData).select()
   }
 
   async function updateHoliday(formData: Partial<Holiday>) {
-    return await supabase.from('holidays').update(formData).eq('id', formData.id).select()
+    const preparedData = prepareFormDates(formData, ['holiday_at'])
+
+    return await supabase.from('holidays').update(preparedData).eq('id', formData.id).select()
   }
 
   async function deleteHoliday(id: number) {
