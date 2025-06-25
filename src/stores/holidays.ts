@@ -8,6 +8,7 @@ export type Holiday = {
   id: number
   created_at: string
   name: string
+  type: string
   description: string
   holiday_at: string
 }
@@ -72,7 +73,7 @@ export const useHolidaysStore = defineStore('holidays', () => {
     query: PostgrestFilterBuilder<any, any, any>,
     { year }: DesignationTableFilter,
   ) {
-    if (year) query = query.eq('holiday_at', year)
+    if (year) query = query.gte('holiday_at', `${year}-01-01`).lt('holiday_at', `${year + 1}-01-01`)
 
     return query
   }
