@@ -66,6 +66,7 @@ const {
                 item-title="label"
                 item-value="id"
                 :rules="[requiredValidator]"
+                :disabled="isUpdate"
               ></v-autocomplete>
             </v-col>
 
@@ -77,6 +78,7 @@ const {
                 label="Attendance Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
+                :disabled="isUpdate"
                 hide-actions
               ></v-date-input>
             </v-col>
