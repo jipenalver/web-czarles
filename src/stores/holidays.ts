@@ -13,7 +13,7 @@ export type Holiday = {
   holiday_at: string
 }
 
-export type DesignationTableFilter = {
+export type HolidayTableFilter = {
   year: string | null
 }
 
@@ -37,7 +37,7 @@ export const useHolidaysStore = defineStore('holidays', () => {
     holidays.value = data as Holiday[]
   }
 
-  async function getHolidaysTable(tableOptions: TableOptions, { year }: DesignationTableFilter) {
+  async function getHolidaysTable(tableOptions: TableOptions, { year }: HolidayTableFilter) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'holiday_at',
@@ -60,7 +60,7 @@ export const useHolidaysStore = defineStore('holidays', () => {
     holidaysTableTotal.value = count as number
   }
 
-  async function getHolidaysCount({ year }: DesignationTableFilter) {
+  async function getHolidaysCount({ year }: HolidayTableFilter) {
     let query = supabase.from('holidays').select('*', { count: 'exact', head: true })
 
     query = getHolidaysFilter(query, { year })
@@ -71,7 +71,7 @@ export const useHolidaysStore = defineStore('holidays', () => {
   function getHolidaysFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { year }: DesignationTableFilter,
+    { year }: HolidayTableFilter,
   ) {
     if (year) query = query.gte('holiday_at', `${year}-01-01`).lt('holiday_at', `${year + 1}-01-01`)
 
