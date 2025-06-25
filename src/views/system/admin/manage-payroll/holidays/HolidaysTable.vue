@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import HolidaysFormDialog from './HolidaysFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useHolidaysTable } from './holidaysTable'
@@ -46,9 +47,9 @@ const tableHeaders: TableHeader[] = [
 const {
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -87,14 +88,14 @@ const {
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="4">
-              <v-autocomplete
+              <v-select
                 v-model="tableFilters.year"
                 :items="['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030']"
                 density="compact"
                 label="Filter by Year"
                 clearable
                 @update:model-value="onFilterItems"
-              ></v-autocomplete>
+              ></v-select>
             </v-col>
 
             <v-col cols="12" sm="3">
@@ -133,6 +134,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <HolidaysFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></HolidaysFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
