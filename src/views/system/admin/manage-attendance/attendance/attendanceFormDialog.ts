@@ -134,9 +134,7 @@ export function useAttendanceFormDialog(
 
       if (!hasChecked)
         return setError('Please check at least one checkbox to rectify the attendance.')
-    }
-
-    if (!isUpdate.value) {
+    } else {
       const hasAttendance = attendancesStore.attendances.some(
         (attendance) =>
           getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
