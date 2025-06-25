@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { getDateWithWeekday, getTime, getRandomCode } from '@/utils/helpers/others'
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
-import { getDateWithWeekday, getTime } from '@/utils/helpers/others'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -185,7 +185,7 @@ const {
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
     subtitle="Are you sure you want to delete this attendance?"
-    confirm-text="DELETE"
+    :confirm-text="getRandomCode(6, true)"
     @confirm="onConfirmDelete"
   ></ConfirmFieldDialog>
 </template>
