@@ -122,14 +122,14 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function addEmployee(formData: Partial<Employee>) {
-    const preparedData = prepareFormDates(formData, ['hired_at', 'birthdate'])
+    const preparedData = prepareFormDates(formData, ['birthdate', 'hired_at'])
 
     return await supabase.from('employees').insert(preparedData).select()
   }
 
   async function updateEmployee(formData: Partial<Employee>) {
     const { designation, area_origin, area_assignment, employee_deductions, ...updateData } =
-      prepareFormDates(formData, ['hired_at', 'birthdate'])
+      prepareFormDates(formData, ['birthdate', 'hired_at'])
 
     return await supabase.from('employees').update(updateData).eq('id', formData.id).select()
   }

@@ -35,6 +35,32 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
     persistent
   >
     <v-card prepend-icon="mdi-tag" title="Holiday Details">
+      <v-card-text>
+        <div class="text-caption text-wrap">
+          <p class="mb-2">
+            To add or update a holiday, please check the official list of holidays in the
+            Philippines.
+          </p>
+
+          <p class="mb-2">
+            <strong>Note:</strong> The list of holidays is subject to change, so please
+            <strong>always refer to the official government website</strong> for the most accurate
+            and up-to-date information.
+          </p>
+
+          <p>
+            <strong>Source: </strong>
+            <a
+              href="https://www.officialgazette.gov.ph/nationwide-holidays/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Official Gazette
+            </a>
+          </p>
+        </div>
+      </v-card-text>
+
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
