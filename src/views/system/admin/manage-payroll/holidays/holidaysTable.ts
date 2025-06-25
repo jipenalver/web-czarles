@@ -3,7 +3,7 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { ref } from 'vue'
 
-export function useDesignationsTable() {
+export function useHolidaysTable() {
   const holidaysStore = useHolidaysStore()
 
   // States
@@ -14,7 +14,7 @@ export function useDesignationsTable() {
     isLoading: false,
   })
   const tableFilters = ref({
-    year: null,
+    year: new Date().getFullYear().toString(),
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
