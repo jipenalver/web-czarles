@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { prepareFormDates } from '@/utils/helpers/others'
 import { type EmployeeDeduction } from './benefits'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -121,11 +122,14 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function addEmployee(formData: Partial<Employee>) {
-    return await supabase.from('employees').insert(formData).select()
+    const preparedData = prepareFormDates(formData, ['hired_at', 'birthdate'])
+
+    return await supabase.from('employees').insert(preparedData).select()
   }
 
   async function updateEmployee(formData: Partial<Employee>) {
-    const { designation, area_origin, area_assignment, ...updateData } = formData
+    const { designation, area_origin, area_assignment, employee_deductions, ...updateData } =
+      prepareFormDates(formData, ['hired_at', 'birthdate'])
 
     return await supabase.from('employees').update(updateData).eq('id', formData.id).select()
   }
