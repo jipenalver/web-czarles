@@ -35,7 +35,7 @@ const { mobile } = useDisplay()
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
-          <p class="text-body-2 font-weight-bold me-2">Birthdate:</p>
+          <span class="text-body-2 font-weight-bold me-2">Birthdate:</span>
           <p class="text-body-2">{{ date.format(props.itemData.birthdate, 'fullDate') }}</p>
         </v-col>
 
@@ -45,7 +45,7 @@ const { mobile } = useDisplay()
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
-          <p class="text-body-2 font-weight-bold me-2">Address:</p>
+          <span class="text-body-2 font-weight-bold me-2">Address:</span>
           <p class="text-body-2">{{ props.itemData.address }}</p>
         </v-col>
 
