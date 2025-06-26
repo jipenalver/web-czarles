@@ -141,61 +141,63 @@ const { mobile } = useDisplay()
             </p>
           </v-col>
 
-          <v-col
-            cols="12"
-            sm="6"
-            class="d-flex align-center my-2"
-            :class="mobile ? 'justify-space-between' : 'justify-start'"
-          >
-            <span class="text-body-2 font-weight-bold me-2">Overtime - Time In:</span>
-            <v-chip class="font-weight-black" color="secondary" size="small">
-              {{ props.itemData.overtime_in ? getTime(props.itemData.overtime_in) : 'n/a' }}
-            </v-chip>
-          </v-col>
-
-          <v-col
-            cols="12"
-            sm="6"
-            class="d-flex align-center my-2"
-            :class="mobile ? 'justify-space-between' : 'justify-start'"
-          >
-            <span class="text-body-2 font-weight-bold me-2">Overtime - Time Out:</span>
-            <v-chip class="font-weight-black" color="secondary" size="small">
-              {{ props.itemData.overtime_out ? getTime(props.itemData.overtime_out) : 'n/a' }}
-            </v-chip>
-          </v-col>
-
-          <v-col
-            cols="12"
-            sm="6"
-            class="d-flex align-center my-2"
-            :class="mobile ? 'justify-space-between' : 'justify-start'"
-          >
-            <span class="text-body-2 font-weight-bold me-2">Overtime - Time In:</span>
-            <v-chip
-              class="font-weight-black"
-              :color="props.itemData.is_overtime_in_rectified ? 'error' : 'success'"
-              size="small"
+          <template v-if="props.itemData.is_overtime_applied">
+            <v-col
+              cols="12"
+              sm="6"
+              class="d-flex align-center my-2"
+              :class="mobile ? 'justify-space-between' : 'justify-start'"
             >
-              {{ props.itemData.is_overtime_in_rectified ? 'Rectified' : 'Not Rectified' }}
-            </v-chip>
-          </v-col>
+              <span class="text-body-2 font-weight-bold me-2">Overtime - Time In:</span>
+              <v-chip class="font-weight-black" color="secondary" size="small">
+                {{ props.itemData.overtime_in ? getTime(props.itemData.overtime_in) : 'n/a' }}
+              </v-chip>
+            </v-col>
 
-          <v-col
-            cols="12"
-            sm="6"
-            class="d-flex align-center my-2"
-            :class="mobile ? 'justify-space-between' : 'justify-start'"
-          >
-            <span class="text-body-2 font-weight-bold me-2">Overtime - Time Out:</span>
-            <v-chip
-              class="font-weight-black"
-              :color="props.itemData.is_overtime_out_rectified ? 'error' : 'success'"
-              size="small"
+            <v-col
+              cols="12"
+              sm="6"
+              class="d-flex align-center my-2"
+              :class="mobile ? 'justify-space-between' : 'justify-start'"
             >
-              {{ props.itemData.is_overtime_out_rectified ? 'Rectified' : 'Not Rectified' }}
-            </v-chip>
-          </v-col>
+              <span class="text-body-2 font-weight-bold me-2">Overtime - Time Out:</span>
+              <v-chip class="font-weight-black" color="secondary" size="small">
+                {{ props.itemData.overtime_out ? getTime(props.itemData.overtime_out) : 'n/a' }}
+              </v-chip>
+            </v-col>
+
+            <v-col
+              cols="12"
+              sm="6"
+              class="d-flex align-center my-2"
+              :class="mobile ? 'justify-space-between' : 'justify-start'"
+            >
+              <span class="text-body-2 font-weight-bold me-2">Overtime - Time In:</span>
+              <v-chip
+                class="font-weight-black"
+                :color="props.itemData.is_overtime_in_rectified ? 'error' : 'success'"
+                size="small"
+              >
+                {{ props.itemData.is_overtime_in_rectified ? 'Rectified' : 'Not Rectified' }}
+              </v-chip>
+            </v-col>
+
+            <v-col
+              cols="12"
+              sm="6"
+              class="d-flex align-center my-2"
+              :class="mobile ? 'justify-space-between' : 'justify-start'"
+            >
+              <span class="text-body-2 font-weight-bold me-2">Overtime - Time Out:</span>
+              <v-chip
+                class="font-weight-black"
+                :color="props.itemData.is_overtime_out_rectified ? 'error' : 'success'"
+                size="small"
+              >
+                {{ props.itemData.is_overtime_out_rectified ? 'Rectified' : 'Not Rectified' }}
+              </v-chip>
+            </v-col>
+          </template>
         </template>
 
         <v-divider class="my-3" thickness="1"></v-divider>
