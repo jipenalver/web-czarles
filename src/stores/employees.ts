@@ -25,7 +25,6 @@ export type Employee = {
   is_field_staff: boolean
   is_permanent: boolean
   is_insured: boolean
-  is_flexible: boolean
   designation_id: number | null
   designation: {
     designation: string
