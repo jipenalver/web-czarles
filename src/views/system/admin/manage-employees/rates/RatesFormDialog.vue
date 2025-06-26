@@ -50,7 +50,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
               ></v-text-field>
             </v-col>
 
-            <v-col cols="12">
+            <v-col cols="12" class="d-flex justify-center">
               <v-switch v-model="formData.is_insured" class="ms-2" color="primary" hide-details>
                 <template #label>
                   With Accident Insurance?
