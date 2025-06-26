@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getDateWithWeekday, getTime, getRandomCode } from '@/utils/helpers/others'
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
+import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -18,11 +19,13 @@ const {
   tableOptions,
   tableFilters,
   isDialogVisible,
+  isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
   onAdd,
   onUpdate,
+  onOvertime,
   onDelete,
   onConfirmDelete,
   onFilterItems,
@@ -142,7 +145,7 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'leave'">
-              <v-btn variant="text" density="comfortable" icon>
+              <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
                 <v-icon icon="mdi-clock-plus" color="secondary"></v-icon>
                 <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>
               </v-btn>
@@ -180,6 +183,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></AttendanceFormDialog>
+
+  <OvertimeFormDialog
+    v-model:is-dialog-visible="isOvertimeDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></OvertimeFormDialog>
 
   <ConfirmFieldDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
