@@ -10,7 +10,7 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref, watch } from 'vue'
 
-export function useAttendanceFormDialog(
+export function useOvertimeFormDialog(
   props: {
     isDialogVisible: boolean
     itemData: Attendance | null
