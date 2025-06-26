@@ -62,7 +62,7 @@ const {
                 item-title="label"
                 item-value="id"
                 :rules="[requiredValidator]"
-                disabled
+                readonly
               ></v-autocomplete>
             </v-col>
 
@@ -74,12 +74,12 @@ const {
                 label="Attendance Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                disabled
+                readonly
                 hide-actions
               ></v-date-input>
             </v-col>
 
-            <v-col cols="12">
+            <v-col cols="12" class="d-flex justify-center">
               <v-switch
                 v-model="formData.is_overtime_applied"
                 class="ms-2"
@@ -95,37 +95,39 @@ const {
               </v-switch>
             </v-col>
 
-            <v-col cols="12" sm="6" class="d-flex justify-center">
-              <v-time-picker
-                v-model="formData.overtime_in"
-                color="secondary"
-                :disabled="!formCheckBox.isRectifyOvertimeIn"
-                ampm-in-title
-              >
-                <template #title>
-                  <v-checkbox-btn
-                    v-model="formCheckBox.isRectifyOvertimeIn"
-                    label="Overtime - Time In"
-                  ></v-checkbox-btn>
-                </template>
-              </v-time-picker>
-            </v-col>
+            <template v-if="formData.is_overtime_applied">
+              <v-col cols="12" sm="6" class="d-flex justify-center">
+                <v-time-picker
+                  v-model="formData.overtime_in"
+                  color="secondary"
+                  :disabled="!formCheckBox.isRectifyOvertimeIn"
+                  ampm-in-title
+                >
+                  <template #title>
+                    <v-checkbox-btn
+                      v-model="formCheckBox.isRectifyOvertimeIn"
+                      label="Overtime - Time In"
+                    ></v-checkbox-btn>
+                  </template>
+                </v-time-picker>
+              </v-col>
 
-            <v-col cols="12" sm="6" class="d-flex justify-center">
-              <v-time-picker
-                v-model="formData.overtime_out"
-                color="secondary"
-                :disabled="!formCheckBox.isRectifyOvertimeOut"
-                ampm-in-title
-              >
-                <template #title>
-                  <v-checkbox-btn
-                    v-model="formCheckBox.isRectifyOvertimeOut"
-                    label="Overtime - Time Out"
-                  ></v-checkbox-btn>
-                </template>
-              </v-time-picker>
-            </v-col>
+              <v-col cols="12" sm="6" class="d-flex justify-center">
+                <v-time-picker
+                  v-model="formData.overtime_out"
+                  color="secondary"
+                  :disabled="!formCheckBox.isRectifyOvertimeOut"
+                  ampm-in-title
+                >
+                  <template #title>
+                    <v-checkbox-btn
+                      v-model="formCheckBox.isRectifyOvertimeOut"
+                      label="Overtime - Time Out"
+                    ></v-checkbox-btn>
+                  </template>
+                </v-time-picker>
+              </v-col>
+            </template>
           </v-row>
         </v-card-text>
 
