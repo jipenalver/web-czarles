@@ -11,7 +11,7 @@ import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'employees' | 'benefits' | 'attendance' | 'payroll'
+  componentView: 'employees' | 'benefits' | 'payroll'
 }>()
 
 const date = useDate()
