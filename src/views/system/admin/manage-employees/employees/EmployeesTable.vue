@@ -188,6 +188,13 @@ const {
                 </v-tooltip>
               </v-btn>
             </template>
+
+            <template v-else-if="props.componentView === 'payroll'">
+              <v-btn variant="text" density="comfortable" icon>
+                <v-icon icon="mdi-cash-fast" color="info"></v-icon>
+                <v-tooltip activator="parent" location="top"> View Employee Payroll </v-tooltip>
+              </v-btn>
+            </template>
           </div>
         </template>
 
