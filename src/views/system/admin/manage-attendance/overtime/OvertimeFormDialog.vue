@@ -143,7 +143,7 @@ const {
             color="primary"
             type="submit"
             variant="elevated"
-            :disabled="formAction.formProcess"
+            :disabled="formAction.formProcess || !formData.is_overtime_applied"
             :loading="formAction.formProcess"
           >
             Apply Overtime
