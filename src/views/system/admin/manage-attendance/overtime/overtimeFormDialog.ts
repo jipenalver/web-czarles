@@ -68,8 +68,8 @@ export function useOvertimeFormDialog(
       overtime_out: formData.value.overtime_out
         ? getDate(formData.value.date) + ' ' + formData.value.overtime_out
         : null,
-      is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn,
-      is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut,
+      is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn ? true : undefined,
+      is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut ? true : undefined,
     }
 
     const { data, error } = await attendancesStore.updateAttendance(newFormData)
@@ -94,10 +94,32 @@ export function useOvertimeFormDialog(
     formAction.value.formAlert = true
   }
 
+  const onFormValidate = () => {
+    const setError = (message: string) => {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: message,
+        formStatus: 400,
+        formProcess: false,
+        formAlert: true,
+      }
+      return true
+    }
+
+    if (!formData.value.overtime_in) return setError('Overtime - Time In is required.')
+
+    const hasChecked = Object.values(formCheckBox.value).some((value) => value)
+
+    if (!hasChecked)
+      return setError('Please check at least one checkbox to rectify the attendance.')
+  }
+
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
     if (valid) {
+      if (onFormValidate()) return
+
       confirmText.value = 'Are you sure you want to update, '
       if (formCheckBox.value.isRectifyOvertimeIn) confirmText.value += ' Overtime - Time In, '
       if (formCheckBox.value.isRectifyOvertimeOut) confirmText.value += ' Overtime - Time Out, '
