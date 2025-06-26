@@ -64,6 +64,7 @@ export function useAttendanceTable() {
     employee_id: null,
   })
   const isDialogVisible = ref(false)
+  const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
@@ -78,6 +79,11 @@ export function useAttendanceTable() {
   const onUpdate = (item: Attendance) => {
     itemData.value = item
     isDialogVisible.value = true
+  }
+
+  const onOvertime = (item: Attendance) => {
+    itemData.value = item
+    isOvertimeDialogVisible.value = true
   }
 
   const onDelete = (id: number) => {
@@ -128,11 +134,13 @@ export function useAttendanceTable() {
     tableOptions,
     tableFilters,
     isDialogVisible,
+    isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
     onAdd,
     onUpdate,
+    onOvertime,
     onDelete,
     onConfirmDelete,
     onFilterItems,

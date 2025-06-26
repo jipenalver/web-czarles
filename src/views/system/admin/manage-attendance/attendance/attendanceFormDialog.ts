@@ -87,10 +87,10 @@ export function useAttendanceFormDialog(
       pm_time_out: formData.value.pm_time_out
         ? getDate(formData.value.date) + ' ' + formData.value.pm_time_out
         : null,
-      is_am_in_rectified: formCheckBox.value.isRectifyAMTimeIn,
-      is_am_out_rectified: formCheckBox.value.isRectifyAMTimeOut,
-      is_pm_in_rectified: formCheckBox.value.isRectifyPMTimeIn,
-      is_pm_out_rectified: formCheckBox.value.isRectifyPMTimeOut,
+      is_am_in_rectified: formCheckBox.value.isRectifyAMTimeIn ? true : undefined,
+      is_am_out_rectified: formCheckBox.value.isRectifyAMTimeOut ? true : undefined,
+      is_pm_in_rectified: formCheckBox.value.isRectifyPMTimeIn ? true : undefined,
+      is_pm_out_rectified: formCheckBox.value.isRectifyPMTimeOut ? true : undefined,
     }
 
     const { data, error } = isUpdate.value
@@ -174,7 +174,6 @@ export function useAttendanceFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions
