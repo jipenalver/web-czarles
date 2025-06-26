@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getTotalWorkHours } from '@/utils/helpers/others'
+import { getTime, getTotalWorkHours } from '@/utils/helpers/others'
 import { type Attendance } from '@/stores/attendances'
 import { useDisplay } from 'vuetify'
 
@@ -23,7 +23,7 @@ const { mobile } = useDisplay()
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">Rendered Time:</span>
-          <span class="text-body-2 font-weight-bold text-secondary">
+          <p class="text-body-2 font-weight-bold">
             {{
               getTotalWorkHours(
                 props.itemData.am_time_in,
@@ -32,7 +32,7 @@ const { mobile } = useDisplay()
                 props.itemData.pm_time_out,
               )
             }}
-          </span>
+          </p>
         </v-col>
 
         <v-col
@@ -119,7 +119,7 @@ const { mobile } = useDisplay()
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
             <span class="text-body-2 font-weight-bold me-2">Is Overtime Applied:</span>
-            <span></span>
+            <p class="text-body-2">{{ props.itemData.is_overtime_applied ? 'Yes' : 'No' }}</p>
           </v-col>
 
           <v-col
@@ -129,7 +129,40 @@ const { mobile } = useDisplay()
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
             <span class="text-body-2 font-weight-bold me-2">Overtime:</span>
-            <span></span>
+            <p class="text-body-2 font-weight-bold">
+              {{
+                getTotalWorkHours(
+                  props.itemData.overtime_in,
+                  props.itemData.overtime_out,
+                  null,
+                  null,
+                )
+              }}
+            </p>
+          </v-col>
+
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">Overtime - Time In:</span>
+            <v-chip class="font-weight-black" color="secondary" size="small">
+              {{ props.itemData.overtime_in ? getTime(props.itemData.overtime_in) : 'n/a' }}
+            </v-chip>
+          </v-col>
+
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">Overtime - Time Out:</span>
+            <v-chip class="font-weight-black" color="secondary" size="small">
+              {{ props.itemData.overtime_out ? getTime(props.itemData.overtime_out) : 'n/a' }}
+            </v-chip>
           </v-col>
         </template>
 
