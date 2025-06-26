@@ -47,7 +47,7 @@ const {
     persistent
   >
     <v-card
-      prepend-icon="mdi-account-cash"
+      prepend-icon="mdi-clock-in"
       title="Attendance"
       :subtitle="
         isUpdate

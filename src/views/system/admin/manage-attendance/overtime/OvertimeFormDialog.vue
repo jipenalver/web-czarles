@@ -46,8 +46,8 @@ const {
     persistent
   >
     <v-card
-      prepend-icon="mdi-account-cash"
-      title="Attendance"
+      prepend-icon="mdi-clock-plus"
+      title="Overtime Application"
       subtitle="Apply Overtime Record. Check the checkboxes to modify the time.
       "
     >
