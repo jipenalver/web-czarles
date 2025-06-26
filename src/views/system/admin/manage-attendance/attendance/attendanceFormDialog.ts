@@ -174,7 +174,6 @@ export function useAttendanceFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions
