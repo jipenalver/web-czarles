@@ -24,6 +24,8 @@ export type Attendance = {
   is_overtime_applied: boolean
   overtime_in: string | null
   overtime_out: string | null
+  is_overtime_in_rectified: boolean
+  is_overtime_out_rectified: boolean
   employee: Employee
 }
 
