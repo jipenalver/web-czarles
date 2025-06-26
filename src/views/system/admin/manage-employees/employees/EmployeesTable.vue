@@ -11,7 +11,7 @@ import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'employees' | 'benefits' | 'attendance' | 'payroll'
+  componentView: 'employees' | 'benefits' | 'payroll'
 }>()
 
 const date = useDate()
@@ -186,6 +186,13 @@ const {
                 <v-tooltip activator="parent" location="top">
                   Edit Employee Deductions based Benefits
                 </v-tooltip>
+              </v-btn>
+            </template>
+
+            <template v-else-if="props.componentView === 'payroll'">
+              <v-btn variant="text" density="comfortable" icon>
+                <v-icon icon="mdi-cash-fast" color="info"></v-icon>
+                <v-tooltip activator="parent" location="top"> View Employee Payroll </v-tooltip>
               </v-btn>
             </template>
           </div>

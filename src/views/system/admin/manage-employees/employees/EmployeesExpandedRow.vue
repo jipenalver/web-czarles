@@ -5,7 +5,7 @@ import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'employees' | 'benefits' | 'attendance' | 'payroll'
+  componentView: 'employees' | 'benefits' | 'payroll'
   columnsLength: number
   itemData: Employee
 }>()
@@ -145,7 +145,7 @@ const { mobile } = useDisplay()
           </p>
         </v-col>
 
-        <template v-if="props.componentView === 'benefits'">
+        <template v-if="props.componentView === 'benefits' || props.componentView === 'payroll'">
           <v-divider class="my-3" thickness="1"></v-divider>
 
           <v-col

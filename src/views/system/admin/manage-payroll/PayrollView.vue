@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import EmployeesTable from '../manage-employees/employees/EmployeesTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import HolidaysTable from './holidays/HolidaysTable.vue'
@@ -55,7 +56,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
         </v-tabs>
 
         <v-tabs-window v-model="tabWindow">
-          <v-tabs-window-item value="payroll"> </v-tabs-window-item>
+          <v-tabs-window-item value="payroll">
+            <EmployeesTable component-view="payroll"></EmployeesTable>
+          </v-tabs-window-item>
 
           <v-tabs-window-item value="holidays">
             <HolidaysTable></HolidaysTable>
