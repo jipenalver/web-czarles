@@ -21,6 +21,9 @@ export type Attendance = {
   is_pm_out_rectified: boolean
   is_am_leave: boolean
   is_pm_leave: boolean
+  is_overtime_applied: boolean
+  overtime_in: string | null
+  overtime_out: string | null
   employee: Employee
 }
 
@@ -42,12 +45,6 @@ export const useAttendancesStore = defineStore('attendances', () => {
   }
 
   // Actions
-  async function getAttendances() {
-    const { data } = await supabase.from('attendances').select()
-
-    attendances.value = data as Attendance[]
-  }
-
   async function getAttendancesTable(
     tableOptions: TableOptions,
     { employee_id }: AttendanceTableFilter,
@@ -115,7 +112,6 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendancesTable,
     attendancesTableTotal,
     $reset,
-    getAttendances,
     getAttendancesTable,
     addAttendance,
     updateAttendance,
