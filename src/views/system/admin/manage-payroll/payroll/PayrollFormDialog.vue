@@ -32,12 +32,19 @@ const {
   ></AppAlert>
 
   <v-dialog
-    :max-width="mdAndDown ? undefined : '600'"
+    :max-width="mdAndDown ? undefined : '1200'"
     :model-value="props.isDialogVisible"
     :fullscreen="mdAndDown"
     persistent
   >
     <v-card prepend-icon="mdi-cash-fast" title="Employee Payroll">
+      <template #append>
+        <v-btn variant="text" density="comfortable" icon>
+          <v-icon icon="mdi-printer" color="primary"></v-icon>
+          <v-tooltip activator="parent" location="top"> Print Employee Payroll </v-tooltip>
+        </v-btn>
+      </template>
+
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
