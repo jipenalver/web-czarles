@@ -2,6 +2,7 @@
 import type { EmployeeTableFilter } from '@/stores/employees'
 import { usePayrollFormDialog } from './payrollFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
+import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -19,6 +20,7 @@ const {
   // formData,
   formAction,
   refVForm,
+  onPrint,
   onFormSubmit,
   onFormReset,
 } = usePayrollFormDialog(props, emit)
@@ -39,7 +41,7 @@ const {
   >
     <v-card prepend-icon="mdi-cash-fast" title="Employee Payroll">
       <template #append>
-        <v-btn variant="text" density="comfortable" icon>
+        <v-btn variant="text" density="comfortable" @click="onPrint" icon>
           <v-icon icon="mdi-printer" color="primary"></v-icon>
           <v-tooltip activator="parent" location="top"> Print Employee Payroll </v-tooltip>
         </v-btn>

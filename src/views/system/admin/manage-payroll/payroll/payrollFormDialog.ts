@@ -1,7 +1,7 @@
 import { type EmployeeTableFilter } from '@/stores/employees'
-import { type EmployeeDeduction } from '@/stores/benefits'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { type EmployeeDeduction } from '@/stores/benefits'
 import { onMounted, ref, watch } from 'vue'
 
 export function usePayrollFormDialog(
@@ -26,6 +26,14 @@ export function usePayrollFormDialog(
     () => props.isDialogVisible,
     async () => {},
   )
+
+  const onPrint = () => {
+    // This function can be used to trigger a print dialog for the payroll form.
+    // You can implement the logic to format the payroll data for printing.
+    console.log('Print payroll form')
+    // For example, you might want to open a new window with the payroll data formatted for printing.
+    // window.print() can be used to trigger the print dialog.
+  }
 
   // Actions
   const onSubmit = async () => {
@@ -80,6 +88,7 @@ export function usePayrollFormDialog(
     formData,
     formAction,
     refVForm,
+    onPrint,
     onFormSubmit,
     onFormReset,
   }
