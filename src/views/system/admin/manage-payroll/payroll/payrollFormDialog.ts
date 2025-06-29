@@ -1,8 +1,8 @@
 import { type EmployeeTableFilter } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { type EmployeeDeduction } from '@/stores/benefits'
 import { onMounted, ref, watch } from 'vue'
+import html2pdf from 'html2pdf.js'
 
 export function usePayrollFormDialog(
   props: {
@@ -17,7 +17,7 @@ export function usePayrollFormDialog(
   // const benefitsStore = useBenefitsStore()
 
   // States
-  const formDataDefault: Partial<EmployeeDeduction>[] = []
+  const formDataDefault = {}
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
@@ -28,11 +28,13 @@ export function usePayrollFormDialog(
   )
 
   const onPrint = () => {
-    // This function can be used to trigger a print dialog for the payroll form.
-    // You can implement the logic to format the payroll data for printing.
-    console.log('Print payroll form')
-    // For example, you might want to open a new window with the payroll data formatted for printing.
-    // window.print() can be used to trigger the print dialog.
+    html2pdf(document.getElementById('generate-payroll'), {
+      margin: 1,
+      filename: 'myfile.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+    })
   }
 
   // Actions

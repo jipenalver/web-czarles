@@ -3,6 +3,7 @@ import type { EmployeeTableFilter } from '@/stores/employees'
 import { usePayrollFormDialog } from './payrollFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -46,6 +47,8 @@ const {
           <v-tooltip activator="parent" location="top"> Print Employee Payroll </v-tooltip>
         </v-btn>
       </template>
+
+      <PayrollPrint></PayrollPrint>
 
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
