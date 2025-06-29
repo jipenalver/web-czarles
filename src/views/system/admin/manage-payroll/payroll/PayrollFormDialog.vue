@@ -37,11 +37,7 @@ const {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card
-      prepend-icon="mdi-account-cash"
-      title="Employee Deduction(s)"
-      subtitle="Update Deduction(s) based on Benefits"
-    >
+    <v-card prepend-icon="mdi-cash-fast" title="Employee Payroll">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>

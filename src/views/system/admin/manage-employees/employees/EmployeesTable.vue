@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PayrollFormDialog from '../../manage-payroll/payroll/PayrollFormDialog.vue'
 import DeductionsFormDialog from '../deductions/DeductionsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
@@ -58,6 +59,7 @@ const {
   isDialogVisible,
   isRateDialogVisible,
   isDeductionsDialogVisible,
+  isPayrollDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
@@ -65,6 +67,7 @@ const {
   onUpdate,
   onRate,
   onDeductions,
+  onPayroll,
   onDelete,
   onConfirmDelete,
   onSearchItems,
@@ -190,7 +193,7 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'payroll'">
-              <v-btn variant="text" density="comfortable" icon>
+              <v-btn variant="text" density="comfortable" @click="onPayroll(item)" icon>
                 <v-icon icon="mdi-cash-fast" color="info"></v-icon>
                 <v-tooltip activator="parent" location="top"> View Employee Payroll </v-tooltip>
               </v-btn>
@@ -242,6 +245,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></DeductionsFormDialog>
+
+  <PayrollFormDialog
+    v-model:is-dialog-visible="isPayrollDialogVisible"
+    :item-id="itemData?.id"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></PayrollFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
