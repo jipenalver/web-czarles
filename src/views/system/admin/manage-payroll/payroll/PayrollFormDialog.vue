@@ -48,7 +48,9 @@ const {
         </v-btn>
       </template>
 
-      <PayrollPrint></PayrollPrint>
+      <div id="generate-payroll">
+        <PayrollPrint></PayrollPrint>
+      </div>
 
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
