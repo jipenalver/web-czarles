@@ -16,8 +16,15 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formAction, formAmounts, refVForm, onFormSubmit, onFormReset, benefitsStore } =
-  useDeductionsFormDialog(props, emit)
+const {
+  formAction,
+  formAddons,
+  formDeductions,
+  refVForm,
+  onFormSubmit,
+  onFormReset,
+  benefitsStore,
+} = useDeductionsFormDialog(props, emit)
 </script>
 
 <template>
@@ -41,9 +48,22 @@ const { formAction, formAmounts, refVForm, onFormSubmit, onFormReset, benefitsSt
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-            <v-col cols="12" v-for="(benefit, index) in benefitsStore.benefits" :key="benefit.id">
+            <h2 class="text-body-1 font-weight-black my-3 ms-2">Add-ons</h2>
+
+            <v-col cols="12" v-for="(benefit, index) in benefitsStore.addons" :key="benefit.id">
               <v-text-field
-                v-model="formAmounts[index]"
+                v-model="formAddons[index]"
+                prepend-inner-icon="mdi-currency-php"
+                :label="benefit.benefit"
+                type="number"
+              ></v-text-field>
+            </v-col>
+
+            <h2 class="text-body-1 font-weight-black my-3 ms-2">Deductions</h2>
+
+            <v-col cols="12" v-for="(benefit, index) in benefitsStore.deductions" :key="benefit.id">
+              <v-text-field
+                v-model="formDeductions[index]"
                 prepend-inner-icon="mdi-currency-php"
                 :label="benefit.benefit"
                 type="number"
