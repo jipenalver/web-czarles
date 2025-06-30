@@ -46,6 +46,17 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
             </v-col>
 
             <v-col cols="12">
+              <v-switch v-model="formData.is_deduction" class="ms-2" color="primary">
+                <template #label>
+                  Is Deduction?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_deduction ? 'Yes' : 'No - Addon' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-col cols="12">
               <v-textarea v-model="formData.description" label="Description" rows="2"></v-textarea>
             </v-col>
           </v-row>

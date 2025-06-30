@@ -8,6 +8,7 @@ export type Benefit = {
   created_at: string
   benefit: string
   description: string
+  is_deduction: boolean
 }
 
 export type EmployeeDeduction = {
@@ -16,26 +17,35 @@ export type EmployeeDeduction = {
   benefit_id: number
   amount: number
   created_at: string
+  benefit: Benefit
 }
 
 export const useBenefitsStore = defineStore('benefits', () => {
   // States
-  const benefits = ref<Benefit[]>([])
+  const addons = ref<Benefit[]>([])
+  const deductions = ref<Benefit[]>([])
   const benefitsTable = ref<Benefit[]>([])
   const benefitsTableTotal = ref(0)
 
   // Reset State
   function $reset() {
-    benefits.value = []
+    addons.value = []
+    deductions.value = []
     benefitsTable.value = []
     benefitsTableTotal.value = 0
   }
 
   // Actions
   async function getBenefits() {
-    const { data } = await supabase.from('employee_benefits').select()
+    const { data } = await supabase
+      .from('employee_benefits')
+      .select()
+      .order('benefit', { ascending: true })
 
-    benefits.value = data as Benefit[]
+    const benefits = data as Benefit[]
+
+    addons.value = benefits.filter((b) => !b.is_deduction)
+    deductions.value = benefits.filter((b) => b.is_deduction)
   }
 
   async function getBenefitsTable(tableOptions: TableOptions) {
@@ -74,7 +84,7 @@ export const useBenefitsStore = defineStore('benefits', () => {
   async function getDeductionsById(employeeId: number) {
     const { data } = await supabase
       .from('employee_deductions')
-      .select()
+      .select('*, benefit:benefit_id (benefit, is_deduction)')
       .eq('employee_id', employeeId)
 
     return data as EmployeeDeduction[]
@@ -93,7 +103,8 @@ export const useBenefitsStore = defineStore('benefits', () => {
 
   // Expose States and Actions
   return {
-    benefits,
+    deductions,
+    addons,
     benefitsTable,
     benefitsTableTotal,
     $reset,

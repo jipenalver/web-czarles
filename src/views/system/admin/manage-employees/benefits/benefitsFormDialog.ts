@@ -16,6 +16,7 @@ export function useBenefitsFormDialog(
   // States
   const formDataDefault = {
     benefit: '',
+    is_deduction: false,
     description: '',
   }
   const formData = ref<Partial<Benefit>>({ ...formDataDefault })
