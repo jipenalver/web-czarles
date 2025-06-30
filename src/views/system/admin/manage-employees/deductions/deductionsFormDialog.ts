@@ -19,16 +19,30 @@ export function useDeductionsFormDialog(
   // States
   const formDataDefault: Partial<EmployeeDeduction>[] = []
   const formData = ref({ ...formDataDefault })
-  const formAmounts = ref<number[]>([])
+  const formAddons = ref<number[]>([])
+  const formDeductions = ref<number[]>([])
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
 
   watch(
     () => props.isDialogVisible,
     async () => {
-      const deductionsData = await benefitsStore.getDeductionsById(props.itemId as number)
+      const benefitsData = await benefitsStore.getDeductionsById(props.itemId as number)
 
-      formAmounts.value = deductionsData.map((deduction) => deduction.amount)
+      const sortedBenefits = benefitsData.sort((a, b) =>
+        a.benefit.benefit.localeCompare(b.benefit.benefit),
+      )
+
+      const addons: number[] = []
+      const deductions: number[] = []
+
+      sortedBenefits.forEach((item) => {
+        if (item.benefit.is_deduction) deductions.push(item.amount)
+        else addons.push(item.amount)
+      })
+
+      formAddons.value = addons
+      formDeductions.value = deductions
     },
   )
 
@@ -36,11 +50,18 @@ export function useDeductionsFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    formData.value = benefitsStore.benefits.map((benefit, index) => ({
-      employee_id: props.itemId as number,
-      benefit_id: benefit.id,
-      amount: formAmounts.value[index],
-    }))
+    formData.value = [
+      ...benefitsStore.addons.map((benefit, index) => ({
+        employee_id: props.itemId as number,
+        benefit_id: benefit.id,
+        amount: formAddons.value[index],
+      })),
+      ...benefitsStore.deductions.map((benefit, index) => ({
+        employee_id: props.itemId as number,
+        benefit_id: benefit.id,
+        amount: formDeductions.value[index],
+      })),
+    ]
 
     const { data, error } = await benefitsStore.updateDeductionsById(formData.value)
 
@@ -77,14 +98,16 @@ export function useDeductionsFormDialog(
   }
 
   onMounted(async () => {
-    if (benefitsStore.benefits.length === 0) await benefitsStore.getBenefits()
+    if (benefitsStore.addons.length === 0 || benefitsStore.deductions.length === 0)
+      await benefitsStore.getBenefits()
   })
 
   // Expose State and Actions
   return {
     formData,
     formAction,
-    formAmounts,
+    formAddons,
+    formDeductions,
     refVForm,
     onFormSubmit,
     onFormReset,
