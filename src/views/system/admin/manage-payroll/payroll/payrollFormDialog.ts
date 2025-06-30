@@ -29,7 +29,7 @@ export function usePayrollFormDialog(
 
   const onPrint = () => {
     html2pdf(document.getElementById('generate-payroll'), {
-      margin: 1,
+      margin: 0.25,
       filename: 'myfile.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
