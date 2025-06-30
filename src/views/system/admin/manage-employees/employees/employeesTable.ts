@@ -22,6 +22,7 @@ export function useEmployeesTable() {
   const isDialogVisible = ref(false)
   const isRateDialogVisible = ref(false)
   const isDeductionsDialogVisible = ref(false)
+  const isPayrollDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<Employee | null>(null)
@@ -46,6 +47,11 @@ export function useEmployeesTable() {
   const onDeductions = (item: Employee) => {
     itemData.value = item
     isDeductionsDialogVisible.value = true
+  }
+
+  const onPayroll = (item: Employee) => {
+    itemData.value = item
+    isPayrollDialogVisible.value = true
   }
 
   const onDelete = (id: number) => {
@@ -100,6 +106,7 @@ export function useEmployeesTable() {
     isDialogVisible,
     isRateDialogVisible,
     isDeductionsDialogVisible,
+    isPayrollDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
@@ -107,6 +114,7 @@ export function useEmployeesTable() {
     onUpdate,
     onRate,
     onDeductions,
+    onPayroll,
     onDelete,
     onConfirmDelete,
     onSearchItems,
