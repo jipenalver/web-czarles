@@ -17,6 +17,11 @@ const tableHeaders: TableHeader[] = [
     align: 'start',
   },
   {
+    title: 'Type',
+    key: 'is_deduction',
+    align: 'start',
+  },
+  {
     title: 'Description',
     key: 'description',
     align: 'start',
@@ -87,6 +92,10 @@ const {
 
         <template #item.benefit="{ item }">
           <span class="font-weight-bold"> {{ item.benefit }} </span>
+        </template>
+
+        <template #item.is_deduction="{ item }">
+          <span class="font-weight-bold"> {{ item.is_deduction ? 'Deduction' : 'Addon' }} </span>
         </template>
 
         <template #item.created_at="{ item }">
