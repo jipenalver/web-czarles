@@ -186,9 +186,7 @@ const {
 
               <v-btn variant="text" density="comfortable" @click="onDeductions(item)" icon>
                 <v-icon icon="mdi-account-cash" color="info"></v-icon>
-                <v-tooltip activator="parent" location="top">
-                  Edit Employee Deductions based Benefits
-                </v-tooltip>
+                <v-tooltip activator="parent" location="top"> Edit Employee Benefits </v-tooltip>
               </v-btn>
             </template>
 
