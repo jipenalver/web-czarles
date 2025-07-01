@@ -64,16 +64,27 @@ export function useAttendanceTable() {
     employee_id: null,
   })
   const isDialogVisible = ref(false)
+  const isViewDialogVisible = ref(false)
   const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
   const formAction = ref({ ...formActionDefault })
+  const viewType = ref<'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'>('am_time_in')
 
   // Actions
   const onAdd = () => {
     itemData.value = null
     isDialogVisible.value = true
+  }
+
+  const onView = (
+    item: Attendance,
+    timeType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out',
+  ) => {
+    itemData.value = item
+    viewType.value = timeType
+    isViewDialogVisible.value = true
   }
 
   const onUpdate = (item: Attendance) => {
@@ -134,11 +145,14 @@ export function useAttendanceTable() {
     tableOptions,
     tableFilters,
     isDialogVisible,
+    isViewDialogVisible,
     isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
+    viewType,
     onAdd,
+    onView,
     onUpdate,
     onOvertime,
     onDelete,
