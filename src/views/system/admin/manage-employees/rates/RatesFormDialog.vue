@@ -4,6 +4,7 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useRatesFormDialog } from './ratesFormDialog'
 import { requiredValidator } from '@/utils/validators'
+import RatesLogs from './RatesLogs.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -61,6 +62,12 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
               </v-switch>
             </v-col>
           </v-row>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-text>
+          <RatesLogs :item-id="props.itemData?.id"></RatesLogs>
         </v-card-text>
 
         <v-divider></v-divider>
