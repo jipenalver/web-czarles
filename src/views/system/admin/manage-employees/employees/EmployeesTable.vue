@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import AddonsDeductionsFormDialog from '../addons-deductions/AddonsDeductionsFormDialog.vue'
 import PayrollFormDialog from '../../manage-payroll/payroll/PayrollFormDialog.vue'
-import DeductionsFormDialog from '../deductions/DeductionsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
@@ -237,12 +237,12 @@ const {
     :table-filters="tableFilters"
   ></RatesFormDialog>
 
-  <DeductionsFormDialog
+  <AddonsDeductionsFormDialog
     v-model:is-dialog-visible="isDeductionsDialogVisible"
     :item-id="itemData?.id"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></DeductionsFormDialog>
+  ></AddonsDeductionsFormDialog>
 
   <PayrollFormDialog
     v-model:is-dialog-visible="isPayrollDialogVisible"
