@@ -6,6 +6,7 @@ import { onMounted } from 'vue'
 
 const props = defineProps<{
   itemId?: number
+  type: 'rates' | 'benefits'
 }>()
 
 const date = useDate()
@@ -13,7 +14,7 @@ const date = useDate()
 const logsStore = useLogsStore()
 
 onMounted(async () => {
-  if (props.itemId) await logsStore.getLogsById(props.itemId, 'rates')
+  if (props.itemId) await logsStore.getLogsById(props.itemId, props.type)
 })
 </script>
 
