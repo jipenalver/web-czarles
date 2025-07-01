@@ -24,6 +24,7 @@ export function useRatesFormDialog(
   const formData = ref<Partial<Employee>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
+  const isConfirmSubmitDialog = ref(false)
 
   watch(
     () => props.isDialogVisible,
@@ -67,7 +68,7 @@ export function useRatesFormDialog(
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
-    if (valid) onSubmit()
+    if (valid) isConfirmSubmitDialog.value = true
   }
 
   const onFormReset = () => {
@@ -81,6 +82,8 @@ export function useRatesFormDialog(
     formData,
     formAction,
     refVForm,
+    isConfirmSubmitDialog,
+    onSubmit,
     onFormSubmit,
     onFormReset,
   }
