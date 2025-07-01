@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Attendance, type AttendanceImage } from '@/stores/attendances'
+import { fileDownload, getDate, getTime } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { getDate, getTime } from '@/utils/helpers/others'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 import { ref, watch } from 'vue'
@@ -36,15 +36,11 @@ watch(
   },
 )
 
-const onDownload = (imagePath: string) => {
-  const link = document.createElement('a')
-  link.href = imagePath
-
-  link.download = `${new Date().toISOString().slice(0, 10)}-${props.itemData?.employee.id}_${props.viewType}.jpg`
-  document.body.appendChild(link)
-
-  link.click()
-  document.body.removeChild(link)
+const onDownload = async (imagePath: string) => {
+  fileDownload(
+    imagePath,
+    `${getDate(imageData.value?.created_at as string)}-${props.itemData?.employee.id}_${props.viewType}.jpg`,
+  )
 }
 
 const onDialogClose = () => {
