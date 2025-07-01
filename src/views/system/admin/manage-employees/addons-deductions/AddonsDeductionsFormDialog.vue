@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useDeductionsFormDialog } from './deductionsFormDialog'
+import { useAddonsDeductionsFormDialog } from './addonsDeductionsFormDialog'
 import { type EmployeeTableFilter } from '@/stores/employees'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -24,7 +24,7 @@ const {
   onFormSubmit,
   onFormReset,
   benefitsStore,
-} = useDeductionsFormDialog(props, emit)
+} = useAddonsDeductionsFormDialog(props, emit)
 </script>
 
 <template>

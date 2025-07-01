@@ -4,7 +4,7 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { onMounted, ref, watch } from 'vue'
 
-export function useDeductionsFormDialog(
+export function useAddonsDeductionsFormDialog(
   props: {
     isDialogVisible: boolean
     itemId?: number
