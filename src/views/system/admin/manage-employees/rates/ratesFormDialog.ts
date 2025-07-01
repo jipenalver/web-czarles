@@ -1,6 +1,7 @@
 import { type Employee, type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useLogsStore } from '@/stores/logs'
 import { ref, watch } from 'vue'
 
 export function useRatesFormDialog(
@@ -13,6 +14,7 @@ export function useRatesFormDialog(
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const employeesStore = useEmployeesStore()
+  const logsStore = useLogsStore()
 
   // States
   const formDataDefault = {
@@ -45,6 +47,12 @@ export function useRatesFormDialog(
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully Updated Employee Rate.`
+
+      await logsStore.addLog({
+        type: 'rates',
+        employee_id: formData.value.id,
+        description: `Updated employee rate to ${formData.value.daily_rate} and insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}.`,
+      })
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
 
