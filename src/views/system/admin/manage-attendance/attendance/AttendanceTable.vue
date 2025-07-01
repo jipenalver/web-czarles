@@ -4,6 +4,7 @@ import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
 import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
+import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
@@ -19,11 +20,14 @@ const {
   tableOptions,
   tableFilters,
   isDialogVisible,
+  isViewDialogVisible,
   isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
+  viewType,
   onAdd,
+  onView,
   onUpdate,
   onOvertime,
   onDelete,
@@ -82,13 +86,7 @@ const {
                 </v-btn>
               </v-col>
             </template>
-            <template v-else-if="props.componentView === 'leave'">
-              <v-col cols="12" sm="3">
-                <v-btn class="my-1" prepend-icon="mdi-account-arrow-left" color="primary" block>
-                  Apply Leave
-                </v-btn>
-              </v-col>
-            </template>
+            <template v-else-if="props.componentView === 'leave'"> </template>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
@@ -107,27 +105,62 @@ const {
         </template>
 
         <template #item.am_time_in="{ item }">
-          <span class="font-weight-bold">
-            {{ item.am_time_in ? getTime(item.am_time_in) : '-' }}
+          <span v-if="item.am_time_in && item.is_am_in_rectified" class="font-weight-bold">
+            {{ getTime(item.am_time_in) }}
           </span>
+          <span
+            v-else-if="item.am_time_in && !item.is_am_in_rectified"
+            class="font-weight-bold cursor-pointer text-decoration-underline"
+            @click="onView(item, 'am_time_in')"
+          >
+            {{ getTime(item.am_time_in) }}
+          </span>
+          <span v-else>-</span>
         </template>
 
         <template #item.am_time_out="{ item }">
-          <span class="font-weight-bold">
-            {{ item.am_time_out ? getTime(item.am_time_out) : '-' }}
+          <span v-if="item.am_time_out && item.is_am_out_rectified" class="font-weight-bold">
+            {{ getTime(item.am_time_out) }}
           </span>
+          <span
+            v-else-if="item.am_time_out && !item.is_am_out_rectified"
+            class="font-weight-bold cursor-pointer text-decoration-underline"
+            @click="onView(item, 'am_time_out')"
+          >
+            {{ getTime(item.am_time_out) }}
+          </span>
+          <span v-else>-</span>
         </template>
 
         <template #item.pm_time_in="{ item }">
-          <span class="font-weight-bold">
-            {{ item.pm_time_in ? getTime(item.pm_time_in) : '-' }}
+          <span
+            v-if="item.pm_time_in && item.is_pm_in_rectified"
+            class="font-weight-bold cursor-pointer"
+          >
+            {{ getTime(item.pm_time_in) }}
           </span>
+          <span
+            v-else-if="item.pm_time_in && !item.is_pm_in_rectified"
+            class="font-weight-bold cursor-pointer text-decoration-underline"
+            @click="onView(item, 'pm_time_in')"
+          >
+            {{ getTime(item.pm_time_in) }}
+          </span>
+          <span v-else>-</span>
         </template>
 
         <template #item.pm_time_out="{ item }">
-          <span class="font-weight-bold">
-            {{ item.pm_time_out ? getTime(item.pm_time_out) : '-' }}
+          <span v-if="item.pm_time_out && item.is_pm_out_rectified" class="font-weight-bold">
+            {{ getTime(item.pm_time_out) }}
           </span>
+          <span
+            v-else-if="item.pm_time_out && !item.is_pm_out_rectified"
+            class="font-weight-bold cursor-pointer text-decoration-underline"
+            @click="onView(item, 'pm_time_out')"
+          >
+            {{ getTime(item.pm_time_out) }}
+          </span>
+          <span v-else>-</span>
         </template>
 
         <template #item.actions="{ item }">
@@ -190,6 +223,12 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></OvertimeFormDialog>
+
+  <AttendanceViewDialog
+    v-model:is-dialog-visible="isViewDialogVisible"
+    :item-data="itemData"
+    :image-type="viewType"
+  ></AttendanceViewDialog>
 
   <ConfirmFieldDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
