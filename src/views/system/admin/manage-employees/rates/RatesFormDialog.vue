@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useRatesFormDialog } from './ratesFormDialog'
 import { requiredValidator } from '@/utils/validators'
-import RatesLogs from './RatesLogs.vue'
+import RatesLogs from '../employees/EmployeeLogs.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -18,10 +19,15 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFormDialog(
-  props,
-  emit,
-)
+const {
+  formData,
+  formAction,
+  refVForm,
+  isConfirmSubmitDialog,
+  onSubmit,
+  onFormSubmit,
+  onFormReset,
+} = useRatesFormDialog(props, emit)
 </script>
 
 <template>
@@ -67,7 +73,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
         <v-divider></v-divider>
 
         <v-card-text>
-          <RatesLogs :item-id="props.itemData?.id"></RatesLogs>
+          <RatesLogs :item-id="props.itemData?.id" type="rates"></RatesLogs>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -91,4 +97,11 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useRatesFo
       </v-form>
     </v-card>
   </v-dialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmSubmitDialog"
+    title="Confirm Update"
+    text="Are you sure you want to update employee rate?"
+    @confirm="onSubmit"
+  ></ConfirmDialog>
 </template>
