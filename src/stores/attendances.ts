@@ -27,11 +27,13 @@ export type Attendance = {
   is_overtime_in_rectified: boolean
   is_overtime_out_rectified: boolean
   employee: Employee
-  attendance_images: {
-    image_path: string
-    image_type: string
-    created_at: string
-  }[]
+  attendance_images: AttendanceImage[]
+}
+
+export type AttendanceImage = {
+  image_path: string
+  image_type: string
+  created_at: string
 }
 
 export type AttendanceTableFilter = {
@@ -65,7 +67,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
     let query = supabase
       .from('attendances')
       .select(
-        '*, employee:employee_id (firstname, lastname), attendance_images (image_path, image_type, created_at)',
+        '*, employee:employee_id (id, firstname, lastname), attendance_images (image_path, image_type, created_at)',
       )
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
