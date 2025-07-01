@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { type Attendance, type AttendanceImage } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { getDate, getTime } from '@/utils/helpers/others'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { type Attendance } from '@/stores/attendances'
-import { useDate, useDisplay } from 'vuetify'
-import { ref } from 'vue'
+import { useDisplay } from 'vuetify'
+import { ref, watch } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -13,22 +14,27 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:isDialogVisible'])
 
-const date = useDate()
 const { mdAndDown } = useDisplay()
 
-const viewType =
-  props.viewType === 'am_time_in'
-    ? 'AM - Time In'
-    : props.viewType === 'am_time_out'
-      ? 'AM - Time Out'
-      : props.viewType === 'pm_time_in'
-        ? 'PM - Time In'
-        : 'PM - Time Out'
-const viewData = props.itemData?.attendance_images.find(
-  (image) => image.image_type === props.viewType,
-)
-
 const formAction = ref({ ...formActionDefault })
+const imageType = ref('')
+const imageData = ref<AttendanceImage | null>(null)
+
+watch(
+  () => props.isDialogVisible,
+  () => {
+    imageType.value =
+      props.viewType === 'am_time_in'
+        ? 'AM - Time In'
+        : props.viewType === 'am_time_out'
+          ? 'AM - Time Out'
+          : props.viewType === 'pm_time_in'
+            ? 'PM - Time In'
+            : 'PM - Time Out'
+    imageData.value =
+      props.itemData?.attendance_images.find((image) => image.image_type === props.viewType) || null
+  },
+)
 
 const onDownload = (imagePath: string) => {
   const link = document.createElement('a')
@@ -60,35 +66,50 @@ const onDialogClose = () => {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-clock-in" title="Attendance Image" :subtitle="viewType">
+    <v-card prepend-icon="mdi-clock-in" title="Attendance Image" :subtitle="imageType">
       <template #append>
         <v-btn
           icon="mdi-download"
           variant="plain"
           color="primary"
-          @click="onDownload(viewData?.image_path || '')"
+          @click="onDownload(imageData?.image_path || '')"
         ></v-btn>
       </template>
 
       <v-card-text>
         <v-row dense>
           <v-col cols="12">
-            <v-img :src="viewData?.image_path || ''" />
+            <v-img :src="imageData?.image_path || ''" />
           </v-col>
 
           <v-divider class="my-3"></v-divider>
 
-          <v-col cols="12" sm="6" class="text-start">
+          <v-col cols="12" class="d-flex justify-space-between align-center">
             <strong>Employee:</strong>
-            <span class="text-caption ms-2">
+            <span class="text-body-2">
               {{ props.itemData?.employee.firstname }} {{ props.itemData?.employee.lastname }}
             </span>
           </v-col>
 
-          <v-col cols="12" sm="6" class="text-end">
-            <strong>Upload Date:</strong>
-            <span class="text-caption ms-2">
-              {{ date.format(viewData?.created_at, 'fullDateTime') }}
+          <v-col cols="12" class="d-flex justify-space-between align-center">
+            <strong>Attendance Date/Time:</strong>
+            <span class="text-body-2">
+              {{
+                getDate(String(props.itemData?.[props.viewType as keyof Attendance] ?? '')) +
+                ' ' +
+                getTime(String(props.itemData?.[props.viewType as keyof Attendance] ?? ''))
+              }}
+            </span>
+          </v-col>
+
+          <v-col cols="12" class="d-flex justify-space-between align-center">
+            <strong>Upload Date/Time:</strong>
+            <span class="text-body-2">
+              {{
+                getDate(imageData?.created_at as string) +
+                ' ' +
+                getTime(imageData?.created_at as string)
+              }}
             </span>
           </v-col>
         </v-row>
