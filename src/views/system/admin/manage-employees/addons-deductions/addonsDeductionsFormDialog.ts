@@ -2,6 +2,7 @@ import { type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
 import { type EmployeeDeduction, useBenefitsStore } from '@/stores/benefits'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useLogsStore } from '@/stores/logs'
 import { onMounted, ref, watch } from 'vue'
 
 export function useAddonsDeductionsFormDialog(
@@ -15,6 +16,7 @@ export function useAddonsDeductionsFormDialog(
 ) {
   const employeesStore = useEmployeesStore()
   const benefitsStore = useBenefitsStore()
+  const logsStore = useLogsStore()
 
   // States
   const formDataDefault: Partial<EmployeeDeduction>[] = []
@@ -54,12 +56,12 @@ export function useAddonsDeductionsFormDialog(
       ...benefitsStore.addons.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formAddons.value[index],
+        amount: formAddons.value[index] || undefined,
       })),
       ...benefitsStore.deductions.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formDeductions.value[index],
+        amount: formDeductions.value[index] || undefined,
       })),
     ]
 
@@ -74,6 +76,18 @@ export function useAddonsDeductionsFormDialog(
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully Updated Employee Deduction(s).`
+
+      const description = `Updated employee add-on benefits
+        (${benefitsStore.addons.map((benefit) => benefit.benefit).join(', ')}) with
+        (${formAddons.value.map((amount) => amount || 0).join(', ')}) and deduction benefits
+        (${benefitsStore.deductions.map((benefit) => benefit.benefit).join(', ')}) with
+        (${formDeductions.value.map((amount) => amount || 0).join(', ')}).`
+
+      await logsStore.addLog({
+        type: 'benefits',
+        employee_id: props.itemId,
+        description,
+      })
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
 
