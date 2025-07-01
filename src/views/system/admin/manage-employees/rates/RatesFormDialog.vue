@@ -2,10 +2,10 @@
 import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableOptions } from '@/utils/helpers/tables'
+import EmployeeLogs from '../employees/EmployeeLogs.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useRatesFormDialog } from './ratesFormDialog'
 import { requiredValidator } from '@/utils/validators'
-import RatesLogs from '../employees/EmployeeLogs.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -73,7 +73,7 @@ const {
         <v-divider></v-divider>
 
         <v-card-text>
-          <RatesLogs :item-id="props.itemData?.id" type="rates"></RatesLogs>
+          <EmployeeLogs :item-id="props.itemData?.id" type="rates"></EmployeeLogs>
         </v-card-text>
 
         <v-divider></v-divider>
