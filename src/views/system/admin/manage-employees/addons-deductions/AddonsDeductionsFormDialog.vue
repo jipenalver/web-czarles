@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
+import { useAddonsDeductionsFormDialog } from './addonsDeductionsFormDialog'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import { type EmployeeTableFilter } from '@/stores/employees'
 import { type TableOptions } from '@/utils/helpers/tables'
 import EmployeeLogs from '../employees/EmployeeLogs.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { useRatesFormDialog } from './ratesFormDialog'
-import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Employee | null
+  itemId?: number
   tableOptions: TableOptions
   tableFilters: EmployeeTableFilter
 }>()
@@ -20,14 +19,16 @@ const emit = defineEmits(['update:isDialogVisible'])
 const { mdAndDown } = useDisplay()
 
 const {
-  formData,
   formAction,
+  formAddons,
+  formDeductions,
   refVForm,
   isConfirmSubmitDialog,
   onSubmit,
   onFormSubmit,
   onFormReset,
-} = useRatesFormDialog(props, emit)
+  benefitsStore,
+} = useAddonsDeductionsFormDialog(props, emit)
 </script>
 
 <template>
@@ -38,42 +39,53 @@ const {
   ></AppAlert>
 
   <v-dialog
-    :max-width="mdAndDown ? undefined : '600'"
+    :max-width="mdAndDown ? undefined : '1200'"
     :model-value="props.isDialogVisible"
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-edit " title="Employee Rate">
+    <v-card prepend-icon="mdi-account-cash" title="Employee Benefits">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
-          <v-row dense>
-            <v-col cols="12">
-              <v-text-field
-                v-model="formData.daily_rate"
-                prepend-inner-icon="mdi-currency-php"
-                label="Daily Rate"
-                type="number"
-                :rules="[requiredValidator]"
-              ></v-text-field>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <v-row dense>
+                <h2 class="text-body-1 font-weight-black mb-3 ms-2">Add-ons</h2>
+
+                <v-col cols="12" v-for="(benefit, index) in benefitsStore.addons" :key="benefit.id">
+                  <v-text-field
+                    v-model="formAddons[index]"
+                    prepend-inner-icon="mdi-currency-php"
+                    :label="benefit.benefit"
+                    type="number"
+                  ></v-text-field>
+                </v-col>
+
+                <h2 class="text-body-1 font-weight-black mb-3 ms-2">Deductions</h2>
+
+                <v-col
+                  cols="12"
+                  v-for="(benefit, index) in benefitsStore.deductions"
+                  :key="benefit.id"
+                >
+                  <v-text-field
+                    v-model="formDeductions[index]"
+                    prepend-inner-icon="mdi-currency-php"
+                    :label="benefit.benefit"
+                    type="number"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </v-col>
 
-            <v-col cols="12" class="d-flex justify-center">
-              <v-switch v-model="formData.is_insured" class="ms-2" color="primary" hide-details>
-                <template #label>
-                  With Accident Insurance?
-                  <span class="font-weight-black ms-1">
-                    {{ formData.is_insured ? 'Yes' : 'No' }}
-                  </span>
-                </template>
-              </v-switch>
+            <v-col cols="12" sm="6">
+              <EmployeeLogs
+                :item-id="props.itemId"
+                type="benefits"
+                max-height="450px"
+              ></EmployeeLogs>
             </v-col>
           </v-row>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-text>
-          <EmployeeLogs :item-id="props.itemData?.id" type="rates"></EmployeeLogs>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -101,7 +113,7 @@ const {
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmSubmitDialog"
     title="Confirm Update"
-    text="Are you sure you want to update employee rate?"
+    text="Are you sure you want to update employee benefits?"
     @confirm="onSubmit"
   ></ConfirmDialog>
 </template>

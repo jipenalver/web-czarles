@@ -2,9 +2,10 @@ import { type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
 import { type EmployeeDeduction, useBenefitsStore } from '@/stores/benefits'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useLogsStore } from '@/stores/logs'
 import { onMounted, ref, watch } from 'vue'
 
-export function useDeductionsFormDialog(
+export function useAddonsDeductionsFormDialog(
   props: {
     isDialogVisible: boolean
     itemId?: number
@@ -15,6 +16,7 @@ export function useDeductionsFormDialog(
 ) {
   const employeesStore = useEmployeesStore()
   const benefitsStore = useBenefitsStore()
+  const logsStore = useLogsStore()
 
   // States
   const formDataDefault: Partial<EmployeeDeduction>[] = []
@@ -23,6 +25,7 @@ export function useDeductionsFormDialog(
   const formDeductions = ref<number[]>([])
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
+  const isConfirmSubmitDialog = ref(false)
 
   watch(
     () => props.isDialogVisible,
@@ -54,12 +57,12 @@ export function useDeductionsFormDialog(
       ...benefitsStore.addons.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formAddons.value[index],
+        amount: formAddons.value[index] || undefined,
       })),
       ...benefitsStore.deductions.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formDeductions.value[index],
+        amount: formDeductions.value[index] || undefined,
       })),
     ]
 
@@ -75,6 +78,18 @@ export function useDeductionsFormDialog(
     } else if (data) {
       formAction.value.formMessage = `Successfully Updated Employee Deduction(s).`
 
+      const description = `Updated employee add-on benefits
+        (${benefitsStore.addons.map((benefit) => benefit.benefit).join(', ')}) with
+        (${formAddons.value.map((amount) => amount || 0).join(', ')}) and deduction benefits
+        (${benefitsStore.deductions.map((benefit) => benefit.benefit).join(', ')}) with
+        (${formDeductions.value.map((amount) => amount || 0).join(', ')}).`
+
+      await logsStore.addLog({
+        type: 'benefits',
+        employee_id: props.itemId,
+        description,
+      })
+
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
 
       setTimeout(() => {
@@ -88,7 +103,7 @@ export function useDeductionsFormDialog(
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
-    if (valid) onSubmit()
+    if (valid) isConfirmSubmitDialog.value = true
   }
 
   const onFormReset = () => {
@@ -109,6 +124,8 @@ export function useDeductionsFormDialog(
     formAddons,
     formDeductions,
     refVForm,
+    isConfirmSubmitDialog,
+    onSubmit,
     onFormSubmit,
     onFormReset,
     benefitsStore,

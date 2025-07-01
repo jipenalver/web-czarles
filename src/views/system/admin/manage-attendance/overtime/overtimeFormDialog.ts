@@ -39,7 +39,9 @@ export function useOvertimeFormDialog(
   const refVForm = ref()
   const formCheckBox = ref({ ...formCheckBoxDefault })
   const isConfirmSubmitDialog = ref(false)
+  const confirmTitle = ref('')
   const confirmText = ref('')
+  const isOvertimeApplied = ref(false)
 
   watch(
     () => props.isDialogVisible,
@@ -53,6 +55,8 @@ export function useOvertimeFormDialog(
         overtime_out: getTime24Hour(itemData.overtime_out) as string,
         date: getDate(itemData.am_time_in),
       }
+
+      isOvertimeApplied.value = itemData.is_overtime_applied || false
     },
   )
 
@@ -118,12 +122,18 @@ export function useOvertimeFormDialog(
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
     if (valid) {
-      if (onFormValidate()) return
+      if (isOvertimeApplied.value) {
+        if (onFormValidate()) return
 
-      confirmText.value = 'Are you sure you want to update, '
-      if (formCheckBox.value.isRectifyOvertimeIn) confirmText.value += ' Overtime - Time In, '
-      if (formCheckBox.value.isRectifyOvertimeOut) confirmText.value += ' Overtime - Time Out, '
-      confirmText.value += ' attendance?'
+        confirmTitle.value = 'Confirm Overtime Rectification'
+        confirmText.value = 'Are you sure you want to update, '
+        if (formCheckBox.value.isRectifyOvertimeIn) confirmText.value += ' Overtime - Time In, '
+        if (formCheckBox.value.isRectifyOvertimeOut) confirmText.value += ' Overtime - Time Out, '
+        confirmText.value += ' attendance?'
+      } else {
+        confirmTitle.value = 'Confirm Overtime Application'
+        confirmText.value = 'Are you sure you want to apply overtime for this attendance?'
+      }
 
       isConfirmSubmitDialog.value = true
     }
@@ -146,6 +156,7 @@ export function useOvertimeFormDialog(
     refVForm,
     formCheckBox,
     isConfirmSubmitDialog,
+    confirmTitle,
     confirmText,
     onSubmit,
     onFormSubmit,
