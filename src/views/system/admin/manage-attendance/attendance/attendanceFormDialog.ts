@@ -56,7 +56,7 @@ export function useAttendanceFormDialog(
       formCheckBox.value = { ...formCheckBoxDefault }
 
       if (isUpdate.value) {
-        const { employee, ...itemData } = props.itemData as Attendance
+        const { employee, attendance_images, ...itemData } = props.itemData as Attendance
         formData.value = {
           ...itemData,
           am_time_in: getTime24Hour(itemData.am_time_in) as string,
