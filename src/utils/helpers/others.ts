@@ -347,3 +347,21 @@ export const generateCSVTrim = (string: string) => {
 
   return string.replace(/,/g, ' ').replace(/\s+/g, ' ').trim()
 }
+
+// 👉 Get File Download
+export const fileDownload = async (filePath: string, fileName: string) => {
+  const response = await fetch(filePath)
+  const blob = await response.blob()
+
+  const blobUrl = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = blobUrl
+  link.download = fileName
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  URL.revokeObjectURL(blobUrl)
+}
