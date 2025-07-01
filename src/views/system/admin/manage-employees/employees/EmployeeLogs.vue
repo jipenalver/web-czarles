@@ -18,7 +18,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h2 class="text-body-1 font-weight-black my-3 ms-2">Rate Logs</h2>
+  <h2 class="text-body-1 font-weight-black my-3 ms-2">Adjustment Logs</h2>
 
   <v-list lines="one" density="compact" nav>
     <v-list-item v-for="log in logsStore.logsByEmployee" :key="log.id">
