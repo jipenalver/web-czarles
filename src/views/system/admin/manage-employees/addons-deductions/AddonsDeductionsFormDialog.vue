@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAddonsDeductionsFormDialog } from './addonsDeductionsFormDialog'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type EmployeeTableFilter } from '@/stores/employees'
 import { type TableOptions } from '@/utils/helpers/tables'
 import EmployeeLogs from '../employees/EmployeeLogs.vue'
@@ -22,6 +23,8 @@ const {
   formAddons,
   formDeductions,
   refVForm,
+  isConfirmSubmitDialog,
+  onSubmit,
   onFormSubmit,
   onFormReset,
   benefitsStore,
@@ -106,4 +109,11 @@ const {
       </v-form>
     </v-card>
   </v-dialog>
+
+  <ConfirmDialog
+    v-model:is-dialog-visible="isConfirmSubmitDialog"
+    title="Confirm Update"
+    text="Are you sure you want to update employee benefits?"
+    @confirm="onSubmit"
+  ></ConfirmDialog>
 </template>
