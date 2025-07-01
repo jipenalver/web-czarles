@@ -227,7 +227,7 @@ const {
   <AttendanceViewDialog
     v-model:is-dialog-visible="isViewDialogVisible"
     :item-data="itemData"
-    :image-type="viewType"
+    :view-type="viewType"
   ></AttendanceViewDialog>
 
   <ConfirmFieldDialog

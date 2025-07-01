@@ -2,20 +2,44 @@
 import { formActionDefault } from '@/utils/helpers/constants'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Attendance } from '@/stores/attendances'
-import { useDisplay } from 'vuetify'
+import { useDate, useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: Attendance | null
-  imageType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'
+  viewType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
 
+const date = useDate()
 const { mdAndDown } = useDisplay()
 
+const viewType =
+  props.viewType === 'am_time_in'
+    ? 'AM - Time In'
+    : props.viewType === 'am_time_out'
+      ? 'AM - Time Out'
+      : props.viewType === 'pm_time_in'
+        ? 'PM - Time In'
+        : 'PM - Time Out'
+const viewData = props.itemData?.attendance_images.find(
+  (image) => image.image_type === props.viewType,
+)
+
 const formAction = ref({ ...formActionDefault })
+
+const onDownload = (imagePath: string) => {
+  const link = document.createElement('a')
+  link.href = imagePath
+
+  link.download = `${new Date().toISOString().slice(0, 10)}-${props.itemData?.employee.id}_${props.viewType}.jpg`
+  document.body.appendChild(link)
+
+  link.click()
+  document.body.removeChild(link)
+}
 
 const onDialogClose = () => {
   formAction.value = { ...formActionDefault }
@@ -36,23 +60,36 @@ const onDialogClose = () => {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-clock-in" title="Attendance">
+    <v-card prepend-icon="mdi-clock-in" title="Attendance Image" :subtitle="viewType">
+      <template #append>
+        <v-btn
+          icon="mdi-download"
+          variant="plain"
+          color="primary"
+          @click="onDownload(viewData?.image_path || '')"
+        ></v-btn>
+      </template>
+
       <v-card-text>
         <v-row dense>
           <v-col cols="12">
-            <v-img
-              :src="
-                props.itemData?.attendance_images[
-                  props.imageType === 'am_time_in'
-                    ? 0
-                    : props.imageType === 'am_time_out'
-                      ? 1
-                      : props.imageType === 'pm_time_in'
-                        ? 2
-                        : 3
-                ].image_path
-              "
-            />
+            <v-img :src="viewData?.image_path || ''" />
+          </v-col>
+
+          <v-divider class="my-3"></v-divider>
+
+          <v-col cols="12" sm="6" class="text-start">
+            <strong>Employee:</strong>
+            <span class="text-caption ms-2">
+              {{ props.itemData?.employee.firstname }} {{ props.itemData?.employee.lastname }}
+            </span>
+          </v-col>
+
+          <v-col cols="12" sm="6" class="text-end">
+            <strong>Upload Date:</strong>
+            <span class="text-caption ms-2">
+              {{ date.format(viewData?.created_at, 'fullDateTime') }}
+            </span>
           </v-col>
         </v-row>
       </v-card-text>
