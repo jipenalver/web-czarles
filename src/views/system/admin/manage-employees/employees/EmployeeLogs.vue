@@ -5,8 +5,8 @@ import { useDate } from 'vuetify'
 import { onMounted } from 'vue'
 
 const props = defineProps<{
-  itemId?: number
   type: 'rates' | 'benefits'
+  itemId?: number
   maxHeight?: string
 }>()
 
