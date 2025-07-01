@@ -114,6 +114,13 @@ export const useAttendancesStore = defineStore('attendances', () => {
   }
 
   async function deleteAttendance(id: number) {
+    const { data, error: deleteImagesError } = await supabase
+      .from('attendance_images')
+      .delete()
+      .eq('attendance_id', id)
+
+    if (deleteImagesError) return { data, error: deleteImagesError }
+
     return await supabase.from('attendances').delete().eq('id', id).select()
   }
 
