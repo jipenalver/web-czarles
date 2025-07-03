@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { EmployeeTableFilter } from '@/stores/employees'
 import { usePayrollPrintDialog } from './payrollPrintDialog'
-import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
@@ -9,8 +7,6 @@ import { useDisplay } from 'vuetify'
 const props = defineProps<{
   isDialogVisible: boolean
   itemId?: number
-  tableOptions: TableOptions
-  tableFilters: EmployeeTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])

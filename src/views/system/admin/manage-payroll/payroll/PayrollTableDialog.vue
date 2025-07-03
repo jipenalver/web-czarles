@@ -32,7 +32,7 @@ const {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-account-cash" title="Payroll Preview">
+    <v-card prepend-icon="mdi-account-cash" title="Payroll List">
       <v-card-text> </v-card-text>
 
       <v-divider></v-divider>

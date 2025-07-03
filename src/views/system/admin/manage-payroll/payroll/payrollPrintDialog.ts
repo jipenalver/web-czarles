@@ -1,6 +1,4 @@
-import { type EmployeeTableFilter } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { type TableOptions } from '@/utils/helpers/tables'
 import html2pdf from 'html2pdf.js'
 import { ref, watch } from 'vue'
 
@@ -8,8 +6,6 @@ export function usePayrollPrintDialog(
   props: {
     isDialogVisible: boolean
     itemId?: number
-    tableOptions: TableOptions
-    tableFilters: EmployeeTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
