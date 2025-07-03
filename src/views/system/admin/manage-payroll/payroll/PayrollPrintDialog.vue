@@ -17,14 +17,7 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const {
-  // formData,
-  formAction,
-  refVForm,
-  onPrint,
-  onFormSubmit,
-  onFormReset,
-} = usePayrollPrintDialog(props, emit)
+const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit)
 </script>
 
 <template>
@@ -40,7 +33,7 @@ const {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-fast" title="Payroll Preview">
+    <v-card prepend-icon="mdi-account-cash" title="Payroll Preview">
       <template #append>
         <v-btn variant="text" density="comfortable" @click="onPrint" icon>
           <v-icon icon="mdi-printer" color="primary"></v-icon>
@@ -52,21 +45,13 @@ const {
         <PayrollPrint></PayrollPrint>
       </v-card-text>
 
-      <v-form ref="refVForm" @submit.prevent="onFormSubmit">
-        <v-card-text>
-          <v-row dense>
-            <v-col cols="12"> </v-col>
-          </v-row>
-        </v-card-text>
+      <v-divider></v-divider>
 
-        <v-divider></v-divider>
+      <v-card-actions class="pa-4">
+        <v-spacer></v-spacer>
 
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-
-          <v-btn text="Close" variant="plain" prepend-icon="mdi-close" @click="onFormReset"></v-btn>
-        </v-card-actions>
-      </v-form>
+        <v-btn text="Close" variant="plain" prepend-icon="mdi-close" @click="onDialogClose"></v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
