@@ -8,36 +8,54 @@
     </v-col>
   </v-row>
 
-  <v-table density="compact" class="mt-4 text-caption">
+  <table class="mt-6 text-caption w-100">
     <tbody>
       <tr>
-        <td class="border-0 pa-0">PAID TO</td>
-        <td class="border-b-md w-50">Juan Dela Cruz</td>
-        <td class="border-0 pa-0">POSITION</td>
-        <td class="border-b-md w-50">Software Engineer</td>
+        <td>PAID TO</td>
+        <td class="border-b-md w-66 ps-5">Juan Dela Cruz</td>
+        <td>POSITION</td>
+        <td class="border-b-md w-25 ps-5">Software Engineer</td>
       </tr>
       <tr>
-        <td class="border-0 pa-0">ADDRESS</td>
-        <td class="border-b-md w-50">Butuan City</td>
-        <td class="border-0 pa-0">DATE</td>
-        <td class="border-b-md w-50">February 26, 2025</td>
+        <td>ADDRESS</td>
+        <td class="border-b-md w-66 ps-5">Butuan City</td>
+        <td>DATE</td>
+        <td class="border-b-md w-25 ps-5">February 26, 2025</td>
       </tr>
     </tbody>
-  </v-table>
+  </table>
 
-  <v-table density="compact" class="mt-4 text-caption">
+  <table class="mt-3 text-caption border-md w-100" style="border-collapse: collapse">
     <tbody>
       <tr>
-        <td class="border-md pa-0 text-center" colspan="4">PARTICULARS</td>
-        <td class="border-md pa-0 text-center">AMOUNT</td>
+        <td class="text-center border-b-md" colspan="4">PARTICULARS</td>
+        <td class="text-center border-b-md border-s-md">AMOUNT</td>
       </tr>
       <tr>
-        <td class="border-b-md">5</td>
+        <td class="border-b-sm text-center">5</td>
         <td>Days Regular Work for chuchuchu</td>
         <td>@ 410.00</td>
         <td>/Day</td>
-        <td>6150.00</td>
+        <td class="border-b-sm border-s-md text-end">6150.00</td>
+      </tr>
+      <tr>
+        <td colspan="2"></td>
+        <td class="text-caption font-weight-bold">Gross Salary</td>
+        <td class="text-caption font-weight-bold text-end">Php</td>
+        <td class="border-b-sm border-s-md text-end"></td>
+      </tr>
+      <tr>
+        <td colspan="2"></td>
+        <td class="text-caption">Less Deductions</td>
+        <td></td>
+        <td class="border-b-sm border-s-md text-end"></td>
+      </tr>
+      <tr>
+        <td colspan="2"></td>
+        <td class="text-caption font-weight-bold border-t-md border-s-md">TOTAL NET SALARY</td>
+        <td class="border-t-md"></td>
+        <td class="border-t-md border-s-md text-end"></td>
       </tr>
     </tbody>
-  </v-table>
+  </table>
 </template>
