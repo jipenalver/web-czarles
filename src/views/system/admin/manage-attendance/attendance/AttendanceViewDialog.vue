@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { type Attendance, type AttendanceImage } from '@/stores/attendances'
-import { fileDownload, getDate, getTime } from '@/utils/helpers/others'
-import { formActionDefault } from '@/utils/helpers/constants'
+import { useAttendanceViewDialog } from './attendanceViewDialog'
+import { getDate, getTime } from '@/utils/helpers/others'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { type Attendance } from '@/stores/attendances'
 import { useDisplay } from 'vuetify'
-import { ref, watch } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -16,37 +15,10 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const formAction = ref({ ...formActionDefault })
-const imageType = ref('')
-const imageData = ref<AttendanceImage | null>(null)
-
-watch(
-  () => props.isDialogVisible,
-  () => {
-    imageType.value =
-      props.viewType === 'am_time_in'
-        ? 'AM - Time In'
-        : props.viewType === 'am_time_out'
-          ? 'AM - Time Out'
-          : props.viewType === 'pm_time_in'
-            ? 'PM - Time In'
-            : 'PM - Time Out'
-    imageData.value =
-      props.itemData?.attendance_images.find((image) => image.image_type === props.viewType) || null
-  },
+const { formAction, imageType, imageData, onDownload, onDialogClose } = useAttendanceViewDialog(
+  props,
+  emit,
 )
-
-const onDownload = async (imagePath: string) => {
-  fileDownload(
-    imagePath,
-    `${getDate(imageData.value?.created_at as string)}-${props.itemData?.employee.id}_${props.viewType}.jpg`,
-  )
-}
-
-const onDialogClose = () => {
-  formAction.value = { ...formActionDefault }
-  emit('update:isDialogVisible', false)
-}
 </script>
 
 <template>
