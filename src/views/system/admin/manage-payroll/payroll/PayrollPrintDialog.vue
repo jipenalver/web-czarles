@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EmployeeTableFilter } from '@/stores/employees'
-import { usePayrollFormDialog } from './payrollFormDialog'
+import { usePayrollPrintDialog } from './payrollPrintDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import PayrollPrint from './PayrollPrint.vue'
@@ -24,7 +24,7 @@ const {
   onPrint,
   onFormSubmit,
   onFormReset,
-} = usePayrollFormDialog(props, emit)
+} = usePayrollPrintDialog(props, emit)
 </script>
 
 <template>
@@ -40,7 +40,7 @@ const {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-fast" title="Employee Payroll">
+    <v-card prepend-icon="mdi-cash-fast" title="Payroll Preview">
       <template #append>
         <v-btn variant="text" density="comfortable" @click="onPrint" icon>
           <v-icon icon="mdi-printer" color="primary"></v-icon>
@@ -65,17 +65,6 @@ const {
           <v-spacer></v-spacer>
 
           <v-btn text="Close" variant="plain" prepend-icon="mdi-close" @click="onFormReset"></v-btn>
-
-          <v-btn
-            prepend-icon="mdi-pencil"
-            color="primary"
-            type="submit"
-            variant="elevated"
-            :disabled="formAction.formProcess"
-            :loading="formAction.formProcess"
-          >
-            Update
-          </v-btn>
         </v-card-actions>
       </v-form>
     </v-card>

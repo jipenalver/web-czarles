@@ -4,7 +4,7 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import { onMounted, ref, watch } from 'vue'
 import html2pdf from 'html2pdf.js'
 
-export function usePayrollFormDialog(
+export function usePayrollPrintDialog(
   props: {
     isDialogVisible: boolean
     itemId?: number
