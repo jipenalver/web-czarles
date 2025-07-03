@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { usePayrollTableDialog } from './payrollTableDialog'
-import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -12,20 +10,12 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const {
-  formAction,
-  // onPreview,
-  onDialogClose,
-} = usePayrollTableDialog(props, emit)
+const onDialogClose = () => {
+  emit('update:isDialogVisible', false)
+}
 </script>
 
 <template>
-  <AppAlert
-    v-model:is-alert-visible="formAction.formAlert"
-    :form-message="formAction.formMessage"
-    :form-status="formAction.formStatus"
-  ></AppAlert>
-
   <v-dialog
     :max-width="mdAndDown ? undefined : '1200'"
     :model-value="props.isDialogVisible"
