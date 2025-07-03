@@ -16,8 +16,14 @@ export type EmployeeDeduction = {
   employee_id: number
   benefit_id: number
   amount: number
+  is_quincena: boolean
   created_at: string
   benefit: Benefit
+}
+
+export type EmployeeDeductionForm = {
+  amount: number[]
+  is_quincena: boolean[]
 }
 
 export const useBenefitsStore = defineStore('benefits', () => {

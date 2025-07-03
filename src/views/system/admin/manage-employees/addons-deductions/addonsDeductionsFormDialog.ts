@@ -1,5 +1,9 @@
+import {
+  type EmployeeDeduction,
+  type EmployeeDeductionForm,
+  useBenefitsStore,
+} from '@/stores/benefits'
 import { type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
-import { type EmployeeDeduction, useBenefitsStore } from '@/stores/benefits'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useLogsStore } from '@/stores/logs'
@@ -21,8 +25,8 @@ export function useAddonsDeductionsFormDialog(
   // States
   const formDataDefault: Partial<EmployeeDeduction>[] = []
   const formData = ref({ ...formDataDefault })
-  const formAddons = ref<number[]>([])
-  const formDeductions = ref<number[]>([])
+  const formAddons = ref<EmployeeDeductionForm>({ amount: [], is_quincena: [] })
+  const formDeductions = ref<EmployeeDeductionForm>({ amount: [], is_quincena: [] })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isConfirmSubmitDialog = ref(false)
@@ -36,12 +40,17 @@ export function useAddonsDeductionsFormDialog(
         a.benefit.benefit.localeCompare(b.benefit.benefit),
       )
 
-      const addons: number[] = []
-      const deductions: number[] = []
+      const addons: EmployeeDeductionForm = { amount: [], is_quincena: [] }
+      const deductions: EmployeeDeductionForm = { amount: [], is_quincena: [] }
 
       sortedBenefits.forEach((item) => {
-        if (item.benefit.is_deduction) deductions.push(item.amount)
-        else addons.push(item.amount)
+        if (item.benefit.is_deduction) {
+          deductions.amount.push(item.amount)
+          deductions.is_quincena.push(item.is_quincena)
+        } else {
+          addons.amount.push(item.amount)
+          addons.is_quincena.push(item.is_quincena)
+        }
       })
 
       formAddons.value = addons
@@ -57,12 +66,14 @@ export function useAddonsDeductionsFormDialog(
       ...benefitsStore.addons.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formAddons.value[index] || undefined,
+        amount: formAddons.value.amount[index] || undefined,
+        is_quincena: formAddons.value.is_quincena[index],
       })),
       ...benefitsStore.deductions.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formDeductions.value[index] || undefined,
+        amount: formDeductions.value.amount[index] || undefined,
+        is_quincena: formDeductions.value.is_quincena[index],
       })),
     ]
 
@@ -80,9 +91,9 @@ export function useAddonsDeductionsFormDialog(
 
       const description = `Updated employee add-on benefits
         (${benefitsStore.addons.map((benefit) => benefit.benefit).join(', ')}) with
-        (${formAddons.value.map((amount) => amount || 0).join(', ')}) and deduction benefits
+        (${formAddons.value.amount.map((amount) => amount || 0).join(', ')}) and deduction benefits
         (${benefitsStore.deductions.map((benefit) => benefit.benefit).join(', ')}) with
-        (${formDeductions.value.map((amount) => amount || 0).join(', ')}).`
+        (${formDeductions.value.amount.map((amount) => amount || 0).join(', ')}).`
 
       await logsStore.addLog({
         type: 'benefits',
