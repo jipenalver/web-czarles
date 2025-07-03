@@ -21,6 +21,7 @@ export function usePayrollPrintDialog(
     async () => {},
   )
 
+  // Actions
   const onPrint = () => {
     html2pdf(document.getElementById('generate-payroll'), {
       margin: 0.25,

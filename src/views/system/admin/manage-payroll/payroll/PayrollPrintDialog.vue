@@ -33,7 +33,7 @@ const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-account-cash" title="Payroll Preview">
+    <v-card prepend-icon="mdi-cash-fast" title="Payroll Preview">
       <template #append>
         <v-btn variant="text" density="comfortable" @click="onPrint" icon>
           <v-icon icon="mdi-printer" color="primary"></v-icon>
