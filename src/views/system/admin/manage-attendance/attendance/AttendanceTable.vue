@@ -177,6 +177,15 @@ const {
           <span v-else>-</span>
         </template>
 
+        <template #item.is_overtime_applied="{ item }">
+          <span
+            class="font-weight-bold"
+            :class="item.is_overtime_applied ? 'text-success' : 'text-error'"
+          >
+            {{ item.is_overtime_applied ? 'Yes' : 'No' }}
+          </span>
+        </template>
+
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
             <template v-if="props.componentView === 'attendance'">

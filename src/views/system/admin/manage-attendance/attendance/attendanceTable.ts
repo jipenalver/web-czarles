@@ -21,16 +21,13 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const getTableHeaders = (componentView: string): TableHeader[] => {
     const headers = [...baseHeaders]
 
-    if (componentView === 'overtime') {
-      headers.push({ title: 'Overtime Application', key: 'is_overtime_applied', align: 'start' })
-    }
+    if (componentView === 'overtime')
+      headers.push({ title: 'Overtime Application', key: 'is_overtime_applied', align: 'center' })
 
     headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
     return headers
   }
-
   const tableHeaders = ref<TableHeader[]>(getTableHeaders(props.componentView))
-
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
