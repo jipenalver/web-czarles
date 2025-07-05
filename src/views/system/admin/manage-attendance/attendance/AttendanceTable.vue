@@ -5,6 +5,7 @@ import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
+import { type AttendanceImage } from '@/stores/attendances'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
@@ -37,6 +38,10 @@ const {
   attendancesStore,
   employeesStore,
 } = useAttendanceTable()
+
+const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
+  return images.some((image) => image.image_type === type)
+}
 </script>
 
 <template>
@@ -105,11 +110,14 @@ const {
         </template>
 
         <template #item.am_time_in="{ item }">
-          <span v-if="item.am_time_in && item.is_am_in_rectified" class="font-weight-bold">
+          <span
+            v-if="item.am_time_in && !hasAttendanceImage(item.attendance_images, 'am_time_in')"
+            class="font-weight-bold"
+          >
             {{ getTime(item.am_time_in) }}
           </span>
           <span
-            v-else-if="item.am_time_in && !item.is_am_in_rectified"
+            v-else-if="item.am_time_in && hasAttendanceImage(item.attendance_images, 'am_time_in')"
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'am_time_in')"
           >
@@ -119,11 +127,16 @@ const {
         </template>
 
         <template #item.am_time_out="{ item }">
-          <span v-if="item.am_time_out && item.is_am_out_rectified" class="font-weight-bold">
+          <span
+            v-if="item.am_time_out && !hasAttendanceImage(item.attendance_images, 'am_time_out')"
+            class="font-weight-bold"
+          >
             {{ getTime(item.am_time_out) }}
           </span>
           <span
-            v-else-if="item.am_time_out && !item.is_am_out_rectified"
+            v-else-if="
+              item.am_time_out && hasAttendanceImage(item.attendance_images, 'am_time_out')
+            "
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'am_time_out')"
           >
@@ -134,13 +147,13 @@ const {
 
         <template #item.pm_time_in="{ item }">
           <span
-            v-if="item.pm_time_in && item.is_pm_in_rectified"
+            v-if="item.pm_time_in && !hasAttendanceImage(item.attendance_images, 'pm_time_in')"
             class="font-weight-bold cursor-pointer"
           >
             {{ getTime(item.pm_time_in) }}
           </span>
           <span
-            v-else-if="item.pm_time_in && !item.is_pm_in_rectified"
+            v-else-if="item.pm_time_in && hasAttendanceImage(item.attendance_images, 'pm_time_in')"
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'pm_time_in')"
           >
@@ -150,11 +163,16 @@ const {
         </template>
 
         <template #item.pm_time_out="{ item }">
-          <span v-if="item.pm_time_out && item.is_pm_out_rectified" class="font-weight-bold">
+          <span
+            v-if="item.pm_time_out && !hasAttendanceImage(item.attendance_images, 'pm_time_out')"
+            class="font-weight-bold"
+          >
             {{ getTime(item.pm_time_out) }}
           </span>
           <span
-            v-else-if="item.pm_time_out && !item.is_pm_out_rectified"
+            v-else-if="
+              item.pm_time_out && hasAttendanceImage(item.attendance_images, 'pm_time_out')
+            "
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'pm_time_out')"
           >
