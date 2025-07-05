@@ -10,7 +10,7 @@ import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'attendance' | 'leave'
+  componentView: 'attendance' | 'leave' | 'overtime'
 }>()
 
 const { mobile } = useDisplay()
@@ -177,7 +177,9 @@ const {
               </v-btn>
             </template>
 
-            <template v-else-if="props.componentView === 'leave'">
+            <template v-else-if="props.componentView === 'leave'"> </template>
+
+            <template v-else-if="props.componentView === 'overtime'">
               <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
                 <v-icon icon="mdi-clock-plus" color="secondary"></v-icon>
                 <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>

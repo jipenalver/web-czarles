@@ -4,7 +4,7 @@ import { type Attendance } from '@/stores/attendances'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'attendance' | 'leave'
+  componentView: 'attendance' | 'leave' | 'overtime'
   columnsLength: number
   itemData: Attendance
 }>()
@@ -109,7 +109,7 @@ const { mobile } = useDisplay()
           </v-chip>
         </v-col>
 
-        <template v-if="props.componentView === 'leave'">
+        <template v-if="props.componentView === 'overtime'">
           <v-divider class="my-3" thickness="1"></v-divider>
 
           <v-col
