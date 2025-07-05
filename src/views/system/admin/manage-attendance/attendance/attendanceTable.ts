@@ -1,6 +1,7 @@
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { type AttendanceImage } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 
@@ -70,7 +71,9 @@ export function useAttendanceTable() {
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
   const formAction = ref({ ...formActionDefault })
-  const viewType = ref<'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'>('am_time_in')
+  const viewType = ref<
+    'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out' | 'overtime_in' | 'overtime_out'
+  >('am_time_in')
 
   // Actions
   const onAdd = () => {
@@ -80,7 +83,13 @@ export function useAttendanceTable() {
 
   const onView = (
     item: Attendance,
-    timeType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out',
+    timeType:
+      | 'am_time_in'
+      | 'am_time_out'
+      | 'pm_time_in'
+      | 'pm_time_out'
+      | 'overtime_in'
+      | 'overtime_out',
   ) => {
     itemData.value = item
     viewType.value = timeType
@@ -135,6 +144,10 @@ export function useAttendanceTable() {
     tableOptions.value.isLoading = false
   }
 
+  const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
+    return images.some((image) => image.image_type === type)
+  }
+
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
   })
@@ -159,6 +172,7 @@ export function useAttendanceTable() {
     onConfirmDelete,
     onFilterItems,
     onLoadItems,
+    hasAttendanceImage,
     attendancesStore,
     employeesStore,
   }
