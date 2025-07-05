@@ -23,7 +23,7 @@ const items = computed(() =>
   <v-card class="mb-5" :image="props.image">
     <template #title>
       <span class="text-h6 font-weight-bold">
-        <v-breadcrumbs :items="xs ? [items[items.length - 1]] : items">
+        <v-breadcrumbs :items="xs ? items.slice(-1) : items">
           <template #prepend>
             <v-icon :icon="props.headerIcon" size="small" class="me-1"></v-icon>
           </template>
