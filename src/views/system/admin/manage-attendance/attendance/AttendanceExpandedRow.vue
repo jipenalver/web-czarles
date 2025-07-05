@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { getTime, getTotalWorkHours } from '@/utils/helpers/others'
+import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
+import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -10,6 +12,8 @@ const props = defineProps<{
 }>()
 
 const { mobile } = useDisplay()
+
+const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttendanceTable()
 </script>
 
 <template>
@@ -149,9 +153,26 @@ const { mobile } = useDisplay()
               :class="mobile ? 'justify-space-between' : 'justify-start'"
             >
               <span class="text-body-2 font-weight-bold me-2">Overtime - Time In:</span>
-              <v-chip class="font-weight-black" color="secondary" size="small">
-                {{ props.itemData.overtime_in ? getTime(props.itemData.overtime_in) : 'n/a' }}
-              </v-chip>
+              <span
+                v-if="
+                  props.itemData.overtime_in &&
+                  !hasAttendanceImage(props.itemData.attendance_images, 'overtime_in')
+                "
+                class="font-weight-bold"
+              >
+                {{ getTime(props.itemData.overtime_in) }}
+              </span>
+              <span
+                v-else-if="
+                  props.itemData.overtime_in &&
+                  hasAttendanceImage(props.itemData.attendance_images, 'overtime_in')
+                "
+                class="font-weight-bold cursor-pointer text-decoration-underline"
+                @click="onView(props.itemData, 'overtime_in')"
+              >
+                {{ getTime(props.itemData.overtime_in) }}
+              </span>
+              <span v-else>-</span>
             </v-col>
 
             <v-col
@@ -161,9 +182,26 @@ const { mobile } = useDisplay()
               :class="mobile ? 'justify-space-between' : 'justify-start'"
             >
               <span class="text-body-2 font-weight-bold me-2">Overtime - Time Out:</span>
-              <v-chip class="font-weight-black" color="secondary" size="small">
-                {{ props.itemData.overtime_out ? getTime(props.itemData.overtime_out) : 'n/a' }}
-              </v-chip>
+              <span
+                v-if="
+                  props.itemData.overtime_out &&
+                  !hasAttendanceImage(props.itemData.attendance_images, 'overtime_out')
+                "
+                class="font-weight-bold"
+              >
+                {{ getTime(props.itemData.overtime_out) }}
+              </span>
+              <span
+                v-else-if="
+                  props.itemData.overtime_out &&
+                  hasAttendanceImage(props.itemData.attendance_images, 'overtime_out')
+                "
+                class="font-weight-bold cursor-pointer text-decoration-underline"
+                @click="onView(props.itemData, 'overtime_out')"
+              >
+                {{ getTime(props.itemData.overtime_out) }}
+              </span>
+              <span v-else>-</span>
             </v-col>
 
             <v-col
@@ -204,4 +242,10 @@ const { mobile } = useDisplay()
       </v-row>
     </td>
   </tr>
+
+  <AttendanceViewDialog
+    v-model:is-dialog-visible="isViewDialogVisible"
+    :item-data="itemData"
+    :view-type="viewType"
+  ></AttendanceViewDialog>
 </template>
