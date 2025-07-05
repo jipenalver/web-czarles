@@ -206,7 +206,12 @@ const {
               </v-btn>
             </template>
 
-            <template v-else-if="props.componentView === 'leave'"> </template>
+            <template v-else-if="props.componentView === 'leave'">
+              <v-btn variant="text" density="comfortable" icon>
+                <v-icon icon="mdi-pencil"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
+              </v-btn>
+            </template>
 
             <template v-else-if="props.componentView === 'overtime'">
               <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
