@@ -20,9 +20,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Attendance Management', 'Leave & Overtime']"
+          :header-items="['Attendance Management', 'Leave Application']"
           header-icon="mdi-account-arrow-left"
-          headline="Manage employee's leave and overtime."
+          headline="Manage employee's leave applications."
         ></HeaderPanel>
 
         <AttendanceTable component-view="leave"></AttendanceTable>
