@@ -5,56 +5,32 @@ import { type AttendanceImage } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 
-export function useAttendanceTable() {
+export function useAttendanceTable(props: { componentView: 'attendance' | 'leave' | 'overtime' }) {
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
 
   // States
-  const tableHeadersDefault: TableHeader[] = [
-    {
-      title: 'Employee',
-      key: 'employee',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'Date',
-      key: 'date',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'AM - Time In',
-      key: 'am_time_in',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'AM - Time Out',
-      key: 'am_time_out',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'PM - Time In',
-      key: 'pm_time_in',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'PM - Time Out',
-      key: 'pm_time_out',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      sortable: false,
-      align: 'center',
-    },
+  const baseHeaders: TableHeader[] = [
+    { title: 'Employee', key: 'employee', sortable: false, align: 'start' },
+    { title: 'Date', key: 'date', sortable: false, align: 'start' },
+    { title: 'AM - Time In', key: 'am_time_in', sortable: false, align: 'start' },
+    { title: 'AM - Time Out', key: 'am_time_out', sortable: false, align: 'start' },
+    { title: 'PM - Time In', key: 'pm_time_in', sortable: false, align: 'start' },
+    { title: 'PM - Time Out', key: 'pm_time_out', sortable: false, align: 'start' },
   ]
-  const tableHeaders = ref<TableHeader[]>(tableHeadersDefault)
+  const getTableHeaders = (componentView: string): TableHeader[] => {
+    const headers = [...baseHeaders]
+
+    if (componentView === 'overtime') {
+      headers.push({ title: 'Overtime Application', key: 'is_overtime_applied', align: 'start' })
+    }
+
+    headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
+    return headers
+  }
+
+  const tableHeaders = ref<TableHeader[]>(getTableHeaders(props.componentView))
+
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
@@ -130,8 +106,10 @@ export function useAttendanceTable() {
   }
 
   const onFilterItems = () => {
-    if (tableFilters.value.employee_id !== null) tableHeaders.value = tableHeadersDefault.slice(1)
-    else tableHeaders.value = tableHeadersDefault
+    const headers = getTableHeaders(props.componentView)
+
+    if (tableFilters.value.employee_id !== null) tableHeaders.value = headers.slice(1)
+    else tableHeaders.value = headers
 
     onLoadItems(tableOptions.value)
   }
