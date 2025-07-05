@@ -37,7 +37,7 @@ const {
   hasAttendanceImage,
   attendancesStore,
   employeesStore,
-} = useAttendanceTable()
+} = useAttendanceTable(props)
 </script>
 
 <template>

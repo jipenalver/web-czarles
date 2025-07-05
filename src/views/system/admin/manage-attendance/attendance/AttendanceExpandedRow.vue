@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const { mobile } = useDisplay()
 
-const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttendanceTable()
+const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttendanceTable(props)
 </script>
 
 <template>
