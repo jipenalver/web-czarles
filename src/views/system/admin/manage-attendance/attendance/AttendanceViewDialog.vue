@@ -8,7 +8,13 @@ import { useDisplay } from 'vuetify'
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: Attendance | null
-  viewType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'
+  viewType:
+    | 'am_time_in'
+    | 'am_time_out'
+    | 'pm_time_in'
+    | 'pm_time_out'
+    | 'overtime_in'
+    | 'overtime_out'
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
