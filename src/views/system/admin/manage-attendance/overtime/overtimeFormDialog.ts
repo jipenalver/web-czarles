@@ -48,7 +48,7 @@ export function useOvertimeFormDialog(
     () => {
       formCheckBox.value = { ...formCheckBoxDefault }
 
-      const { employee, ...itemData } = props.itemData as Attendance
+      const { employee, attendance_images, ...itemData } = props.itemData as Attendance
       formData.value = {
         ...itemData,
         overtime_in: getTime24Hour(itemData.overtime_in) as string,
