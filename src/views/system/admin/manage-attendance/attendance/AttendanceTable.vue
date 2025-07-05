@@ -10,7 +10,7 @@ import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
-  componentView: 'attendance' | 'leave'
+  componentView: 'attendance' | 'leave' | 'overtime'
 }>()
 
 const { mobile } = useDisplay()
@@ -34,9 +34,10 @@ const {
   onConfirmDelete,
   onFilterItems,
   onLoadItems,
+  hasAttendanceImage,
   attendancesStore,
   employeesStore,
-} = useAttendanceTable()
+} = useAttendanceTable(props)
 </script>
 
 <template>
@@ -86,7 +87,13 @@ const {
                 </v-btn>
               </v-col>
             </template>
-            <template v-else-if="props.componentView === 'leave'"> </template>
+            <template v-else-if="props.componentView === 'leave'">
+              <v-col cols="12" sm="3">
+                <v-btn class="my-1" prepend-icon="mdi-account-arrow-left" color="primary" block>
+                  Apply Leave
+                </v-btn>
+              </v-col>
+            </template>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
@@ -105,11 +112,14 @@ const {
         </template>
 
         <template #item.am_time_in="{ item }">
-          <span v-if="item.am_time_in && item.is_am_in_rectified" class="font-weight-bold">
+          <span
+            v-if="item.am_time_in && !hasAttendanceImage(item.attendance_images, 'am_time_in')"
+            class="font-weight-bold"
+          >
             {{ getTime(item.am_time_in) }}
           </span>
           <span
-            v-else-if="item.am_time_in && !item.is_am_in_rectified"
+            v-else-if="item.am_time_in && hasAttendanceImage(item.attendance_images, 'am_time_in')"
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'am_time_in')"
           >
@@ -119,11 +129,16 @@ const {
         </template>
 
         <template #item.am_time_out="{ item }">
-          <span v-if="item.am_time_out && item.is_am_out_rectified" class="font-weight-bold">
+          <span
+            v-if="item.am_time_out && !hasAttendanceImage(item.attendance_images, 'am_time_out')"
+            class="font-weight-bold"
+          >
             {{ getTime(item.am_time_out) }}
           </span>
           <span
-            v-else-if="item.am_time_out && !item.is_am_out_rectified"
+            v-else-if="
+              item.am_time_out && hasAttendanceImage(item.attendance_images, 'am_time_out')
+            "
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'am_time_out')"
           >
@@ -134,13 +149,13 @@ const {
 
         <template #item.pm_time_in="{ item }">
           <span
-            v-if="item.pm_time_in && item.is_pm_in_rectified"
+            v-if="item.pm_time_in && !hasAttendanceImage(item.attendance_images, 'pm_time_in')"
             class="font-weight-bold cursor-pointer"
           >
             {{ getTime(item.pm_time_in) }}
           </span>
           <span
-            v-else-if="item.pm_time_in && !item.is_pm_in_rectified"
+            v-else-if="item.pm_time_in && hasAttendanceImage(item.attendance_images, 'pm_time_in')"
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'pm_time_in')"
           >
@@ -150,17 +165,31 @@ const {
         </template>
 
         <template #item.pm_time_out="{ item }">
-          <span v-if="item.pm_time_out && item.is_pm_out_rectified" class="font-weight-bold">
+          <span
+            v-if="item.pm_time_out && !hasAttendanceImage(item.attendance_images, 'pm_time_out')"
+            class="font-weight-bold"
+          >
             {{ getTime(item.pm_time_out) }}
           </span>
           <span
-            v-else-if="item.pm_time_out && !item.is_pm_out_rectified"
+            v-else-if="
+              item.pm_time_out && hasAttendanceImage(item.attendance_images, 'pm_time_out')
+            "
             class="font-weight-bold cursor-pointer text-decoration-underline"
             @click="onView(item, 'pm_time_out')"
           >
             {{ getTime(item.pm_time_out) }}
           </span>
           <span v-else>-</span>
+        </template>
+
+        <template #item.is_overtime_applied="{ item }">
+          <span
+            class="font-weight-bold"
+            :class="item.is_overtime_applied ? 'text-success' : 'text-error'"
+          >
+            {{ item.is_overtime_applied ? 'Yes' : 'No' }}
+          </span>
         </template>
 
         <template #item.actions="{ item }">
@@ -177,7 +206,9 @@ const {
               </v-btn>
             </template>
 
-            <template v-else-if="props.componentView === 'leave'">
+            <template v-else-if="props.componentView === 'leave'"> </template>
+
+            <template v-else-if="props.componentView === 'overtime'">
               <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
                 <v-icon icon="mdi-clock-plus" color="secondary"></v-icon>
                 <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>

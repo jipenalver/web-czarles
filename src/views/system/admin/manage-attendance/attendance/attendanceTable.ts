@@ -1,59 +1,33 @@
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { type AttendanceImage } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 
-export function useAttendanceTable() {
+export function useAttendanceTable(props: { componentView: 'attendance' | 'leave' | 'overtime' }) {
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
 
   // States
-  const tableHeadersDefault: TableHeader[] = [
-    {
-      title: 'Employee',
-      key: 'employee',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'Date',
-      key: 'date',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'AM - Time In',
-      key: 'am_time_in',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'AM - Time Out',
-      key: 'am_time_out',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'PM - Time In',
-      key: 'pm_time_in',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'PM - Time Out',
-      key: 'pm_time_out',
-      sortable: false,
-      align: 'start',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      sortable: false,
-      align: 'center',
-    },
+  const baseHeaders: TableHeader[] = [
+    { title: 'Employee', key: 'employee', sortable: false, align: 'start' },
+    { title: 'Date', key: 'date', sortable: false, align: 'start' },
+    { title: 'AM - Time In', key: 'am_time_in', sortable: false, align: 'start' },
+    { title: 'AM - Time Out', key: 'am_time_out', sortable: false, align: 'start' },
+    { title: 'PM - Time In', key: 'pm_time_in', sortable: false, align: 'start' },
+    { title: 'PM - Time Out', key: 'pm_time_out', sortable: false, align: 'start' },
   ]
-  const tableHeaders = ref<TableHeader[]>(tableHeadersDefault)
+  const getTableHeaders = (componentView: string): TableHeader[] => {
+    const headers = [...baseHeaders]
+
+    if (componentView === 'overtime')
+      headers.push({ title: 'Overtime Applied?', key: 'is_overtime_applied', align: 'center' })
+
+    headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
+    return headers
+  }
+  const tableHeaders = ref<TableHeader[]>(getTableHeaders(props.componentView))
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
@@ -70,7 +44,9 @@ export function useAttendanceTable() {
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
   const formAction = ref({ ...formActionDefault })
-  const viewType = ref<'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'>('am_time_in')
+  const viewType = ref<
+    'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out' | 'overtime_in' | 'overtime_out'
+  >('am_time_in')
 
   // Actions
   const onAdd = () => {
@@ -80,7 +56,13 @@ export function useAttendanceTable() {
 
   const onView = (
     item: Attendance,
-    timeType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out',
+    timeType:
+      | 'am_time_in'
+      | 'am_time_out'
+      | 'pm_time_in'
+      | 'pm_time_out'
+      | 'overtime_in'
+      | 'overtime_out',
   ) => {
     itemData.value = item
     viewType.value = timeType
@@ -121,8 +103,10 @@ export function useAttendanceTable() {
   }
 
   const onFilterItems = () => {
-    if (tableFilters.value.employee_id !== null) tableHeaders.value = tableHeadersDefault.slice(1)
-    else tableHeaders.value = tableHeadersDefault
+    const headers = getTableHeaders(props.componentView)
+
+    if (tableFilters.value.employee_id !== null) tableHeaders.value = headers.slice(1)
+    else tableHeaders.value = headers
 
     onLoadItems(tableOptions.value)
   }
@@ -133,6 +117,10 @@ export function useAttendanceTable() {
     await attendancesStore.getAttendancesTable({ page, itemsPerPage, sortBy }, tableFilters.value)
 
     tableOptions.value.isLoading = false
+  }
+
+  const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
+    return images.some((image) => image.image_type === type)
   }
 
   onMounted(async () => {
@@ -159,6 +147,7 @@ export function useAttendanceTable() {
     onConfirmDelete,
     onFilterItems,
     onLoadItems,
+    hasAttendanceImage,
     attendancesStore,
     employeesStore,
   }
