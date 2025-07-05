@@ -87,7 +87,13 @@ const {
                 </v-btn>
               </v-col>
             </template>
-            <template v-else-if="props.componentView === 'leave'"> </template>
+            <template v-else-if="props.componentView === 'leave'">
+              <v-col cols="12" sm="3">
+                <v-btn class="my-1" prepend-icon="mdi-account-arrow-left" color="primary" block>
+                  Apply Leave
+                </v-btn>
+              </v-col>
+            </template>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
