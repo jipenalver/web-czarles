@@ -22,7 +22,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     const headers = [...baseHeaders]
 
     if (componentView === 'overtime')
-      headers.push({ title: 'Overtime Application', key: 'is_overtime_applied', align: 'center' })
+      headers.push({ title: 'Overtime Applied?', key: 'is_overtime_applied', align: 'center' })
 
     headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
     return headers
