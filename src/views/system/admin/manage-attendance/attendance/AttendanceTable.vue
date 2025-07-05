@@ -5,7 +5,6 @@ import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
-import { type AttendanceImage } from '@/stores/attendances'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
@@ -35,13 +34,10 @@ const {
   onConfirmDelete,
   onFilterItems,
   onLoadItems,
+  hasAttendanceImage,
   attendancesStore,
   employeesStore,
 } = useAttendanceTable()
-
-const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
-  return images.some((image) => image.image_type === type)
-}
 </script>
 
 <template>
