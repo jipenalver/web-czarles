@@ -57,6 +57,17 @@ export const useAttendancesStore = defineStore('attendances', () => {
   }
 
   // Actions
+  async function getAttendances() {
+    const { data } = await supabase
+      .from('attendances')
+      .select(
+        '*, employee:employee_id (id, firstname, lastname), attendance_images (image_path, image_type, created_at)',
+      )
+      .order('am_time_in', { ascending: false })
+
+    attendances.value = data as Attendance[]
+  }
+
   async function getAttendancesTable(
     tableOptions: TableOptions,
     { employee_id }: AttendanceTableFilter,
@@ -133,6 +144,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendancesTable,
     attendancesTableTotal,
     $reset,
+    getAttendances,
     getAttendancesTable,
     addAttendance,
     updateAttendance,
