@@ -7,6 +7,7 @@ import {
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { getDate } from '@/utils/helpers/others'
 import { onMounted, ref, watch } from 'vue'
 
 export function useLeaveFormDialog(
@@ -41,13 +42,43 @@ export function useLeaveFormDialog(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
-      formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+
+      if (isUpdate.value) {
+        const { employee, attendance_images, ...itemData } = props.itemData as Attendance
+        formData.value = { ...itemData }
+      } else formData.value = { ...formDataDefault }
     },
   )
 
   // Actions
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
+
+    const { date, ...newFormData } = {
+      ...formData.value,
+      am_time_in: getDate(formData.value.date as string),
+    }
+
+    const { data, error } = isUpdate.value
+      ? await attendancesStore.updateAttendance(newFormData)
+      : await attendancesStore.addAttendance(newFormData)
+
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formProcess: false,
+      }
+    } else if (data) {
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Application' : 'Applied for Leave'}.`
+
+      await attendancesStore.getAttendancesTable(props.tableOptions, props.tableFilters)
+
+      setTimeout(() => {
+        onFormReset()
+      }, 1500)
+    }
 
     formAction.value.formAlert = true
   }
@@ -73,6 +104,7 @@ export function useLeaveFormDialog(
     formData,
     formAction,
     refVForm,
+    isUpdate,
     isConfirmSubmitDialog,
     onSubmit,
     onFormSubmit,
