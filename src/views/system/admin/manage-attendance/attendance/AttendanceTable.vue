@@ -97,7 +97,7 @@ const {
                   prepend-icon="mdi-account-arrow-left"
                   color="primary"
                   block
-                  @click="onLeave"
+                  @click="onLeave(null)"
                 >
                   Apply Leave
                 </v-btn>
