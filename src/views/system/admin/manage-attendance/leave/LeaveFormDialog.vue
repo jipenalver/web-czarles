@@ -46,7 +46,7 @@ const {
     <v-card
       prepend-icon="mdi-account-arrow-left"
       title="Leave Application"
-      subtitle="Apply for Leave."
+      subtitle="Apply for Employee's Leave."
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
@@ -98,7 +98,7 @@ const {
               </v-switch>
             </v-col>
 
-            <v-col cols="12" sm="6">
+            <v-col cols="12">
               <v-switch
                 v-model="formData.is_leave_with_pay"
                 class="ms-2"
@@ -112,6 +112,31 @@ const {
                   </span>
                 </template>
               </v-switch>
+            </v-col>
+
+            <v-col cols="12">
+              <v-select
+                v-model="formData.leave_type"
+                label="Leave Type"
+                :items="[
+                  'Sick Leave',
+                  'Vacation Leave',
+                  'Emergency Leave',
+                  'Maternity Leave',
+                  'Paternity Leave',
+                  'Leasure Leave',
+                  'Others',
+                ]"
+                :rules="[requiredValidator]"
+              ></v-select>
+            </v-col>
+
+            <v-col cols="12">
+              <v-textarea
+                v-model="formData.leave_reason"
+                label="Leave Reason"
+                rows="2"
+              ></v-textarea>
             </v-col>
           </v-row>
         </v-card-text>
