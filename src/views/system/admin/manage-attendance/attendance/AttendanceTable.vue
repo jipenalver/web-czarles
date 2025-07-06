@@ -121,8 +121,12 @@ const {
         </template>
 
         <template #item.am_time_in="{ item }">
+          <span v-if="item.is_pm_leave && !item.is_am_leave">-</span>
+          <span v-else-if="item.is_am_leave" class="font-weight-bold text-secondary">
+            {{ item.leave_type }}
+          </span>
           <span
-            v-if="item.am_time_in && !hasAttendanceImage(item.attendance_images, 'am_time_in')"
+            v-else-if="item.am_time_in && !hasAttendanceImage(item.attendance_images, 'am_time_in')"
             class="font-weight-bold"
           >
             {{ getTime(item.am_time_in) }}
@@ -138,8 +142,13 @@ const {
         </template>
 
         <template #item.am_time_out="{ item }">
+          <span v-if="item.is_am_leave" class="font-weight-bold text-secondary">
+            {{ item.leave_type }}
+          </span>
           <span
-            v-if="item.am_time_out && !hasAttendanceImage(item.attendance_images, 'am_time_out')"
+            v-else-if="
+              item.am_time_out && !hasAttendanceImage(item.attendance_images, 'am_time_out')
+            "
             class="font-weight-bold"
           >
             {{ getTime(item.am_time_out) }}
@@ -157,8 +166,11 @@ const {
         </template>
 
         <template #item.pm_time_in="{ item }">
+          <span v-if="item.is_pm_leave" class="font-weight-bold text-secondary">
+            {{ item.leave_type }}
+          </span>
           <span
-            v-if="item.pm_time_in && !hasAttendanceImage(item.attendance_images, 'pm_time_in')"
+            v-else-if="item.pm_time_in && !hasAttendanceImage(item.attendance_images, 'pm_time_in')"
             class="font-weight-bold cursor-pointer"
           >
             {{ getTime(item.pm_time_in) }}
@@ -174,8 +186,13 @@ const {
         </template>
 
         <template #item.pm_time_out="{ item }">
+          <span v-if="item.is_pm_leave" class="font-weight-bold text-secondary">
+            {{ item.leave_type }}
+          </span>
           <span
-            v-if="item.pm_time_out && !hasAttendanceImage(item.attendance_images, 'pm_time_out')"
+            v-else-if="
+              item.pm_time_out && !hasAttendanceImage(item.attendance_images, 'pm_time_out')
+            "
             class="font-weight-bold"
           >
             {{ getTime(item.pm_time_out) }}
@@ -216,14 +233,28 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'leave'">
-              <v-btn variant="text" density="comfortable" icon @click="onLeave(item)">
+              <v-btn
+                v-if="
+                  !(item.am_time_in && item.am_time_out) || !(item.pm_time_in && item.pm_time_out)
+                "
+                variant="text"
+                density="comfortable"
+                icon
+                @click="onLeave(item)"
+              >
                 <v-icon icon="mdi-pencil"></v-icon>
-                <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
+                <v-tooltip activator="parent" location="top">Apply Leave</v-tooltip>
               </v-btn>
             </template>
 
             <template v-else-if="props.componentView === 'overtime'">
-              <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
+              <v-btn
+                v-if="!item.is_am_leave || !item.is_pm_leave"
+                variant="text"
+                density="comfortable"
+                @click="onOvertime(item)"
+                icon
+              >
                 <v-icon icon="mdi-clock-plus" color="secondary"></v-icon>
                 <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>
               </v-btn>
