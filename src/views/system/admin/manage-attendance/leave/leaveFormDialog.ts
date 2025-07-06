@@ -96,21 +96,27 @@ export function useLeaveFormDialog(
     }
 
     if (!isUpdate.value) {
-      const hasFilledAttendance = attendancesStore.attendances.some(
+      const attendance = attendancesStore.attendances.find(
         (attendance) =>
           getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
-          attendance.employee_id === formData.value.employee_id &&
-          attendance.am_time_in &&
-          attendance.am_time_out &&
-          attendance.pm_time_in &&
-          attendance.pm_time_out,
+          attendance.employee_id === formData.value.employee_id,
       )
 
-      if (hasFilledAttendance)
-        return setError(
-          'Attendance for this employee and its date is already filled. Cannot apply for leave.',
-        )
+      const isAttendanceComplete =
+        attendance &&
+        [
+          attendance.am_time_in,
+          attendance.am_time_out,
+          attendance.pm_time_in,
+          attendance.pm_time_out,
+        ].every((time) => time !== null)
+
+      if (isAttendanceComplete)
+        return setError('Cannot apply for leave - attendance already recorded for this date.')
     }
+
+    if (!formData.value.is_am_leave || !formData.value.is_pm_leave)
+      return setError('Either AM or PM leave must be selected.')
   }
 
   // Trigger Validators

@@ -142,9 +142,7 @@ export function useAttendanceFormDialog(
       )
 
       if (hasAttendance)
-        return setError(
-          'Attendance for this employee and its date already exists. Cannot add new attendance.',
-        )
+        return setError('Cannot add attendance - record already exists for this employee and date.')
     }
 
     if (!formData.value.am_time_in) return setError('AM - Time In is required.')
