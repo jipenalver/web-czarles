@@ -19,8 +19,6 @@ export type Attendance = {
   is_am_out_rectified: boolean
   is_pm_in_rectified: boolean
   is_pm_out_rectified: boolean
-  is_am_absent: boolean
-  is_pm_absent: boolean
   is_overtime_applied: boolean
   overtime_in: string | null
   overtime_out: string | null
@@ -28,6 +26,11 @@ export type Attendance = {
   is_overtime_out_rectified: boolean
   employee: Employee
   attendance_images: AttendanceImage[]
+  is_am_leave: boolean
+  is_pm_leave: boolean
+  is_leave_with_pay: boolean
+  leave_type: string | null
+  leave_reason: string
 }
 
 export type AttendanceImage = {
