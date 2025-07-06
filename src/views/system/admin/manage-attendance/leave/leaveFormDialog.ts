@@ -115,7 +115,7 @@ export function useLeaveFormDialog(
         return setError('Cannot apply for leave - attendance already recorded for this date.')
     }
 
-    if (!formData.value.is_am_leave || !formData.value.is_pm_leave)
+    if (!formData.value.is_am_leave && !formData.value.is_pm_leave)
       return setError('Either AM or PM leave must be selected.')
   }
 
@@ -137,6 +137,7 @@ export function useLeaveFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions
