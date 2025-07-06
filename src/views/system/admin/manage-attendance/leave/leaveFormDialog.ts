@@ -83,10 +83,50 @@ export function useLeaveFormDialog(
     formAction.value.formAlert = true
   }
 
+  const onFormValidate = () => {
+    const setError = (message: string) => {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: message,
+        formStatus: 400,
+        formProcess: false,
+        formAlert: true,
+      }
+      return true
+    }
+
+    if (!isUpdate.value) {
+      const attendance = attendancesStore.attendances.find(
+        (attendance) =>
+          getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
+          attendance.employee_id === formData.value.employee_id,
+      )
+
+      const isAttendanceComplete =
+        attendance &&
+        [
+          attendance.am_time_in,
+          attendance.am_time_out,
+          attendance.pm_time_in,
+          attendance.pm_time_out,
+        ].every((time) => time !== null)
+
+      if (isAttendanceComplete)
+        return setError('Cannot apply for leave - attendance already recorded for this date.')
+    }
+
+    if (!formData.value.is_am_leave && !formData.value.is_pm_leave)
+      return setError('Either AM or PM leave must be selected.')
+  }
+
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
-    if (valid) isConfirmSubmitDialog.value = true
+    if (valid) {
+      if (onFormValidate()) return
+
+      isConfirmSubmitDialog.value = true
+    }
   }
 
   const onFormReset = () => {
@@ -97,6 +137,7 @@ export function useLeaveFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions

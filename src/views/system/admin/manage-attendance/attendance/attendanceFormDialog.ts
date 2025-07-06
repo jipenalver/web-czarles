@@ -141,7 +141,8 @@ export function useAttendanceFormDialog(
           attendance.employee_id === formData.value.employee_id,
       )
 
-      if (hasAttendance) return setError('Attendance for this date and employee already exists.')
+      if (hasAttendance)
+        return setError('Cannot add attendance - record already exists for this employee and date.')
     }
 
     if (!formData.value.am_time_in) return setError('AM - Time In is required.')
@@ -174,6 +175,7 @@ export function useAttendanceFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions
