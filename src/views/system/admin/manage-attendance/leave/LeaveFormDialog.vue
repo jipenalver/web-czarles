@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { type Attendance, type AttendanceTableFilter } from '@/stores/attendances'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { useOvertimeFormDialog } from './overtimeFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { useLeaveFormDialog } from './leaveFormDialog'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
@@ -22,14 +22,12 @@ const {
   formData,
   formAction,
   refVForm,
-  formCheckBox,
   isConfirmSubmitDialog,
-  confirmText,
   onSubmit,
   onFormSubmit,
   onFormReset,
   employeesStore,
-} = useOvertimeFormDialog(props, emit)
+} = useLeaveFormDialog(props, emit)
 </script>
 
 <template>
@@ -46,9 +44,9 @@ const {
     persistent
   >
     <v-card
-      prepend-icon="mdi-clock-plus"
-      title="Overtime Application"
-      subtitle="Apply for Overtime. Check the checkboxes to modify the time."
+      prepend-icon="mdi-account-arrow-left"
+      title="Leave Application"
+      subtitle="Apply for Leave."
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
@@ -70,7 +68,7 @@ const {
                 v-model="formData.date"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
-                label="Attendance Date"
+                label="Select Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
                 readonly
@@ -78,55 +76,43 @@ const {
               ></v-date-input>
             </v-col>
 
-            <v-col cols="12" class="d-flex justify-center">
-              <v-switch
-                v-model="formData.is_overtime_applied"
-                class="ms-2"
-                color="primary"
-                hide-details
-              >
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_am_leave" class="ms-2" color="primary" hide-details>
                 <template #label>
-                  Apply For Overtime?
+                  AM - Leave?
                   <span class="font-weight-black ms-1">
-                    {{ formData.is_overtime_applied ? 'Yes' : 'No' }}
+                    {{ formData.is_am_leave ? 'Yes' : 'No' }}
                   </span>
                 </template>
               </v-switch>
             </v-col>
 
-            <template v-if="formData.is_overtime_applied">
-              <v-col cols="12" sm="6" class="d-flex justify-center">
-                <v-time-picker
-                  v-model="formData.overtime_in"
-                  color="secondary"
-                  :disabled="!formCheckBox.isRectifyOvertimeIn"
-                  ampm-in-title
-                >
-                  <template #title>
-                    <v-checkbox-btn
-                      v-model="formCheckBox.isRectifyOvertimeIn"
-                      label="Overtime - Time In"
-                    ></v-checkbox-btn>
-                  </template>
-                </v-time-picker>
-              </v-col>
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_pm_leave" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  PM - Leave?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_pm_leave ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
 
-              <v-col cols="12" sm="6" class="d-flex justify-center">
-                <v-time-picker
-                  v-model="formData.overtime_out"
-                  color="secondary"
-                  :disabled="!formCheckBox.isRectifyOvertimeOut"
-                  ampm-in-title
-                >
-                  <template #title>
-                    <v-checkbox-btn
-                      v-model="formCheckBox.isRectifyOvertimeOut"
-                      label="Overtime - Time Out"
-                    ></v-checkbox-btn>
-                  </template>
-                </v-time-picker>
-              </v-col>
-            </template>
+            <v-col cols="12" sm="6">
+              <v-switch
+                v-model="formData.is_leave_with_pay"
+                class="ms-2"
+                color="primary"
+                hide-details
+              >
+                <template #label>
+                  Is Leave with Pay?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_leave_with_pay ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
           </v-row>
         </v-card-text>
 
@@ -142,10 +128,10 @@ const {
             color="primary"
             type="submit"
             variant="elevated"
-            :disabled="formAction.formProcess || !formData.is_overtime_applied"
+            :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Apply Overtime
+            Apply Leave
           </v-btn>
         </v-card-actions>
       </v-form>
@@ -154,8 +140,8 @@ const {
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmSubmitDialog"
-    title="Confirm Overtime Rectification"
-    :text="confirmText"
+    title="Confirm Leave Application"
+    text="Are you sure you want to submit this leave application?"
     @confirm="onSubmit"
   ></ConfirmDialog>
 </template>
