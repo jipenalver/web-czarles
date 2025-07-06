@@ -83,10 +83,44 @@ export function useLeaveFormDialog(
     formAction.value.formAlert = true
   }
 
+  const onFormValidate = () => {
+    const setError = (message: string) => {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: message,
+        formStatus: 400,
+        formProcess: false,
+        formAlert: true,
+      }
+      return true
+    }
+
+    if (!isUpdate.value) {
+      const hasFilledAttendance = attendancesStore.attendances.some(
+        (attendance) =>
+          getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
+          attendance.employee_id === formData.value.employee_id &&
+          attendance.am_time_in &&
+          attendance.am_time_out &&
+          attendance.pm_time_in &&
+          attendance.pm_time_out,
+      )
+
+      if (hasFilledAttendance)
+        return setError(
+          'Attendance for this employee and its date is already filled. Cannot apply for leave.',
+        )
+    }
+  }
+
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
-    if (valid) isConfirmSubmitDialog.value = true
+    if (valid) {
+      if (onFormValidate()) return
+
+      isConfirmSubmitDialog.value = true
+    }
   }
 
   const onFormReset = () => {
