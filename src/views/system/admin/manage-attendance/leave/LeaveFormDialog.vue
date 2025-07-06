@@ -22,6 +22,7 @@ const {
   formData,
   formAction,
   refVForm,
+  isUpdate,
   isConfirmSubmitDialog,
   onSubmit,
   onFormSubmit,
@@ -59,7 +60,7 @@ const {
                 item-title="label"
                 item-value="id"
                 :rules="[requiredValidator]"
-                readonly
+                :readonly="isUpdate"
               ></v-autocomplete>
             </v-col>
 
@@ -71,12 +72,12 @@ const {
                 label="Select Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                readonly
+                :readonly="isUpdate"
                 hide-actions
               ></v-date-input>
             </v-col>
 
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="6" class="d-flex justify-center">
               <v-switch v-model="formData.is_am_leave" class="ms-2" color="primary" hide-details>
                 <template #label>
                   AM - Leave?
@@ -87,7 +88,7 @@ const {
               </v-switch>
             </v-col>
 
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="6" class="d-flex justify-center">
               <v-switch v-model="formData.is_pm_leave" class="ms-2" color="primary" hide-details>
                 <template #label>
                   PM - Leave?
@@ -98,7 +99,7 @@ const {
               </v-switch>
             </v-col>
 
-            <v-col cols="12">
+            <v-col cols="12" class="d-flex justify-center">
               <v-switch
                 v-model="formData.is_leave_with_pay"
                 class="ms-2"
@@ -166,7 +167,7 @@ const {
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmSubmitDialog"
     title="Confirm Leave Application"
-    text="Are you sure you want to submit this leave application?"
+    text="Are you sure you want to submit this leave application? Any existing attendance records for this employee on the same date will be overwritten."
     @confirm="onSubmit"
   ></ConfirmDialog>
 </template>
