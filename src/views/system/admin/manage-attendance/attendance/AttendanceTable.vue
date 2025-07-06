@@ -5,6 +5,7 @@ import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
+import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { useDisplay } from 'vuetify'
@@ -21,6 +22,7 @@ const {
   tableFilters,
   isDialogVisible,
   isViewDialogVisible,
+  isLeaveDialogVisible,
   isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
@@ -29,6 +31,7 @@ const {
   onAdd,
   onView,
   onUpdate,
+  onLeave,
   onOvertime,
   onDelete,
   onConfirmDelete,
@@ -89,7 +92,13 @@ const {
             </template>
             <template v-else-if="props.componentView === 'leave'">
               <v-col cols="12" sm="3">
-                <v-btn class="my-1" prepend-icon="mdi-account-arrow-left" color="primary" block>
+                <v-btn
+                  class="my-1"
+                  prepend-icon="mdi-account-arrow-left"
+                  color="primary"
+                  block
+                  @click="onLeave"
+                >
                   Apply Leave
                 </v-btn>
               </v-col>
@@ -207,7 +216,7 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'leave'">
-              <v-btn variant="text" density="comfortable" icon>
+              <v-btn variant="text" density="comfortable" icon @click="onLeave(item)">
                 <v-icon icon="mdi-pencil"></v-icon>
                 <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
               </v-btn>
@@ -252,6 +261,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></AttendanceFormDialog>
+
+  <LeaveFormDialog
+    v-model:is-dialog-visible="isLeaveDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></LeaveFormDialog>
 
   <OvertimeFormDialog
     v-model:is-dialog-visible="isOvertimeDialogVisible"
