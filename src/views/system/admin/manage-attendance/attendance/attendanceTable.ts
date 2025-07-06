@@ -39,6 +39,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   })
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)
+  const isLeaveDialogVisible = ref(false)
   const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
@@ -72,6 +73,11 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const onUpdate = (item: Attendance) => {
     itemData.value = item
     isDialogVisible.value = true
+  }
+
+  const onLeave = (item: Attendance | null = null) => {
+    itemData.value = item
+    isLeaveDialogVisible.value = true
   }
 
   const onOvertime = (item: Attendance) => {
@@ -134,6 +140,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     tableFilters,
     isDialogVisible,
     isViewDialogVisible,
+    isLeaveDialogVisible,
     isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
@@ -142,6 +149,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     onAdd,
     onView,
     onUpdate,
+    onLeave,
     onOvertime,
     onDelete,
     onConfirmDelete,
