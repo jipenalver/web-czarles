@@ -2,6 +2,19 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { type Employee } from '@/stores/employees'
 import { ref, watch } from 'vue'
 
+type TableData = {
+  month: string
+  basic_salary: number
+  gross_pay: number
+  deductions: number
+  net_pay: number
+}
+export type PayrollData = {
+  year: number
+  month: string
+  employee_id: number
+}
+
 export function usePayrollTableDialog(
   props: {
     isDialogVisible: boolean
@@ -9,13 +22,6 @@ export function usePayrollTableDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  type TableData = {
-    month: string
-    basic_salary: number
-    gross_pay: number
-    deductions: number
-    net_pay: number
-  }
   // States
   const tableOptions = ref({
     page: 1,
@@ -28,6 +34,12 @@ export function usePayrollTableDialog(
   })
   const tableData = ref<TableData[]>([])
   const formAction = ref({ ...formActionDefault })
+  const isPrintDialogVisible = ref(false)
+  const payrollData = ref<PayrollData>({
+    year: 0,
+    month: '',
+    employee_id: 0,
+  })
 
   watch(
     () => props.isDialogVisible,
@@ -52,6 +64,16 @@ export function usePayrollTableDialog(
     },
   )
 
+  // Actions
+  const onView = (item: TableData) => {
+    payrollData.value = {
+      year: tableFilters.value.year,
+      month: item.month,
+      employee_id: props.itemData?.id || 0,
+    }
+    isPrintDialogVisible.value = true
+  }
+
   const onDialogClose = () => {
     formAction.value = { ...formActionDefault }
     emit('update:isDialogVisible', false)
@@ -63,6 +85,9 @@ export function usePayrollTableDialog(
     tableFilters,
     tableData,
     formAction,
+    isPrintDialogVisible,
+    payrollData,
+    onView,
     onDialogClose,
   }
 }
