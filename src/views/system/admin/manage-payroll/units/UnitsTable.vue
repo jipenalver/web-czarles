@@ -5,6 +5,7 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { useUnitsTable } from './unitsTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
+import UnitsFormDialog from './unitsFormDialog.vue'
 
 const date = useDate()
 const { mobile } = useDisplay()
@@ -36,9 +37,9 @@ const tableHeaders: TableHeader[] = [
 const {
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -124,6 +125,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <UnitsFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></UnitsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
