@@ -4,6 +4,7 @@ import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Employee } from '@/stores/employees'
 import { useDisplay } from 'vuetify'
+import PayrollPrintDialog from './PayrollPrintDialog.vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -47,10 +48,16 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
-const { tableOptions, tableFilters, tableData, formAction, onDialogClose } = usePayrollTableDialog(
-  props,
-  emit,
-)
+const {
+  tableOptions,
+  tableFilters,
+  tableData,
+  formAction,
+  isPrintDialogVisible,
+  payrollData,
+  onView,
+  onDialogClose,
+} = usePayrollTableDialog(props, emit)
 </script>
 
 <template>
@@ -92,6 +99,11 @@ const { tableOptions, tableFilters, tableData, formAction, onDialogClose } = use
           :hide-default-header="mobile"
           :mobile="mobile"
         >
+          <template #item.month="{ item }">
+            <v-btn class="text-decoration-underline" variant="text" @click="onView(item)">
+              {{ item.month }}
+            </v-btn>
+          </template>
         </v-data-table-server>
       </v-card-text>
 
@@ -104,4 +116,9 @@ const { tableOptions, tableFilters, tableData, formAction, onDialogClose } = use
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <PayrollPrintDialog
+    v-model:is-dialog-visible="isPrintDialogVisible"
+    :payroll-data="payrollData"
+  ></PayrollPrintDialog>
 </template>
