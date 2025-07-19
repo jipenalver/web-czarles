@@ -10,8 +10,8 @@ const { xs } = useDisplay()
 const tabsItems = [
   {
     icon: 'mdi-highway',
-    text: 'Trippings',
-    value: 'trippings',
+    text: 'Trips',
+    value: 'trips',
   },
   {
     icon: 'mdi-dump-truck',
@@ -25,7 +25,7 @@ const tabsItems = [
   },
 ]
 
-const tabWindow = ref('trippings')
+const tabWindow = ref('trips')
 const isDrawerVisible = ref(xs.value ? false : true)
 </script>
 
@@ -38,7 +38,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Payroll Management', 'Trippings']"
+          :header-items="['Payroll Management', 'Trips']"
           header-icon="mdi-highway"
           headline="Manage employee's trips."
         ></HeaderPanel>
@@ -59,7 +59,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
         </v-tabs>
 
         <v-tabs-window v-model="tabWindow">
-          <v-tabs-window-item value="trippings"> </v-tabs-window-item>
+          <v-tabs-window-item value="trips"> </v-tabs-window-item>
 
           <v-tabs-window-item value="units"> </v-tabs-window-item>
 
