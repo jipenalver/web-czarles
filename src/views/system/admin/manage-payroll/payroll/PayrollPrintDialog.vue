@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { usePayrollPrintDialog } from './payrollPrintDialog'
+import { type PayrollData } from './payrollTableDialog'
 import AppAlert from '@/components/common/AppAlert.vue'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemId?: number
+  payrollData: PayrollData
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
