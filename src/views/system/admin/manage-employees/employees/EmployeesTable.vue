@@ -246,7 +246,7 @@ const {
 
   <PayrollTableDialog
     v-model:is-dialog-visible="isPayrollDialogVisible"
-    :item-id="itemData?.id"
+    :item-data="itemData"
   ></PayrollTableDialog>
 
   <ConfirmDialog
