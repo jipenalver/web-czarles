@@ -6,7 +6,7 @@ import { ref } from 'vue'
 export function useTripsTable() {
   const tripsStore = useTripsStore()
 
-  // States
+  // State
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,

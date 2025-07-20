@@ -14,7 +14,7 @@ export function useTripsFormDialog(
 ) {
   const tripsStore = useTripsStore()
 
-  // States
+  // State
   const formDataDefault = {
     unit_id: null as any,
     trip_location_id: null as any,

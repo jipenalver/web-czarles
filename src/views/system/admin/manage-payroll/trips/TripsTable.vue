@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TripsFormDialog from '@/views/system/admin/manage-payroll/trips/TripsFormDialog.vue'
-import { useTripsTable } from '@/views/system/admin/manage-payroll/trips/TripsTable'
+import { useTripsTable } from '@/views/system/admin/manage-payroll/trips/tripsTable.ts'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'

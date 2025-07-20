@@ -8,7 +8,7 @@ import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
 const { xs } = useDisplay()
-
+//tabs
 const tabsItems = [
   {
     icon: 'mdi-highway',
