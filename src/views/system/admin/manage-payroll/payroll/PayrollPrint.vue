@@ -1,3 +1,61 @@
+<script setup lang="ts">
+import { type PayrollData } from './payrollTableDialog'
+import { type Employee } from '@/stores/employees'
+import { computed } from 'vue'
+
+const props = defineProps<{
+  employee: Employee | null
+  payrollData: PayrollData
+  tableData: any
+}>()
+
+const fullName = computed(() => {
+  if (!props.employee) return 'N/A'
+  const middleName = props.employee.middlename ? ` ${props.employee.middlename} ` : ' '
+  return `${props.employee.firstname}${middleName}${props.employee.lastname}`
+})
+
+const designation = computed(() => {
+  return props.employee?.designation?.designation || 'N/A'
+})
+
+const address = computed(() => {
+  return props.employee?.address || 'N/A'
+})
+
+const formattedDate = computed(() => {
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+  const monthIndex = monthNames.indexOf(props.payrollData.month)
+  const date = new Date(props.payrollData.year, monthIndex)
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+})
+
+const dailyRate = computed(() => {
+  return props.employee?.daily_rate || 0
+})
+
+const grossSalary = computed(() => {
+  return props.tableData?.gross_pay || 0
+})
+
+const totalDeductions = computed(() => {
+  return props.tableData?.deductions || 0
+})
+
+const netSalary = computed(() => {
+  return props.tableData?.net_pay || 0
+})
+
+const workDays = computed(() => {
+  // Calculate work days based on gross pay and daily rate
+  if (dailyRate.value === 0) return 0
+  return Math.round(grossSalary.value / dailyRate.value)
+})
+</script>
+
 <template>
   <v-row dense no-gutters>
     <v-col cols="12" sm="9" class="d-flex justify-center align-center">
@@ -12,15 +70,15 @@
     <tbody>
       <tr>
         <td class="text-caption">PAID TO</td>
-        <td class="border-b-md w-66 ps-5">Juan Dela Cruz</td>
+        <td class="border-b-md w-66 ps-5">{{ fullName }}</td>
         <td class="text-caption">POSITION</td>
-        <td class="border-b-md w-25 ps-5">Software Engineer</td>
+        <td class="border-b-md w-25 ps-5">{{ designation }}</td>
       </tr>
       <tr>
         <td class="text-caption">ADDRESS</td>
-        <td class="border-b-md w-66 ps-5">Butuan City</td>
+        <td class="border-b-md w-66 ps-5">{{ address }}</td>
         <td class="text-caption">DATE</td>
-        <td class="border-b-md w-25 ps-5">February 26, 2025</td>
+        <td class="border-b-md w-25 ps-5">{{ formattedDate }}</td>
       </tr>
     </tbody>
   </table>
@@ -32,29 +90,29 @@
         <td class="text-caption text-center border-b-md border-s-md">AMOUNT</td>
       </tr>
       <tr>
-        <td class="border-b-sm text-center">5</td>
-        <td>Days Regular Work for chuchuchu</td>
-        <td>@ 410.00</td>
+        <td class="border-b-sm text-center">{{ workDays }}</td>
+        <td>Days Regular Work for {{ payrollData.month }}</td>
+        <td>@ {{ dailyRate.toFixed(2) }}</td>
         <td>/Day</td>
-        <td class="border-b-sm border-s-md text-end">6150.00</td>
+        <td class="border-b-sm border-s-md text-end">{{ grossSalary.toFixed(2) }}</td>
       </tr>
       <tr>
         <td colspan="2"></td>
         <td class="text-caption font-weight-bold">Gross Salary</td>
         <td class="text-caption font-weight-bold text-end">Php</td>
-        <td class="border-b-sm border-s-md text-end"></td>
+        <td class="border-b-sm border-s-md text-end">{{ grossSalary.toFixed(2) }}</td>
       </tr>
       <tr>
         <td colspan="2"></td>
         <td class="text-caption">Less Deductions</td>
         <td></td>
-        <td class="border-b-sm border-s-md text-end"></td>
+        <td class="border-b-sm border-s-md text-end">{{ totalDeductions.toFixed(2) }}</td>
       </tr>
       <tr>
         <td colspan="2"></td>
         <td class="text-caption font-weight-bold border-t-md border-s-md">TOTAL NET SALARY</td>
-        <td class="border-t-md"></td>
-        <td class="border-t-md border-s-md text-end"></td>
+        <td class="border-t-md">Php</td>
+        <td class="border-t-md border-s-md text-end">{{ netSalary.toFixed(2) }}</td>
       </tr>
     </tbody>
   </table>
