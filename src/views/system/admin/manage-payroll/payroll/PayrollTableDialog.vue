@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { usePayrollTableDialog } from './payrollTableDialog'
 import { type TableHeader } from '@/utils/helpers/tables'
+import PayrollPrintDialog from './PayrollPrintDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Employee } from '@/stores/employees'
+
 import { useDisplay } from 'vuetify'
-import PayrollPrintDialog from './PayrollPrintDialog.vue'
+
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -55,6 +57,7 @@ const {
   formAction,
   isPrintDialogVisible,
   payrollData,
+  selectedTableData,
   onView,
   onDialogClose,
 } = usePayrollTableDialog(props, emit)
@@ -120,5 +123,7 @@ const {
   <PayrollPrintDialog
     v-model:is-dialog-visible="isPrintDialogVisible"
     :payroll-data="payrollData"
+    :employee="props.itemData"
+    :table-data="selectedTableData"
   ></PayrollPrintDialog>
 </template>

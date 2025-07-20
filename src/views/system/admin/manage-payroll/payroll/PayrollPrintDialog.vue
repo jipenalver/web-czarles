@@ -1,13 +1,17 @@
 <script setup lang="ts">
+
 import { usePayrollPrintDialog } from './payrollPrintDialog'
+
 import { type PayrollData } from './payrollTableDialog'
-import AppAlert from '@/components/common/AppAlert.vue'
+import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
   payrollData: PayrollData
+  employee: Employee | null
+  tableData: any
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -39,7 +43,11 @@ const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit
       </template>
 
       <v-card-text id="generate-payroll">
-        <PayrollPrint></PayrollPrint>
+        <PayrollPrint 
+          :employee="props.employee"
+          :payroll-data="props.payrollData"
+          :table-data="props.tableData"
+        ></PayrollPrint>
       </v-card-text>
 
       <v-divider></v-divider>
