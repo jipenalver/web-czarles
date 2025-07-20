@@ -1,6 +1,6 @@
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type Employee } from '@/stores/employees'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 type TableData = {
   month: string
@@ -25,12 +25,13 @@ export function usePayrollTableDialog(
   // States
   const tableOptions = ref({
     page: 1,
-    itemsPerPage: 12,
+    itemsPerPage: 6, // show 6 months per page para dili kaayo taas ang table
     sortBy: [],
     isLoading: false,
   })
   const tableFilters = ref({
     year: new Date().getFullYear(),
+    search: '', // search para sa months
   })
   const tableData = ref<TableData[]>([])
   const formAction = ref({ ...formActionDefault })
@@ -40,29 +41,112 @@ export function usePayrollTableDialog(
     month: '',
     employee_id: 0,
   })
+  const selectedTableData = ref<TableData | null>(null)
 
   watch(
     () => props.isDialogVisible,
     async () => {
       // query sa payroll data based on itemData.id = Employee ID
+      // load tanan months sa selected year with sample data
       tableData.value = [
         {
           month: 'January',
-          basic_salary: 5000,
-          gross_pay: 6000,
-          deductions: 1000,
-          net_pay: 5000,
+          basic_salary: 25000,
+          gross_pay: 28500,
+          deductions: 3200,
+          net_pay: 25300,
         },
         {
           month: 'February',
-          basic_salary: 5000,
-          gross_pay: 6000,
-          deductions: 1000,
-          net_pay: 5000,
+          basic_salary: 25000,
+          gross_pay: 29200,
+          deductions: 3100,
+          net_pay: 26100,
+        },
+        {
+          month: 'March',
+          basic_salary: 25000,
+          gross_pay: 27800,
+          deductions: 2900,
+          net_pay: 24900,
+        },
+        {
+          month: 'April',
+          basic_salary: 25000,
+          gross_pay: 30100,
+          deductions: 3400,
+          net_pay: 26700,
+        },
+        {
+          month: 'May',
+          basic_salary: 25000,
+          gross_pay: 28900,
+          deductions: 3000,
+          net_pay: 25900,
+        },
+        {
+          month: 'June',
+          basic_salary: 25000,
+          gross_pay: 31200,
+          deductions: 3600,
+          net_pay: 27600,
+        },
+        {
+          month: 'July',
+          basic_salary: 25000,
+          gross_pay: 29800,
+          deductions: 3300,
+          net_pay: 26500,
+        },
+        {
+          month: 'August',
+          basic_salary: 25000,
+          gross_pay: 28700,
+          deductions: 3150,
+          net_pay: 25550,
+        },
+        {
+          month: 'September',
+          basic_salary: 25000,
+          gross_pay: 30500,
+          deductions: 3500,
+          net_pay: 27000,
+        },
+        {
+          month: 'October',
+          basic_salary: 25000,
+          gross_pay: 29300,
+          deductions: 3250,
+          net_pay: 26050,
+        },
+        {
+          month: 'November',
+          basic_salary: 25000,
+          gross_pay: 32100,
+          deductions: 3800,
+          net_pay: 28300,
+        },
+        {
+          month: 'December',
+          basic_salary: 25000,
+          gross_pay: 35400,
+          deductions: 4200,
+          net_pay: 31200,
         },
       ]
     },
   )
+
+  // Computed properties
+  const filteredTableData = computed(() => {
+    // filter ang data based sa search input para sa months
+    if (!tableFilters.value.search) {
+      return tableData.value
+    }
+    return tableData.value.filter(item =>
+      item.month.toLowerCase().includes(tableFilters.value.search.toLowerCase())
+    )
+  })
 
   // Actions
   const onView = (item: TableData) => {
@@ -71,6 +155,7 @@ export function usePayrollTableDialog(
       month: item.month,
       employee_id: props.itemData?.id || 0,
     }
+    selectedTableData.value = item
     isPrintDialogVisible.value = true
   }
 
@@ -84,9 +169,11 @@ export function usePayrollTableDialog(
     tableOptions,
     tableFilters,
     tableData,
+    filteredTableData,
     formAction,
     isPrintDialogVisible,
     payrollData,
+    selectedTableData,
     onView,
     onDialogClose,
   }
