@@ -17,6 +17,11 @@ export type Trip = {
   employee_id: number | null
   user_id: string | null
   description: string | null
+  // Join fields para sa display sa table
+  units?: {
+    id: number
+    name: string
+  }
 }
 
 export type TripTableFilter = {
@@ -52,19 +57,40 @@ export const useTripsStore = defineStore('trips', () => {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'trip_no')
     const search = tableSearch(filters.search)
 
-    let query = supabase
+    // First fetch: get trips data
+    let tripsQuery = supabase
       .from('trips')
-      .select()
+      .select('*')
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getTripsFilter(query, filters)
+    tripsQuery = getTripsFilter(tripsQuery, filters)
 
-    const { data } = await query
+    const { data: tripsData } = await tripsQuery
+
+    // Extract unique unit IDs para sa second fetch
+    const unitIds = [...new Set(tripsData?.map(trip => trip.unit_id).filter(Boolean))] as number[]
+
+    // Second fetch: get units data based sa unit IDs from trips
+    let unitsData: { id: number; name: string }[] = []
+    if (unitIds.length > 0) {
+      const { data: fetchedUnits } = await supabase
+        .from('units')
+        .select('id, name')
+        .in('id', unitIds)
+      
+      unitsData = fetchedUnits || []
+    }
+
+    // Combine ang data - map units sa trips
+    const combinedData = tripsData?.map(trip => ({
+      ...trip,
+      units: trip.unit_id ? unitsData.find(unit => unit.id === trip.unit_id) : undefined
+    })) || []
 
     const { count } = await getTripsCount(filters)
 
-    tripsTable.value = data as Trip[]
+    tripsTable.value = combinedData as Trip[]
     tripsTableTotal.value = count as number
   }
 

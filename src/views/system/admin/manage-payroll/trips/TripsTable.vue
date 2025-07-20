@@ -145,7 +145,7 @@ const {
         </template>
 
         <template #item.unit_id="{ item }">
-          <span> {{ item.unit_id || 'N/A' }} </span>
+          <span> {{ item.units?.name || 'N/A' }} </span>
         </template>
 
         <template #item.trip_location_id="{ item }">
