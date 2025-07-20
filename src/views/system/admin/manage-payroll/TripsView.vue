@@ -3,6 +3,7 @@ import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import UnitsTable from './units/UnitsTable.vue'
+import TripsTable from './trips/TripsTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -60,7 +61,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
         </v-tabs>
 
         <v-tabs-window v-model="tabWindow">
-          <v-tabs-window-item value="trips"> </v-tabs-window-item>
+          <v-tabs-window-item value="trips">
+            <TripsTable></TripsTable>
+          </v-tabs-window-item>
 
           <v-tabs-window-item value="units">
             <UnitsTable></UnitsTable>

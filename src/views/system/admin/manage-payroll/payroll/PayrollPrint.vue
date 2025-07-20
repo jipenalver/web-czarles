@@ -105,12 +105,26 @@ const {
           <td class="pa-2">/Day</td>
           <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(grossSalary) }}</td>
         </tr>
-        <!-- Coda Allowance Row -->
+        <!-- TODO dapat dynamic row ni -->
         <tr>
           <td class="border-b-thin text-center pa-2">1</td>
-          <td class="pa-2">Coda allowance</td>
+          <td class="pa-2">Cola allowance CDO / NAMNAM / BUKIDNON / Cabulohan</td>
           <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
-          <td class="pa-2">/Month</td>
+          <td class="pa-2">/Day</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
+        </tr>
+         <tr>
+          <td class="border-b-thin text-center pa-2">1</td>
+          <td class="pa-2">Cola Jabonga Allowance / Jabonga / Buenavista / SanLuis</td>
+          <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
+          <td class="pa-2">/Day</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
+        </tr>
+          <tr>
+          <td class="border-b-thin text-center pa-2">1</td>
+          <td class="pa-2">Sunday Work</td>
+          <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
+          <td class="pa-2">/Sunday</td>
           <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
         </tr>
         <tr>
