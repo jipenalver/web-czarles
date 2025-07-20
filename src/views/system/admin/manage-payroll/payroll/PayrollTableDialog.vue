@@ -54,6 +54,7 @@ const {
   tableOptions,
   tableFilters,
   tableData,
+  filteredTableData,
   formAction,
   isPrintDialogVisible,
   payrollData,
@@ -82,23 +83,37 @@ const {
       :subtitle="`${props.itemData?.firstname} ${props.itemData?.lastname}`"
     >
       <template #append>
-        <v-select
-          v-model="tableFilters.year"
-          label="Year"
-          :items="[2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]"
-        ></v-select>
+        <div class="d-flex ga-3 align-center">
+          <!-- Search input para sa months -->
+          <v-text-field
+            v-model="tableFilters.search"
+            label="Search months..."
+            prepend-inner-icon="mdi-magnify"
+            clearable
+            density="compact"
+            variant="outlined"
+            style="min-width: 200px;"
+          ></v-text-field>
+          
+          <v-select
+            v-model="tableFilters.year"
+            label="Year"
+            :items="[2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]"
+            style="min-width: 120px;"
+          ></v-select>
+        </div>
       </template>
 
       <v-card-text>
         <!-- eslint-disable vue/valid-v-slot -->
-        <v-data-table-server
+        <v-data-table
           v-model:items-per-page="tableOptions.itemsPerPage"
           v-model:page="tableOptions.page"
           v-model:sort-by="tableOptions.sortBy"
           :loading="tableOptions.isLoading"
           :headers="tableHeaders"
-          :items="tableData"
-          :items-length="12"
+          :items="filteredTableData"
+          :items-per-page-options="[6, 12]"
           :hide-default-header="mobile"
           :mobile="mobile"
         >
@@ -107,7 +122,7 @@ const {
               {{ item.month }}
             </v-btn>
           </template>
-        </v-data-table-server>
+        </v-data-table>
       </v-card-text>
 
       <v-divider></v-divider>
