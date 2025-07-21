@@ -3,11 +3,16 @@ import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+export type UserRolePage = {
+  id: number
+  page: string
+}
+
 export type UserRole = {
   id: number
   user_role: string
   description: string
-  user_role_pages: { page: string }[]
+  user_role_pages: UserRolePage[]
   pages: string[]
 }
 
@@ -19,7 +24,7 @@ export const useUserRolesStore = defineStore('userRoles', () => {
   async function getUserRoles() {
     const { data } = await supabase
       .from('user_roles')
-      .select('*, user_role_pages (page)')
+      .select('*, user_role_pages (*)')
       .order('user_role', { ascending: true })
 
     userRoles.value = data as UserRole[]

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { type Benefit, type EmployeeDeduction } from './benefits'
 import { prepareFormDates } from '@/utils/helpers/others'
-import { type EmployeeDeduction } from './benefits'
+import { type Designation } from './designations'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
+import { type Area } from './areas'
 import { ref } from 'vue'
 
 export type Employee = {
@@ -26,21 +28,16 @@ export type Employee = {
   is_permanent: boolean
   is_insured: boolean
   designation_id: number | null
-  designation: {
-    designation: string
-  }
+  designation: Designation
   area_origin_id: number | null
-  area_origin: {
-    area: string
-  }
+  area_origin: Area
   area_assignment_id: number | null
-  area_assignment: {
-    area: string
-  }
+  area_assignment: Area
   daily_rate: number
-  employee_deductions: (Partial<EmployeeDeduction> & {
-    employee_benefit: { benefit: string }
-  })[]
+  employee_deductions: EmployeeDeduction &
+    {
+      employee_benefit: Benefit
+    }[]
 }
 
 export type EmployeeTableFilter = {
@@ -82,7 +79,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     let query = supabase
       .from('employees')
       .select(
-        '*, designation:designation_id (designation), area_origin:area_origin_id (area), area_assignment:area_assignment_id (area), employee_deductions (amount, benefit_id, employee_benefit:benefit_id (benefit))',
+        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
       )
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
