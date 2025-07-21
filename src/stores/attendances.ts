@@ -60,9 +60,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
   async function getAttendances() {
     const { data } = await supabase
       .from('attendances')
-      .select(
-        '*, employee:employee_id (id, firstname, lastname), attendance_images (image_path, image_type, created_at)',
-      )
+      .select('*, employee:employee_id (id, firstname, lastname), attendance_images (*)')
       .order('am_time_in', { ascending: false })
 
     attendances.value = data as Attendance[]
