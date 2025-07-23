@@ -6,24 +6,24 @@ import { computed } from 'vue'
 import { usePayrollRefs } from '@/views/system/admin/manage-payroll/payroll/PayrollPrint'
 
 const props = defineProps<{
-  employee: Employee | null
+  employeeData: Employee | null
   payrollData: PayrollData
   tableData: any
 }>()
 
 // Employee Information 
 const fullName = computed(() => {
-  if (!props.employee) return 'N/A'
-  const middleName = props.employee.middlename ? ` ${props.employee.middlename} ` : ' '
-  return `${props.employee.firstname}${middleName}${props.employee.lastname}`
+  if (!props.employeeData) return 'N/A'
+  const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
+  return `${props.employeeData.firstname}${middleName}${props.employeeData.lastname}`
 })
 
 const designation = computed(() => {
-  return props.employee?.designation?.designation || 'N/A'
+  return props.employeeData?.designation?.designation || 'N/A'
 })
 
 const address = computed(() => {
-  return props.employee?.address || 'N/A'
+  return props.employeeData?.address || 'N/A'
 })
 
 // Date Formatting
@@ -39,7 +39,7 @@ const formattedDate = computed(() => {
 
 // Basic salary data 
 const dailyRate = computed(() => {
-  return props.employee?.daily_rate || 0
+  return props.employeeData?.daily_rate || 0
 })
 
 const grossSalary = computed(() => {
@@ -47,7 +47,15 @@ const grossSalary = computed(() => {
 })
 
 // composable: gamit ang usePayrollRefs para sa mga ref
-const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(props, dailyRate, grossSalary)
+const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
+  {
+    employee: props.employeeData,
+    payrollData: props.payrollData,
+    tableData: props.tableData
+  },
+  dailyRate,
+  grossSalary
+)
 
 // payroll computation 
 const {

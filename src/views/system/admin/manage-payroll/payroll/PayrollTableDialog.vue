@@ -84,17 +84,6 @@ const {
     >
       <template #append>
         <div class="d-flex ga-3 align-center">
-          <!-- Search input para sa months -->
-          <v-text-field
-            v-model="tableFilters.search"
-            label="Search months..."
-            prepend-inner-icon="mdi-magnify"
-            clearable
-            density="compact"
-            variant="outlined"
-            style="min-width: 200px;"
-          ></v-text-field>
-          
           <v-select
             v-model="tableFilters.year"
             label="Year"
