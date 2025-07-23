@@ -2,7 +2,7 @@
 
 <script setup lang="ts">
 import { type PayrollData, type TableData } from './payrollTableDialog'
-import { usePayrollPrint } from './PayrollPrint'
+import { usePayrollPrint } from './payrollPrint'
 import { type Employee } from '@/stores/employees'
 import { computed } from 'vue'
 

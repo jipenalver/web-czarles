@@ -4,6 +4,7 @@ import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import UnitsTable from './units/UnitsTable.vue'
 import TripsTable from './trips/TripsTable.vue'
+import LocationsTable from './locations/LocationsTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -69,7 +70,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <UnitsTable></UnitsTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="locations"> </v-tabs-window-item>
+          <v-tabs-window-item value="locations">
+            <LocationsTable></LocationsTable>
+          </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
     </template>
