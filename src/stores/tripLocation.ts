@@ -11,6 +11,8 @@ export type TripLocation = {
 
 export type TripLocationTableFilter = {
   search: string
+  location?: string
+  description?: string
 }
 
 export type TripLocationTableOptions = {

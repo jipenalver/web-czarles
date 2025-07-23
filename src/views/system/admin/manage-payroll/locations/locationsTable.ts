@@ -12,8 +12,11 @@ export function useLocationsTable() {
     sortBy: [],
     isLoading: false,
   })
+  // Table filters: search, location, description
   const tableFilters = ref({
     search: '',
+    location: '',
+    description: '',
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -55,25 +58,31 @@ export function useLocationsTable() {
   }
 
   // Search and pagination integration (server-side)
+  // Bisaya-English: trigger table reload kung naay changes sa filters
   const onSearchItems = () => {
-    if (
-      tableFilters.value.search?.length >= 2 ||
-      tableFilters.value.search?.length == 0 ||
-      tableFilters.value.search === null
-    ) {
+    // Allow search if any filter is set (search, location, description)
+    const hasSearch = tableFilters.value.search?.length >= 2 || tableFilters.value.search?.length === 0
+    const hasLocation = tableFilters.value.location?.length >= 2 || tableFilters.value.location?.length === 0
+    const hasDescription = tableFilters.value.description?.length >= 2 || tableFilters.value.description?.length === 0
+    if (hasSearch || hasLocation || hasDescription) {
       onLoadItems(tableOptions.value)
     }
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: any) => {
     tableOptions.value.isLoading = true
+    // Bisaya-English: pass all filters to store (search, location, description)
     await tripLocationsStore.getTripLocationsTable(
       {
         page,
         itemsPerPage,
         sortBy: sortBy && sortBy.length > 0 ? sortBy : [{ key: 'location', order: 'asc' }],
       },
-      tableFilters.value
+      {
+        search: tableFilters.value.search,
+        location: tableFilters.value.location,
+        description: tableFilters.value.description,
+      }
     )
     tableOptions.value.isLoading = false
   }
