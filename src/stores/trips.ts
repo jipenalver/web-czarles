@@ -1,4 +1,4 @@
-import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
+import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -55,7 +55,7 @@ export const useTripsStore = defineStore('trips', () => {
   async function getTripsTable(tableOptions: TableOptions, filters: TripTableFilter) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'trip_no')
     // query sa trips with join sa units ug trips_location table, C7 style
-    const tripsQuery = supabase
+    let query = supabase
       .from('trips')
       .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)') // join units and trips_location tables
       .order(column, { ascending: order })
@@ -64,8 +64,7 @@ export const useTripsStore = defineStore('trips', () => {
     query = getTripsFilter(query, filters)
 
     // log the query object for debugging
-    console.log('tripsQuery:', tripsQuery)
-    const { data: tripsData } = await tripsQuery
+    const { data: tripsData } = await query
 
     // direct na ang units ug trips_location field gikan sa join, no need for second fetch
     const { count } = await getTripsCount(filters)
