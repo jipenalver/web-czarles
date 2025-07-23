@@ -54,7 +54,6 @@ const {
   tableOptions,
   tableFilters,
   tableData,
-  filteredTableData,
   formAction,
   isPrintDialogVisible,
   payrollData,
@@ -101,7 +100,7 @@ const {
           v-model:sort-by="tableOptions.sortBy"
           :loading="tableOptions.isLoading"
           :headers="tableHeaders"
-          :items="filteredTableData"
+          :items="tableData"
           :items-per-page-options="[6, 12]"
           :hide-default-header="mobile"
           :mobile="mobile"

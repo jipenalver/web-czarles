@@ -136,11 +136,7 @@ export function usePayrollTableDialog(
     },
   )
 
-  // Computed properties
-  const filteredTableData = computed(() => {
-    // No search filter, just return all data
-    return tableData.value
-  })
+  // No filteredTableData, use tableData directly
 
   // Actions
   const onView = (item: TableData) => {
@@ -163,7 +159,6 @@ export function usePayrollTableDialog(
     tableOptions,
     tableFilters,
     tableData,
-    filteredTableData,
     formAction,
     isPrintDialogVisible,
     payrollData,
