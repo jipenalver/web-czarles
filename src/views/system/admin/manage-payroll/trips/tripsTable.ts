@@ -15,11 +15,11 @@ export function useTripsTable() {
   })
   const tableFilters = ref({
     search: '',
-    unit_id: null as number | null,
-    trip_location_id: null as number | null,
-    employee_id: null as number | null,
-    date_from: null as string | null,
-    date_to: null as string | null,
+    unit_id: undefined as number | undefined,
+    trip_location_id: undefined as number | undefined,
+    employee_id: undefined as number | undefined,
+    date_from: '' as string,
+    date_to: '' as string,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -66,12 +66,12 @@ export function useTripsTable() {
     if (
       tableFilters.value.search?.length >= 2 ||
       tableFilters.value.search?.length == 0 ||
-      tableFilters.value.search === null ||
-      tableFilters.value.unit_id !== null ||
-      tableFilters.value.trip_location_id !== null ||
-      tableFilters.value.employee_id !== null ||
-      tableFilters.value.date_from !== null ||
-      tableFilters.value.date_to !== null
+      tableFilters.value.search === '' ||
+      tableFilters.value.unit_id !== undefined ||
+      tableFilters.value.trip_location_id !== undefined ||
+      tableFilters.value.employee_id !== undefined ||
+      tableFilters.value.date_from !== '' ||
+      tableFilters.value.date_to !== ''
     )
       onLoadItems(tableOptions.value)
   }

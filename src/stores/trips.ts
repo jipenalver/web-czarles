@@ -2,30 +2,34 @@ import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
+import type { Unit } from './units'
+import type { TripLocation } from './tripLocation'
 import { ref } from 'vue'
 
 export type Trip = {
   id: number
   created_at: string
-  unit_id: number | null
-  trip_location_id: number | null
-  date: string | null
-  materials: string | null
-  km: number | null
-  trip_no: number | null
-  per_trip: number | null
-  employee_id: number | null
-  user_id: string | null
-  description: string | null
+  unit_id: number | undefined
+  trip_location_id: number | undefined
+  date: string
+  materials: string
+  km: number | undefined
+  trip_no: number | undefined
+  per_trip: number | undefined
+  employee_id: number | undefined
+  user_id: string
+  description: string
+  units?: Unit
+  trips_location?: TripLocation
 }
 
 export type TripTableFilter = {
-  search: string | null
-  unit_id: number | null
-  trip_location_id: number | null
-  employee_id: number | null
-  date_from: string | null
-  date_to: string | null
+  search: string
+  unit_id: number | undefined
+  trip_location_id: number | undefined
+  employee_id: number | undefined
+  date_from: string
+  date_to: string
 }
 
 export const useTripsStore = defineStore('trips', () => {
@@ -50,21 +54,24 @@ export const useTripsStore = defineStore('trips', () => {
 
   async function getTripsTable(tableOptions: TableOptions, filters: TripTableFilter) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'trip_no')
-    const search = tableSearch(filters.search)
-
-    let query = supabase
+    // query sa trips with join sa units ug trips_location table, C7 style
+    const tripsQuery = supabase
       .from('trips')
-      .select()
+      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)') // join units and trips_location tables
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
     query = getTripsFilter(query, filters)
 
-    const { data } = await query
+    // log the query object for debugging
+    console.log('tripsQuery:', tripsQuery)
+    const { data: tripsData } = await tripsQuery
 
+    // direct na ang units ug trips_location field gikan sa join, no need for second fetch
     const { count } = await getTripsCount(filters)
 
-    tripsTable.value = data as Trip[]
+    // ensure trips_location is available for the table
+    tripsTable.value = tripsData as Trip[]
     tripsTableTotal.value = count as number
   }
 
@@ -84,7 +91,9 @@ export const useTripsStore = defineStore('trips', () => {
     const { search, unit_id, trip_location_id, employee_id, date_from, date_to } = filters
 
     if (search) {
-      query = query.or(`trip_no.eq.${search}, materials.ilike.%${search}%, description.ilike.%${search}%`)
+      query = query.or(
+        `trip_no.eq.${search}, materials.ilike.%${search}%, description.ilike.%${search}%`,
+      )
     }
 
     if (unit_id) {
@@ -99,11 +108,11 @@ export const useTripsStore = defineStore('trips', () => {
       query = query.eq('employee_id', employee_id)
     }
 
-    if (date_from && date_to) {
+    if (date_from && date_to && date_from !== '' && date_to !== '') {
       query = query.gte('date', date_from).lte('date', date_to)
-    } else if (date_from) {
+    } else if (date_from && date_from !== '') {
       query = query.gte('date', date_from)
-    } else if (date_to) {
+    } else if (date_to && date_to !== '') {
       query = query.lte('date', date_to)
     }
 
