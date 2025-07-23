@@ -7,9 +7,15 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
+import { useTripLocationsStore } from '@/stores/tripLocation'
+
 
 const date = useDate()
 const { mobile } = useDisplay()
+
+
+const tripLocationsStore = useTripLocationsStore()
+tripLocationsStore.fetchTripLocations()
 
 const tableHeaders: TableHeader[] = [
   {
@@ -136,7 +142,7 @@ const {
 
         <template #item.date="{ item }">
           <span class="font-weight-bold">
-            {{ item.date ? date.format(item.date, 'keyboardDate') : 'N/A' }}
+            {{ item.created_at ? date.format(item.created_at, 'keyboardDate') : 'N/A' }}
           </span>
         </template>
 
@@ -149,7 +155,11 @@ const {
         </template>
 
         <template #item.trip_location_id="{ item }">
-          <span> {{ item.trip_location_id || 'N/A' }} </span>
+          <span>
+            {{ item.trips_location?.location ||
+              tripLocationsStore.tripLocations.find(loc => loc.id === item.trip_location_id)?.location ||
+              'N/A' }}
+          </span>
         </template>
 
         <template #item.km="{ item }">

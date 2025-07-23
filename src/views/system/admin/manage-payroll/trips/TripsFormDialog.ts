@@ -1,7 +1,7 @@
 import { type Trip, type TripTableFilter, useTripsStore } from '@/stores/trips'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 
 export function useTripsFormDialog(
   props: {
@@ -16,15 +16,15 @@ export function useTripsFormDialog(
 
   // State
   const formDataDefault = {
-    unit_id: null as any,
-    trip_location_id: null as any,
-    date: null as string | null,
+    unit_id: undefined as number | undefined,
+    trip_location_id: undefined as number | undefined,
+    date: '' as string,
     materials: '',
-    km: null as number | null,
-    trip_no: null as number | null,
-    per_trip: null as number | null,
-    employee_id: null as any,
-    user_id: null as string | null,
+    km: undefined as number | undefined,
+    trip_no: undefined as number | undefined,
+    per_trip: undefined as number | undefined,
+    employee_id: undefined as number | undefined,
+    user_id: '' as string,
     description: '',
   }
   const formData = ref<Partial<Trip>>({ ...formDataDefault })
@@ -47,9 +47,9 @@ export function useTripsFormDialog(
     // Convert form data to match API expectations
     const submitData = {
       ...formData.value,
-      unit_id: formData.value.unit_id || null,
-      trip_location_id: formData.value.trip_location_id || null,
-      employee_id: formData.value.employee_id || null,
+      unit_id: formData.value.unit_id || undefined,
+      trip_location_id: formData.value.trip_location_id || undefined,
+      employee_id: formData.value.employee_id || undefined,
     }
 
     const { data, error } = isUpdate.value
