@@ -16,7 +16,7 @@ const { mobile } = useDisplay()
 
 
 const tripLocationsStore = useTripLocationsStore()
-tripLocationsStore.fetchTripLocations()
+tripLocationsStore.getTripLocations()
 
 const tableHeaders: TableHeader[] = [
   {
@@ -130,7 +130,7 @@ const expanded = ref([])
 
         <template #item.date="{ item }">
           <span class="font-weight-bold">
-            {{ item.created_at ? date.format(item.created_at, 'keyboardDate') : 'N/A' }}
+            {{ item.date ? date.format(item.date, 'keyboardDate') : 'N/A' }}
           </span>
         </template>
 
