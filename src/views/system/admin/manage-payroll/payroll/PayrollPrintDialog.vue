@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { usePayrollPrintDialog } from './payrollPrintDialog'
 import { type PayrollData } from './payrollTableDialog'
 import { type Employee } from '@/stores/employees'
@@ -42,7 +41,7 @@ const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit
       </template>
 
       <v-card-text id="generate-payroll">
-        <PayrollPrint 
+        <PayrollPrint
           :employee-data="props.employeeData"
           :payroll-data="props.payrollData"
           :table-data="props.tableData"
