@@ -18,8 +18,7 @@ export function useTripsTable() {
     unit_id: undefined as number | undefined,
     trip_location_id: undefined as number | undefined,
     employee_id: undefined as number | undefined,
-    date_from: '' as string,
-    date_to: '' as string,
+    trip_at: [] as string[],
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -70,8 +69,7 @@ export function useTripsTable() {
       tableFilters.value.unit_id !== undefined ||
       tableFilters.value.trip_location_id !== undefined ||
       tableFilters.value.employee_id !== undefined ||
-      tableFilters.value.date_from !== '' ||
-      tableFilters.value.date_to !== ''
+      (Array.isArray(tableFilters.value.trip_at) && tableFilters.value.trip_at.length > 0)
     )
       onLoadItems(tableOptions.value)
   }

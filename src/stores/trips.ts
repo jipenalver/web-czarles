@@ -25,12 +25,11 @@ export type Trip = {
 }
 
 export type TripTableFilter = {
-  search: string 
+  search: string
   unit_id: number | undefined
   trip_location_id: number | undefined
   employee_id: number | undefined
-  date_from: string
-  date_to: string 
+  trip_at: string[]
 }
 
 export const useTripsStore = defineStore('trips', () => {
@@ -89,7 +88,7 @@ export const useTripsStore = defineStore('trips', () => {
     query: PostgrestFilterBuilder<any, any, any>,
     filters: TripTableFilter,
   ) {
-    const { search, unit_id, trip_location_id, employee_id, date_from, date_to } = filters
+    const { search, unit_id, trip_location_id, employee_id, trip_at } = filters
 
     if (search) {
       query = query.or(`trip_no.eq.${search}, materials.ilike.%${search}%, description.ilike.%${search}%`)
@@ -107,12 +106,10 @@ export const useTripsStore = defineStore('trips', () => {
       query = query.eq('employee_id', employee_id)
     }
 
-    if (date_from && date_to && date_from !== '' && date_to !== '') {
-      query = query.gte('date', date_from).lte('date', date_to)
-    } else if (date_from && date_from !== '') {
-      query = query.gte('date', date_from)
-    } else if (date_to && date_to !== '') {
-      query = query.lte('date', date_to)
+    if (Array.isArray(trip_at) && trip_at.length === 2 && trip_at[0] && trip_at[1]) {
+      query = query.gte('date', trip_at[0]).lte('date', trip_at[1])
+    } else if (Array.isArray(trip_at) && trip_at.length === 1 && trip_at[0]) {
+      query = query.eq('date', trip_at[0])
     }
 
     return query
