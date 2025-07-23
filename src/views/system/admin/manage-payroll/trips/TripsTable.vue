@@ -4,10 +4,11 @@ import { useTripsTable } from '@/views/system/admin/manage-payroll/trips/tripsTa
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { useTripLocationsStore } from '@/stores/tripLocation'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
-import { useTripLocationsStore } from '@/stores/tripLocation'
+
 
 
 const date = useDate()
@@ -44,26 +45,6 @@ const tableHeaders: TableHeader[] = [
     align: 'start',
   },
   {
-    title: 'KM',
-    key: 'km',
-    align: 'center',
-  },
-  {
-    title: 'Per Trip',
-    key: 'per_trip',
-    align: 'center',
-  },
-  {
-    title: 'Materials',
-    key: 'materials',
-    align: 'start',
-  },
-  {
-    title: 'Created Date',
-    key: 'created_at',
-    align: 'center',
-  },
-  {
     title: 'Actions',
     key: 'actions',
     sortable: false,
@@ -71,6 +52,7 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
+import { ref } from 'vue'
 const {
   tableOptions,
   tableFilters,
@@ -86,6 +68,9 @@ const {
   onLoadItems,
   tripsStore,
 } = useTripsTable()
+
+// Expanded row state
+const expanded = ref([])
 </script>
 
 <template>
@@ -109,6 +94,9 @@ const {
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
+        show-expand
+        expand-on-click
+        v-model:expanded="expanded"
       >
         <template #top>
           <v-row dense>
@@ -162,23 +150,7 @@ const {
           </span>
         </template>
 
-        <template #item.km="{ item }">
-          <span> {{ item.km || 'N/A' }} </span>
-        </template>
-
-        <template #item.per_trip="{ item }">
-          <span> {{ item.per_trip ? `₱${item.per_trip}` : 'N/A' }} </span>
-        </template>
-
-        <template #item.materials="{ item }">
-          <span> {{ item.materials || 'N/A' }} </span>
-        </template>
-
-        <template #item.created_at="{ item }">
-          <span class="font-weight-bold">
-            {{ date.format(item.created_at, 'fullDateTime') }}
-          </span>
-        </template>
+        <!-- KM, Per Trip, Materials, and Created Date moved to expanded row -->
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
@@ -186,12 +158,36 @@ const {
               <v-icon icon="mdi-pencil"></v-icon>
               <v-tooltip activator="parent" location="top">Edit Trip</v-tooltip>
             </v-btn>
-
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
               <v-tooltip activator="parent" location="top">Delete Trip</v-tooltip>
             </v-btn>
           </div>
+        </template>
+
+        <template #expanded-row="{ columns, item }">
+          <tr>
+            <td :colspan="columns.length">
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <strong>Description:</strong> {{ item.description || 'N/A' }}
+                </v-col>
+               
+                <v-col cols="12" sm="3">
+                  <strong>KM:</strong> {{ item.km || 'N/A' }}
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <strong>Per Trip:</strong> {{ item.per_trip ? `₱${item.per_trip}` : 'N/A' }}
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <strong>Materials:</strong> {{ item.materials || 'N/A' }}
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <strong>Created Date:</strong> <span class="font-weight-bold">{{ date.format(item.created_at, 'fullDateTime') }}</span>
+                </v-col>
+              </v-row>
+            </td>
+          </tr>
         </template>
       </v-data-table-server>
     </v-card-text>
