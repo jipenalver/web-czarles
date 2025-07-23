@@ -2,9 +2,9 @@
 import TripsFormDialog from '@/views/system/admin/manage-payroll/trips/TripsFormDialog.vue'
 import { useTripsTable } from '@/views/system/admin/manage-payroll/trips/tripsTable.ts'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import { useTripLocationsStore } from '@/stores/tripLocation'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { useTripLocationsStore } from '@/stores/tripLocation'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 

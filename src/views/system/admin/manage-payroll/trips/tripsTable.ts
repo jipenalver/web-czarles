@@ -65,11 +65,7 @@ export function useTripsTable() {
     if (
       tableFilters.value.search?.length >= 2 ||
       tableFilters.value.search?.length == 0 ||
-      tableFilters.value.search === '' ||
-      tableFilters.value.unit_id !== undefined ||
-      tableFilters.value.trip_location_id !== undefined ||
-      tableFilters.value.employee_id !== undefined ||
-      (Array.isArray(tableFilters.value.trip_at) && tableFilters.value.trip_at.length > 0)
+      tableFilters.value.search === null
     )
       onLoadItems(tableOptions.value)
   }
