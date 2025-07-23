@@ -125,9 +125,11 @@ const {
   </v-dialog>
 
   <PayrollPrintDialog
-    v-model:is-dialog-visible="isPrintDialogVisible"
-    :payroll-data="payrollData"
-    :employee-data="props.itemData"
-    :table-data="selectedData"
-  ></PayrollPrintDialog>
+  v-if="props.itemData && selectedData"
+  v-model:is-dialog-visible="isPrintDialogVisible"
+  :payroll-data="payrollData"
+  :employee-data="props.itemData"
+  :table-data="selectedData"
+/>
+
 </template>
