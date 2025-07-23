@@ -34,10 +34,9 @@ export type Employee = {
   area_assignment_id: number | null
   area_assignment: Area
   daily_rate: number
-  employee_deductions: EmployeeDeduction &
-    {
-      employee_benefit: Benefit
-    }[]
+  employee_deductions: (EmployeeDeduction & {
+    employee_benefit: Benefit
+  })[]
 }
 
 export type EmployeeTableFilter = {
