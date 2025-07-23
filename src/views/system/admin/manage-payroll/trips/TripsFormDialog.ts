@@ -18,13 +18,12 @@ export function useTripsFormDialog(
   const formDataDefault = {
     unit_id: undefined as number | undefined,
     trip_location_id: undefined as number | undefined,
-    date: '' as string,
+    trip_at: undefined as string | undefined,
     materials: '',
     km: undefined as number | undefined,
     trip_no: undefined as number | undefined,
     per_trip: undefined as number | undefined,
     employee_id: undefined as number | undefined,
-    user_id: '' as string,
     description: '',
   }
   const formData = ref<Partial<Trip>>({ ...formDataDefault })

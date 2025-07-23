@@ -25,7 +25,7 @@ export function usePayrollTableDialog(
   // States
   const tableOptions = ref({
     page: 1,
-    itemsPerPage: 6, // show 6 months per page para dili kaayo taas ang table
+    itemsPerPage: 12, 
     sortBy: [],
     isLoading: false,
   })
