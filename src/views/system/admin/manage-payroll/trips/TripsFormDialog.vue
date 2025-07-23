@@ -4,6 +4,8 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useTripsFormDialog } from './TripsFormDialog'
+import { useEmployeesStore } from '@/stores/employees'
+import { watch, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -20,6 +22,23 @@ const { mdAndDown } = useDisplay()
 const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useTripsFormDialog(
   props,
   emit,
+)
+
+// Employees store for dropdown
+const employeesStore = useEmployeesStore()
+// Make employees reactive using computed
+const employees = computed(() => employeesStore.employees)
+
+// Fetch employees when dialog opens
+watch(
+  () => props.isDialogVisible,
+  async (visible) => {
+    if (visible) {
+      // fetch ang tanan na employees para sa dropdown options
+      await employeesStore.getEmployees()
+    }
+  },
+  { immediate: true }
 )
 </script>
 
@@ -85,8 +104,8 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
               <v-select
                 v-model="(formData.employee_id as any)"
                 label="Employee"
-                :items="[]"
-                item-title="name"
+                :items="employees"
+                item-title="label"
                 item-value="id"
                 clearable
                 :return-object="false"

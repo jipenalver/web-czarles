@@ -34,10 +34,12 @@ export type Employee = {
   area_assignment_id: number | null
   area_assignment: Area
   daily_rate: number
-  employee_deductions: EmployeeDeduction &
-    {
-      employee_benefit: Benefit
-    }[]
+  employee_deductions: EmployeeDeduction & {
+    employee_benefit: Benefit
+  }[]
+  // Para sa dropdown sa v-select
+  label: string
+  value: number
 }
 
 export type EmployeeTableFilter = {
