@@ -28,7 +28,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
   const isLoading = ref(false)
 
   // Get all (no filter)
-  async function fetchTripLocations() {
+  async function getTripLocations() {
     isLoading.value = true
     const { data } = await supabase.from('trip_locations').select('*').order('location', { ascending: true })
     tripLocations.value = data as TripLocation[]
@@ -80,7 +80,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
     tripLocationsTable,
     tripLocationsTableTotal,
     isLoading,
-    fetchTripLocations,
+    getTripLocations,
     getTripLocationsTable,
     addTripLocation,
     updateTripLocation,

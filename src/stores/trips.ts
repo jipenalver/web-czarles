@@ -47,7 +47,7 @@ export const useTripsStore = defineStore('trips', () => {
 
   // Actions
   async function getTrips() {
-    const { data } = await supabase.from('trips').select()
+    const { data } = await supabase.from('trips').select('*')
 
     trips.value = data as Trip[]
   }

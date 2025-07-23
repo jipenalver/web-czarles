@@ -5,6 +5,8 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useTripsFormDialog } from './TripsFormDialog'
 import { useEmployeesStore } from '@/stores/employees'
+import  {useUnitsStore } from '@/stores/units'
+import { useTripLocationsStore } from '@/stores/tripLocation'
 import { watch, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -24,18 +26,24 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
   emit,
 )
 
-// Employees store for dropdown
+// stores for dropdown
 const employeesStore = useEmployeesStore()
-// Make employees reactive using computed
-const employees = computed(() => employeesStore.employees)
+const unitsStore = useUnitsStore()
+const tripLocationsStore = useTripLocationsStore()
 
-// Fetch employees when dialog opens
+// Make stores reactive using computed para magamit sa UI
+const employees = computed(() => employeesStore.employees)
+const units = computed(() => unitsStore.units)
+const tripLocations = computed(() => tripLocationsStore.tripLocations)
+// Fetch stores when dialog opens
 watch(
   () => props.isDialogVisible,
   async (visible) => {
     if (visible) {
-      // fetch ang tanan na employees para sa dropdown options
+      // fetch ang tanan store geters
+      await unitsStore.getUnits()
       await employeesStore.getEmployees()
+      await tripLocationsStore.getTripLocations()
     }
   },
   { immediate: true }
@@ -80,7 +88,7 @@ watch(
               <v-select
                 v-model="(formData.unit_id as any)"
                 label="Unit"
-                :items="[]"
+                :items="units"
                 item-title="name"
                 item-value="id"
                 clearable
@@ -92,8 +100,8 @@ watch(
               <v-select
                 v-model="(formData.trip_location_id as any)"
                 label="Trip Location"
-                :items="[]"
-                item-title="name"
+                :items="tripLocations"
+                item-title="location"
                 item-value="id"
                 clearable
                 :return-object="false"
