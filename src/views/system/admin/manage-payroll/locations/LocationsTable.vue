@@ -3,7 +3,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import LocationsFormDialog from './LocationsFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { useLocationsTable } from './LocationsTable'
+import { useLocationsTable } from './locationsTable'
 import { useDisplay } from 'vuetify'
 
 const { mobile } = useDisplay()
