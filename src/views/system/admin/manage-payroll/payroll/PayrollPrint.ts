@@ -4,7 +4,7 @@ import { computed, toRef } from 'vue'
 import type { ComputedRef } from 'vue'
 
 interface UsePayrollRefsProps {
-  employee: Employee | null
+  employeeData: Employee | null
   payrollData: PayrollData
   tableData: any
 }

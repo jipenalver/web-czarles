@@ -49,7 +49,7 @@ const grossSalary = computed(() => {
 // composable: gamit ang usePayrollRefs para sa mga ref
 const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
   {
-    employee: props.employeeData,
+    employeeData: props.employeeData,
     payrollData: props.payrollData,
     tableData: props.tableData
   },
