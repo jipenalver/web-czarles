@@ -2,7 +2,8 @@
 import { usePayrollComputation } from './payrollComputation'
 import { type PayrollData } from './payrollTableDialog'
 import { type Employee } from '@/stores/employees'
-import { computed, toRef } from 'vue'
+import { computed } from 'vue'
+import { usePayrollRefs } from '@/views/system/admin/manage-payroll/payroll/PayrollPrint'
 
 const props = defineProps<{
   employee: Employee | null
@@ -45,10 +46,8 @@ const grossSalary = computed(() => {
   return props.tableData?.gross_pay || 0
 })
 
-//  composable
-const dailyRateRef = toRef(() => dailyRate.value)
-const grossSalaryRef = toRef(() => grossSalary.value)
-const tableDataRef = toRef(props, 'tableData')
+// composable: gamit ang usePayrollRefs para sa mga ref
+const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(props, dailyRate, grossSalary)
 
 // payroll computation 
 const {
