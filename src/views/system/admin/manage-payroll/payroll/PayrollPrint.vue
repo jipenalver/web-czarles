@@ -1,17 +1,18 @@
+
+
 <script setup lang="ts">
-import { usePayrollComputation } from './payrollComputation'
-import { type PayrollData } from './payrollTableDialog'
+import { type PayrollData, type TableData } from './payrollTableDialog'
+import { usePayrollPrint } from './PayrollPrint'
 import { type Employee } from '@/stores/employees'
 import { computed } from 'vue'
-import { usePayrollRefs } from '@/views/system/admin/manage-payroll/payroll/PayrollPrint'
 
 const props = defineProps<{
   employeeData: Employee | null
   payrollData: PayrollData
-  tableData: any
+  tableData: TableData
 }>()
 
-// Employee Information 
+// Employee Information
 const fullName = computed(() => {
   if (!props.employeeData) return 'N/A'
   const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
@@ -37,17 +38,12 @@ const formattedDate = computed(() => {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 })
 
-// Basic salary data 
-const dailyRate = computed(() => {
-  return props.employeeData?.daily_rate || 0
-})
+// Use composables for payroll refs and computations
+const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
+const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 
-const grossSalary = computed(() => {
-  return props.tableData?.gross_pay || 0
-})
 
-// composable: gamit ang usePayrollRefs para sa mga ref
-const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
+const payrollPrint = usePayrollPrint(
   {
     employeeData: props.employeeData,
     payrollData: props.payrollData,
@@ -57,7 +53,7 @@ const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
   grossSalary
 )
 
-// payroll computation 
+// Destructure values from payrollPrint composable
 const {
   workDays,
   codaAllowance,
@@ -65,7 +61,7 @@ const {
   totalDeductions,
   netSalary,
   formatCurrency
-} = usePayrollComputation(dailyRateRef, grossSalaryRef, tableDataRef)
+} = payrollPrint
 </script>
 
 <template>

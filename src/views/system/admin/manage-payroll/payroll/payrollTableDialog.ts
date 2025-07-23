@@ -2,7 +2,7 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { type Employee } from '@/stores/employees'
 import { ref, watch, computed } from 'vue'
 
-type TableData = {
+export type TableData = {
   month: string
   basic_salary: number
   gross_pay: number
