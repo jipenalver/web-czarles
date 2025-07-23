@@ -40,7 +40,7 @@ export function usePayrollTableDialog(
     month: '',
     employee_id: 0,
   })
-  const selectedTableData = ref<TableData | null>(null)
+  const selectedData = ref<TableData | null>(null)
 
   watch(
     () => props.isDialogVisible,
@@ -149,7 +149,7 @@ export function usePayrollTableDialog(
       month: item.month,
       employee_id: props.itemData?.id || 0,
     }
-    selectedTableData.value = item
+    selectedData.value = item
     isPrintDialogVisible.value = true
   }
 
@@ -167,7 +167,7 @@ export function usePayrollTableDialog(
     formAction,
     isPrintDialogVisible,
     payrollData,
-    selectedTableData,
+    selectedData,
     onView,
     onDialogClose,
   }

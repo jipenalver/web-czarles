@@ -58,7 +58,7 @@ const {
   formAction,
   isPrintDialogVisible,
   payrollData,
-  selectedTableData,
+  selectedData,
   onView,
   onDialogClose,
 } = usePayrollTableDialog(props, emit)
@@ -128,6 +128,6 @@ const {
     v-model:is-dialog-visible="isPrintDialogVisible"
     :payroll-data="payrollData"
     :employee-data="props.itemData"
-    :table-data="selectedTableData"
+    :table-data="selectedData"
   ></PayrollPrintDialog>
 </template>
