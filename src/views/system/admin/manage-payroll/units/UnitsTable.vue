@@ -2,10 +2,10 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import UnitsFormDialog from './UnitsFormDialog.vue'
 import { useUnitsTable } from './unitsTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
-import UnitsFormDialog from './unitsFormDialog.vue'
 
 const date = useDate()
 const { mobile } = useDisplay()
