@@ -31,7 +31,6 @@ export function usePayrollTableDialog(
   })
   const tableFilters = ref({
     year: new Date().getFullYear(),
-    search: '', // search para sa months
   })
   const tableData = ref<TableData[]>([])
   const formAction = ref({ ...formActionDefault })
@@ -139,13 +138,8 @@ export function usePayrollTableDialog(
 
   // Computed properties
   const filteredTableData = computed(() => {
-    // filter ang data based sa search input para sa months
-    if (!tableFilters.value.search) {
-      return tableData.value
-    }
-    return tableData.value.filter(item =>
-      item.month.toLowerCase().includes(tableFilters.value.search.toLowerCase())
-    )
+    // No search filter, just return all data
+    return tableData.value
   })
 
   // Actions
