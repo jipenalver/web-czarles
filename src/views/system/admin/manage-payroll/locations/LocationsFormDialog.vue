@@ -10,7 +10,7 @@ const props = defineProps<{
   itemData: TripLocation | null
 }>()
 
-const emit = defineEmits(['update:isDialogVisible'])
+const emit = defineEmits(['update:isDialogVisible', 'refresh-table'])
 
 const { mdAndDown } = useDisplay()
 

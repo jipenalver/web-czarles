@@ -118,6 +118,9 @@ const {
   <LocationsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+    @refresh-table="onLoadItems(tableOptions)"
   ></LocationsFormDialog>
 
   <ConfirmDialog
