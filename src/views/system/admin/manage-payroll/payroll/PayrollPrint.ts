@@ -1,9 +1,7 @@
-// src/composables/usePayrollRefs.ts
-// 'composable para sa payroll refs, para magamit sa lain na components'
+import type { PayrollData } from '@/views/system/admin/manage-payroll/payroll/payrollTableDialog'
+import type { Employee } from '@/stores/employees'
 import { computed, toRef } from 'vue'
 import type { ComputedRef } from 'vue'
-import type { Employee } from '@/stores/employees'
-import type { PayrollData } from '@/views/system/admin/manage-payroll/payroll/payrollTableDialog'
 
 interface UsePayrollRefsProps {
   employee: Employee | null

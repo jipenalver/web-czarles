@@ -138,7 +138,7 @@ const {
   <PayrollPrintDialog
     v-model:is-dialog-visible="isPrintDialogVisible"
     :payroll-data="payrollData"
-    :employee="props.itemData"
+    :employee-data="props.itemData"
     :table-data="selectedTableData"
   ></PayrollPrintDialog>
 </template>

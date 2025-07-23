@@ -9,7 +9,7 @@ import { useDisplay } from 'vuetify'
 const props = defineProps<{
   isDialogVisible: boolean
   payrollData: PayrollData
-  employee: Employee | null
+  employeeData: Employee | null
   tableData: any
 }>()
 
@@ -43,7 +43,7 @@ const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit
 
       <v-card-text id="generate-payroll">
         <PayrollPrint 
-          :employee="props.employee"
+          :employee="props.employeeData"
           :payroll-data="props.payrollData"
           :table-data="props.tableData"
         ></PayrollPrint>
