@@ -11,7 +11,7 @@ const props = defineProps<{
   tableData: any
 }>()
 
-// Employee Information 
+// Employee Information
 const fullName = computed(() => {
   if (!props.employeeData) return 'N/A'
   const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
@@ -29,15 +29,25 @@ const address = computed(() => {
 // Date Formatting
 const formattedDate = computed(() => {
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ]
   const monthIndex = monthNames.indexOf(props.payrollData.month)
   const date = new Date(props.payrollData.year, monthIndex)
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 })
 
-// Basic salary data 
+// Basic salary data
 const dailyRate = computed(() => {
   return props.employeeData?.daily_rate || 0
 })
@@ -51,21 +61,15 @@ const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
   {
     employee: props.employeeData,
     payrollData: props.payrollData,
-    tableData: props.tableData
+    tableData: props.tableData,
   },
   dailyRate,
-  grossSalary
+  grossSalary,
 )
 
-// payroll computation 
-const {
-  workDays,
-  codaAllowance,
-  totalGrossSalary,
-  totalDeductions,
-  netSalary,
-  formatCurrency
-} = usePayrollComputation(dailyRateRef, grossSalaryRef, tableDataRef)
+// payroll computation
+const { workDays, codaAllowance, totalGrossSalary, totalDeductions, netSalary, formatCurrency } =
+  usePayrollComputation(dailyRateRef, grossSalaryRef, tableDataRef)
 </script>
 
 <template>
@@ -84,10 +88,10 @@ const {
     <v-table class="mt-6 text-body-2" density="compact">
       <tbody>
         <tr>
-          <td class="text-caption pa-2" style="width: auto;">PAID TO</td>
-          <td class="pa-2 border-b-sm" style="width: 66%;">{{ fullName }}</td>
-          <td class="text-caption pa-2" style="width: auto;">POSITION</td>
-          <td class="pa-2 border-b-sm" style="width: 25%;">{{ designation }}</td>
+          <td class="text-caption pa-2" style="width: auto">PAID TO</td>
+          <td class="pa-2 border-b-sm" style="width: 66%">{{ fullName }}</td>
+          <td class="text-caption pa-2" style="width: auto">POSITION</td>
+          <td class="pa-2 border-b-sm" style="width: 25%">{{ designation }}</td>
         </tr>
         <tr>
           <td class="text-caption pa-2">ADDRESS</td>
@@ -118,37 +122,49 @@ const {
           <td class="pa-2">Cola allowance CDO / NAMNAM / BUKIDNON / Cabulohan</td>
           <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
           <td class="pa-2">/Day</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(codaAllowance) }}
+          </td>
         </tr>
-         <tr>
+        <tr>
           <td class="border-b-thin text-center pa-2">1</td>
           <td class="pa-2">Cola Jabonga Allowance / Jabonga / Buenavista / SanLuis</td>
           <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
           <td class="pa-2">/Day</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(codaAllowance) }}
+          </td>
         </tr>
-          <tr>
+        <tr>
           <td class="border-b-thin text-center pa-2">1</td>
           <td class="pa-2">Sunday Work</td>
           <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
           <td class="pa-2">/Sunday</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(codaAllowance) }}
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
           <td class="text-caption font-weight-bold text-end pa-2">Php</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption pa-2">Less Deductions</td>
           <td class="pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalDeductions) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalDeductions) }}
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
-          <td class="text-caption font-weight-bold border-t-sm border-s-sm pa-2">TOTAL NET SALARY</td>
+          <td class="text-caption font-weight-bold border-t-sm border-s-sm pa-2">
+            TOTAL NET SALARY
+          </td>
           <td class="border-t-sm pa-2">Php</td>
           <td class="border-t-sm border-s-sm text-end pa-2">{{ formatCurrency(netSalary) }}</td>
         </tr>
