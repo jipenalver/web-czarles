@@ -1,20 +1,39 @@
+
+
+// Import constants, types, and timezone helpers
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type Employee } from '@/stores/employees'
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onUnmounted } from 'vue'
+import { usePayrollComputation, type TableData as ComputationTableData } from './payrollComputation'
+import {
+  getCurrentMonthInPhilippines,
+  getCurrentYearInPhilippines,
+  monthNames,
+  getSampleBasicSalary,
+  getSampleOvertime,
+  getSampleAllowances,
+  getSampleDeductions,
+} from './currentMonth'
 
-export type TableData = {
+
+// Table row type para sa payroll data
+export interface TableData {
   month: string
   basic_salary: number
   gross_pay: number
   deductions: number
   net_pay: number
 }
-export type PayrollData = {
+
+// Type para sa payrollData na gamiton sa print dialog
+export interface PayrollData {
   year: number
   month: string
   employee_id: number
 }
 
+
+// Composable para sa Payroll Table Dialog
 export function usePayrollTableDialog(
   props: {
     isDialogVisible: boolean
@@ -22,139 +41,179 @@ export function usePayrollTableDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  // States
+
+  // ...existing code...
+
+  // Payroll data generator using payrollComputation composable
+  const generatePayrollData = (monthIndex: number): TableData => {
+    // Use helpers from currentMonth.ts for sample/demo data
+    const basicSalary = getSampleBasicSalary(monthIndex)
+    const overtime = getSampleOvertime()
+    const allowances = getSampleAllowances()
+    const grossPay = basicSalary + overtime + allowances
+    const deductions = getSampleDeductions(monthIndex)
+
+    // Prepare tableData for computation composable
+    const computationTableData: ComputationTableData = {
+      gross_pay: grossPay,
+      deductions: deductions,
+      coda_allowance: allowances,
+      overtime_hours: Math.round(overtime / (basicSalary / 22 / 8)), // estimate hours
+      // You can add more fields as needed for computation
+    }
+
+    // Use composable for all math
+    const dailyRate = ref(Math.round(basicSalary / 22))
+    const grossSalary = ref(grossPay)
+    const tableDataRef = ref<ComputationTableData | null>(computationTableData)
+    const payroll = usePayrollComputation(dailyRate, grossSalary, tableDataRef)
+
+    return {
+      month: monthNames[monthIndex],
+      basic_salary: basicSalary,
+      gross_pay: payroll.totalGrossSalary.value,
+      deductions: payroll.totalDeductions.value,
+      net_pay: payroll.netSalary.value,
+    }
+  }
+
+  // Table options (for v-data-table-server)
   const tableOptions = ref({
     page: 1,
-    itemsPerPage: 12, 
+    itemsPerPage: 12,
     sortBy: [],
     isLoading: false,
   })
-  const tableFilters = ref({
-    year: new Date().getFullYear(),
+
+  // Table filters (year)
+  const tableFilters = ref<{ year: number }>({
+    year: getCurrentYearInPhilippines(),
   })
+
+  // Table data (rows)
   const tableData = ref<TableData[]>([])
+
+  // Form action state (for dialog)
   const formAction = ref({ ...formActionDefault })
+
+  // Print dialog visibility
   const isPrintDialogVisible = ref(false)
+
+  // Payroll data for print dialog
   const payrollData = ref<PayrollData>({
     year: 0,
     month: '',
     employee_id: 0,
   })
+
+  // Selected row data
   const selectedData = ref<TableData | null>(null)
 
+  // Real-time current month/year tracking
+  const currentMonth = ref<number>(getCurrentMonthInPhilippines())
+  const currentYear = ref<number>(getCurrentYearInPhilippines())
+
+  // Interval for real-time update
+  let updateInterval: ReturnType<typeof setInterval> | undefined
+
+  // Computed: available months depende sa year
+  const availableMonths = computed<number[]>(() => {
+    const current = currentMonth.value
+    const year = tableFilters.value.year
+    const currentYearInPH = currentYear.value
+    // kung current year, kutob ra sa current month
+    if (year === currentYearInPH) {
+      return Array.from({ length: current + 1 }, (_, i) => i)
+    } else if (year < currentYearInPH) {
+      // Kung past year, tanan 12 months
+      return Array.from({ length: 12 }, (_, i) => i)
+    } else {
+      // Kung future year, walay months
+      return []
+    }
+  })
+
+  // Load payroll data based on available months
+  const loadPayrollData = (): void => {
+    tableData.value = availableMonths.value.map((monthIndex) =>
+      generatePayrollData(monthIndex)
+    )
+  }
+
+  // Update current time (month/year) and reload if needed
+  const updateCurrentTime = (): void => {
+    const newMonth = getCurrentMonthInPhilippines()
+    const newYear = getCurrentYearInPhilippines()
+    if (newMonth !== currentMonth.value || newYear !== currentYear.value) {
+      currentMonth.value = newMonth
+      currentYear.value = newYear
+      //kung current year gihapon, reload para ma-include new month
+      if (tableFilters.value.year === newYear) {
+        loadPayrollData()
+      }
+    }
+  }
+
+  // Watch: dialog visibility
   watch(
     () => props.isDialogVisible,
-    async () => {
-      // query sa payroll data based on itemData.id = Employee ID
-      // load tanan months sa selected year with sample data
-      tableData.value = [
-        {
-          month: 'January',
-          basic_salary: 25000,
-          gross_pay: 28500,
-          deductions: 3200,
-          net_pay: 25300,
-        },
-        {
-          month: 'February',
-          basic_salary: 25000,
-          gross_pay: 29200,
-          deductions: 3100,
-          net_pay: 26100,
-        },
-        {
-          month: 'March',
-          basic_salary: 25000,
-          gross_pay: 27800,
-          deductions: 2900,
-          net_pay: 24900,
-        },
-        {
-          month: 'April',
-          basic_salary: 25000,
-          gross_pay: 30100,
-          deductions: 3400,
-          net_pay: 26700,
-        },
-        {
-          month: 'May',
-          basic_salary: 25000,
-          gross_pay: 28900,
-          deductions: 3000,
-          net_pay: 25900,
-        },
-        {
-          month: 'June',
-          basic_salary: 25000,
-          gross_pay: 31200,
-          deductions: 3600,
-          net_pay: 27600,
-        },
-        {
-          month: 'July',
-          basic_salary: 25000,
-          gross_pay: 29800,
-          deductions: 3300,
-          net_pay: 26500,
-        },
-        {
-          month: 'August',
-          basic_salary: 25000,
-          gross_pay: 28700,
-          deductions: 3150,
-          net_pay: 25550,
-        },
-        {
-          month: 'September',
-          basic_salary: 25000,
-          gross_pay: 30500,
-          deductions: 3500,
-          net_pay: 27000,
-        },
-        {
-          month: 'October',
-          basic_salary: 25000,
-          gross_pay: 29300,
-          deductions: 3250,
-          net_pay: 26050,
-        },
-        {
-          month: 'November',
-          basic_salary: 25000,
-          gross_pay: 32100,
-          deductions: 3800,
-          net_pay: 28300,
-        },
-        {
-          month: 'December',
-          basic_salary: 25000,
-          gross_pay: 35400,
-          deductions: 4200,
-          net_pay: 31200,
-        },
-      ]
+    (isVisible) => {
+      if (isVisible) {
+        // update time ug load data pag open
+        updateCurrentTime()
+        loadPayrollData()
+        // Start interval (every 1 min)
+        updateInterval = setInterval(updateCurrentTime, 60000)
+      } else {
+        // Stop interval pag close
+        if (updateInterval) {
+          clearInterval(updateInterval)
+          updateInterval = undefined
+        }
+      }
     },
   )
 
-  // No filteredTableData, use tableData directly
+  // Watch: year filter changes
+  watch(
+    () => tableFilters.value.year,
+    () => {
+      loadPayrollData()
+    },
+  )
 
-  // Actions
-  const onView = (item: TableData) => {
+  // Watch: available months (month transition)
+  watch(availableMonths, () => {
+    if (props.isDialogVisible) {
+      loadPayrollData()
+    }
+  })
+
+  // Cleanup: on unmount, clear interval
+  onUnmounted(() => {
+    if (updateInterval) {
+      clearInterval(updateInterval)
+    }
+  })
+
+  // Action: view/print payroll row
+  const onView = (item: TableData): void => {
     payrollData.value = {
       year: tableFilters.value.year,
       month: item.month,
-      employee_id: props.itemData?.id || 0,
+      employee_id: props.itemData?.id ?? 0, // gamita 0 kung wala
     }
     selectedData.value = item
     isPrintDialogVisible.value = true
   }
 
-  const onDialogClose = () => {
+  // Action: close dialog
+  const onDialogClose = (): void => {
     formAction.value = { ...formActionDefault }
     emit('update:isDialogVisible', false)
   }
 
-  // Expose State and Actions
+  // Expose state ug actions
   return {
     tableOptions,
     tableFilters,
@@ -163,6 +222,9 @@ export function usePayrollTableDialog(
     isPrintDialogVisible,
     payrollData,
     selectedData,
+    currentMonth: computed(() => monthNames[currentMonth.value]),
+    currentYear,
+    availableMonths,
     onView,
     onDialogClose,
   }
