@@ -7,7 +7,6 @@ import { useUnitsTable } from './unitsTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
-
 const date = useDate()
 const { mobile } = useDisplay()
 
