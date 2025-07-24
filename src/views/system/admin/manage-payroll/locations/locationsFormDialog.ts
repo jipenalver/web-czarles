@@ -7,11 +7,10 @@ export function useLocationsFormDialog(
   props: {
     isDialogVisible: boolean
     itemData: TripLocation | null
+    tableOptions: any
+    tableFilters: any
   },
-  emit: {
-    (event: 'update:isDialogVisible', value: boolean): void
-    (event: 'refresh-table', value: undefined): void
-  },
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const tripLocationsStore = useTripLocationsStore()
 
@@ -56,8 +55,12 @@ export function useLocationsFormDialog(
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Location.`
 
-      // Emit event to parent to refresh table after add/update
-      emit('refresh-table', undefined)
+      // Refresh table and locations list after add/update, wala na emit
+      if (tripLocationsStore.getTripLocationsTable) {
+        await tripLocationsStore.getTripLocationsTable(props.tableOptions, props.tableFilters)
+      }
+      await tripLocationsStore.getTripLocations()
+
       setTimeout(() => {
         onFormReset()
       }, 1500)
@@ -75,7 +78,7 @@ export function useLocationsFormDialog(
   const onFormReset = () => {
     formAction.value = { ...formActionDefault }
     formData.value = { ...formDataDefault }
-    emit('update:isDialogVisible', false)
+    emit('update:isDialogVisible', false) //Dialog close ra ang emit, refresh handled by store fetch
   }
 
   // Expose State and Actions

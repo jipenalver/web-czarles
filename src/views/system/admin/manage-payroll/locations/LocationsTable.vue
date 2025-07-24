@@ -96,7 +96,7 @@ const {
         </template>
 
         <template #item.description="{ item }">
-          <span>{{ item.description || 'N/A' }}</span>
+          <span>{{ item.description}}</span>
         </template>
 
         <template #item.actions="{ item }">
