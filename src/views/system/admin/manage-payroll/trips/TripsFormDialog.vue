@@ -96,6 +96,7 @@ watch(
               ></v-text-field>
             </v-col>
 
+
             <v-col cols="12" md="6">
               <v-select
                 v-model="(formData.unit_id as any)"
@@ -105,8 +106,10 @@ watch(
                 item-value="id"
                 clearable
                 :return-object="false"
+                :rules="[requiredValidator]"
               ></v-select>
             </v-col>
+
 
             <v-col cols="12" md="6">
               <v-select
@@ -117,8 +120,10 @@ watch(
                 item-value="id"
                 clearable
                 :return-object="false"
+                :rules="[requiredValidator]"
               ></v-select>
             </v-col>
+
 
             <v-col cols="12" md="6">
               <v-select
@@ -129,8 +134,10 @@ watch(
                 item-value="id"
                 clearable
                 :return-object="false"
+                :rules="[requiredValidator]"
               ></v-select>
             </v-col>
+
 
 
             <v-col cols="12" md="6">
@@ -138,8 +145,10 @@ watch(
                 v-model="formData.km"
                 label="Kilometers"
                 type="number"
+                :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
+
 
             <v-col cols="12" md="6">
               <v-text-field
@@ -147,31 +156,26 @@ watch(
                 label="Per Trip"
                 type="number"
                 step="0.01"
+                :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
-
-          <!--   <v-col cols="12" md="6">
-              <v-text-field
-                v-model="formData.per_trip"
-                label="Per Trip"
-                type="number"
-                step="0.01"
-              ></v-text-field>
-            </v-col> -->
 
             <v-col cols="12">
               <v-textarea 
                 v-model="formData.materials" 
                 label="Materials" 
                 rows="2"
+                :rules="[requiredValidator]"
               ></v-textarea>
             </v-col>
+
 
             <v-col cols="12">
               <v-textarea 
                 v-model="formData.description" 
                 label="Description" 
                 rows="2"
+                :rules="[requiredValidator]"
               ></v-textarea>
             </v-col>
           </v-row>
