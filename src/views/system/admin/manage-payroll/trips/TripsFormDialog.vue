@@ -98,7 +98,7 @@ watch(
 
 
             <v-col cols="12" md="6">
-              <v-select
+              <v-autocomplete
                 v-model="(formData.unit_id as any)"
                 label="Unit"
                 :items="units"
@@ -107,12 +107,16 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-              ></v-select>
+                auto-select-first
+                hide-no-data
+                hide-details="auto"
+                density="comfortable"
+              ></v-autocomplete>
             </v-col>
 
 
             <v-col cols="12" md="6">
-              <v-select
+              <v-autocomplete
                 v-model="(formData.trip_location_id as any)"
                 label="Trip Location"
                 :items="tripLocations"
@@ -121,12 +125,16 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-              ></v-select>
+                auto-select-first
+                hide-no-data
+                hide-details="auto"
+                density="comfortable"
+              ></v-autocomplete>
             </v-col>
 
 
             <v-col cols="12" md="6">
-              <v-select
+              <v-autocomplete
                 v-model="(formData.employee_id as any)"
                 label="Employee"
                 :items="employees"
@@ -135,7 +143,11 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-              ></v-select>
+                auto-select-first
+                hide-no-data
+                hide-details="auto"
+                density="comfortable"
+              ></v-autocomplete>
             </v-col>
 
 
