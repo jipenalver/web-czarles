@@ -2,33 +2,14 @@
 import TripsFormDialog from '@/views/system/admin/manage-payroll/trips/TripsFormDialog.vue'
 import { useTripsTable } from '@/views/system/admin/manage-payroll/trips/tripsTable.ts'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import { useTripLocationsStore } from '@/stores/tripLocation'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
-import { onMounted, ref } from 'vue' // Add onMounted import
+import { ref } from 'vue'
 
 const date = useDate()
 const { mobile } = useDisplay()
-
-const tripLocationsStore = useTripLocationsStore()
-
-const {
-  tableOptions,
-  tableFilters,
-  isDialogVisible,
-  isConfirmDeleteDialog,
-  itemData,
-  formAction,
-  onAdd,
-  onUpdate,
-  onDelete,
-  onConfirmDelete,
-  onSearchItems,
-  onLoadItems,
-  tripsStore,
-} = useTripsTable()
 
 // Expanded row state
 const expanded = ref([])
@@ -67,11 +48,21 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
-// Load initial data when component mounts
-onMounted(async () => {
-  await tripLocationsStore.getTripLocations()
-  await onLoadItems(tableOptions.value) // Load trips data on mount
-})
+const {
+  tableOptions,
+  tableFilters,
+  isDialogVisible,
+  isConfirmDeleteDialog,
+  itemData,
+  formAction,
+  onAdd,
+  onUpdate,
+  onDelete,
+  onConfirmDelete,
+  onFilterItems,
+  onLoadItems,
+  tripsStore,
+} = useTripsTable()
 </script>
 
 <template>
@@ -108,10 +99,9 @@ onMounted(async () => {
                 v-model="tableFilters.search"
                 density="compact"
                 prepend-inner-icon="mdi-magnify"
-                placeholder="Search Trip No, Materials, Description"
+                label="Search Trip No, Materials, Description"
                 clearable
-                @click:clear="onSearchItems"
-                @input="onSearchItems"
+                @update:model-value="onFilterItems"
               ></v-text-field>
             </v-col>
 
@@ -144,11 +134,7 @@ onMounted(async () => {
         </template>
 
         <template #item.trip_location_id="{ item }">
-          <span>
-            {{ item.trip_location?.location ||
-              tripLocationsStore.tripLocations.find(loc => loc.id === item.trip_location_id)?.location ||
-              'N/A' }}
-          </span>
+          <span> {{ item.trip_location?.location || 'N/A' }} </span>
         </template>
 
         <template #item.actions="{ item }">

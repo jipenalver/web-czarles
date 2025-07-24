@@ -6,7 +6,7 @@ import { ref } from 'vue'
 export function useTripsTable() {
   const tripsStore = useTripsStore()
 
-  // State
+  // States
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
@@ -48,7 +48,8 @@ export function useTripsTable() {
     const { data, error } = await tripsStore.deleteTrip(deleteId.value)
 
     if (error) {
-      formAction.value.formMessage = error.message
+      // Error handling, basin walay message property, so safe access ta
+      formAction.value.formMessage = (error as { message?: string }).message || 'Unknown error'
       formAction.value.formStatus = 400
     } else if (data) {
       formAction.value.formMessage = 'Successfully Deleted Trip.'
@@ -61,13 +62,8 @@ export function useTripsTable() {
     formAction.value.formProcess = false
   }
 
-  const onSearchItems = () => {
-    if (
-      tableFilters.value.search?.length >= 2 ||
-      tableFilters.value.search?.length == 0 ||
-      tableFilters.value.search === null
-    )
-      onLoadItems(tableOptions.value)
+  const onFilterItems = () => {
+    onLoadItems(tableOptions.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -90,7 +86,7 @@ export function useTripsTable() {
     onUpdate,
     onDelete,
     onConfirmDelete,
-    onSearchItems,
+    onFilterItems,
     onLoadItems,
     tripsStore,
   }
