@@ -7,7 +7,6 @@ import type { Unit } from './units'
 import type { TripLocation } from './tripLocation'
 import { ref } from 'vue'
 
-
 export type Trip = {
   id: number
   created_at: string
@@ -33,6 +32,7 @@ export type TripTableFilter = {
   trip_at: string[]
 }
 
+// Make sure this has the 'export' keyword
 export const useTripsStore = defineStore('trips', () => {
   // States
   const trips = ref<Trip[]>([])
@@ -48,92 +48,138 @@ export const useTripsStore = defineStore('trips', () => {
 
   // Actions
   async function getTrips() {
-    const { data } = await supabase.from('trips').select('*')
-
-    trips.value = data as Trip[]
+    try {
+      const { data, error } = await supabase.from('trips').select('*')
+      if (error) {
+        console.error('[getTrips] Error:', error)
+        return
+      }
+      trips.value = data as Trip[]
+    } catch (err) {
+      console.error('[getTrips] Exception:', err)
+    }
   }
 
   async function getTripsTable(tableOptions: TableOptions, filters: TripTableFilter) {
+    // Fetching trips table with search ug pagination
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'trip_no')
-    // query sa trips with join sa units ug trips_location table, C7 style
-    let tripsQuery = supabase
+    // Copy search logic from designations
+    const search = filters.search ? filters.search.trim() : ''
+
+    let query = supabase
       .from('trips')
-      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)') // join units and trip_location tables
+      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)')
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    tripsQuery = getTripsFilter(tripsQuery, filters)
+    query = getTripsFilter(query, { ...filters, search })
 
-    // log the query object for debugging
-    console.log('tripsQuery:', tripsQuery)
-    const { data: tripsData } = await tripsQuery
+    const { data: tripsData, error } = await query
+    if (error) {
+      console.error('[getTripsTable] Error:', error)
+      return
+    }
 
-    // direct na ang units ug trip_location field gikan sa join, no need for second fetch
-    const { count } = await getTripsCount(filters)
+    const { count } = await getTripsCount({ ...filters, search })
 
-    // ensure trip_location is available for the table
     tripsTable.value = tripsData as Trip[]
     tripsTableTotal.value = count as number
   }
 
   async function getTripsCount(filters: TripTableFilter) {
-    let query = supabase.from('trips').select('*', { count: 'exact', head: true })
+    //Counting trips for pagination
+    let query = supabase
+      .from('trips')
+      .select('*', { count: 'exact', head: true })
 
     query = getTripsFilter(query, filters)
 
-    return await query
+    const { count } = await query
+    return { count }
   }
 
   function getTripsFilter(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  query: PostgrestFilterBuilder<any, any, any>,
-  filters: TripTableFilter,
-) {
-  const { search, unit_id, trip_location_id, employee_id, trip_at } = filters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query: PostgrestFilterBuilder<any, any, any>,
+    filters: TripTableFilter,
+  ) {
+    // Filtering trips for search ug filters
+    const { search, unit_id, trip_location_id, employee_id, trip_at } = filters
 
-  if (search) {
-    query = query.or(`trip_no.eq.${search}, materials.ilike.%${search}%, description.ilike.%${search}%`)
-  }
-
-  if (unit_id) {
-    query = query.eq('unit_id', unit_id)
-  }
-
-  if (trip_location_id) {
-    query = query.eq('trip_location_id', trip_location_id)
-  }
-
-  if (employee_id) {
-    query = query.eq('employee_id', employee_id)
-  }
-
-  if (trip_at && Array.isArray(trip_at) && trip_at.length > 0) {
-    const isValidDate = (d: string) => {
-      const date = new Date(d)
-      return !isNaN(date.getTime())
+    if (search) {
+      // Search sa string fields ra, dili apil ang trip_no kay number
+      query = query.or(`materials.ilike.%${search}%,description.ilike.%${search}%`)
     }
-    if (trip_at.length === 1 && isValidDate(trip_at[0])) {
-      query = query.eq('date', prepareDate(trip_at[0]))
-    } else if (trip_at.length > 1 && isValidDate(trip_at[0]) && isValidDate(trip_at[trip_at.length - 1])) {
-      query = query
-        .gte('date', prepareDate(trip_at[0])) // greater than or equal to `from` date
-        .lte('date', prepareDate(trip_at[trip_at.length - 1])) // less than or equal to `to` date
-    }
-  }
 
-  return query
-}
+    if (unit_id) {
+      query = query.eq('unit_id', unit_id)
+    }
+
+    if (trip_location_id) {
+      query = query.eq('trip_location_id', trip_location_id)
+    }
+
+    if (employee_id) {
+      query = query.eq('employee_id', employee_id)
+    }
+
+    if (trip_at && Array.isArray(trip_at) && trip_at.length > 0) {
+      const isValidDate = (d: string) => {
+        const date = new Date(d)
+        return !isNaN(date.getTime())
+      }
+      if (trip_at.length === 1 && isValidDate(trip_at[0])) {
+        query = query.eq('date', prepareDate(trip_at[0]))
+      } else if (trip_at.length > 1 && isValidDate(trip_at[0]) && isValidDate(trip_at[trip_at.length - 1])) {
+        query = query
+          .gte('date', prepareDate(trip_at[0])) // greater than or equal to `from` date
+          .lte('date', prepareDate(trip_at[trip_at.length - 1])) // less than or equal to `to` date
+      }
+    }
+
+    return query
+  }
 
   async function addTrip(formData: Partial<Trip>) {
-    return await supabase.from('trips').insert(formData).select()
+    try {
+      const { data, error } = await supabase.from('trips').insert(formData).select()
+      if (error) {
+        console.error('[addTrip] Error:', error)
+        return { data: null, error }
+      }
+      return { data, error: null }
+    } catch (err) {
+      console.error('[addTrip] Exception:', err)
+      return { data: null, error: err }
+    }
   }
 
   async function updateTrip(formData: Partial<Trip>) {
-    return await supabase.from('trips').update(formData).eq('id', formData.id).select()
+    try {
+      const { data, error } = await supabase.from('trips').update(formData).eq('id', formData.id).select()
+      if (error) {
+        console.error('[updateTrip] Error:', error)
+        return { data: null, error }
+      }
+      return { data, error: null }
+    } catch (err) {
+      console.error('[updateTrip] Exception:', err)
+      return { data: null, error: err }
+    }
   }
 
   async function deleteTrip(id: number) {
-    return await supabase.from('trips').delete().eq('id', id).select()
+    try {
+      const { data, error } = await supabase.from('trips').delete().eq('id', id).select()
+      if (error) {
+        console.error('[deleteTrip] Error:', error)
+        return { data: null, error }
+      }
+      return { data, error: null }
+    } catch (err) {
+      console.error('[deleteTrip] Exception:', err)
+      return { data: null, error: err }
+    }
   }
 
   // Expose States and Actions
