@@ -1,6 +1,9 @@
+
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/utils/supabase'
+import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
+import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 
 export type TripLocation = {
   id: number
@@ -9,55 +12,59 @@ export type TripLocation = {
   description: string 
 }
 
+
 export type TripLocationTableFilter = {
-  search: string
-  location?: string
-  description?: string
+  search: string | null
 }
 
-export type TripLocationTableOptions = {
-  page: number
-  itemsPerPage: number
-  sortBy: { key: string; order: 'asc' | 'desc' }[]
-}
+
+// Use shared TableOptions from helpers
 
 export const useTripLocationsStore = defineStore('tripLocations', () => {
   const tripLocations = ref<TripLocation[]>([])
   const tripLocationsTable = ref<TripLocation[]>([])
   const tripLocationsTableTotal = ref(0)
-  const isLoading = ref(false)
+
 
   // Get all (no filter)
   async function getTripLocations() {
-    isLoading.value = true
-    const { data } = await supabase.from('trip_locations').select('*').order('location', { ascending: true })
+    const { data } = await supabase.from('trip_locations').select().order('location', { ascending: true })
     tripLocations.value = data as TripLocation[]
-    isLoading.value = false
   }
 
   // Server-side search and pagination for table
-  async function getTripLocationsTable(tableOptions: TripLocationTableOptions, filters: TripLocationTableFilter) {
-    isLoading.value = true
-    const { page, itemsPerPage, sortBy } = tableOptions
-    const sort = sortBy && sortBy.length > 0 ? sortBy[0] : { key: 'location', order: 'asc' }
-    const from = (page - 1) * itemsPerPage
-    const to = from + itemsPerPage - 1
+  async function getTripLocationsTable(tableOptions: TableOptions, { search }: TripLocationTableFilter) {
+    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'location')
+    search = tableSearch(search)
 
     let query = supabase
       .from('trip_locations')
-      .select('*', { count: 'exact' })
-      .order(sort.key, { ascending: sort.order === 'asc' })
-      .range(from, to)
+      .select()
+      .order(column, { ascending: order })
+      .range(rangeStart, rangeEnd)
 
-    if (filters.search) {
-      // search by location or description
-      query = query.or(`location.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-    }
+    query = getTripLocationsFilter(query, { search })
 
-    const { data, count } = await query
+    const { data } = await query
+    const { count } = await getTripLocationsCount({ search })
+
     tripLocationsTable.value = data as TripLocation[]
-    tripLocationsTableTotal.value = count || 0
-    isLoading.value = false
+    tripLocationsTableTotal.value = count as number
+  }
+
+  async function getTripLocationsCount({ search }: TripLocationTableFilter) {
+    let query = supabase.from('trip_locations').select('*', { count: 'exact', head: true })
+    query = getTripLocationsFilter(query, { search })
+    return await query
+  }
+
+  function getTripLocationsFilter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query: PostgrestFilterBuilder<any, any, any>,
+    { search }: TripLocationTableFilter,
+  ) {
+    if (search) query = query.or(`location.ilike.%${search}%, description.ilike.%${search}%`)
+    return query
   }
 
   // Post
@@ -79,7 +86,6 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
     tripLocations,
     tripLocationsTable,
     tripLocationsTableTotal,
-    isLoading,
     getTripLocations,
     getTripLocationsTable,
     addTripLocation,
