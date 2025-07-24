@@ -67,20 +67,32 @@ watch(
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="formData.trip_no"
-                label="Trip Number"
-                type="number"
-                :rules="[requiredValidator]"
-              ></v-text-field>
-            </v-col>
 
             <v-col cols="12" md="6">
               <v-text-field
                 v-model="formData.date"
                 label="Date"
                 type="date"
+                :rules="[requiredValidator]"
+              ></v-text-field>
+            </v-col>
+
+             <v-col cols="12" md="6">
+              <v-text-field
+                v-model="formData.trip_at"
+                label="Trip At"
+                type="date"
+                :rules="[requiredValidator]"
+              ></v-text-field>
+            </v-col>
+
+
+              <v-col cols="12" md="6">
+              <v-text-field
+                v-model="formData.trip_no"
+                label="Trip Number"
+                type="number"
+                :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
 

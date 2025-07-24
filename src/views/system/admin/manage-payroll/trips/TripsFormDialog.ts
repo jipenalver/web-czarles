@@ -28,7 +28,9 @@ export function useTripsFormDialog(
     employee_id: undefined as number | undefined,
     description: '',
   }
-  const formData = ref<Partial<Trip>>({ ...formDataDefault })
+  // Extend Trip type to allow trip_at for form usage
+  type TripWithTripAt = Trip & { trip_at?: string }
+  const formData = ref<Partial<TripWithTripAt>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)

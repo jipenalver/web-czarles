@@ -16,7 +16,7 @@ const date = useDate()
   <tr>
     <td :colspan="props.columnsLength" class="py-2">
       <v-row :class="mobile ? '' : 'px-4'" :no-gutters="!mobile" dense>
-        <!-- Bisaya-English: Grid arrangement MCP style, like EmployeesExpandedRow.vue -->
+       
         <v-col cols="12" sm="6" class="d-flex align-center my-2" :class="mobile ? 'justify-space-between' : 'justify-start'">
           <span class="text-body-2 font-weight-bold me-2">Description:</span>
           <span class="text-body-2">{{ props.itemData.description || 'N/A' }}</span>
