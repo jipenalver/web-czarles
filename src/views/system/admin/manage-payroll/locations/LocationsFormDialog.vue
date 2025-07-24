@@ -54,6 +54,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
                 v-model="formData.description"
                 label="Description"
                 rows="2"
+                :rules="[requiredValidator]"
               ></v-textarea>
             </v-col>
           </v-row>
