@@ -3,8 +3,6 @@ import { type TripLocation, type TripLocationTableFilter, useTripLocationsStore 
 import { formActionDefault } from '@/utils/helpers/constants'
 import type { TableOptions } from '@/utils/helpers/tables'
 import { ref, watch } from 'vue'
-
-// Composable for Locations Form Dialog, Bisaya-English comments for clarity
 export function useLocationsFormDialog(
   props: {
     isDialogVisible: boolean

@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { TripLocationTableFilter } from '@/stores/tripLocation'
 import { useLocationsFormDialog } from './locationsFormDialog'
 import { type TripLocation } from '@/stores/tripLocation'
 import type { TableOptions } from '@/utils/helpers/tables'
-import type { TripLocationTableFilter } from '@/stores/tripLocation'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'

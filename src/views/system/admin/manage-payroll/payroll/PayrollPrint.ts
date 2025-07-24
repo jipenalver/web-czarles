@@ -1,4 +1,3 @@
-
 import type { PayrollData } from '@/views/system/admin/manage-payroll/payroll/payrollTableDialog'
 import { usePayrollComputation } from './payrollComputation'
 import type { Employee } from '@/stores/employees'
@@ -7,7 +6,7 @@ import type { ComputedRef } from 'vue'
 
 
 
-interface UsePayrollRefsProps {
+type UsePayrollRefsProps = {
   employeeData: Employee | null
   payrollData: PayrollData
   tableData: any
@@ -36,3 +35,4 @@ export function usePayrollPrint(
   // Use payrollComputation composable and expose its return
   return usePayrollComputation(dailyRateRef, grossSalaryRef, tableDataRef)
 }
+
