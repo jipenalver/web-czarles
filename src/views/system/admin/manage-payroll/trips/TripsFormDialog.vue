@@ -120,11 +120,21 @@ watch(
               ></v-select>
             </v-col>
 
+
             <v-col cols="12" md="6">
               <v-text-field
                 v-model="formData.km"
                 label="Kilometers"
                 type="number"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="formData.per_trip"
+                label="Per Trip"
+                type="number"
+                step="0.01"
               ></v-text-field>
             </v-col>
 
