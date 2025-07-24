@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TripsFormDialog from '@/views/system/admin/manage-payroll/trips/TripsFormDialog.vue'
+import TripsExpandedRow from '@/views/system/admin/manage-payroll/trips/TripsExpandedRow.vue'
 import { useTripsTable } from '@/views/system/admin/manage-payroll/trips/tripsTable.ts'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
@@ -151,28 +152,7 @@ const {
         </template>
 
         <template #expanded-row="{ columns, item }">
-          <tr>
-            <td :colspan="columns.length">
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <strong>Description:</strong> {{ item.description || 'N/A' }}
-                </v-col>
-               
-                <v-col cols="12" sm="3">
-                  <strong>KM:</strong> {{ item.km || 'N/A' }}
-                </v-col>
-                <v-col cols="12" sm="3">
-                  <strong>Per Trip:</strong> {{ item.per_trip ? `₱${item.per_trip}` : 'N/A' }}
-                </v-col>
-                <v-col cols="12" sm="3">
-                  <strong>Materials:</strong> {{ item.materials || 'N/A' }}
-                </v-col>
-                <v-col cols="12" sm="3">
-                  <strong>Created Date:</strong> <span class="font-weight-bold">{{ date.format(item.created_at, 'fullDateTime') }}</span>
-                </v-col>
-              </v-row>
-            </td>
-          </tr>
+          <TripsExpandedRow :columns-length="columns.length" :item-data="item" />
         </template>
       </v-data-table-server>
     </v-card-text>
