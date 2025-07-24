@@ -33,7 +33,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
   }
 
   // Server-side search and pagination for table
-  async function getTripLocationsTable(tableOptions: TableOptions, { search }: TripLocationTableFilter) {
+  async function getTripLocationsTable(tableOptions: TableOptions, { search }: TripLocationTableFilter = { search: null }) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'location')
     search = tableSearch(search)
 

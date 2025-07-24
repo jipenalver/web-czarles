@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { useLocationsFormDialog } from './LocationsFormDialog'
+import { useLocationsFormDialog } from './locationsFormDialog'
 import { type TripLocation } from '@/stores/tripLocation'
+import type { TableOptions } from '@/utils/helpers/tables'
+import type { TripLocationTableFilter } from '@/stores/tripLocation'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
+// Props must include tableOptions and tableFilters for composable
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: TripLocation | null
+  tableOptions: TableOptions
+  tableFilters: TripLocationTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible', 'refresh-table'])

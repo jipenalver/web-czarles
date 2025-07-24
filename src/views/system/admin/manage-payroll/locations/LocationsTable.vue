@@ -39,7 +39,6 @@ const {
   onDelete,
   onConfirmDelete,
   onSearchItems,
-  onLoadItems,
   tripLocationsStore,
 } = useLocationsTable()
 </script>
@@ -61,7 +60,7 @@ const {
         :headers="tableHeaders"
         :items="tripLocationsStore.tripLocationsTable"
         :items-length="tripLocationsStore.tripLocationsTableTotal"
-        @update:options="onLoadItems"
+        @update:options="(options) => tripLocationsStore.getTripLocationsTable(options, tableFilters)"
         :hide-default-header="mobile"
         :mobile="mobile"
       >
@@ -120,7 +119,7 @@ const {
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-    @refresh-table="onLoadItems(tableOptions)"
+    @refresh-table="() => tripLocationsStore.getTripLocationsTable(tableOptions, tableFilters)"
   ></LocationsFormDialog>
 
   <ConfirmDialog

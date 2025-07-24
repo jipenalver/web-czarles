@@ -21,6 +21,7 @@ export function useLocationsTable() {
   const itemData = ref<TripLocation | null>(null)
   const formAction = ref({ ...formActionDefault })
 
+
   // Actions
   const onAdd = () => {
     itemData.value = null
@@ -47,7 +48,7 @@ export function useLocationsTable() {
       formAction.value.formStatus = 400
     } else if (data) {
       formAction.value.formMessage = 'Successfully Deleted Location.'
-      await onLoadItems(tableOptions.value)
+      await tripLocationsStore.getTripLocationsTable(tableOptions.value, tableFilters.value)
     }
 
     formAction.value.formAlert = true
@@ -61,21 +62,8 @@ export function useLocationsTable() {
       tableFilters.value.search?.length == 0 ||
       tableFilters.value.search === null
     ) {
-      onLoadItems(tableOptions.value)
+      tripLocationsStore.getTripLocationsTable(tableOptions.value, tableFilters.value)
     }
-  }
-
-  const onLoadItems = async ({ page, itemsPerPage, sortBy }: any) => {
-    tableOptions.value.isLoading = true
-    await tripLocationsStore.getTripLocationsTable(
-      {
-        page,
-        itemsPerPage,
-        sortBy: sortBy && sortBy.length > 0 ? sortBy : [{ key: 'location', order: 'asc' }],
-      },
-      tableFilters.value
-    )
-    tableOptions.value.isLoading = false
   }
 
   // Expose State and Actions
@@ -91,7 +79,6 @@ export function useLocationsTable() {
     onDelete,
     onConfirmDelete,
     onSearchItems,
-    onLoadItems,
     tripLocationsStore,
   }
 }
