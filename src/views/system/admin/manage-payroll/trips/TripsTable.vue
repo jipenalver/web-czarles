@@ -28,7 +28,7 @@ const tableHeaders: TableHeader[] = [
   },
   {
     title: 'Employee',
-    key: 'employee_id',
+    key: 'employee_fullname',
     align: 'start',
   },
   {
@@ -127,15 +127,15 @@ const {
         </template>
 
         <template #item.employee_id="{ item }">
-          <span> {{ item.employee_id || 'N/A' }} </span>
+          <span> {{ item.employee_fullname  }} </span>
         </template>
 
         <template #item.unit_id="{ item }">
-          <span> {{ item.units?.name || 'N/A' }} </span>
+          <span> {{ item.units?.name  }} </span>
         </template>
 
         <template #item.trip_location_id="{ item }">
-          <span> {{ item.trip_location?.location || 'N/A' }} </span>
+          <span> {{ item.trip_location?.location  }} </span>
         </template>
 
         <template #item.actions="{ item }">

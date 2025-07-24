@@ -22,6 +22,12 @@ export type Trip = {
   description: string 
   units?: Unit
   trip_location?: TripLocation
+  employees?: {
+    firstname: string
+    middlename: string
+    lastname: string
+  }
+  employee_fullname?: string
 }
 
 export type TripTableFilter = {
@@ -68,7 +74,7 @@ export const useTripsStore = defineStore('trips', () => {
 
     let query = supabase
       .from('trips')
-      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)')
+      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location), employees:employee_id(firstname,middlename,lastname)')
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -82,7 +88,15 @@ export const useTripsStore = defineStore('trips', () => {
 
     const { count } = await getTripsCount({ ...filters, search })
 
-    tripsTable.value = tripsData as Trip[]
+    // Merge employee fullname into each trip
+    const tripsWithFullname = (tripsData as Trip[]).map(trip => ({
+      ...trip,
+      employee_fullname: trip.employees
+        ? `${trip.employees.firstname} ${trip.employees.middlename} ${trip.employees.lastname}`.replace(/\s+/g, ' ').trim()
+        : ''
+    }))
+
+    tripsTable.value = tripsWithFullname
     tripsTableTotal.value = count as number
   }
 
