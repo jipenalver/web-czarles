@@ -157,10 +157,7 @@ export const useTripsStore = defineStore('trips', () => {
   async function addTrip(formData: Partial<Trip>) {
     try {
       const { data, error } = await supabase.from('trips').insert(formData).select()
-      if (error) {
-        console.error('[addTrip] Error:', error)
-        return { data: null, error }
-      }
+     
       return { data, error: null }
     } catch (err) {
       console.error('[addTrip] Exception:', err)
@@ -171,10 +168,7 @@ export const useTripsStore = defineStore('trips', () => {
   async function updateTrip(formData: Partial<Trip>) {
     try {
       const { data, error } = await supabase.from('trips').update(formData).eq('id', formData.id).select()
-      if (error) {
-        console.error('[updateTrip] Error:', error)
-        return { data: null, error }
-      }
+     
       return { data, error: null }
     } catch (err) {
       console.error('[updateTrip] Exception:', err)
@@ -185,10 +179,7 @@ export const useTripsStore = defineStore('trips', () => {
   async function deleteTrip(id: number) {
     try {
       const { data, error } = await supabase.from('trips').delete().eq('id', id).select()
-      if (error) {
-        console.error('[deleteTrip] Error:', error)
-        return { data: null, error }
-      }
+    
       return { data, error: null }
     } catch (err) {
       console.error('[deleteTrip] Exception:', err)

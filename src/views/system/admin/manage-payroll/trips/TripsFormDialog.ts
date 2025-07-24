@@ -1,4 +1,5 @@
 import { type Trip, type TripTableFilter, useTripsStore } from '@/stores/trips'
+import { useAuthUserStore } from '@/stores/authUser'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { ref, watch } from 'vue'
@@ -13,6 +14,7 @@ export function useTripsFormDialog(
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const tripsStore = useTripsStore()
+  const authUserStore = useAuthUserStore()
 
   // State
   const formDataDefault = {
@@ -44,11 +46,14 @@ export function useTripsFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     // Convert form data to match API expectations
+
+    // Kuhaon ang user_id gikan sa authUserStore
     const submitData = {
       ...formData.value,
       unit_id: formData.value.unit_id || undefined,
       trip_location_id: formData.value.trip_location_id || undefined,
       employee_id: formData.value.employee_id || undefined,
+      user_id: authUserStore.userData?.id,
     }
 
     const { data, error } = isUpdate.value
