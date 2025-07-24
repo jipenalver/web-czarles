@@ -1,4 +1,5 @@
 import { type TableOptions, tablePagination} from '@/utils/helpers/tables'
+import { prepareDate } from '@/utils/helpers/others'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -21,7 +22,7 @@ export type Trip = {
   user_id: string 
   description: string 
   units?: Unit
-  trips_location?: TripLocation
+  trip_location?: TripLocation
 }
 
 export type TripTableFilter = {
@@ -57,7 +58,7 @@ export const useTripsStore = defineStore('trips', () => {
     // query sa trips with join sa units ug trips_location table, C7 style
     let tripsQuery = supabase
       .from('trips')
-      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)') // join units and trips_location tables
+      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location)') // join units and trip_location tables
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -67,10 +68,10 @@ export const useTripsStore = defineStore('trips', () => {
     console.log('tripsQuery:', tripsQuery)
     const { data: tripsData } = await tripsQuery
 
-    // direct na ang units ug trips_location field gikan sa join, no need for second fetch
+    // direct na ang units ug trip_location field gikan sa join, no need for second fetch
     const { count } = await getTripsCount(filters)
 
-    // ensure trips_location is available for the table
+    // ensure trip_location is available for the table
     tripsTable.value = tripsData as Trip[]
     tripsTableTotal.value = count as number
   }
@@ -84,36 +85,44 @@ export const useTripsStore = defineStore('trips', () => {
   }
 
   function getTripsFilter(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
-    filters: TripTableFilter,
-  ) {
-    const { search, unit_id, trip_location_id, employee_id, trip_at } = filters
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: PostgrestFilterBuilder<any, any, any>,
+  filters: TripTableFilter,
+) {
+  const { search, unit_id, trip_location_id, employee_id, trip_at } = filters
 
-    if (search) {
-      query = query.or(`trip_no.eq.${search}, materials.ilike.%${search}%, description.ilike.%${search}%`)
-    }
-
-    if (unit_id) {
-      query = query.eq('unit_id', unit_id)
-    }
-
-    if (trip_location_id) {
-      query = query.eq('trip_location_id', trip_location_id)
-    }
-
-    if (employee_id) {
-      query = query.eq('employee_id', employee_id)
-    }
-
-    if (Array.isArray(trip_at) && trip_at.length === 2 && trip_at[0] && trip_at[1]) {
-      query = query.gte('date', trip_at[0]).lte('date', trip_at[1])
-    } else if (Array.isArray(trip_at) && trip_at.length === 1 && trip_at[0]) {
-      query = query.eq('date', trip_at[0])
-    }
-
-    return query
+  if (search) {
+    query = query.or(`trip_no.eq.${search}, materials.ilike.%${search}%, description.ilike.%${search}%`)
   }
+
+  if (unit_id) {
+    query = query.eq('unit_id', unit_id)
+  }
+
+  if (trip_location_id) {
+    query = query.eq('trip_location_id', trip_location_id)
+  }
+
+  if (employee_id) {
+    query = query.eq('employee_id', employee_id)
+  }
+
+  if (trip_at && Array.isArray(trip_at) && trip_at.length > 0) {
+    const isValidDate = (d: string) => {
+      const date = new Date(d)
+      return !isNaN(date.getTime())
+    }
+    if (trip_at.length === 1 && isValidDate(trip_at[0])) {
+      query = query.eq('date', prepareDate(trip_at[0]))
+    } else if (trip_at.length > 1 && isValidDate(trip_at[0]) && isValidDate(trip_at[trip_at.length - 1])) {
+      query = query
+        .gte('date', prepareDate(trip_at[0])) // greater than or equal to `from` date
+        .lte('date', prepareDate(trip_at[trip_at.length - 1])) // less than or equal to `to` date
+    }
+  }
+
+  return query
+}
 
   async function addTrip(formData: Partial<Trip>) {
     return await supabase.from('trips').insert(formData).select()

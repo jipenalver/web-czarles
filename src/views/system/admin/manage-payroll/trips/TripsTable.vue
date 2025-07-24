@@ -7,16 +7,31 @@ import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
-
-
-
+import { onMounted, ref } from 'vue' // Add onMounted import
 
 const date = useDate()
 const { mobile } = useDisplay()
 
-
 const tripLocationsStore = useTripLocationsStore()
-tripLocationsStore.getTripLocations()
+
+const {
+  tableOptions,
+  tableFilters,
+  isDialogVisible,
+  isConfirmDeleteDialog,
+  itemData,
+  formAction,
+  onAdd,
+  onUpdate,
+  onDelete,
+  onConfirmDelete,
+  onSearchItems,
+  onLoadItems,
+  tripsStore,
+} = useTripsTable()
+
+// Expanded row state
+const expanded = ref([])
 
 const tableHeaders: TableHeader[] = [
   {
@@ -52,25 +67,11 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
-import { ref } from 'vue'
-const {
-  tableOptions,
-  tableFilters,
-  isDialogVisible,
-  isConfirmDeleteDialog,
-  itemData,
-  formAction,
-  onAdd,
-  onUpdate,
-  onDelete,
-  onConfirmDelete,
-  onSearchItems,
-  onLoadItems,
-  tripsStore,
-} = useTripsTable()
-
-// Expanded row state
-const expanded = ref([])
+// Load initial data when component mounts
+onMounted(async () => {
+  await tripLocationsStore.getTripLocations()
+  await onLoadItems(tableOptions.value) // Load trips data on mount
+})
 </script>
 
 <template>
@@ -144,13 +145,11 @@ const expanded = ref([])
 
         <template #item.trip_location_id="{ item }">
           <span>
-            {{ item.trips_location?.location ||
+            {{ item.trip_location?.location ||
               tripLocationsStore.tripLocations.find(loc => loc.id === item.trip_location_id)?.location ||
               'N/A' }}
           </span>
         </template>
-
-        <!-- KM, Per Trip, Materials, and Created Date moved to expanded row -->
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
@@ -205,5 +204,5 @@ const expanded = ref([])
     title="Confirm Delete"
     text="Are you sure you want to delete this trip?"
     @confirm="onConfirmDelete"
-  ></ConfirmDialog>
+  />
 </template>
