@@ -157,6 +157,18 @@ export const filesExtract = (event: Event) => {
   })
 }
 
+// 👉 Get next month string in YYYY-MM-DD (for holidays table)
+export const getNextMonth = (dateString: string): string => {
+  const [year, month] = dateString.split('-').map(Number)
+  if (month === 12) {
+    // December -> January of next year
+    return `${year + 1}-01-01`
+  } else {
+    // Any other month -> next month same year
+    return `${year}-${String(month + 1).padStart(2, '0')}-01`
+  }
+}
+
 // 👉 Fix v-date-input; prepare local dates in form
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const prepareFormDates = (formData: { [key: string]: any }, dateColumns: string[] = []) => {

@@ -20,9 +20,6 @@ export function usePayrollHolidays(dateString: string) {
   return { holidays, isLoading, fetchHolidays }
 }
 
-
-
-
 type UsePayrollRefsProps = {
   employeeData: Employee | null
   payrollData: PayrollData
@@ -52,28 +49,14 @@ export function usePayrollPrint(
   return usePayrollComputation(dailyRateRef, grossSalaryRef, tableDataRef)
 }
 
-/**
- * Composable: usePayrollFilters
- * Filter trips and employees for payrolls based on selected date (YYYY-MM-DD) and employeeId
- * @param dateString - YYYY-MM-DD string (e.g., '2025-07-01')
- * @param employeeId - Employee ID to filter
- */
 export function usePayrollFilters(dateString: string, employeeId: number | undefined) {
   const tripsStore = useTripsStore()
 
-  // Instance sa attendances store
-  const attendancesStore = useAttendancesStore()
 
-  /**
-   * Fetch trips for payroll filter using store action
-   * @returns Promise<Trip[]>
-   */
   async function fetchFilteredTrips() {
     // Tawag sa store action para fetch ug update sa trips
     return await tripsStore.fetchFilteredTrips(dateString, employeeId)
   }
-
- 
 
   return {
     fetchFilteredTrips,

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { usePayrollPrint, usePayrollHolidays, usePayrollFilters } from './payrollPrint'
+import { usePayrollPrint, usePayrollFilters } from './payrollPrint'
+import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
 import { formatTripDate } from '@/utils/helpers/others'
@@ -74,7 +75,18 @@ const payrollPrint = usePayrollPrint(
   grossSalary
 )
 
-const { holidays, isLoading: isHolidaysLoading, fetchHolidays } = usePayrollHolidays(holidayDateString.value)
+const holidays = ref<Holiday[]>([])
+const isHolidaysLoading = ref(false)
+
+async function fetchEmployeeHolidays() {
+  if (!props.employeeData?.id) {
+    holidays.value = []
+    return
+  }
+  isHolidaysLoading.value = true
+  holidays.value = await fetchHolidaysByDateString(holidayDateString.value, String(props.employeeData.id))
+  isHolidaysLoading.value = false
+}
 const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
 
 // Destructure values from payrollPrint composable
@@ -98,7 +110,7 @@ function loadTrips() {
 // Lifecycle hooks
 onMounted(() => {
   loadTrips()
-  fetchHolidays()
+  fetchEmployeeHolidays()
 })
 
 // Watchers
@@ -106,8 +118,8 @@ watch([filterDateString, () => props.employeeData?.id], () => {
   loadTrips()
 })
 
-watch(holidayDateString, () => {
-  fetchHolidays()
+watch([holidayDateString, () => props.employeeData?.id], () => {
+  fetchEmployeeHolidays()
 })
 
 // Debug logging

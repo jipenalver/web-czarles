@@ -1,6 +1,7 @@
+
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { prepareFormDates } from '@/utils/helpers/others'
+import { prepareFormDates, getNextMonth } from '@/utils/helpers/others'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -14,22 +15,61 @@ export type Holiday = {
   description: string
   holiday_at: string
 }
-
+interface GetNextMonthFn {
+  (dateString: string): string
+}
 export type HolidayTableFilter = {
   year: string | null
 }
-export async function fetchHolidaysByDateString(dateString: string): Promise<Holiday[]> {
+
+export async function fetchHolidaysByDateString(dateString: string, employeeId?: string): Promise<Holiday[]> {
+  console.log('Fetching holidays for dateString:', dateString, 'and employeeId:', employeeId)
   // Query sa holidays table gamit ang %ilike% sa holiday_at column
-  // Example: dateString = '2025-07' => %ilike% '2025-07%'
-  const { data, error } = await supabase
-    .from('holidays')
-    .select()
-    .ilike('holiday_at', `%${dateString}%`)
-  if (error) {
+
+  const { data: holidays, error: holidaysError } = await supabase
+  .from('holidays')
+  .select()
+ .gte('holiday_at', `${dateString}-01`)
+  .lt('holiday_at', getNextMonth(dateString))
+
+  if (holidaysError || !holidays) {
     // Handle error if needed, for now return empty array
     return []
   }
-  return data as Holiday[]
+
+  // If no employeeId, return all holidays for the dateString
+  if (!employeeId) {
+    return holidays as Holiday[]
+  }
+
+  // Fetch attendances for the employee within the dateString month
+const { data: attendances, error: attendancesError } = await supabase
+  .from('attendances')
+  .select('am_time_in')
+  // For any month in YYYY-MM format
+  .gte('am_time_in', `${dateString}-01`)
+  .lt('am_time_in', getNextMonth(dateString))
+  .eq('employee_id', employeeId)
+
+if (attendancesError || !attendances) return []
+
+// Helper function to get the next month
+
+
+
+
+  // Create a Set of attendance dates (YYYY-MM-DD only)
+  const attendanceDates = new Set(
+    attendances
+      .map((a: { am_time_in: string | null }) => a.am_time_in?.slice(0, 10))
+      .filter(Boolean)
+  )
+
+  // Filter holidays where holiday_at matches any attendance date
+  const matchedHolidays = (holidays as Holiday[]).filter(h => attendanceDates.has(h.holiday_at.slice(0, 10)))
+
+  console.log('Matched Holidays:', matchedHolidays)
+  return matchedHolidays
 }
 
 
