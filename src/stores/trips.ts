@@ -155,33 +155,39 @@ export const useTripsStore = defineStore('trips', () => {
   }
 
   async function addTrip(formData: Partial<Trip>) {
+    // Add Trip - always return actual Supabase error
     try {
       const { data, error } = await supabase.from('trips').insert(formData).select()
-     
-      return { data, error: null }
+      // Ibalik gyud ang error gikan sa Supabase, dili null
+      return { data, error }
     } catch (err) {
+      // Exception handling, para klaro unsay nahitabo
       console.error('[addTrip] Exception:', err)
       return { data: null, error: err }
     }
   }
 
   async function updateTrip(formData: Partial<Trip>) {
+    // Update Trip - always return actual Supabase error
     try {
       const { data, error } = await supabase.from('trips').update(formData).eq('id', formData.id).select()
-     
-      return { data, error: null }
+      // Ibalik gyud ang error gikan sa Supabase, dili null
+      return { data, error }
     } catch (err) {
+      // Exception handling, para klaro unsay nahitabo
       console.error('[updateTrip] Exception:', err)
       return { data: null, error: err }
     }
   }
 
   async function deleteTrip(id: number) {
+    // Delete Trip - always return actual Supabase error
     try {
       const { data, error } = await supabase.from('trips').delete().eq('id', id).select()
-    
-      return { data, error: null }
+      // Ibalik gyud ang error gikan sa Supabase, dili null
+      return { data, error }
     } catch (err) {
+      // Exception handling, para klaro unsay nahitabo
       console.error('[deleteTrip] Exception:', err)
       return { data: null, error: err }
     }
