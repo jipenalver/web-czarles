@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { usePayrollPrint, usePayrollFilters } from './payrollPrint'
+
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
+import { usePayrollPrint, usePayrollFilters } from './payrollPrint'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
 import { formatTripDate } from '@/utils/helpers/others'
 import { computed, watch, onMounted, ref } from 'vue'

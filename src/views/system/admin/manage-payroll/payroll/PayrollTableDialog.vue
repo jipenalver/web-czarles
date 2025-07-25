@@ -4,8 +4,11 @@ import { type TableHeader } from '@/utils/helpers/tables'
 import PayrollPrintDialog from './PayrollPrintDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Employee } from '@/stores/employees'
-
+import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
+import { ref } from 'vue'
+
+
 
 
 const props = defineProps<{
@@ -50,8 +53,6 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
-import { ref } from 'vue'
-import { monthNames } from './currentMonth'
 
 const {
   tableOptions,

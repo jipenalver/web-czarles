@@ -44,8 +44,6 @@ export function usePayrollTableDialog(
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
 
-  // ...existing code...
-
   // Payroll data generator using payrollComputation composable
   const generatePayrollData = (monthIndex: number): TableData => {
     // Use helpers from currentMonth.ts for sample/demo data
@@ -87,38 +85,27 @@ export function usePayrollTableDialog(
     isLoading: false,
   })
 
-  // Table filters (year)
   const tableFilters = ref<{ year: number }>({
     year: getCurrentYearInPhilippines(),
   })
-
-  // Table data (rows)
   const tableData = ref<TableData[]>([])
-
-  // Form action state (for dialog)
   const formAction = ref({ ...formActionDefault })
-
-  // Print dialog visibility
   const isPrintDialogVisible = ref(false)
 
-  // Payroll data for print dialog
   const payrollData = ref<PayrollData>({
     year: 0,
     month: '',
     employee_id: 0,
   })
 
-  // Selected row data
+
   const selectedData = ref<TableData | null>(null)
 
-  // Real-time current month/year tracking
+
   const currentMonth = ref<number>(getCurrentMonthInPhilippines())
   const currentYear = ref<number>(getCurrentYearInPhilippines())
-
-  // Interval for real-time update
   let updateInterval: ReturnType<typeof setInterval> | undefined
 
-  // Computed: available months depende sa year
   const availableMonths = computed<number[]>(() => {
     const current = currentMonth.value
     const year = tableFilters.value.year
