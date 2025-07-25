@@ -1,3 +1,11 @@
+// 👉 Get short month text (e.g., JAN.)
+export const getMonthShortText = (date: Date | string | null) => {
+  if (!date) return ''
+  const dateValue = new Date(date)
+  if (isNaN(dateValue.getTime())) return ''
+  const months = ['JAN.', 'FEB.', 'MAR.', 'APR.', 'MAY.', 'JUN.', 'JUL.', 'AUG.', 'SEP.', 'OCT.', 'NOV.', 'DEC.']
+  return months[dateValue.getMonth()]
+}
 // 👉 Avatar Text Initials
 export const getAvatarText = (name: string) => {
   const nameParts = name.trim().split(' ').filter(Boolean)
