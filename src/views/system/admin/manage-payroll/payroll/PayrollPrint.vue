@@ -66,6 +66,7 @@ const {
 
 // Payroll Filters: fetch trips for this employee and month, use tripsStore.trips directly
 import { useTripsStore } from '@/stores/trips'
+import { ref } from 'vue'
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -76,13 +77,21 @@ const filterDateString = computed(() => {
 })
 const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
 const tripsStore = useTripsStore()
+const isTripsLoading = ref(false)
 
 onMounted(() => {
-  fetchFilteredTrips()
+  loadTrips()
 })
 watch([filterDateString, () => props.employeeData?.id], () => {
-  fetchFilteredTrips()
+  loadTrips()
 })
+
+function loadTrips() {
+  isTripsLoading.value = true
+  Promise.resolve(fetchFilteredTrips()).finally(() => {
+    isTripsLoading.value = false
+  })
+}
 
 // Debug: log filter values and tripsStore.trips
 console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
@@ -126,7 +135,13 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="text-caption text-center border-b-sm border-s-sm pa-2">AMOUNT</td>
         </tr>
         <!-- Dynamic trip location only, others static (Trip location ra dynamic, uban static) -->
-        <tr v-if="tripsStore.trips.length > 0" v-for="trip in tripsStore.trips" :key="trip.id">
+        <tr v-if="isTripsLoading">
+          <td class="text-center pa-2" colspan="5">
+            <v-progress-circular indeterminate color="primary" size="32" class="mx-auto mb-2" />
+            Loading trips...
+          </td>
+        </tr>
+        <tr v-else-if="tripsStore.trips.length > 0" v-for="trip in tripsStore.trips" :key="trip.id">
           <td class="border-b-thin text-center pa-2">
             {{ trip.trip_location?.location || 'N/A' }}
           </td>
