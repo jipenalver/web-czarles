@@ -50,6 +50,9 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
+import { ref } from 'vue'
+import { monthNames } from './currentMonth'
+
 const {
   tableOptions,
   tableFilters,
@@ -58,9 +61,29 @@ const {
   isPrintDialogVisible,
   payrollData,
   selectedData,
-  onView,
+  onView: baseOnView,
   onDialogClose,
 } = usePayrollTableDialog(props, emit)
+
+// Variable para isave ang month na gipili sa client
+const chosenMonth = ref<string>('')
+
+// Helper function: convert year + month name to YYYY-MM-DD
+function getMonthYearAsDateString(year: number, monthName: string): string {
+  // Pangitaon ang month index (0-based)
+  const monthIndex = monthNames.findIndex(m => m === monthName)
+  const month = (monthIndex + 1).toString().padStart(2, '0')
+  return `${year}-${month}-01`
+}
+
+// Wrapper function para sa onView, para ma-save ug ma-console.log ang month ug date string
+function onView(item: any) {
+  chosenMonth.value = item.month
+  //isave nato ang month na gipili, then i-console.log para sa debugging
+  const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
+  console.log('Chosen month:', chosenMonth.value, '| Date string:', dateString, '| for employee:', props.itemData?.id)
+  baseOnView(item)
+}
 </script>
 
 <template>

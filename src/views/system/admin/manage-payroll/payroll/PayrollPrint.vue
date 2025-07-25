@@ -2,9 +2,8 @@
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './payrollPrint'
 import { type Employee } from '@/stores/employees'
-import { computed } from 'vue'
-import { useTripsStore } from '@/stores/trips'
-import { storeToRefs } from 'pinia'
+import { computed, watch, onMounted } from 'vue'
+import { usePayrollFilters } from './payrollPrint'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -63,9 +62,29 @@ const {
   formatCurrency
 } = payrollPrint
 
-// Trips Store ( Para sa trip rows sa payslip)
+
+// Payroll Filters: fetch trips for this employee and month, use tripsStore.trips directly
+import { useTripsStore } from '@/stores/trips'
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
+const filterDateString = computed(() => {
+  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
+  return `${props.payrollData.year}-${month}-01`
+})
+const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
 const tripsStore = useTripsStore()
-const { tripsTable } = storeToRefs(tripsStore)
+
+onMounted(() => {
+  fetchFilteredTrips()
+})
+watch([filterDateString, () => props.employeeData?.id], () => {
+  fetchFilteredTrips()
+})
+
+// Debug: log filter values and tripsStore.trips
+console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
 </script>
 
 <template>
@@ -106,7 +125,7 @@ const { tripsTable } = storeToRefs(tripsStore)
           <td class="text-caption text-center border-b-sm border-s-sm pa-2">AMOUNT</td>
         </tr>
         <!-- Dynamic trip location only, others static (Trip location ra dynamic, uban static) -->
-        <tr v-for="trip in tripsTable" :key="trip.id">
+        <tr v-for="trip in tripsStore.trips" :key="trip.id">
           <td class="border-b-thin text-center pa-2">
             {{ trip.trip_location?.location || 'N/A' }}
           </td>
