@@ -1,10 +1,10 @@
-
-
 <script setup lang="ts">
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './payrollPrint'
 import { type Employee } from '@/stores/employees'
 import { computed } from 'vue'
+import { useTripsStore } from '@/stores/trips'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -62,6 +62,10 @@ const {
   netSalary,
   formatCurrency
 } = payrollPrint
+
+// Trips Store ( Para sa trip rows sa payslip)
+const tripsStore = useTripsStore()
+const { tripsTable } = storeToRefs(tripsStore)
 </script>
 
 <template>
@@ -101,34 +105,15 @@ const {
           <td class="text-caption text-center border-b-sm pa-2" colspan="4">PARTICULARS</td>
           <td class="text-caption text-center border-b-sm border-s-sm pa-2">AMOUNT</td>
         </tr>
-        <tr>
-          <td class="border-b-thin text-center pa-2">{{ workDays }}</td>
-          <td class="pa-2">Days Regular Work for {{ payrollData.month }}</td>
-          <td class="pa-2">@ {{ formatCurrency(dailyRate) }}</td>
-          <td class="pa-2">/Day</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(grossSalary) }}</td>
-        </tr>
-        <!-- TODO dapat dynamic row ni -->
-        <tr>
-          <td class="border-b-thin text-center pa-2">1</td>
-          <td class="pa-2">Cola allowance CDO / NAMNAM / BUKIDNON / Cabulohan</td>
-          <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
-          <td class="pa-2">/Day</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
-        </tr>
-         <tr>
-          <td class="border-b-thin text-center pa-2">1</td>
-          <td class="pa-2">Cola Jabonga Allowance / Jabonga / Buenavista / SanLuis</td>
-          <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
-          <td class="pa-2">/Day</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
-        </tr>
-          <tr>
-          <td class="border-b-thin text-center pa-2">1</td>
-          <td class="pa-2">Sunday Work</td>
-          <td class="pa-2">@ {{ formatCurrency(codaAllowance) }}</td>
-          <td class="pa-2">/Sunday</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(codaAllowance) }}</td>
+        <!-- Dynamic trip location only, others static (Trip location ra dynamic, uban static) -->
+        <tr v-for="trip in tripsTable" :key="trip.id">
+          <td class="border-b-thin text-center pa-2">
+            {{ trip.trip_location?.location || 'N/A' }}
+          </td>
+          <td class="pa-2">-</td>
+          <td class="pa-2">-</td>
+          <td class="pa-2">-</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">-</td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>

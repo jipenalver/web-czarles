@@ -6,6 +6,7 @@ import { defineStore } from 'pinia'
 import type { Unit } from './units'
 import type { TripLocation } from './tripLocation'
 import { ref } from 'vue'
+import type { Employee } from './employees'
 
 export type Trip = {
   id: number
@@ -22,11 +23,7 @@ export type Trip = {
   description: string 
   units?: Unit
   trip_location?: TripLocation
-  employees?: {
-    firstname: string
-    middlename: string
-    lastname: string
-  }
+  employees?: Employee
   employee_fullname?: string
 }
 
@@ -74,7 +71,7 @@ export const useTripsStore = defineStore('trips', () => {
 
     let query = supabase
       .from('trips')
-      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(location), employees:employee_id(firstname,middlename,lastname)')
+      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)')
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
