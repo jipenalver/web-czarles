@@ -1,12 +1,13 @@
 <script setup lang="ts">
+
 import { type Trip, type TripTableFilter } from '@/stores/trips'
+import { useTripLocationsStore } from '@/stores/tripLocation'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useTripsFormDialog } from './TripsFormDialog'
 import { useEmployeesStore } from '@/stores/employees'
 import  {useUnitsStore } from '@/stores/units'
-import { useTripLocationsStore } from '@/stores/tripLocation'
 import { watch, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -98,7 +99,7 @@ watch(
 
 
             <v-col cols="12" md="6">
-              <v-autocomplete
+              <v-select
                 v-model="(formData.unit_id as any)"
                 label="Unit"
                 :items="units"
@@ -107,16 +108,12 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-                auto-select-first
-                hide-no-data
-                hide-details="auto"
-                density="comfortable"
-              ></v-autocomplete>
+              ></v-select>
             </v-col>
 
 
             <v-col cols="12" md="6">
-              <v-autocomplete
+              <v-select
                 v-model="(formData.trip_location_id as any)"
                 label="Trip Location"
                 :items="tripLocations"
@@ -125,16 +122,12 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-                auto-select-first
-                hide-no-data
-                hide-details="auto"
-                density="comfortable"
-              ></v-autocomplete>
+              ></v-select>
             </v-col>
 
 
             <v-col cols="12" md="6">
-              <v-autocomplete
+              <v-select
                 v-model="(formData.employee_id as any)"
                 label="Employee"
                 :items="employees"
@@ -143,11 +136,7 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-                auto-select-first
-                hide-no-data
-                hide-details="auto"
-                density="comfortable"
-              ></v-autocomplete>
+              ></v-select>
             </v-col>
 
 

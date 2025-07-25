@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
+import LocationsTable from './locations/LocationsTable.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import UnitsTable from './units/UnitsTable.vue'
 import TripsTable from './trips/TripsTable.vue'
-import LocationsTable from './locations/LocationsTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 

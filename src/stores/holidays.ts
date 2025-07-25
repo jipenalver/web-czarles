@@ -1,27 +1,10 @@
-/**
- * Fetch holidays where holiday_at column matches the dateString using %ilike% (e.g., '2025-07%')
- * @param dateString - YYYY-MM or YYYY-MM-DD string pattern
- * @returns Promise<Holiday[]>
- */
-export async function fetchHolidaysByDateString(dateString: string): Promise<Holiday[]> {
-  // Query sa holidays table gamit ang %ilike% sa holiday_at column
-  // Example: dateString = '2025-07' => %ilike% '2025-07%'
-  const { data, error } = await supabase
-    .from('holidays')
-    .select()
-    .ilike('holiday_at', `%${dateString}%`)
-  if (error) {
-    // Handle error if needed, for now return empty array
-    return []
-  }
-  return data as Holiday[]
-}
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { prepareFormDates } from '@/utils/helpers/others'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+
 
 export type Holiday = {
   id: number 
@@ -35,6 +18,21 @@ export type Holiday = {
 export type HolidayTableFilter = {
   year: string | null
 }
+export async function fetchHolidaysByDateString(dateString: string): Promise<Holiday[]> {
+  // Query sa holidays table gamit ang %ilike% sa holiday_at column
+  // Example: dateString = '2025-07' => %ilike% '2025-07%'
+  const { data, error } = await supabase
+    .from('holidays')
+    .select()
+    .ilike('holiday_at', `%${dateString}%`)
+  if (error) {
+    // Handle error if needed, for now return empty array
+    return []
+  }
+  return data as Holiday[]
+}
+
+
 
 export const useHolidaysStore = defineStore('holidays', () => {
   // States

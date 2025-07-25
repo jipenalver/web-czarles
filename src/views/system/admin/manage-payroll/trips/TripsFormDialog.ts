@@ -1,7 +1,7 @@
 import { type Trip, type TripTableFilter, useTripsStore } from '@/stores/trips'
-import { useAuthUserStore } from '@/stores/authUser'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useAuthUserStore } from '@/stores/authUser'
 import { ref, watch } from 'vue'
 
 export function useTripsFormDialog(

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useDisplay } from 'vuetify'
+import { useDisplay,useDate } from 'vuetify'
 import { type Trip } from '@/stores/trips' // Assume Trip type exists
-import { useDate } from 'vuetify'
+
 
 const props = defineProps<{
   columnsLength: number

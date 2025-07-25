@@ -67,30 +67,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendances.value = data as Attendance[]
   }
 
-  // Fetch attendances by am_time_in = dateString
-async function getAttendancesByDateString(dateString: string) {
 
-  console.log(' dateString:', dateString)
-  // Query sa attendances table kung asa ang am_time_in = dateString
-  const { data, error } = await supabase
-    .from('attendances')
-    .select('*, employee:employee_id (id, firstname, lastname)')
-    /* .eq('am_time_in', dateString) */
-    /* .order('am_time_in', { ascending: false }) */
-
-  if (error) {
-    // Naay error sa pag-fetch, ilog nato ang error para sa debugging
-    console.error('[getAttendancesByDateString] fetch error:', error)
-    // Ireturn nato null ang data kung naay error
-    return { data: null, error }
-  }
-
-  // Debug: Ilog ang value sa data
-  console.log('[getAttendancesByDateString] fetched data:', data)
-
-  // Ireturn nato ang data ug error para magamit sa component
-  return { data: data as Attendance[] | null, error: null }
-}
   async function getAttendancesTable(
     tableOptions: TableOptions,
     { employee_id }: AttendanceTableFilter,
@@ -172,6 +149,6 @@ async function getAttendancesByDateString(dateString: string) {
     addAttendance,
     updateAttendance,
     deleteAttendance,
-    getAttendancesByDateString,
+
   }
 })

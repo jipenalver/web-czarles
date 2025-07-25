@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, watch, onMounted, ref } from 'vue'
+import { usePayrollPrint, usePayrollHolidays, usePayrollFilters } from './payrollPrint'
 import { type PayrollData, type TableData } from './payrollTableDialog'
+import logoCzarles from '@/assets/logos/logo-czarles.png'
+import { formatTripDate } from '@/utils/helpers/others'
+import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-import { usePayrollPrint, usePayrollHolidays, usePayrollFilters } from './payrollPrint'
-import { formatTripDate } from '@/utils/helpers/others'
-import logoCzarles from '@/assets/logos/logo-czarles.png'
+
+
+
 
 // Props
 const props = defineProps<{
