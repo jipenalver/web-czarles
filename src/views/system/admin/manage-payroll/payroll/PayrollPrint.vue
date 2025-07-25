@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import logoCzarles from '@/assets/logos/logo-czarles.png'
 import { type PayrollData, type TableData } from './payrollTableDialog'
-import { usePayrollPrint } from './payrollPrint'
+import logoCzarles from '@/assets/logos/logo-czarles.png'
+import { formatTripDate } from '@/utils/helpers/others'
 import { type Employee } from '@/stores/employees'
-import { computed, watch, onMounted } from 'vue'
+import { usePayrollPrint } from './payrollPrint'
 import { usePayrollFilters } from './payrollPrint'
+import { computed, watch, onMounted } from 'vue'
+import { useTripsStore } from '@/stores/trips'
+import { ref } from 'vue'
+
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -65,9 +69,7 @@ const {
 
 
 // Payroll Filters: fetch trips for this employee and month, use tripsStore.trips directly
-import { useTripsStore } from '@/stores/trips'
-import { ref } from 'vue'
-import { getMonthShortText } from '@/utils/helpers/others'
+
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -80,16 +82,7 @@ const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.e
 const tripsStore = useTripsStore()
 const isTripsLoading = ref(false)
 
-// Helper to format trip date as 'JAN. -- DD -- YYYY' using getMonthShortText from others.ts
-function formatTripDate(dateStr: string): string {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return dateStr
-  const month = getMonthShortText(date)
-  const day = String(date.getDate()).padStart(2, '0')
-  const year = date.getFullYear()
-  return `${month} -- ${day} -- ${year}`
-}
+// gamit ang formatTripDate gikan sa others.ts para consistent ug reusable
 
 onMounted(() => {
   loadTrips()

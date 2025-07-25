@@ -6,7 +6,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export type Holiday = {
-  id: number
+  id: number 
   created_at: string
   name: string
   type: string | null

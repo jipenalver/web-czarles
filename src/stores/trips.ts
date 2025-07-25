@@ -1,12 +1,13 @@
+
 import { type TableOptions, tablePagination} from '@/utils/helpers/tables'
-import { prepareDate } from '@/utils/helpers/others'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { prepareDate } from '@/utils/helpers/others'
+import type { TripLocation } from './tripLocation'
 import { supabase } from '@/utils/supabase'
+import type { Employee } from './employees'
 import { defineStore } from 'pinia'
 import type { Unit } from './units'
-import type { TripLocation } from './tripLocation'
 import { ref } from 'vue'
-import type { Employee } from './employees'
 
 export type Trip = {
   id: number
@@ -62,6 +63,40 @@ export const useTripsStore = defineStore('trips', () => {
       console.error('[getTrips] Exception:', err)
     }
   }
+  async function fetchFilteredTrips(dateString: string, employeeId: number | undefined): Promise<Trip[]> {
+    if (!employeeId) return []
+    // Extract YYYY-MM for filtering
+    const yearMonth = dateString.slice(0, 7)
+    // Compute next month for range filtering
+    const [year, month] = yearMonth.split('-').map(Number)
+    let nextYear = year
+    let nextMonth = month + 1
+    if (nextMonth > 12) {
+      nextMonth = 1
+      nextYear += 1
+    }
+    const nextMonthStr = `${nextYear}-${nextMonth.toString().padStart(2, '0')}`
+    // Use join/alias as in store for trip_location and employees
+    const { data, error } = await supabase
+      .from('trips')
+      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)')
+      .eq('employee_id', employeeId)
+      .gte('date', `${yearMonth}-01`)
+      .lt('date', `${nextMonthStr}-01`)
+      .order('date', { ascending: true })
+
+    if (error) {
+      //error pag fetch sa trips para payroll filter
+      console.error('[fetchFilteredTrips] error:', error)
+      return []
+    }
+    // Update the trips store (optional: replace or merge)
+    trips.value = data as Trip[]
+    // Debug log
+    console.log('[fetchFilteredTrips] fetched trips from supabase:', data)
+    return data as Trip[]
+  }
+
 
   async function getTripsTable(tableOptions: TableOptions, filters: TripTableFilter) {
     // Fetching trips table with search ug pagination
@@ -201,5 +236,6 @@ export const useTripsStore = defineStore('trips', () => {
     addTrip,
     updateTrip,
     deleteTrip,
+    fetchFilteredTrips,
   }
 })

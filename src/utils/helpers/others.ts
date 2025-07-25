@@ -1,3 +1,13 @@
+// 👉 Format trip date as 'JAN. -- DD -- YYYY' (for PayrollPrint.vue)
+export const formatTripDate = (dateStr: string): string => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const month = getMonthShortText(date)
+  const day = String(date.getDate()).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${month} -- ${day} -- ${year}`
+}
 // 👉 Get short month text (e.g., JAN.)
 export const getMonthShortText = (date: Date | string | null) => {
   if (!date) return ''
