@@ -53,7 +53,6 @@ const { data: attendances, error: attendancesError } = await supabase
 
 if (attendancesError || !attendances) return []
 
-// Helper function to get the next month
 
 
 

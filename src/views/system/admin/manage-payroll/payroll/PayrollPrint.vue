@@ -233,6 +233,42 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
+          <td class="text-caption text-disabled pa-2">Loss Deduction</td>
+          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+          <tr>
+          <td class="pa-2" colspan="2"></td>
+          <td class="text-caption text-disabled pa-2">SSS</td>
+          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+          <tr>
+          <td class="pa-2" colspan="2"></td>
+          <td class="text-caption text-disabled pa-2">PHIC</td>
+          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+          <tr>
+          <td class="pa-2" colspan="2"></td>
+          <td class="text-caption text-disabled pa-2">HDMF</td>
+          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+          <tr>
+          <td class="pa-2" colspan="2"></td>
+          <td class="text-caption text-disabled pa-2">Cash Advance</td>
+          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+          <tr>
+          <td class="pa-2" colspan="2"></td>
+          <td class="text-caption text-disabled pa-2">Others</td>
+          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+        <tr>
+          <td class="pa-2" colspan="2"></td>
           <td class="text-caption pa-2">Less Deductions</td>
           <td class="pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalDeductions) }}</td>
