@@ -23,18 +23,28 @@ export function getSampleDeductions(monthIndex: number): number {
 
 // mga helper para sa timezone ug month/year sa PH
 
+// Import date helpers from others.ts
+import {
+  getDateISO,
+  getDate,
+  getDateWithWeekday,
+  prepareDate,
+} from '@/utils/helpers/others'
+
 /**
  * Kuha current date/time sa Manila timezone (Asia/Manila)
  */
 export function getPhilippinesDate(): string {
-  return new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' })
+  // gamit prepareDate para consistent ang format
+  return prepareDate(new Date())
 }
 
 /**
  * Kuha current month index (0-11) sa PH timezone
  */
 export function getCurrentMonthInPhilippines(): number {
-  const philippinesDate = new Date(getPhilippinesDate())
+  // gamit prepareDate para sa PH timezone, then extract month
+  const philippinesDate = new Date(prepareDate(new Date()))
   return philippinesDate.getMonth()
 }
 
@@ -42,7 +52,7 @@ export function getCurrentMonthInPhilippines(): number {
  * Kuha current year sa PH timezone
  */
 export function getCurrentYearInPhilippines(): number {
-  const philippinesDate = new Date(getPhilippinesDate())
+  const philippinesDate = new Date(prepareDate(new Date()))
   return philippinesDate.getFullYear()
 }
 
