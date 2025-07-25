@@ -1,7 +1,29 @@
+import { fetchHolidaysByDateString } from '@/stores/holidays'
+import { ref, type Ref } from 'vue'
+import type { Holiday } from '@/stores/holidays'
+/**
+ * Composable: usePayrollHolidays
+ * Fetch holidays for a given dateString (YYYY-MM or YYYY-MM-DD)
+ * @param dateString - string pattern for holiday_at column
+ * @returns { holidays, isLoading, fetchHolidays }
+ */
+export function usePayrollHolidays(dateString: string) {
+  const holidays: Ref<Holiday[]> = ref([])
+  const isLoading = ref(false)
+
+  async function fetchHolidays() {
+    isLoading.value = true
+    holidays.value = await fetchHolidaysByDateString(dateString)
+    isLoading.value = false
+  }
+
+  return { holidays, isLoading, fetchHolidays }
+}
 
 import type { PayrollData } from '@/views/system/admin/manage-payroll/payroll/payrollTableDialog'
 import { usePayrollComputation } from './payrollComputation'
 import { useTripsStore, type Trip } from '@/stores/trips'
+import { useAttendancesStore, type Attendance } from '@/stores/attendances'
 import type { Employee } from '@/stores/employees'
 import { computed, toRef } from 'vue'
 import type { ComputedRef } from 'vue'
@@ -46,6 +68,9 @@ export function usePayrollPrint(
 export function usePayrollFilters(dateString: string, employeeId: number | undefined) {
   const tripsStore = useTripsStore()
 
+  // Instance sa attendances store
+  const attendancesStore = useAttendancesStore()
+
   /**
    * Fetch trips for payroll filter using store action
    * @returns Promise<Trip[]>
@@ -55,8 +80,26 @@ export function usePayrollFilters(dateString: string, employeeId: number | undef
     return await tripsStore.fetchFilteredTrips(dateString, employeeId)
   }
 
+  /**
+   * Fetch attendances for payroll filter using store action
+   * @returns Promise<Attendance[] | null>
+   */
+  async function fetchFilteredAttendances() {
+    // Tawag sa store action para fetch attendances by am_time_in ug employeeId
+    if (!employeeId) return null
+    // Query sa attendances table kung asa ang am_time_in = dateString ug employee_id = employeeId
+    const { data, error } = await attendancesStore.getAttendancesByDateString(dateString)
+    if (error) {
+      // Handle error if needed
+      return null
+    }
+    // Filter pa gyud by employee_id kung naa pa
+    return data?.filter((item) => item.employee_id == String(employeeId)) ?? null
+  }
+
   return {
     fetchFilteredTrips,
+    fetchFilteredAttendances,
   }
 }
 
