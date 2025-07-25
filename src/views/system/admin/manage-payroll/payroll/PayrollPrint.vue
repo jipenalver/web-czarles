@@ -150,47 +150,63 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
         </tr>
         
         <!-- Loading State -->
-        <tr v-if="isTripsLoading">
+
+        <!-- Unified Loading State for Trips and Holidays -->
+        <tr v-if="isTripsLoading || isHolidaysLoading">
           <td class="text-center pa-2" colspan="5">
             <v-progress-circular indeterminate color="primary" size="32" class="mx-auto mb-2" />
-            Loading trips...
+            Loading payroll data...
           </td>
         </tr>
 
-        <!-- Trips Rows -->
-        <tr v-else-if="tripsStore.trips.length > 0" v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
-          <td class="pa-2">-</td>
-          <td class="border-b-thin text-center pa-2">
-            {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
-          </td>
-          <td class="pa-2">@ 450 /per Trip</td>
-          <td class="pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">-</td>
-        </tr>
+        <!-- Show trips and holidays only when both are loaded -->
+        <template v-else>
+          <!-- Trips Rows -->
+          <template v-if="tripsStore.trips.length > 0">
+            <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
+              <td class="pa-2">-</td>
+              <td class="border-b-thin text-center pa-2">
+                {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
+              </td>
+              <td class="pa-2">@ 450 /per Trip</td>
+              <td class="pa-2"></td>
+              <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr>
+              <td class="text-center pa-2" colspan="5">
+                <v-img
+                  :src="logoCzarles"
+                  alt="No trips"
+                  max-width="300"
+                  class="mx-auto mb-2"
+                />
+                No trips to preview for this payroll period.
+              </td>
+            </tr>
+          </template>
 
-        <!-- Holidays Rows -->
-        <tr v-if="!isHolidaysLoading && holidays.length > 0" v-for="holiday in holidays" :key="'holiday-' + holiday.id">
-          <td class="pa-2">-</td>
-          <td class="border-b-thin text-center pa-2">
-            {{ holiday.name }} ({{ holiday.type}})
-          </td>
-          <td class="pa-2">@</td>
-          <td class="pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">-</td>
-        </tr>
-
-        <!-- No Trips State -->
-        <tr v-else>
-          <td class="text-center pa-2" colspan="5">
-            <v-img
-              :src="logoCzarles"
-              alt="No trips"
-              max-width="300"
-              class="mx-auto mb-2"
-            />
-            No trips to preview for this payroll period.
-          </td>
-        </tr>
+          <!-- Holidays Rows -->
+          <template v-if="holidays.length > 0">
+            <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
+              <td class="pa-2">-</td>
+              <td class="border-b-thin text-center pa-2">
+                {{ holiday.name }} ({{ holiday.type}})
+              </td>
+              <td class="pa-2">@</td>
+              <td class="pa-2"></td>
+              <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr>
+              <td class="text-center pa-2" colspan="5">
+                No holidays for this payroll period.
+              </td>
+            </tr>
+          </template>
+        </template>
 
         <!-- Salary Calculation Rows -->
         <tr>
