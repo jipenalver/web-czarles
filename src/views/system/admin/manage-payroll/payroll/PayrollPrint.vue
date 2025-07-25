@@ -79,6 +79,18 @@ const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.e
 const tripsStore = useTripsStore()
 const isTripsLoading = ref(false)
 
+// Helper to format trip date as 'JAN. -- DD -- YYYY'
+function formatTripDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const months = ['JAN.', 'FEB.', 'MAR.', 'APR.', 'MAY.', 'JUN.', 'JUL.', 'AUG.', 'SEP.', 'OCT.', 'NOV.', 'DEC.']
+  const month = months[date.getMonth()]
+  const day = String(date.getDate()).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${month} -- ${day} -- ${year}`
+}
+
 onMounted(() => {
   loadTrips()
 })
@@ -142,12 +154,13 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           </td>
         </tr>
         <tr v-else-if="tripsStore.trips.length > 0" v-for="trip in tripsStore.trips" :key="trip.id">
+           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
-            {{ trip.trip_location?.location || 'N/A' }}
+            {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
           </td>
-          <td class="pa-2">-</td>
-          <td class="pa-2">-</td>
-          <td class="pa-2">-</td>
+          <td class="pa-2">@ 450 /per Trip</td>
+         
+          <td class="pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">-</td>
         </tr>
         <tr v-else>
