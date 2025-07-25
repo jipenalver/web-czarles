@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import logoCzarles from '@/assets/logos/logo-czarles.png'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './payrollPrint'
 import { type Employee } from '@/stores/employees'
@@ -125,7 +126,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="text-caption text-center border-b-sm border-s-sm pa-2">AMOUNT</td>
         </tr>
         <!-- Dynamic trip location only, others static (Trip location ra dynamic, uban static) -->
-        <tr v-for="trip in tripsStore.trips" :key="trip.id">
+        <tr v-if="tripsStore.trips.length > 0" v-for="trip in tripsStore.trips" :key="trip.id">
           <td class="border-b-thin text-center pa-2">
             {{ trip.trip_location?.location || 'N/A' }}
           </td>
@@ -133,6 +134,17 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="pa-2">-</td>
           <td class="pa-2">-</td>
           <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+        </tr>
+        <tr v-else>
+          <td class="text-center pa-2" colspan="5">
+            <v-img
+              :src="logoCzarles"
+              alt="No trips"
+              max-width="300"
+              class="mx-auto mb-2"
+            />
+            No trips to preview for this payroll period.
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
