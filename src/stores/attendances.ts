@@ -1,6 +1,6 @@
+import { getDate, getTimeHHMM, getNextMonth } from '@/utils/helpers/others'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { getDate, getTimeHHMM } from '@/utils/helpers/others'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -65,13 +65,27 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     attendances.value = data as Attendance[]
   }
-  // Get employee attendance by employee_id (kuhaon ang am_time_in ug pm_time_in gikan sa DB)
-  async function getEmployeeAttendanceById(employeeId: number | string): Promise<Array<{ am_time_in: string | null, pm_time_in: string | null }> | null> {
-    const { data, error } = await supabase
-      .from('attendances')
-      .select('am_time_in, pm_time_in')
-      .eq('employee_id', employeeId)
-      .order('created_at', { ascending: false })
+  // Get employee attendance by employee_id and dateString (kuhaon ang am_time_in ug pm_time_in gikan sa DB)
+  async function getEmployeeAttendanceById(
+    employeeId: number | string,
+    dateString: string
+  ): Promise<Array<{ am_time_in: string | null, pm_time_in: string | null }> | null> {
+    // query sa attendance records for the given employee ug month
+   const startOfMonth = `${dateString}-01T00:00:00.000Z`;
+const [year, month] = dateString.split('-');
+const nextMonth = new Date(parseInt(year), parseInt(month), 1);
+const endOfMonth = nextMonth.toISOString();
+
+const { data, error } = await supabase
+  .from('attendances')
+  .select('am_time_in, pm_time_in')
+  .eq('employee_id', employeeId)
+ /*  .gte('created_at', startOfMonth) // Filter by created_at for the month
+  .lt('created_at', endOfMonth) */
+  .gte('am_time_in', startOfMonth) // Filter by am_time_in for the month
+  .lt('am_time_in', endOfMonth)
+
+  .order('created_at', { ascending: false })
     if (error) {
       console.error('getEmployeeAttendanceById error:', error)
       return null

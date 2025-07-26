@@ -6,6 +6,8 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
+
+import { getYearMonthString } from '@/utils/helpers/others'
 import { ref } from 'vue'
 
 
@@ -14,6 +16,7 @@ import { ref } from 'vue'
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: Employee | null
+  dateString?: string
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -80,10 +83,14 @@ function getMonthYearAsDateString(year: number, monthName: string): string {
 // Wrapper function para sa onView, para ma-save ug ma-console.log ang month ug date string
 function onView(item: any) {
   chosenMonth.value = item.month
-  //isave nato ang month na gipili, then i-console.log para sa debugging
+  // isave nato ang month na gipili, then i-console.log para sa debugging
   const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
-  // console.log('Chosen month:', chosenMonth.value, '| Date string:', dateString, '| for employee:', props.itemData?.id)
-  baseOnView(item)
+  // I-format ang dateString to YYYY-MM before saving to localStorage
+  const yearMonth = getYearMonthString(dateString)
+  localStorage.setItem('czarles_payroll_dateString', yearMonth)
+  console.log('Chosen month:', chosenMonth.value, '| Date string:', dateString, '| for employee:', props.itemData?.id)
+  // Pass dateString as prop to composable logic (if needed)
+  baseOnView({ ...item, dateString })
 }
 </script>
 

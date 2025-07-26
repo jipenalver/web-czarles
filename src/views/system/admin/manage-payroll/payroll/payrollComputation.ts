@@ -28,7 +28,8 @@ export function usePayrollComputation(
   tableData: Ref<TableData | null>,
   employeeId?: number,
   payrollMonth?: string,
-  payrollYear?: number
+  payrollYear?: number,
+  dateString?: string
 ) {
   const employeesStore = useEmployeesStore()
   const attendancesStore = useAttendancesStore()
@@ -60,11 +61,11 @@ export function usePayrollComputation(
     return emp?.daily_rate || dailyRate.value
   })
 
-  // Helper function para kuhaon ang am_time_in ug pm_time_in gikan sa employee
+
   // Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
-  async function getEmployeeTimeIns(empId?: number): Promise<{ amTimeIn: string | null; pmTimeIn: string | null }> {
-    if (!empId) return { amTimeIn: null, pmTimeIn: null }
-    const attendances = await attendancesStore.getEmployeeAttendanceById(empId)
+  async function getEmployeeTimeIns(empId?: number, dateStr?: string): Promise<{ amTimeIn: string | null; pmTimeIn: string | null }> {
+    if (!empId || !dateStr) return { amTimeIn: null, pmTimeIn: null }
+    const attendances = await attendancesStore.getEmployeeAttendanceById(empId, dateStr)
     if (Array.isArray(attendances) && attendances.length > 0) {
       // Gamiton ang pinakabag-o (first in array) na attendance record
       return { amTimeIn: attendances[0].am_time_in, pmTimeIn: attendances[0].pm_time_in }
@@ -83,10 +84,18 @@ export function usePayrollComputation(
     let amTimeIn: string | null | undefined = undefined
     let pmTimeIn: string | null | undefined = undefined
 
-    console.log('Calculating regular work total for employeeId:', employeeId)
-    if (employeeId) {
-      // kuhaon ang attendance gamit ang getEmployeeAttendanceById
-      const attendances = await attendancesStore.getEmployeeAttendanceById(employeeId)
+    // Kuhaon ang dateString gikan sa prop, kung wala, kuhaon sa localStorage
+    let usedDateString = dateString
+    if (!usedDateString && typeof window !== 'undefined') {
+      usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
+    }
+
+    // Calculating regular work total for employeeId ug dateString gikan sa PayrollTableDialog.vue or localStorage
+    console.log('Calculating regular work total for employeeId:', employeeId, '| dateString (from prop/localStorage):', usedDateString)
+
+    if (employeeId && usedDateString) {
+      // kuhaon ang attendance gamit ang getEmployeeAttendanceById, gamit ang dateString nga prop or localStorage
+      const attendances = await attendancesStore.getEmployeeAttendanceById(employeeId, usedDateString)
       if (Array.isArray(attendances) && attendances.length > 0) {
         // I-log tanan am_time_in ug pm_time_in values separately
         const allAmTimeIn = attendances.map(a => a.am_time_in)
@@ -107,12 +116,11 @@ export function usePayrollComputation(
       }
     }
     const total = (daily ?? 0) * workDays.value
-   /*  console.log('regularWorkTotal:', total, '| employeeId:', employeeId, '| daily_rate:', daily, '| source:', source) */
     regularWorkTotal.value = total
   }
 
   // Watch for changes and recompute
-  watch([dailyRate, workDays, () => employeeId], computeRegularWorkTotal, { immediate: true })
+  watch([dailyRate, workDays, () => employeeId, () => dateString], computeRegularWorkTotal, { immediate: true })
 
   // Overtime calculations
   const overtimeHours = computed(() => tableData.value?.overtime_hours || 0)

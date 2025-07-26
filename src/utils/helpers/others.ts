@@ -1,3 +1,12 @@
+// 👉 Format date string to YYYY-MM (for payroll month storage)
+export const getYearMonthString = (dateStr: string): string => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
 // 👉 Extract time in HH:MM format from string (ISO, time-only, or space-separated)
 export const getTimeHHMM = (val: string | null): string | null => {
   if (!val) return null
