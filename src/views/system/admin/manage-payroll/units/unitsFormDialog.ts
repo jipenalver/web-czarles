@@ -50,6 +50,7 @@ export function useUnitsFormDialog(
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Unit.`
 
+      //Refresh table and units list after add/update, wala na emit
       await unitsStore.getUnitsTable(props.tableOptions, props.tableFilters)
       await unitsStore.getUnits()
 
@@ -70,7 +71,7 @@ export function useUnitsFormDialog(
   const onFormReset = () => {
     formAction.value = { ...formActionDefault }
     formData.value = { ...formDataDefault }
-    emit('update:isDialogVisible', false)
+    emit('update:isDialogVisible', false) //  Dialog close ra ang emit, refresh handled by store fetch
   }
 
   // Expose State and Actions

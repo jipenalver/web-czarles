@@ -14,6 +14,7 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { VDateInput } from 'vuetify/labs/VDateInput'
 import { VTimePicker } from 'vuetify/labs/VTimePicker'
+import AppAlert from '@/components/common/AppAlert.vue'
 
 // Icon Fonts
 import '@mdi/font/css/materialdesignicons.css'
@@ -44,5 +45,8 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(vuetify)
 app.use(router)
+
+// Register AppAlert globally para magamit sa tanan components
+app.component('AppAlert', AppAlert)
 
 app.mount('#app')
