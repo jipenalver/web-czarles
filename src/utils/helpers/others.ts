@@ -1,3 +1,17 @@
+// 👉 Get start and end date of a month as 'Month DD, YYYY'
+export const getMonthDateRange = (year: number, monthName: string): string => {
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+  const monthIndex = monthNames.indexOf(monthName)
+  if (monthIndex === -1) return ''
+  const start = new Date(year, monthIndex, 1)
+  const end = new Date(year, monthIndex + 1, 0)
+  const startStr = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  const endStr = end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  return `${startStr} to ${endStr}`
+}
 // 👉 Format trip date as 'JAN. -- DD -- YYYY' (for PayrollPrint.vue)
 export const formatTripDate = (dateStr: string): string => {
   if (!dateStr) return ''

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
+import { formatTripDate, getMonthDateRange } from '@/utils/helpers/others'
 import { type PayrollData, type TableData } from './payrollTableDialog'
-import { usePayrollPrint, usePayrollFilters } from './payrollPrint'
+import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
-import { formatTripDate } from '@/utils/helpers/others'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
@@ -19,6 +19,10 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
+// Month date range for display in "Days Regular Work for"
+const monthDateRange = computed(() => {
+  return getMonthDateRange(props.payrollData.year, props.payrollData.month)
+})
 // Constants
 const monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -156,6 +160,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
         </tr>
       </tbody>
     </v-table>
+    
 
     <!-- Payroll Details Table -->
     <v-table class="mt-3 text-body-2 border" density="compact">
@@ -165,8 +170,16 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="text-caption text-center border-b-sm border-s-sm pa-2">AMOUNT</td>
         </tr>
         
-        <!-- Loading State -->
-
+        
+        <tr>
+          <td class="pa-2">-</td>
+          <td class="border-b-thin text-center pa-2">
+            Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
+          </td>
+          <td class="pa-2">@</td>
+          <td class="pa-2"></td>
+          <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+        </tr>
         <!-- Unified Loading State for Trips and Holidays -->
         <tr v-if="isTripsLoading || isHolidaysLoading">
           <td class="text-center pa-2" colspan="5">
@@ -200,6 +213,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
                 />
                 No trips to preview for this payroll period.
               </td>
+              
             </tr>
           </template>
 
@@ -223,9 +237,26 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
             </tr>
           </template>
         </template>
+        <!-- overtime -->
+         <tr>
+          
+        <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
+          <td class="pa-2">@</td>
+          <td class="text-caption font-weight-bold text-end pa-2">/hour</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
+
+        <!-- monthly tripings -->
+        <tr>
+          <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
+          <td class="pa-2">@</td>
+          <td class="text-caption font-weight-bold text-end pa-2">/month</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+        </tr>
 
         <!-- Salary Calculation Rows -->
         <tr>
+          
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
           <td class="text-caption font-weight-bold text-end pa-2">Php</td>
