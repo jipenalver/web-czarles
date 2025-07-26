@@ -1,5 +1,7 @@
+
 import { useEmployeesStore } from '@/stores/employees'
-import { computed, type Ref } from 'vue'
+import { computed, type Ref, ref, watch } from 'vue'
+import { useAttendancesStore } from '@/stores/attendances'
 
 
 export interface PayrollData {
@@ -29,6 +31,7 @@ export function usePayrollComputation(
   payrollYear?: number
 ) {
   const employeesStore = useEmployeesStore()
+  const attendancesStore = useAttendancesStore()
 
   // Basic calculations
   const codaAllowance = computed(() => tableData.value?.coda_allowance || 0)
@@ -57,26 +60,53 @@ export function usePayrollComputation(
     return emp?.daily_rate || dailyRate.value
   })
 
+  // Helper function para kuhaon ang am_time_in ug pm_time_in gikan sa employee
+  // Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
+  async function getEmployeeTimeIns(empId?: number): Promise<{ amTimeIn: string | null; pmTimeIn: string | null }> {
+    if (!empId) return { amTimeIn: null, pmTimeIn: null }
+    const attendance = await attendancesStore.getEmployeeAttendanceById(empId)
+    if (attendance) {
+      // kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
+      return { amTimeIn: attendance.am_time_in, pmTimeIn: attendance.pm_time_in }
+    }
+    return { amTimeIn: null, pmTimeIn: null }
+  }
+
   // Regular work total (future-proof for deductions, etc.)
   // Gamiton ang getEmployeeById ug i-filter by employeeId (props.employeeData?.id)
-const regularWorkTotal = computed(() => {
-  let daily = dailyRate.value
-  let source = 'fallback'
-  if (employeeId) {
-    // kuhaon ang employee gamit ang getEmployeeById
-    const emp = employeesStore.getEmployeeById(employeeId)
-    if (emp) {
-      daily = emp.daily_rate
-      source = 'employee'
+  // Async computed for regular work total using attendance DB
+  const regularWorkTotal = ref<number>(0)
+
+  async function computeRegularWorkTotal() {
+    let daily = dailyRate.value
+    let source = 'fallback'
+    let amTimeIn: string | null | undefined = undefined
+    let pmTimeIn: string | null | undefined = undefined
+
+    console.log('Calculating regular work total for employeeId:', employeeId)
+    if (employeeId) {
+      // kuhaon ang attendance gamit ang getEmployeeAttendanceById
+      const attendance = await attendancesStore.getEmployeeAttendanceById(employeeId)
+      if (attendance) {
+        amTimeIn = attendance.am_time_in
+        pmTimeIn = attendance.pm_time_in
+        source = 'attendance'
+        // kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
+        console.log('am_time_in:', amTimeIn, '| pm_time_in:', pmTimeIn)
+      }
+      // Optionally, you can still get daily rate from employee store if needed
+      const emp = employeesStore.getEmployeeById(employeeId)
+      if (emp) {
+        daily = emp.daily_rate
+      }
     }
+    const total = (daily ?? 0) * workDays.value
+    console.log('regularWorkTotal:', total, '| employeeId:', employeeId, '| daily_rate:', daily, '| source:', source)
+    regularWorkTotal.value = total
   }
-  const total = (daily ?? 0) * workDays.value
-  // Gamiton ang other_deductions gikan sa deductions computed
-  const otherDeduction = 5000
-  console.log('regularWorkTotal:', total, '| employeeId:', employeeId, '| daily_rate:', daily, '| source:', source, '| other_deductions:', otherDeduction)
-  // I-subtract ang other_deductions sa total para sakto ang regular work total
-  return total - otherDeduction
-})
+
+  // Watch for changes and recompute
+  watch([dailyRate, workDays, () => employeeId], computeRegularWorkTotal, { immediate: true })
 
   // Overtime calculations
   const overtimeHours = computed(() => tableData.value?.overtime_hours || 0)

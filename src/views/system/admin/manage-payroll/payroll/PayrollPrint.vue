@@ -130,7 +130,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
 })
 
 // Debug logging
-console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
+// console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
 </script>
 
 <template>

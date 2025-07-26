@@ -82,7 +82,7 @@ function onView(item: any) {
   chosenMonth.value = item.month
   //isave nato ang month na gipili, then i-console.log para sa debugging
   const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
-  console.log('Chosen month:', chosenMonth.value, '| Date string:', dateString, '| for employee:', props.itemData?.id)
+  // console.log('Chosen month:', chosenMonth.value, '| Date string:', dateString, '| for employee:', props.itemData?.id)
   baseOnView(item)
 }
 </script>

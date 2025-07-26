@@ -93,7 +93,7 @@ export const useTripsStore = defineStore('trips', () => {
     // Update the trips store (optional: replace or merge)
     trips.value = data as Trip[]
     // Debug log
-    console.log('[fetchFilteredTrips] fetched trips from supabase:', data)
+   /*  console.log('[fetchFilteredTrips] fetched trips from supabase:', data) */
     return data as Trip[]
   }
 

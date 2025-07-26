@@ -21,7 +21,7 @@ export type HolidayTableFilter = {
 }
 
 export async function fetchHolidaysByDateString(dateString: string, employeeId?: string): Promise<Holiday[]> {
-  console.log('Fetching holidays for dateString:', dateString, 'and employeeId:', employeeId)
+ /*  console.log('Fetching holidays for dateString:', dateString, 'and employeeId:', employeeId) */
   // Query sa holidays table gamit ang %ilike% sa holiday_at column
 
   const { data: holidays, error: holidaysError } = await supabase
@@ -65,7 +65,7 @@ if (attendancesError || !attendances) return []
   // Filter holidays where holiday_at matches any attendance date
   const matchedHolidays = (holidays as Holiday[]).filter(h => attendanceDates.has(h.holiday_at.slice(0, 10)))
 
-  console.log('Matched Holidays:', matchedHolidays)
+ /*  console.log('Matched Holidays:', matchedHolidays) */
   return matchedHolidays
 }
 

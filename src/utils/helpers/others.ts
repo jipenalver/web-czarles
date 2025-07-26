@@ -1,3 +1,21 @@
+// 👉 Extract time in HH:MM format from string (ISO, time-only, or space-separated)
+export const getTimeHHMM = (val: string | null): string | null => {
+  if (!val) return null
+  // If ISO string, extract time part (HH:mm:ss)
+  let time = null
+  const match = val.match(/T(\d{2}:\d{2}:\d{2})/)
+  if (match) time = match[1]
+  // If already time-only, or space-separated, get last part
+  if (!time) {
+    if (/^\d{2}:\d{2}:\d{2}$/.test(val)) time = val
+    else if (val.includes(' ')) time = val.split(' ').pop() || null
+    else time = val
+  }
+  // Only return HH:MM
+  if (time && /^\d{2}:\d{2}:\d{2}$/.test(time)) return time.slice(0,5)
+  if (time && /^\d{2}:\d{2}$/.test(time)) return time
+  return null
+}
 // 👉 Get start and end date of a month as 'Month DD, YYYY'
 export const getMonthDateRange = (year: number, monthName: string): string => {
   const monthNames = [
