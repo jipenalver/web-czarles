@@ -45,7 +45,14 @@ export function usePayrollPrint(
 ) {
   const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(props, dailyRate, grossSalary)
   // Use payrollComputation composable and expose its return
-  return usePayrollComputation(dailyRateRef, grossSalaryRef, tableDataRef)
+  return usePayrollComputation(
+    dailyRateRef,
+    grossSalaryRef,
+    tableDataRef,
+    props.employeeData?.id,
+    props.payrollData.month,
+    props.payrollData.year
+  )
 }
 
 export function usePayrollFilters(dateString: string, employeeId: number | undefined) {

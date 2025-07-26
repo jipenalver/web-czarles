@@ -101,7 +101,9 @@ const {
   totalGrossSalary,
   totalDeductions,
   netSalary,
-  formatCurrency
+  formatCurrency,
+  employeeDailyRate,
+  regularWorkTotal // expose regularWorkTotal from composable
 } = payrollPrint
 
 // Methods
@@ -176,9 +178,9 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="border-b-thin text-center pa-2">
             Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
           </td>
-          <td class="pa-2">@</td>
-          <td class="pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+          <td class="pa-2">@ {{ formatCurrency(employeeDailyRate ?? 0) }}</td>
+          <td class="pa-2">x {{ workDays }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(regularWorkTotal) }}</td>
         </tr>
         <!-- Unified Loading State for Trips and Holidays -->
         <tr v-if="isTripsLoading || isHolidaysLoading">

@@ -15,9 +15,7 @@ export type Holiday = {
   description: string
   holiday_at: string
 }
-interface GetNextMonthFn {
-  (dateString: string): string
-}
+
 export type HolidayTableFilter = {
   year: string | null
 }

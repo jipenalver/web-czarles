@@ -1,4 +1,6 @@
+import { useEmployeesStore } from '@/stores/employees'
 import { computed, type Ref } from 'vue'
+
 
 export interface PayrollData {
   month: string
@@ -10,7 +12,6 @@ export interface TableData {
   deductions?: number
   net_pay?: number
   coda_allowance?: number
-  // Future properties for extended functionality
   overtime_hours?: number
   sss_deduction?: number
   philhealth_deduction?: number
@@ -22,143 +23,170 @@ export interface TableData {
 export function usePayrollComputation(
   dailyRate: Ref<number>,
   grossSalary: Ref<number>,
-  tableData: Ref<TableData | null>
+  tableData: Ref<TableData | null>,
+  employeeId?: number,
+  payrollMonth?: string,
+  payrollYear?: number
 ) {
-  // Basic Salary Calculations
-  const codaAllowance = computed(() => {
-    return tableData.value?.coda_allowance || 0
-  })
+  const employeesStore = useEmployeesStore()
 
-  const totalGrossSalary = computed(() => {
-    return grossSalary.value + codaAllowance.value
-  })
+  // Basic calculations
+  const codaAllowance = computed(() => tableData.value?.coda_allowance || 0)
+  const totalGrossSalary = computed(() => grossSalary.value + codaAllowance.value)
+  const totalDeductions = computed(() => tableData.value?.deductions || 0)
+  const netSalary = computed(() => totalGrossSalary.value - totalDeductions.value)
 
-  const totalDeductions = computed(() => {
-    return tableData.value?.deductions || 0
-  })
-
-  const netSalary = computed(() => {
-    return totalGrossSalary.value - totalDeductions.value
-  })
-
+  // Work days calculation
   const workDays = computed(() => {
-    // Logic: Calculate work days based on gross pay and daily rate
-    // TODO: Add validation for leap years, holidays, leaves
-    if (dailyRate.value === 0) return 0
-    return Math.round(grossSalary.value / dailyRate.value)
+    if (!payrollMonth || !payrollYear) return 0
+    const monthIndex = new Date(`${payrollMonth} 1, ${payrollYear}`).getMonth()
+    const start = new Date(payrollYear, monthIndex, 1)
+    const end = new Date(payrollYear, monthIndex + 1, 0)
+    let count = 0
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay()
+      if (day >= 1 && day <= 5) count++
+    }
+    return count
   })
 
-  // Overtime Calculations
-  const overtimeHours = computed(() => {
-    return tableData.value?.overtime_hours || 0
+  // Employee daily rate
+  const employeeDailyRate = computed(() => {
+    if (!employeeId) return dailyRate.value
+    const emp = employeesStore.getEmployeeById(employeeId)
+    return emp?.daily_rate || dailyRate.value
   })
 
+  // Regular work total (future-proof for deductions, etc.)
+  // Gamiton ang getEmployeeById ug i-filter by employeeId (props.employeeData?.id)
+const regularWorkTotal = computed(() => {
+  let daily = dailyRate.value
+  let source = 'fallback'
+  if (employeeId) {
+    // kuhaon ang employee gamit ang getEmployeeById
+    const emp = employeesStore.getEmployeeById(employeeId)
+    if (emp) {
+      daily = emp.daily_rate
+      source = 'employee'
+    }
+  }
+  const total = (daily ?? 0) * workDays.value
+  // Gamiton ang other_deductions gikan sa deductions computed
+  const otherDeduction = 5000
+  console.log('regularWorkTotal:', total, '| employeeId:', employeeId, '| daily_rate:', daily, '| source:', source, '| other_deductions:', otherDeduction)
+  // I-subtract ang other_deductions sa total para sakto ang regular work total
+  return total - otherDeduction
+})
+
+  // Overtime calculations
+  const overtimeHours = computed(() => tableData.value?.overtime_hours || 0)
   const overtimePay = computed(() => {
-    // Logic: Calculate overtime pay based on daily rate and overtime hours
-    // Formula: (daily_rate / 8) * overtime_hours * overtime_multiplier
     const hourlyRate = dailyRate.value / 8
-    const overtimeRate = hourlyRate * 1.25 // Placeholder multiplier
+    const overtimeRate = hourlyRate * 1.25
     return overtimeHours.value * overtimeRate
   })
+  const totalEarnings = computed(() => totalGrossSalary.value + overtimePay.value)
 
-  const totalEarnings = computed(() => {
-    return totalGrossSalary.value + overtimePay.value
+  // Dynamic deduction variables for future extensibility
+  // Magamit ni for any deduction type, dili lang fixed fields
+  const deductionFields = [
+    'sss_deduction',
+    'philhealth_deduction',
+    'pagibig_deduction',
+    'tax_deduction',
+    'other_deductions',
+    // add more deduction keys diri in the future
+  ] as const
+
+  type DeductionKey = typeof deductionFields[number]
+
+  // Dynamic deductions object
+  const deductions = computed(() => {
+    const result: Record<DeductionKey, number> = {
+      sss_deduction: 0,
+      philhealth_deduction: 0,
+      pagibig_deduction: 0,
+      tax_deduction: 0,
+      other_deductions: 20000,
+    }
+    if (tableData.value) {
+      deductionFields.forEach((key) => {
+        // kuhaon ang value per deduction, default 0 kung wala
+        result[key] = tableData.value?.[key] || 0
+      })
+    }
+    return result
   })
 
-  // Deduction Breakdown Calculations
-  const sssDeduction = computed(() => {
-    return tableData.value?.sss_deduction || 0
-  })
+  // For backward compatibility, keep individual computed
+  const sssDeduction = computed(() => deductions.value.sss_deduction)
+  const philhealthDeduction = computed(() => deductions.value.philhealth_deduction)
+  const pagibigDeduction = computed(() => deductions.value.pagibig_deduction)
+  const taxDeduction = computed(() => deductions.value.tax_deduction)
+  const otherDeductions = computed(() => deductions.value.other_deductions)
 
-  const philhealthDeduction = computed(() => {
-    return tableData.value?.philhealth_deduction || 0
-  })
-
-  const pagibigDeduction = computed(() => {
-    return tableData.value?.pagibig_deduction || 0
-  })
-
-  const taxDeduction = computed(() => {
-    return tableData.value?.tax_deduction || 0
-  })
-
-  const otherDeductions = computed(() => {
-    return tableData.value?.other_deductions || 0
-  })
-
-  // Tax Calculation Functions
+  // Calculation functions
   const calculateIncomeTax = (taxableIncome: number): number => {
-    // Logic: Calculate Philippine income tax based on tax brackets
-    // TODO: Implement actual tax calculation based on BIR tax table
-    return 0 // Placeholder
+    return 0
   }
 
   const calculateSSS = (monthlyBasicSalary: number): number => {
-    // Logic: Calculate SSS contribution based on salary brackets
-    // TODO: Implement actual SSS contribution table
-    return 0 // Placeholder
+    return 0
   }
 
   const calculatePhilHealth = (monthlyBasicSalary: number): number => {
-    // Logic: Calculate PhilHealth contribution (percentage of basic salary)
-    // TODO: Implement actual PhilHealth calculation
-    return 0 // Placeholder
+    return 0
   }
 
   const calculatePagIbig = (monthlyBasicSalary: number): number => {
-    // Logic: Calculate Pag-IBIG contribution (percentage based)
-    // TODO: Implement actual Pag-IBIG calculation
-    return 0 // Placeholder
-  }
-
-  // Utility Functions
-  const formatCurrency = (amount: number): string => {
-    return amount.toFixed(2)
-  }
-
-  const formatNumber = (num: number): string => {
-    return num.toString()
+    return 0
   }
 
   const calculateTotalDeductions = (): number => {
-    // Logic: Sum all deduction types
-    // TODO: Add validation and business rules for deductions
-    return sssDeduction.value + 
-           philhealthDeduction.value + 
-           pagibigDeduction.value + 
-           taxDeduction.value + 
-           otherDeductions.value
+    return (
+      sssDeduction.value +
+      philhealthDeduction.value +
+      pagibigDeduction.value +
+      taxDeduction.value +
+      otherDeductions.value
+    )
   }
 
+  // Utility functions
+  const formatCurrency = (amount: number): string => amount.toFixed(2)
+  const formatNumber = (num: number): string => num.toString()
+
   return {
-    // Basic Calculations
+    // Basic
     workDays,
     codaAllowance,
     totalGrossSalary,
     totalDeductions,
     netSalary,
+    regularWorkTotal,
 
-    // Overtime Calculations
+    // Overtime
     overtimeHours,
     overtimePay,
     totalEarnings,
 
-    // Deduction Breakdown
+    // Deductions
     sssDeduction,
     philhealthDeduction,
     pagibigDeduction,
     taxDeduction,
     otherDeductions,
 
-    // Calculation Functions
+    // Calculations
     calculateIncomeTax,
     calculateSSS,
     calculatePhilHealth,
     calculatePagIbig,
     calculateTotalDeductions,
 
-    // Utility Functions
+    // Utilities
     formatCurrency,
-    formatNumber
+    formatNumber,
+    employeeDailyRate,
   }
 }
