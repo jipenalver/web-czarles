@@ -66,25 +66,22 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendances.value = data as Attendance[]
   }
   // Get employee attendance by employee_id (kuhaon ang am_time_in ug pm_time_in gikan sa DB)
-  async function getEmployeeAttendanceById(employeeId: number | string): Promise<{ am_time_in: string | null, pm_time_in: string | null } | null> {
+  async function getEmployeeAttendanceById(employeeId: number | string): Promise<Array<{ am_time_in: string | null, pm_time_in: string | null }> | null> {
     const { data, error } = await supabase
       .from('attendances')
       .select('am_time_in, pm_time_in')
       .eq('employee_id', employeeId)
-      //another .eq to ensure we get the specific employee's month attendance
       .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
     if (error) {
       console.error('getEmployeeAttendanceById error:', error)
       return null
     }
-    //kuhaon ang pinakabag-o na attendance record para sa employee ug i-strip ang date, time ra ibalik (HH:MM)
-    return data
-      ? {
-          am_time_in: getTimeHHMM(data.am_time_in),
-          pm_time_in: getTimeHHMM(data.pm_time_in),
-        }
+    //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
+    return Array.isArray(data)
+      ? data.map((row) => ({
+          am_time_in: getTimeHHMM(row.am_time_in),
+          pm_time_in: getTimeHHMM(row.pm_time_in),
+        }))
       : null
   }
 

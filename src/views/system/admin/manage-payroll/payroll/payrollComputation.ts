@@ -1,7 +1,7 @@
-
+import { useAttendancesStore } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
 import { computed, type Ref, ref, watch } from 'vue'
-import { useAttendancesStore } from '@/stores/attendances'
+
 
 
 export interface PayrollData {
@@ -64,10 +64,10 @@ export function usePayrollComputation(
   // Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
   async function getEmployeeTimeIns(empId?: number): Promise<{ amTimeIn: string | null; pmTimeIn: string | null }> {
     if (!empId) return { amTimeIn: null, pmTimeIn: null }
-    const attendance = await attendancesStore.getEmployeeAttendanceById(empId)
-    if (attendance) {
-      // kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
-      return { amTimeIn: attendance.am_time_in, pmTimeIn: attendance.pm_time_in }
+    const attendances = await attendancesStore.getEmployeeAttendanceById(empId)
+    if (Array.isArray(attendances) && attendances.length > 0) {
+      // Gamiton ang pinakabag-o (first in array) na attendance record
+      return { amTimeIn: attendances[0].am_time_in, pmTimeIn: attendances[0].pm_time_in }
     }
     return { amTimeIn: null, pmTimeIn: null }
   }
@@ -86,10 +86,16 @@ export function usePayrollComputation(
     console.log('Calculating regular work total for employeeId:', employeeId)
     if (employeeId) {
       // kuhaon ang attendance gamit ang getEmployeeAttendanceById
-      const attendance = await attendancesStore.getEmployeeAttendanceById(employeeId)
-      if (attendance) {
-        amTimeIn = attendance.am_time_in
-        pmTimeIn = attendance.pm_time_in
+      const attendances = await attendancesStore.getEmployeeAttendanceById(employeeId)
+      if (Array.isArray(attendances) && attendances.length > 0) {
+        // I-log tanan am_time_in ug pm_time_in values separately
+        const allAmTimeIn = attendances.map(a => a.am_time_in)
+        const allPmTimeIn = attendances.map(a => a.pm_time_in)
+        console.log('All am_time_in:', allAmTimeIn)
+        console.log('All pm_time_in:', allPmTimeIn)
+        // Gamiton ang pinakabag-o (first in array) na attendance record
+        amTimeIn = attendances[0].am_time_in
+        pmTimeIn = attendances[0].pm_time_in
         source = 'attendance'
         // kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
         console.log('am_time_in:', amTimeIn, '| pm_time_in:', pmTimeIn)
@@ -101,7 +107,7 @@ export function usePayrollComputation(
       }
     }
     const total = (daily ?? 0) * workDays.value
-    console.log('regularWorkTotal:', total, '| employeeId:', employeeId, '| daily_rate:', daily, '| source:', source)
+   /*  console.log('regularWorkTotal:', total, '| employeeId:', employeeId, '| daily_rate:', daily, '| source:', source) */
     regularWorkTotal.value = total
   }
 
