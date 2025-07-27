@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
+import { getDateTimeISO, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Benefit, type EmployeeDeduction } from './benefits'
-import { prepareFormDates } from '@/utils/helpers/others'
 import { type Designation } from './designations'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -12,6 +12,7 @@ import { ref } from 'vue'
 export type Employee = {
   id: number
   created_at: string
+  deleted_at: string | null
   firstname: string
   middlename: string
   lastname: string
@@ -59,7 +60,7 @@ export const useEmployeesStore = defineStore('employees', () => {
 
   // Actions
   async function getEmployees() {
-    const { data } = await supabase.from('employees').select()
+    const { data } = await supabase.from('employees').select().is('deleted_at', null)
 
     employees.value = data?.map((item) => ({
       ...item,
@@ -80,6 +81,7 @@ export const useEmployeesStore = defineStore('employees', () => {
       .select(
         '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
       )
+      .is('deleted_at', null)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -130,7 +132,11 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function deleteEmployee(id: number) {
-    return await supabase.from('employees').delete().eq('id', id).select()
+    return await supabase
+      .from('employees')
+      .update({ deleted_at: getDateTimeISO(new Date()) })
+      .eq('id', id)
+      .select()
   }
 
   // Expose States and Actions
