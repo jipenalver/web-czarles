@@ -159,7 +159,7 @@ export const fileDownload = async (filePath: string, fileName: string) => {
 
 // 👉 Generate CSV
 export const generateCSV = (filename: string, csvData: string) => {
-  const blob = new Blob([csvData], { type: 'text/csv; charset=utf-8' })
+  const blob = new Blob(['\uFEFF' + csvData], { type: 'text/csv; charset=utf-8' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
@@ -177,8 +177,8 @@ export const generateCSV = (filename: string, csvData: string) => {
 }
 
 // 👉 CSV Text Trimming
-export const generateCSVTrim = (string: string) => {
+export const prepareCSV = (string: string) => {
   if (typeof string !== 'string' || !string.trim()) return ''
 
-  return string.replace(/,/g, ' ').replace(/\s+/g, ' ').trim()
+  return `="${string.replace(/,/g, ' ').replace(/\s+/g, ' ').trim()}"`
 }
