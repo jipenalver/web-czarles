@@ -45,6 +45,8 @@ export type AttendanceTableFilter = {
 }
 
 export const useAttendancesStore = defineStore('attendances', () => {
+  const selectQuery = '*, employee:employee_id (id, firstname, lastname), attendance_images (*)'
+
   // States
   const attendances = ref<Attendance[]>([])
   const attendancesTable = ref<Attendance[]>([])
@@ -61,7 +63,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
   async function getAttendances() {
     const { data } = await supabase
       .from('attendances')
-      .select('*, employee:employee_id (id, firstname, lastname), attendance_images (*)')
+      .select(selectQuery)
       .order('am_time_in', { ascending: false })
 
     attendances.value = data as Attendance[]
@@ -79,9 +81,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     let query = supabase
       .from('attendances')
-      .select(
-        '*, employee:employee_id (id, firstname, lastname), attendance_images (image_path, image_type, created_at)',
-      )
+      .select(selectQuery)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 

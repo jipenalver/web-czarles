@@ -46,6 +46,9 @@ export type EmployeeTableFilter = {
 }
 
 export const useEmployeesStore = defineStore('employees', () => {
+  const selectQuery =
+    '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))'
+
   // States
   const employees = ref<Employee[]>([])
   const employeesTable = ref<Employee[]>([])
@@ -58,16 +61,9 @@ export const useEmployeesStore = defineStore('employees', () => {
     employeesTableTotal.value = 0
   }
 
-  const selectDefault = supabase
-    .from('employees')
-    .select(
-      '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
-    )
-    .is('deleted_at', null)
-
   // Actions
   async function getEmployees() {
-    const { data } = await selectDefault
+    const { data } = await supabase.from('employees').select(selectQuery).is('deleted_at', null)
 
     employees.value = data?.map((item) => ({
       ...item,
@@ -87,7 +83,12 @@ export const useEmployeesStore = defineStore('employees', () => {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'lastname')
     search = tableSearch(search)
 
-    let query = selectDefault.order(column, { ascending: order }).range(rangeStart, rangeEnd)
+    let query = supabase
+      .from('employees')
+      .select(selectQuery)
+      .is('deleted_at', null)
+      .order(column, { ascending: order })
+      .range(rangeStart, rangeEnd)
 
     query = getEmployeesFilter(query, { search, designation_id })
 
