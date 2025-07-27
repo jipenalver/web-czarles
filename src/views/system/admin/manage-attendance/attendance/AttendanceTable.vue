@@ -36,6 +36,7 @@ const {
   onOvertime,
   onDelete,
   onConfirmDelete,
+  onFilterDate,
   onFilterItems,
   onLoadItems,
   hasAttendanceImage,
@@ -82,6 +83,18 @@ const {
                 clearable
                 @update:model-value="onFilterItems"
               ></v-autocomplete>
+            </v-col>
+
+            <v-col cols="12" sm="4">
+              <v-date-input
+                v-model="tableFilters.attendance_at"
+                density="compact"
+                label="Attendance Date"
+                multiple="range"
+                clearable
+                @click:clear="onFilterDate(true)"
+                @update:model-value="onFilterDate(false)"
+              ></v-date-input>
             </v-col>
 
             <template v-if="props.componentView === 'attendance'">
