@@ -1,22 +1,24 @@
-import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
+import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { MILLISECONDS_PER_DAY, prepareDate } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
+import { type Employee } from './employees'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export type CashAdvance = {
   id: number
   created_at: string
-  date_at: string
-  employee_id: number
+  request_at: string
   amount: number
   description: string
+  employee_id: number | null
+  employee: Employee
 }
 
 export type CashAdvanceTableFilter = {
-  search: string | null
-  date_at: Date[] | null
+  employee_id: number | null
+  request_at: Date[] | null
 }
 
 export const useCashAdvancesStore = defineStore('cashAdvances', () => {
@@ -41,7 +43,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     const { data } = await supabase
       .from('cash_advances')
       .select(selectQuery)
-      .order('date_at', { ascending: false })
+      .order('request_at', { ascending: false })
 
     cashAdvances.value = data as CashAdvance[]
   }
@@ -50,7 +52,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     tableOptions: TableOptions,
     tableFilters: CashAdvanceTableFilter,
   ) {
-    const { column, order } = tablePagination(tableOptions, 'date_at', false)
+    const { column, order } = tablePagination(tableOptions, 'request_at', false)
 
     let query = supabase
       .from('cash_advances')
@@ -66,10 +68,13 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
   async function getCashAdvancesTable(
     tableOptions: TableOptions,
-    { search, date_at }: CashAdvanceTableFilter,
+    tableFilters: CashAdvanceTableFilter,
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'date_at', false)
-    search = tableSearch(search)
+    const { rangeStart, rangeEnd, column, order } = tablePagination(
+      tableOptions,
+      'request_at',
+      false,
+    )
 
     let query = supabase
       .from('cash_advances')
@@ -77,20 +82,20 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getCashAdvancesFilter(query, { search, date_at })
+    query = getCashAdvancesFilter(query, tableFilters)
 
     const { data } = await query
 
-    const { count } = await getCashAdvancesCount({ search, date_at })
+    const { count } = await getCashAdvancesCount(tableFilters)
 
     cashAdvancesTable.value = data as CashAdvance[]
     cashAdvancesTableTotal.value = count as number
   }
 
-  async function getCashAdvancesCount({ search, date_at }: CashAdvanceTableFilter) {
+  async function getCashAdvancesCount({ employee_id, request_at }: CashAdvanceTableFilter) {
     let query = supabase.from('cash_advances').select('*', { count: 'exact', head: true })
 
-    query = getCashAdvancesFilter(query, { search, date_at })
+    query = getCashAdvancesFilter(query, { employee_id, request_at })
 
     return await query
   }
@@ -98,21 +103,23 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
   function getCashAdvancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { search, date_at }: CashAdvanceTableFilter,
+    { employee_id, request_at }: CashAdvanceTableFilter,
   ) {
-    if (search) query = query.or(`designation.ilike.%${search}%, description.ilike.%${search}%`)
+    if (employee_id) query = query.eq('employee_id', employee_id)
 
-    if (date_at) {
+    if (request_at) {
       const dateQuery = (dates: Date[], isRange = false) => {
         const startDate = dates[0]
         const endDate = isRange
           ? new Date(dates[dates.length - 1].getTime() + MILLISECONDS_PER_DAY)
           : new Date(startDate.getTime() + MILLISECONDS_PER_DAY)
 
-        return query.gte('date_at', prepareDate(startDate)).lt('date_at', prepareDate(endDate))
+        return query
+          .gte('request_at', prepareDate(startDate))
+          .lt('request_at', prepareDate(endDate))
       }
 
-      query = dateQuery(date_at, date_at.length > 1)
+      query = dateQuery(request_at, request_at.length > 1)
     }
 
     return query
