@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getTime, getTotalWorkHours } from '@/utils/helpers/others'
+import { getTime, getTotalWorkHours } from '@/utils/helpers/dates'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'

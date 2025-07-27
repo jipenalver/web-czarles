@@ -1,6 +1,6 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { prepareFormDates } from '@/utils/helpers/others'
+import { prepareFormDates } from '@/utils/helpers/dates'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
