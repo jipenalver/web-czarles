@@ -20,10 +20,14 @@ export type CashAdvanceTableFilter = {
 }
 
 export const useCashAdvancesStore = defineStore('cashAdvances', () => {
+  const selectQuery =
+    '*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*)'
+
   // States
   const cashAdvances = ref<CashAdvance[]>([])
   const cashAdvancesTable = ref<CashAdvance[]>([])
   const cashAdvancesTableTotal = ref(0)
+  const cashAdvancesCSV = ref<CashAdvance[]>([])
 
   // Reset State
   function $reset() {
@@ -34,16 +38,37 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
   // Actions
   async function getCashAdvances() {
-    const { data } = await supabase.from('cash_advances').select()
+    const { data } = await supabase
+      .from('cash_advances')
+      .select(selectQuery)
+      .order('date_at', { ascending: false })
 
     cashAdvances.value = data as CashAdvance[]
+  }
+
+  async function getCashAdvancesCSV(
+    tableOptions: TableOptions,
+    tableFilters: CashAdvanceTableFilter,
+  ) {
+    const { column, order } = tablePagination(tableOptions, 'date_at', false)
+
+    let query = supabase
+      .from('cash_advances')
+      .select(selectQuery)
+      .order(column, { ascending: order })
+
+    query = getCashAdvancesFilter(query, tableFilters)
+
+    const { data } = await query
+
+    cashAdvancesCSV.value = data as CashAdvance[]
   }
 
   async function getCashAdvancesTable(
     tableOptions: TableOptions,
     { search, date_at }: CashAdvanceTableFilter,
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions)
+    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'date_at', false)
     search = tableSearch(search)
 
     let query = supabase
@@ -112,6 +137,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     cashAdvancesTableTotal,
     $reset,
     getCashAdvances,
+    getCashAdvancesCSV,
     getCashAdvancesTable,
     addCashAdvance,
     updateCashAdvance,
