@@ -20,7 +20,11 @@ const props = defineProps<{
     netSalary: number
   }
   formatCurrency: (value: number) => string
+  employeeId: number | undefined
 }>()
+
+// log the employeeId for debugging
+console.log('PayrollDeductions employeeId:', props.employeeId)
 </script>
 <template>
   <!-- Deduction Rows -->
