@@ -31,6 +31,54 @@ export function usePayrollComputation(
   payrollYear?: number,
   dateString?: string,
 ) {
+  // Log overall overtime rendered when composable is used
+  if (typeof window !== 'undefined') {
+    setTimeout(() => {
+      computeOverallOvertimeCalculation().then((overallOvertime) => {
+        // i-log ang overall overtime rendered
+        const formattedOvertime = overallOvertime.toFixed(2)
+        console.log('Overall overtime rendered (hours):', formattedOvertime)
+      })
+    }, 0)
+  }
+  // Helper function to compute overtime hours between two time strings (HH:MM)
+  function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
+    // Debug: log overtimeIn and overtimeOut values
+    /* console.log('computeOvertimeHours:', { overtimeIn, overtimeOut }) */
+    if (!overtimeIn || !overtimeOut) return 0
+    // parse time strings to Date objects (use today as date)
+    const today = new Date().toISOString().split('T')[0]
+    const inDate = new Date(`${today}T${overtimeIn}:00`)
+    const outDate = new Date(`${today}T${overtimeOut}:00`)
+    const diffMs = outDate.getTime() - inDate.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    return diffHours > 0 ? diffHours : 0
+  }
+
+  // Async function to compute overall overtime for the month for an employee
+  async function computeOverallOvertimeCalculation() {
+    let usedDateString = dateString
+    if (!usedDateString && typeof window !== 'undefined') {
+      usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
+    }
+    if (employeeId && usedDateString) {
+      const attendances = await attendancesStore.getEmployeeAttendanceById(
+        employeeId,
+        usedDateString,
+      )
+      if (Array.isArray(attendances) && attendances.length > 0) {
+        // sum all overtime hours for the month
+        let totalOvertime = 0
+        attendances.forEach((a) => {
+          totalOvertime += computeOvertimeHours(a.overtime_in, a.overtime_out)
+        })
+
+        return totalOvertime
+      }
+    }
+
+    return 0
+  }
   const employeesStore = useEmployeesStore()
   const attendancesStore = useAttendancesStore()
 
@@ -96,7 +144,6 @@ export function usePayrollComputation(
       usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
     }
 
-
     // let amTimeIn: string | null | undefined = undefined
     // let pmTimeIn: string | null | undefined = undefined
 
@@ -120,7 +167,7 @@ export function usePayrollComputation(
           totalLatePM += lateMinutes
         })
         monthLateDeduction.value = totalLateAM + totalLatePM
-        // console.log('Total month late deduction (minutes):', monthLateDeduction.value)
+        console.log('Total month late deduction (minutes):', monthLateDeduction.value)
       } else {
         monthLateDeduction.value = 0
       }
@@ -187,38 +234,13 @@ export function usePayrollComputation(
   const taxDeduction = computed(() => deductions.value.tax_deduction)
   const otherDeductions = computed(() => deductions.value.other_deductions)
 
-  // Calculation functions
-  const calculateIncomeTax = (taxableIncome: number): number => {
-    return 0
-  }
-
-  const calculateSSS = (monthlyBasicSalary: number): number => {
-    return 0
-  }
-
-  const calculatePhilHealth = (monthlyBasicSalary: number): number => {
-    return 0
-  }
-
-  const calculatePagIbig = (monthlyBasicSalary: number): number => {
-    return 0
-  }
-
-  const calculateTotalDeductions = (): number => {
-    return (
-      sssDeduction.value +
-      philhealthDeduction.value +
-      pagibigDeduction.value +
-      taxDeduction.value +
-      otherDeductions.value
-    )
-  }
-
   // Utility functions
   const formatCurrency = (amount: number): string => amount.toFixed(2)
   const formatNumber = (num: number): string => num.toString()
 
   return {
+    // Overtime calculation utility
+    computeOverallOvertimeCalculation,
     // Basic
     workDays,
     codaAllowance,
@@ -240,13 +262,6 @@ export function usePayrollComputation(
     pagibigDeduction,
     taxDeduction,
     otherDeductions,
-
-    // Calculations
-    calculateIncomeTax,
-    calculateSSS,
-    calculatePhilHealth,
-    calculatePagIbig,
-    calculateTotalDeductions,
 
     // Utilities
     formatCurrency,

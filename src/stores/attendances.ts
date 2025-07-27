@@ -69,7 +69,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
   async function getEmployeeAttendanceById(
     employeeId: number | string,
     dateString: string,
-  ): Promise<Array<{ am_time_in: string | null; pm_time_in: string | null }> | null> {
+  ): Promise<Array<{ am_time_in: string | null; pm_time_in: string | null; overtime_in: string | null; overtime_out: string | null }> | null> {
     // query sa attendance records for the given employee ug month
     const startOfMonth = `${dateString}-01T00:00:00.000Z`
     const [year, month] = dateString.split('-')
@@ -78,13 +78,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { data, error } = await supabase
       .from('attendances')
-      .select('am_time_in, pm_time_in')
+      .select('am_time_in, pm_time_in, overtime_in, overtime_out')
       .eq('employee_id', employeeId)
-      /*  .gte('created_at', startOfMonth) // Filter by created_at for the month
-  .lt('created_at', endOfMonth) */
       .gte('am_time_in', startOfMonth) // Filter by am_time_in for the month
       .lt('am_time_in', endOfMonth)
-
       .order('created_at', { ascending: false })
     if (error) {
       console.error('getEmployeeAttendanceById error:', error)
@@ -95,6 +92,8 @@ export const useAttendancesStore = defineStore('attendances', () => {
       ? data.map((row) => ({
           am_time_in: getTimeHHMM(row.am_time_in),
           pm_time_in: getTimeHHMM(row.pm_time_in),
+          overtime_in: getTimeHHMM(row.overtime_in),
+          overtime_out: getTimeHHMM(row.overtime_out),
         }))
       : null
   }

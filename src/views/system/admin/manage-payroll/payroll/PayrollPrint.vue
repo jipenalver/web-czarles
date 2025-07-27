@@ -117,6 +117,7 @@ const {
   employeeDailyRate,
   regularWorkTotal, // expose regularWorkTotal from composable
   lateDeduction,
+  monthLateDeduction, // expose monthLateDeduction for late minutes
 } = payrollPrint
 
 // Extractor for holiday type code to full name
@@ -323,7 +324,12 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <tr v-if="showLateDeduction">
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">Late Deduction</td>
-          <td class="text-caption font-weight-bold text-end pa-2"></td>
+          <td class="text-caption font-weight-bold text-end pa-2">
+            <!-- total late minutes for the month -->
+            <span v-if="monthLateDeduction !== undefined && monthLateDeduction > 0">
+              ({{ monthLateDeduction }} min.)
+            </span>
+          </td>
           <td class="border-b-thin border-s-sm text-end pa-2">
             {{ formatCurrency(lateDeduction) }}
           </td>
