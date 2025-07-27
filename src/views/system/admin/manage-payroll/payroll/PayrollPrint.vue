@@ -19,6 +19,7 @@ const props = defineProps<{
 const monthDateRange = computed(() => {
   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
 })
+
 // Constants
 const monthNames = [
   'January',
@@ -37,6 +38,10 @@ const monthNames = [
 
 // Reactive references
 const isTripsLoading = ref(false)
+const isHolidaysLoading = ref(false)
+const holidays = ref<Holiday[]>([])
+const overallOvertime = ref<number>(0)
+const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
 // Computed properties for employee information
@@ -75,7 +80,7 @@ const holidayDateString = computed(() => {
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 
-//check kung field staff ba ang employee, para dili ipakita ang late deduction
+// Check if field staff to determine if late deduction should be shown
 const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
 
 // Composables
@@ -89,21 +94,6 @@ const payrollPrint = usePayrollPrint(
   grossSalary,
 )
 
-const holidays = ref<Holiday[]>([])
-const isHolidaysLoading = ref(false)
-
-async function fetchEmployeeHolidays() {
-  if (!props.employeeData?.id) {
-    holidays.value = []
-    return
-  }
-  isHolidaysLoading.value = true
-  holidays.value = await fetchHolidaysByDateString(
-    holidayDateString.value,
-    String(props.employeeData.id),
-  )
-  isHolidaysLoading.value = false
-}
 const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
 
 // Destructure values from payrollPrint composable
@@ -115,34 +105,120 @@ const {
   netSalary,
   formatCurrency,
   employeeDailyRate,
-  regularWorkTotal, // expose regularWorkTotal from composable
+  regularWorkTotal,
   lateDeduction,
-  monthLateDeduction, // expose monthLateDeduction for late minutes
+  monthLateDeduction,
   computeOverallOvertimeCalculation,
 } = payrollPrint
 
-// Ref to hold the computed overall overtime hours
-const overallOvertime = ref<number>(0)
+// Improved overall earnings total computation
+const overallEarningsTotal = computed(() => {
+  let total = 0
 
-async function updateOverallOvertime() {
-  overallOvertime.value = await computeOverallOvertimeCalculation()
+  // 1. Regular work earnings - use actual calculated value
+  const regularWork = Number(regularWorkTotal.value) || 0
+  total += regularWork
+
+  // 2. Trips earnings - ensure safe access and proper calculation
+  const tripsEarnings = tripsStore.trips?.reduce((sum, trip) => {
+    return sum + (Number(trip.per_trip) || 0)
+  }, 0) || 0
+  total += tripsEarnings
+
+  // 3. Holiday earnings - improved calculation with proper type checking
+  const holidayEarnings = holidays.value?.reduce((sum, holiday) => {
+    const baseRate = Number(dailyRate.value) || 0
+    const type = holiday.type?.toLowerCase() || ''
+    
+    let multiplier = 1 // default multiplier
+    if (type.includes('rh')) {
+      multiplier = 2.0 // Regular Holiday 200%
+    } else if (type.includes('snh')) {
+      multiplier = 1.5 // Special Non-working Holiday 150%
+    } else if (type.includes('swh')) {
+      multiplier = 1.3 // Special Working Holiday 130%
+    }
+    
+    return sum + (baseRate * multiplier)
+  }, 0) || 0
+  total += holidayEarnings
+
+  // 4. Overtime earnings - use proper rate calculation
+  const overtimeRate = (Number(employeeDailyRate.value) || 0) / 8 * 1.25
+  const overtimeEarnings = overtimeRate * (Number(overallOvertime.value) || 0)
+  total += overtimeEarnings
+
+  // 5. Monthly trippings - currently 0 as per your template, but ready for future use
+  const monthlyTrippings = 0 // Add logic here when needed
+  total += monthlyTrippings
+
+  // 6. Any additional allowances (CODA, etc.)
+  const allowances = Number(codaAllowance.value) || 0
+  total += allowances
+
+  return total
+})
+
+// Enhanced debugging computed to track individual components
+const earningsBreakdown = computed(() => {
+  const regular = Number(regularWorkTotal.value) || 0
+  const trips = tripsStore.trips?.reduce((sum, trip) => sum + (Number(trip.per_trip) || 0), 0) || 0
+  const holidayTotal = holidays.value?.reduce((sum, holiday) => {
+    const baseRate = Number(dailyRate.value) || 0
+    const type = holiday.type?.toLowerCase() || ''
+    let multiplier = 1
+    if (type.includes('rh')) multiplier = 2.0
+    else if (type.includes('snh')) multiplier = 1.5
+    else if (type.includes('swh')) multiplier = 1.3
+    return sum + (baseRate * multiplier)
+  }, 0) || 0
+  const overtime = ((Number(employeeDailyRate.value) || 0) / 8) * 1.25 * (Number(overallOvertime.value) || 0)
+  const allowances = Number(codaAllowance.value) || 0
+
+  return {
+    regular,
+    trips,
+    holidays: holidayTotal,
+    overtime,
+    allowances,
+    total: regular + trips + holidayTotal + overtime + allowances
+  }
+})
+
+// Net salary calculation (total earnings minus deductions)
+const netSalaryCalculation = computed(() => {
+  const totalEarnings = overallEarningsTotal.value
+  
+  // Calculate actual deductions (currently all showing as 0 in template)
+  const deductions = {
+    late: showLateDeduction.value ? (Number(lateDeduction.value) || 0) : 0,
+    sss: 0, // Add actual SSS calculation when available
+    phic: 0, // Add actual PHIC calculation when available  
+    hdmf: 0, // Add actual HDMF calculation when available
+    cashAdvance: 0, // Add actual cash advance when available
+    others: 0 // Add other deductions when available
+  }
+  
+  const totalDeductionsAmount = Object.values(deductions).reduce((sum, amount) => sum + amount, 0)
+  
+  return {
+    grossSalary: totalEarnings,
+    deductions,
+    totalDeductions: totalDeductionsAmount,
+    netSalary: totalEarnings - totalDeductionsAmount
+  }
+})
+
+// Utility function for safe currency formatting
+function safeCurrencyFormat(amount: number | string | null | undefined): string {
+  const numAmount = Number(amount) || 0
+  return formatCurrency(numAmount)
 }
 
-onMounted(() => {
-  loadTrips()
-  fetchEmployeeHolidays()
-  updateOverallOvertime()
-})
-
-// Update overtime when relevant props change
-watch([
-  () => props.employeeData?.id,
-  () => filterDateString.value,
-  () => props.payrollData?.month,
-  () => props.payrollData?.year,
-], () => {
-  updateOverallOvertime()
-})
+// Function to recalculate total earnings
+function recalculateEarnings() {
+  reactiveTotalEarnings.value = overallEarningsTotal.value
+}
 
 // Extractor for holiday type code to full name
 function getHolidayTypeName(type: string | undefined): string {
@@ -161,7 +237,27 @@ function getHolidayTypeName(type: string | undefined): string {
   }
 }
 
-// Methods
+// Holiday fetching function
+async function fetchEmployeeHolidays() {
+  if (!props.employeeData?.id) {
+    holidays.value = []
+    return
+  }
+  isHolidaysLoading.value = true
+  try {
+    holidays.value = await fetchHolidaysByDateString(
+      holidayDateString.value,
+      String(props.employeeData.id),
+    )
+  } catch (error) {
+    console.error('Error fetching holidays:', error)
+    holidays.value = []
+  } finally {
+    isHolidaysLoading.value = false
+  }
+}
+
+// Trip loading function
 function loadTrips() {
   isTripsLoading.value = true
   Promise.resolve(fetchFilteredTrips()).finally(() => {
@@ -169,13 +265,59 @@ function loadTrips() {
   })
 }
 
-// Lifecycle hooks
-onMounted(() => {
-  loadTrips()
-  fetchEmployeeHolidays()
+// Overtime calculation function
+async function updateOverallOvertime() {
+  try {
+    overallOvertime.value = await computeOverallOvertimeCalculation()
+  } catch (error) {
+    console.error('Error calculating overtime:', error)
+    overallOvertime.value = 0
+  }
+}
+
+// Enhanced mounted hook
+onMounted(async () => {
+  await Promise.all([
+    loadTrips(),
+    fetchEmployeeHolidays(),
+    updateOverallOvertime()
+  ])
+  recalculateEarnings()
 })
 
-// Watchers
+// Watch for changes in all earning components
+watch([
+  regularWorkTotal,
+  () => tripsStore.trips,
+  holidays,
+  overallOvertime,
+  employeeDailyRate,
+  dailyRate,
+  codaAllowance
+], () => {
+  recalculateEarnings()
+}, { deep: true, immediate: true })
+
+// Enhanced watchers for better reactivity
+watch(
+  [
+    () => props.employeeData?.id,
+    () => filterDateString.value,
+    () => props.payrollData?.month,
+    () => props.payrollData?.year,
+  ],
+  async () => {
+    await Promise.all([
+      updateOverallOvertime(),
+      loadTrips(),
+      fetchEmployeeHolidays()
+    ])
+    recalculateEarnings()
+  },
+  { deep: true }
+)
+
+// Individual watchers for specific data changes
 watch([filterDateString, () => props.employeeData?.id], () => {
   loadTrips()
 })
@@ -184,8 +326,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
 
-// Debug logging
+// Debug logging (uncomment for debugging)
 // console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
+// console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
 </script>
 
 <template>
@@ -231,12 +374,13 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="border-b-thin text-center pa-2">
             Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
           </td>
-          <td class="pa-2">@ {{ formatCurrency(employeeDailyRate ?? 0) }}</td>
+          <td class="pa-2">@ {{ safeCurrencyFormat(employeeDailyRate ?? 0) }}</td>
           <td class="pa-2">x {{ workDays }}</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(regularWorkTotal) }}
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
+            {{ safeCurrencyFormat(regularWorkTotal) }}
           </td>
         </tr>
+
         <!-- Unified Loading State for Trips and Holidays -->
         <tr v-if="isTripsLoading || isHolidaysLoading">
           <td class="text-center pa-2" colspan="5">
@@ -248,17 +392,17 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <!-- Show trips and holidays only when both are loaded -->
         <template v-else>
           <!-- Trips Rows -->
-          <template v-if="tripsStore.trips.length > 0">
+          <template v-if="tripsStore.trips && tripsStore.trips.length > 0">
             <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
               </td>
-              <td class="pa-2">
-                @{{ formatCurrency(trip.per_trip ?? 0) }}
-              </td>
+              <td class="pa-2">@{{ safeCurrencyFormat(trip.per_trip ?? 0) }}</td>
               <td class="pa-2"></td>
-              <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(trip.per_trip ?? 0) }}</td>
+              <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="trip">
+                {{ safeCurrencyFormat(trip.per_trip ?? 0) }}
+              </td>
             </tr>
           </template>
           <template v-else>
@@ -279,36 +423,37 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               </td>
               <td class="pa-2">
                 <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">
-                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                  @ {{ safeCurrencyFormat(dailyRate ?? 0) }}
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
-                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                  @ {{ safeCurrencyFormat(dailyRate ?? 0) }}
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
-                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                  @ {{ safeCurrencyFormat(dailyRate ?? 0) }}
                 </span>
-                <span v-else>
-                  @ {{ formatCurrency(dailyRate ?? 0) }}
-                </span>
+                <span v-else> @ {{ safeCurrencyFormat(dailyRate ?? 0) }} </span>
               </td>
               <td class="pa-2">
                 <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">x 200%</span>
-                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">x 150%</span>
-                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">x 130%</span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')"
+                  >x 150%</span
+                >
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')"
+                  >x 130%</span
+                >
               </td>
-              <td class="border-b-thin border-s-sm text-end pa-2">
+              <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
                 {{
                   holiday.type && holiday.type.toLowerCase().includes('rh')
-                    ? formatCurrency(dailyRate * 2)
+                    ? safeCurrencyFormat(dailyRate * 2)
                     : holiday.type && holiday.type.toLowerCase().includes('snh')
-                      ? formatCurrency(dailyRate * 1.5)
+                      ? safeCurrencyFormat(dailyRate * 1.5)
                       : holiday.type && holiday.type.toLowerCase().includes('swh')
-                        ? formatCurrency(dailyRate * 1.3)
-                        : formatCurrency(dailyRate)
+                        ? safeCurrencyFormat(dailyRate * 1.3)
+                        : safeCurrencyFormat(dailyRate)
                 }}
               </td>
             </tr>
-           
           </template>
           <template v-else>
             <tr>
@@ -316,23 +461,25 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             </tr>
           </template>
         </template>
-        <!-- overtime -->
+
+        <!-- Overtime -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2">@</td>
-          <td class="text-caption text-end pa-2"> {{ formatCurrency(overallOvertime) }} / hour</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-           -
+          <td class="text-caption text-end pa-2">{{ safeCurrencyFormat(overallOvertime) }} / hour</td>
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
+            <!-- overtime pay: daily rate / 8 * 1.25 * overtime hours -->
+            {{ safeCurrencyFormat((employeeDailyRate / 8) * 1.25 * overallOvertime) }}
           </td>
         </tr>
 
-        <!-- monthly tripings -->
+        <!-- Monthly trippings -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2">@</td>
           <td class="text-caption font-weight-bold text-end pa-2">/month</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            0
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="monthly-trippings">
+            {{ safeCurrencyFormat(0) }}
           </td>
         </tr>
 
@@ -341,8 +488,8 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
           <td class="text-caption font-weight-bold text-end pa-2">Php</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-           0
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overall">
+            {{ safeCurrencyFormat(overallEarningsTotal) }}
           </td>
         </tr>
         <tr v-if="showLateDeduction">
@@ -355,7 +502,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             </span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-           0
+            {{ safeCurrencyFormat(netSalaryCalculation.deductions.late) }}
           </td>
         </tr>
         <tr>
@@ -363,7 +510,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">SSS</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            0
+            {{ safeCurrencyFormat(netSalaryCalculation.deductions.sss) }}
           </td>
         </tr>
         <tr>
@@ -371,7 +518,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">PHIC</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-           0
+            {{ safeCurrencyFormat(netSalaryCalculation.deductions.phic) }}
           </td>
         </tr>
         <tr>
@@ -379,7 +526,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">HDMF</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            0
+            {{ safeCurrencyFormat(netSalaryCalculation.deductions.hdmf) }}
           </td>
         </tr>
         <tr>
@@ -387,7 +534,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">Cash Advance</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            0
+            {{ safeCurrencyFormat(netSalaryCalculation.deductions.cashAdvance) }}
           </td>
         </tr>
         <tr>
@@ -395,7 +542,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">Others</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            0
+            {{ safeCurrencyFormat(netSalaryCalculation.deductions.others) }}
           </td>
         </tr>
         <tr>
@@ -403,7 +550,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption pa-2">Less Deductions</td>
           <td class="pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            0
+            {{ safeCurrencyFormat(netSalaryCalculation.totalDeductions) }}
           </td>
         </tr>
         <tr>
@@ -412,7 +559,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             TOTAL NET SALARY
           </td>
           <td class="border-t-sm pa-2">Php</td>
-          <td class="border-t-sm border-s-sm text-end pa-2">0</td>
+          <td class="border-t-sm border-s-sm text-end pa-2">
+            {{ safeCurrencyFormat(netSalaryCalculation.netSalary) }}
+          </td>
         </tr>
       </tbody>
     </v-table>
