@@ -133,7 +133,7 @@ export function useEmployeesTable(
         'Pag-IBIG',
         'Origin',
         'Assignment',
-        ...(props.componentView === 'benefits' ? ['Daily Rate', 'Insured'] : []),
+        ...(props.componentView === 'benefits' ? ['Daily Rate', 'Accident Insurance'] : []),
         ...(props.componentView === 'payroll' ? [] : []),
       ].join(',')
 
@@ -143,7 +143,7 @@ export function useEmployeesTable(
           generateCSVTrim(item.firstname),
           generateCSVTrim(item.middlename),
 
-          `'${generateCSVTrim(item.phone)}'`,
+          `"${generateCSVTrim(item.phone)}"`, // Double quotes for numbers
           generateCSVTrim(item.email),
           generateCSVTrim(item.designation.designation),
           item.hired_at ? generateCSVTrim(date.format(item.hired_at, 'fullDate')) : '',
@@ -153,26 +153,27 @@ export function useEmployeesTable(
           getYearsOfService(item.hired_at),
           item.is_permanent ? 'Permanent' : 'Contractual',
           item.is_field_staff ? 'Field' : 'Office',
-          `'${generateCSVTrim(item.tin_no)}'`,
-          `'${generateCSVTrim(item.sss_no)}'`,
-          `'${generateCSVTrim(item.philhealth_no)}'`,
-          `'${generateCSVTrim(item.pagibig_no)}'`,
-          item.area_origin ? `'${generateCSVTrim(item.area_origin.area)}'` : '',
-          item.area_assignment ? `'${generateCSVTrim(item.area_assignment.area)}'` : '',
+          `"${generateCSVTrim(item.tin_no)}"`,
+          `"${generateCSVTrim(item.sss_no)}"`,
+          `"${generateCSVTrim(item.philhealth_no)}"`,
+          `"${generateCSVTrim(item.pagibig_no)}"`,
+          item.area_origin ? generateCSVTrim(item.area_origin.area) : '',
+          item.area_assignment ? generateCSVTrim(item.area_assignment.area) : '',
         ]
 
         if (props.componentView === 'benefits')
           csvData = [
             ...csvData,
-            generateCSVTrim(item.daily_rate.toFixed(2)),
+            item.daily_rate ? generateCSVTrim(item.daily_rate.toFixed(2)) : '',
             generateCSVTrim(item.is_insured ? 'Yes' : 'No'),
           ]
 
         if (props.componentView === 'payroll') csvData = [...csvData]
+
         return csvData.join(',')
       })
 
-      return [csvHeaders, ...csvRows].join('\n')
+      return '\uFEFF' + [csvHeaders, ...csvRows].join('\n')
     }
 
     generateCSV(filename, csvData())
