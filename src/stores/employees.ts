@@ -58,9 +58,16 @@ export const useEmployeesStore = defineStore('employees', () => {
     employeesTableTotal.value = 0
   }
 
+  const selectDefault = supabase
+    .from('employees')
+    .select(
+      '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
+    )
+    .is('deleted_at', null)
+
   // Actions
   async function getEmployees() {
-    const { data } = await supabase.from('employees').select().is('deleted_at', null)
+    const { data } = await selectDefault
 
     employees.value = data?.map((item) => ({
       ...item,
@@ -76,14 +83,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'lastname')
     search = tableSearch(search)
 
-    let query = supabase
-      .from('employees')
-      .select(
-        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
-      )
-      .is('deleted_at', null)
-      .order(column, { ascending: order })
-      .range(rangeStart, rangeEnd)
+    let query = selectDefault.order(column, { ascending: order }).range(rangeStart, rangeEnd)
 
     query = getEmployeesFilter(query, { search, designation_id })
 
