@@ -229,9 +229,11 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
               </td>
-              <td class="pa-2">@ 450 /per Trip</td>
+              <td class="pa-2">
+                @{{ formatCurrency(trip.per_trip ?? 0) }}
+              </td>
               <td class="pa-2"></td>
-              <td class="border-b-thin border-s-sm text-end pa-2">trips total</td>
+              <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(trip.per_trip ?? 0) }}</td>
             </tr>
           </template>
           <template v-else>
