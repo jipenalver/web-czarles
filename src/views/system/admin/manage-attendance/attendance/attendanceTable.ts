@@ -116,19 +116,23 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     formAction.value.formProcess = false
   }
 
-  const onFilterDate = (isCleared = false) => {
+  const onFilterDate = async (isCleared = false) => {
     if (isCleared) tableFilters.value.attendance_at = null
 
     onLoadItems(tableOptions.value)
+
+    await attendancesStore.getAttendancesCSV(tableOptions.value, tableFilters.value)
   }
 
-  const onFilterItems = () => {
+  const onFilterItems = async () => {
     const headers = getTableHeaders(props.componentView)
 
     if (tableFilters.value.employee_id !== null) tableHeaders.value = headers.slice(1)
     else tableHeaders.value = headers
 
     onLoadItems(tableOptions.value)
+
+    await attendancesStore.getAttendancesCSV(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -164,7 +168,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
           : []),
       ].join(',')
 
-      const csvRows = attendancesStore.attendances.map((item) => {
+      const csvRows = attendancesStore.attendancesCSV.map((item) => {
         let csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),

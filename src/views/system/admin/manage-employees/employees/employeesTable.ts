@@ -90,17 +90,22 @@ export function useEmployeesTable(
     formAction.value.formProcess = false
   }
 
-  const onFilterItems = () => {
+  const onFilterItems = async () => {
     onLoadItems(tableOptions.value)
+
+    await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
   }
 
-  const onSearchItems = () => {
+  const onSearchItems = async () => {
     if (
       tableFilters.value.search?.length >= 2 ||
       tableFilters.value.search?.length == 0 ||
       tableFilters.value.search === null
-    )
+    ) {
       onLoadItems(tableOptions.value)
+
+      await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+    }
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -146,7 +151,7 @@ export function useEmployeesTable(
         ...(props.componentView === 'payroll' ? [] : []),
       ].join(',')
 
-      const csvRows = employeesStore.employees.map((item) => {
+      const csvRows = employeesStore.employeesCSV.map((item) => {
         let csvData = [
           prepareCSV(item.lastname),
           prepareCSV(item.firstname),
