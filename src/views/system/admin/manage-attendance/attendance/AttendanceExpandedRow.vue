@@ -102,15 +102,15 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
               )
             }}
 
-            <span class="text-body-2 font-weight-bold">
-              {{
+            <span class="text-caption font-weight-black">
+              ({{
                 getWorkHoursDecimal(
                   props.itemData.am_time_in,
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
                 )
-              }}
+              }})
             </span>
           </p>
         </v-col>
