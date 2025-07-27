@@ -17,8 +17,30 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
-  useHolidaysFormDialog(props, emit)
+const {
+  formData,
+  formAction,
+  refVForm,
+  isUpdate,
+  onFormSubmit: baseOnFormSubmit,
+  onFormReset,
+} = useHolidaysFormDialog(props, emit)
+
+// Mapping for holiday type label to code
+const holidayTypeMap: Record<string, string> = {
+  'Regular Holiday': 'RH',
+  'Special (Non-working) Holiday': 'SNH',
+  'Special (Working) Holiday': 'SWH',
+  'Sunday Rate': 'SR',
+}
+
+function onFormSubmit() {
+  // i-map ang label to code before submit
+  if (formData.value.type && holidayTypeMap[formData.value.type]) {
+    formData.value.type = holidayTypeMap[formData.value.type]
+  }
+  baseOnFormSubmit()
+}
 </script>
 
 <template>

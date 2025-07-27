@@ -119,6 +119,23 @@ const {
   lateDeduction,
 } = payrollPrint
 
+// Extractor for holiday type code to full name
+function getHolidayTypeName(type: string | undefined): string {
+  if (!type) return ''
+  switch (type) {
+    case 'RH':
+      return 'Regular Holiday'
+    case 'SNH':
+      return 'Special (Non-working) Holiday'
+    case 'SWH':
+      return 'Special (Working) Holiday'
+    case 'SR':
+      return 'Sunday Rate'
+    default:
+      return type
+  }
+}
+
 // Methods
 function loadTrips() {
   isTripsLoading.value = true
@@ -231,12 +248,40 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
-                {{ holiday.name }} ({{ holiday.type }})
+                {{ holiday.name }} ({{ getHolidayTypeName(holiday.type ?? undefined) }})
               </td>
-              <td class="pa-2">@</td>
-              <td class="pa-2"></td>
-              <td class="border-b-thin border-s-sm text-end pa-2">holiday total</td>
+              <td class="pa-2">
+                <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">
+                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
+                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
+                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                </span>
+                <span v-else>
+                  @ {{ formatCurrency(dailyRate ?? 0) }}
+                </span>
+              </td>
+              <td class="pa-2">
+                <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">x 200%</span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">x 150%</span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">x 130%</span>
+              </td>
+              <td class="border-b-thin border-s-sm text-end pa-2">
+                {{
+                  holiday.type && holiday.type.toLowerCase().includes('rh')
+                    ? formatCurrency(dailyRate * 2)
+                    : holiday.type && holiday.type.toLowerCase().includes('snh')
+                      ? formatCurrency(dailyRate * 1.5)
+                      : holiday.type && holiday.type.toLowerCase().includes('swh')
+                        ? formatCurrency(dailyRate * 1.3)
+                        : formatCurrency(dailyRate)
+                }}
+              </td>
             </tr>
+           
           </template>
           <template v-else>
             <tr>
