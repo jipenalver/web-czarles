@@ -4,7 +4,7 @@ import {
   type AttendanceTableFilter,
   useAttendancesStore,
 } from '@/stores/attendances'
-import { getDate, getTime24Hour } from '@/utils/helpers/others'
+import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'

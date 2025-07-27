@@ -7,7 +7,7 @@ import {
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
-import { getDate } from '@/utils/helpers/others'
+import { getDate } from '@/utils/helpers/dates'
 import { onMounted, ref, watch } from 'vue'
 
 export function useLeaveFormDialog(

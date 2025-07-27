@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import AddonsDeductionsFormDialog from '../addons-deductions/AddonsDeductionsFormDialog.vue'
 import PayrollTableDialog from '../../manage-payroll/payroll/PayrollTableDialog.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import RatesFormDialog from '../rates/RatesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { getRandomCode } from '@/utils/helpers/others'
 import { useEmployeesTable } from './employeesTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -249,10 +250,11 @@ const {
     :item-data="itemData"
   ></PayrollTableDialog>
 
-  <ConfirmDialog
+  <ConfirmFieldDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this employee?"
+    subtitle="Are you sure you want to delete this employee?"
+    :confirm-text="getRandomCode(6, true)"
     @confirm="onConfirmDelete"
-  ></ConfirmDialog>
+  ></ConfirmFieldDialog>
 </template>
