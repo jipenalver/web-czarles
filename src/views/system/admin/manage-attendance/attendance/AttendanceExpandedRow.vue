@@ -214,14 +214,7 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
           >
             <span class="text-body-2 font-weight-bold me-2">Rendered Overtime:</span>
             <p class="text-body-2 font-weight-bold">
-              {{
-                getWorkHoursString(
-                  props.itemData.overtime_in,
-                  props.itemData.overtime_out,
-                  null,
-                  null,
-                )
-              }}
+              {{ getWorkHoursString(props.itemData.overtime_in, props.itemData.overtime_out) }}
             </p>
           </v-col>
         </template>
