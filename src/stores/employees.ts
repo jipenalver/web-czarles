@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
-import { getDateTimeISO, prepareFormDates } from '@/utils/helpers/dates'
+import { prepareDateTime, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Benefit, type EmployeeDeduction } from './benefits'
 import { type Designation } from './designations'
@@ -134,7 +134,7 @@ export const useEmployeesStore = defineStore('employees', () => {
   async function deleteEmployee(id: number) {
     return await supabase
       .from('employees')
-      .update({ deleted_at: getDateTimeISO(new Date()) })
+      .update({ deleted_at: prepareDateTime(new Date()) })
       .eq('id', id)
       .select()
   }

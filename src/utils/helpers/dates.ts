@@ -17,6 +17,12 @@ export const prepareDate = (date: Date | string) => {
   return dateValue.toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })
 }
 
+// 👉 Fix v-date-input; prepare local date in form
+export const prepareDateTime = (date: Date | string) => {
+  const dateValue = new Date(date)
+  return dateValue.toLocaleString('en-US', { timeZone: 'Asia/Manila' })
+}
+
 // 👉 Fix v-date-input; prepare date range
 export const prepareDateRange = (daterange: string[] | null) => {
   if (daterange === null) return null
