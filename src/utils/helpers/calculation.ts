@@ -1,12 +1,20 @@
-// 👉 Get Field minutes worked
-const getFieldMinutes = (startTime: string | Date | null, endTime: string | Date | null) => {
-  const start = new Date(startTime as string)
-  const end = new Date(endTime as string)
+// 👉 Get Field minutes worked (handles overnight shifts)
+const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | null) => {
+  const checkIn = new Date(timeIn as string)
+  const checkOut = new Date(timeOut as string)
 
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
+  if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) return 0
 
-  const diffMs = end.getTime() - start.getTime()
-  return diffMs < 0 ? 0 : Math.floor(diffMs / (1000 * 60))
+  let diffMs = checkOut.getTime() - checkIn.getTime()
+
+  // Handle overnight shifts: if end time is earlier than start time, assume it's the next day
+  if (diffMs < 0) {
+    const nextDayEnd = new Date(checkOut)
+    nextDayEnd.setDate(nextDayEnd.getDate() + 1)
+    diffMs = nextDayEnd.getTime() - checkIn.getTime()
+  }
+
+  return Math.max(0, Math.floor(diffMs / (1000 * 60)))
 }
 
 // 👉 Get Office minutes worked with penalties for late arrivals and early departures
@@ -16,8 +24,6 @@ const getOfficeMinutes = (
   sessionStart: number,
   sessionEnd: number,
 ) => {
-  if (!timeIn || !timeOut) return 0
-
   // Strip timezone information and parse as local time
   const parseLocalTime = (timeString: string | Date) => {
     if (typeof timeString === 'string') {
@@ -28,11 +34,12 @@ const getOfficeMinutes = (
     return new Date(timeString)
   }
 
-  const checkIn = parseLocalTime(timeIn)
-  const checkOut = parseLocalTime(timeOut)
+  const checkIn = parseLocalTime(timeIn as string)
+  const checkOut = parseLocalTime(timeOut as string)
 
   if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) return 0
 
+  // Ensure check-in and check-out are within the same day
   const sessionStartTime = new Date(
     checkIn.getFullYear(),
     checkIn.getMonth(),
@@ -61,9 +68,9 @@ const getOfficeMinutes = (
 
   // Calculate minutes within session bounds with deductions applied
   const diffMs = effectiveOut.getTime() - effectiveIn.getTime()
-  const minutes = Math.max(0, Math.floor(diffMs / (1000 * 60)))
 
-  return minutes
+  // If negative, it means no valid time worked
+  return Math.max(0, Math.floor(diffMs / (1000 * 60)))
 }
 
 // 👉 Get total minutes worked (AM + PM)
@@ -131,11 +138,7 @@ export const getWorkHoursString = (
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
   isField = false,
-) => {
-  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
-
-  return convertTimeToString(totalMinutes)
-}
+) => convertTimeToString(getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField))
 
 // 👉 Get total work hours (AM + PM) in decimal
 export const getWorkHoursDecimal = (
@@ -144,22 +147,12 @@ export const getWorkHoursDecimal = (
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
   isField = false,
-) => {
-  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
-
-  return convertTimeToDecimal(totalMinutes)
-}
+) => convertTimeToDecimal(getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField))
 
 // 👉 Get total overtime hours as string
-export const getOvertimeHoursString = (overtimeIn: string | null, overtimeOut: string | null) => {
-  const totalMinutes = getFieldMinutes(overtimeIn, overtimeOut)
-
-  return convertTimeToString(totalMinutes)
-}
+export const getOvertimeHoursString = (overtimeIn: string | null, overtimeOut: string | null) =>
+  convertTimeToString(getFieldMinutes(overtimeIn, overtimeOut))
 
 // 👉 Get total overtime hours as decimal
-export const getOvertimeHoursDecimal = (overtimeIn: string | null, overtimeOut: string | null) => {
-  const totalMinutes = getFieldMinutes(overtimeIn, overtimeOut)
-
-  return convertTimeToDecimal(totalMinutes)
-}
+export const getOvertimeHoursDecimal = (overtimeIn: string | null, overtimeOut: string | null) =>
+  convertTimeToDecimal(getFieldMinutes(overtimeIn, overtimeOut))
