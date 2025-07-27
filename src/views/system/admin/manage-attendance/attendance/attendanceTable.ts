@@ -36,6 +36,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   })
   const tableFilters = ref({
     employee_id: null,
+    attendance_at: null as Date[] | null,
   })
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)
@@ -108,6 +109,12 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     formAction.value.formProcess = false
   }
 
+  const onFilterDate = (isCleared = false) => {
+    if (isCleared) tableFilters.value.attendance_at = null
+
+    onLoadItems(tableOptions.value)
+  }
+
   const onFilterItems = () => {
     const headers = getTableHeaders(props.componentView)
 
@@ -153,6 +160,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     onOvertime,
     onDelete,
     onConfirmDelete,
+    onFilterDate,
     onFilterItems,
     onLoadItems,
     hasAttendanceImage,
