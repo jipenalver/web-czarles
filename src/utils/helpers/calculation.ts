@@ -66,7 +66,7 @@ const getOfficeMinutes = (
   return minutes
 }
 
-// 👉 Get total minutes worked (AM + PM sessions combined)
+// 👉 Get total minutes worked (AM + PM)
 const getTotalMinutes = (
   amTimeIn: string | null,
   amTimeOut: string | null,
@@ -101,16 +101,8 @@ const getTotalMinutes = (
   return totalMinutes
 }
 
-// 👉 Get total work hours (AM + PM sessions combined)
-export const getWorkHoursString = (
-  amTimeIn: string | null,
-  amTimeOut: string | null,
-  pmTimeIn: string | null = null,
-  pmTimeOut: string | null = null,
-  isField = false,
-) => {
-  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
-
+// 👉 Convert total minutes to a human-readable string
+const convertTimeToString = (totalMinutes: number) => {
   if (totalMinutes === 0) return '0 minutes'
 
   const hours = Math.floor(totalMinutes / 60)
@@ -123,7 +115,29 @@ export const getWorkHoursString = (
   return `${hours} ${hourText} ${minutes} ${minuteText}`
 }
 
-// 👉 Get total work hours (AM + PM sessions combined) in decimal
+// 👉 Convert total minutes to a decimal string
+const convertTimeToDecimal = (totalMinutes: number) => {
+  if (totalMinutes === 0) return 0
+
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return Math.round((hours + minutes / 60) * 100) / 100
+}
+
+// 👉 Get total work hours (AM + PM)
+export const getWorkHoursString = (
+  amTimeIn: string | null,
+  amTimeOut: string | null,
+  pmTimeIn: string | null = null,
+  pmTimeOut: string | null = null,
+  isField = false,
+) => {
+  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
+
+  return convertTimeToString(totalMinutes)
+}
+
+// 👉 Get total work hours (AM + PM) in decimal
 export const getWorkHoursDecimal = (
   amTimeIn: string | null,
   amTimeOut: string | null,
@@ -133,9 +147,19 @@ export const getWorkHoursDecimal = (
 ) => {
   const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
 
-  if (totalMinutes === 0) return 0
+  return convertTimeToDecimal(totalMinutes)
+}
 
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  return (hours + minutes / 60).toFixed(2)
+// 👉 Get total overtime hours as string
+export const getOvertimeHoursString = (overtimeIn: string | null, overtimeOut: string | null) => {
+  const totalMinutes = getFieldMinutes(overtimeIn, overtimeOut)
+
+  return convertTimeToString(totalMinutes)
+}
+
+// 👉 Get total overtime hours as decimal
+export const getOvertimeHoursDecimal = (overtimeIn: string | null, overtimeOut: string | null) => {
+  const totalMinutes = getFieldMinutes(overtimeIn, overtimeOut)
+
+  return convertTimeToDecimal(totalMinutes)
 }
