@@ -1,10 +1,20 @@
+import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
+import { generateCSV, generateCSVTrim } from '@/utils/helpers/others'
 import { type Employee, useEmployeesStore } from '@/stores/employees'
+import { getDateISO, getYearsOfService } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useDesignationsStore } from '@/stores/designations'
-import { type TableOptions } from '@/utils/helpers/tables'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useDate } from 'vuetify'
 
-export function useEmployeesTable() {
+export function useEmployeesTable(
+  props: {
+    componentView: 'employees' | 'benefits' | 'payroll'
+  },
+  tableHeaders: TableHeader[],
+) {
+  const date = useDate()
+
   const employeesStore = useEmployeesStore()
   const designationsStore = useDesignationsStore()
 
@@ -99,6 +109,79 @@ export function useEmployeesTable() {
     tableOptions.value.isLoading = false
   }
 
+  const onExportCSV = () => {
+    const filename = getDateISO(new Date()) + '-employees'
+
+    const csvData = () => {
+      const defaultHeaders = tableHeaders
+        .filter(({ title }) => title !== 'Actions' && title !== 'Fullname')
+        .map(({ title }) => title)
+
+      const csvHeaders = [
+        'Lastname',
+        'Firstname',
+        'Middlename',
+        ...defaultHeaders,
+        'Birthdate',
+        'Address',
+        'Years of Service',
+        'Contract Status',
+        'Field or Office',
+        'TIN',
+        'SSS',
+        'PhilHealth',
+        'Pag-IBIG',
+        'Origin',
+        'Assignment',
+        ...(props.componentView === 'benefits' ? ['Daily Rate', 'Insured'] : []),
+        ...(props.componentView === 'payroll' ? [] : []),
+      ].join(',')
+
+      const csvRows = employeesStore.employees.map((item) => {
+        let csvData = [
+          generateCSVTrim(item.lastname),
+          generateCSVTrim(item.firstname),
+          generateCSVTrim(item.middlename),
+
+          `'${generateCSVTrim(item.phone)}'`,
+          generateCSVTrim(item.email),
+          generateCSVTrim(item.designation.designation),
+          item.hired_at ? generateCSVTrim(date.format(item.hired_at, 'fullDate')) : '',
+
+          item.birthdate ? generateCSVTrim(date.format(item.birthdate, 'fullDate')) : '',
+          generateCSVTrim(item.address),
+          getYearsOfService(item.hired_at),
+          item.is_permanent ? 'Permanent' : 'Contractual',
+          item.is_field_staff ? 'Field' : 'Office',
+          `'${generateCSVTrim(item.tin_no)}'`,
+          `'${generateCSVTrim(item.sss_no)}'`,
+          `'${generateCSVTrim(item.philhealth_no)}'`,
+          `'${generateCSVTrim(item.pagibig_no)}'`,
+          item.area_origin ? `'${generateCSVTrim(item.area_origin.area)}'` : '',
+          item.area_assignment ? `'${generateCSVTrim(item.area_assignment.area)}'` : '',
+        ]
+
+        if (props.componentView === 'benefits')
+          csvData = [
+            ...csvData,
+            generateCSVTrim(item.daily_rate.toFixed(2)),
+            generateCSVTrim(item.is_insured ? 'Yes' : 'No'),
+          ]
+
+        if (props.componentView === 'payroll') csvData = [...csvData]
+        return csvData.join(',')
+      })
+
+      return [csvHeaders, ...csvRows].join('\n')
+    }
+
+    generateCSV(filename, csvData())
+  }
+
+  onMounted(async () => {
+    await employeesStore.getEmployees()
+  })
+
   // Expose State and Actions
   return {
     tableOptions,
@@ -120,6 +203,7 @@ export function useEmployeesTable() {
     onSearchItems,
     onFilterItems,
     onLoadItems,
+    onExportCSV,
     employeesStore,
     designationsStore,
   }
