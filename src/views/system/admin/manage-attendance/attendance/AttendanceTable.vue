@@ -15,7 +15,7 @@ const props = defineProps<{
   componentView: 'attendance' | 'leave' | 'overtime'
 }>()
 
-const { mobile } = useDisplay()
+const { mobile, xs } = useDisplay()
 
 const {
   tableHeaders,
@@ -40,6 +40,7 @@ const {
   onFilterItems,
   onLoadItems,
   hasAttendanceImage,
+  onExportCSV,
   attendancesStore,
   employeesStore,
 } = useAttendanceTable(props)
@@ -70,6 +71,20 @@ const {
       >
         <template #top>
           <v-row dense>
+            <v-col cols="12" sm="1" :class="xs ? 'd-flex justify-end' : ''">
+              <v-menu>
+                <template v-slot:activator="{ props }">
+                  <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item @click="onExportCSV">
+                    <v-list-item-title>Export to CSV</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-col>
+
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="4">
@@ -85,7 +100,7 @@ const {
               ></v-autocomplete>
             </v-col>
 
-            <v-col cols="12" sm="4">
+            <v-col cols="12" sm="3">
               <v-date-input
                 v-model="tableFilters.attendance_at"
                 prepend-icon=""
