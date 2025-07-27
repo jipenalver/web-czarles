@@ -52,12 +52,14 @@ export const useAttendancesStore = defineStore('attendances', () => {
   const attendances = ref<Attendance[]>([])
   const attendancesTable = ref<Attendance[]>([])
   const attendancesTableTotal = ref(0)
+  const attendancesCSV = ref<Attendance[]>([])
 
   // Reset State
   function $reset() {
     attendances.value = []
     attendancesTable.value = []
     attendancesTableTotal.value = 0
+    attendancesCSV.value = []
   }
 
   // Actions
@@ -68,6 +70,21 @@ export const useAttendancesStore = defineStore('attendances', () => {
       .order('am_time_in', { ascending: false })
 
     attendances.value = data as Attendance[]
+  }
+
+  async function getAttendancesCSV(
+    tableOptions: TableOptions,
+    tableFilters: AttendanceTableFilter,
+  ) {
+    const { column, order } = tablePagination(tableOptions, 'am_time_in', false)
+
+    let query = supabase.from('attendances').select(selectQuery).order(column, { ascending: order })
+
+    query = getAttendancesFilter(query, tableFilters)
+
+    const { data } = await query
+
+    attendancesCSV.value = data as Attendance[]
   }
 
   async function getAttendancesTable(
@@ -158,8 +175,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendances,
     attendancesTable,
     attendancesTableTotal,
+    attendancesCSV,
     $reset,
     getAttendances,
+    getAttendancesCSV,
     getAttendancesTable,
     addAttendance,
     updateAttendance,
