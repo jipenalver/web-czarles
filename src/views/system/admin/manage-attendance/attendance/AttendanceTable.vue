@@ -88,6 +88,8 @@ const {
             <v-col cols="12" sm="4">
               <v-date-input
                 v-model="tableFilters.attendance_at"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
                 density="compact"
                 label="Attendance Date"
                 multiple="range"
