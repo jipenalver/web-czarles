@@ -7,7 +7,7 @@ import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const date = useDate()
-const { mobile } = useDisplay()
+const { mobile, xs } = useDisplay()
 
 const {
   tableHeaders,
@@ -24,6 +24,7 @@ const {
   onFilterDate,
   onFilterItems,
   onLoadItems,
+  onExportCSV,
   cashAdvancesStore,
   employeesStore,
 } = useCashAdvancesTable()
@@ -53,6 +54,20 @@ const {
       >
         <template #top>
           <v-row dense>
+            <v-col cols="12" sm="1" :class="xs ? 'd-flex justify-end' : ''">
+              <v-menu>
+                <template v-slot:activator="{ props }">
+                  <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item @click="onExportCSV">
+                    <v-list-item-title>Export to CSV</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-col>
+
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="4">

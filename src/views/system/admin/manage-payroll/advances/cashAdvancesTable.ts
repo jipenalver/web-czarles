@@ -1,19 +1,24 @@
 import { type CashAdvance, useCashAdvancesStore } from '@/stores/cashAdvances'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
+import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
+import { getDateISO } from '@/utils/helpers/dates'
 import { onMounted, ref } from 'vue'
+import { useDate } from 'vuetify'
 
 export function useCashAdvancesTable() {
+  const date = useDate()
+
   const cashAdvancesStore = useCashAdvancesStore()
   const employeesStore = useEmployeesStore()
 
   // States
   const baseHeaders: TableHeader[] = [
     { title: 'Employee', key: 'employee', sortable: false, align: 'start' },
-    { title: 'Amount', key: 'amount', sortable: false, align: 'start' },
-    { title: 'Description', key: 'description', sortable: false, align: 'start' },
-    { title: 'Date Requested', key: 'request_at', sortable: false, align: 'center' },
+    { title: 'Amount', key: 'amount', align: 'start' },
+    { title: 'Description', key: 'description', align: 'start' },
+    { title: 'Date Requested', key: 'request_at', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
@@ -92,6 +97,36 @@ export function useCashAdvancesTable() {
     tableOptions.value.isLoading = false
   }
 
+  const onExportCSV = () => {
+    const filename = `${getDateISO(new Date())}-cash-advances`
+
+    const csvData = () => {
+      const defaultHeaders = tableHeaders.value
+        .filter(({ title }) => !['Actions', 'Employee'].includes(title))
+        .map(({ title }) => title)
+
+      const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
+
+      const csvRows = cashAdvancesStore.cashAdvancesCSV.map((item) => {
+        const csvData = [
+          prepareCSV(item.employee.lastname),
+          prepareCSV(item.employee.firstname),
+          prepareCSV(item.employee.middlename),
+
+          prepareCSV(item.amount.toString()),
+          prepareCSV(item.description),
+          item.request_at ? prepareCSV(date.format(item.request_at, 'fullDate')) : '',
+        ]
+
+        return csvData.join(',')
+      })
+
+      return [csvHeaders, ...csvRows].join('\n')
+    }
+
+    generateCSV(filename, csvData())
+  }
+
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
     if (cashAdvancesStore.cashAdvancesCSV.length === 0)
@@ -114,6 +149,7 @@ export function useCashAdvancesTable() {
     onFilterDate,
     onFilterItems,
     onLoadItems,
+    onExportCSV,
     cashAdvancesStore,
     employeesStore,
   }
