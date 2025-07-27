@@ -45,7 +45,8 @@ export type AttendanceTableFilter = {
 }
 
 export const useAttendancesStore = defineStore('attendances', () => {
-  const selectQuery = '*, employee:employee_id (id, firstname, lastname), attendance_images (*)'
+  const selectQuery =
+    '*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*)'
 
   // States
   const attendances = ref<Attendance[]>([])
