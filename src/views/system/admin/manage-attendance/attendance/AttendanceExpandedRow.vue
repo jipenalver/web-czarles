@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getWorkHoursString } from '@/utils/helpers/calculation'
+import { getWorkHoursDecimal, getWorkHoursString } from '@/utils/helpers/calculation'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'
@@ -101,6 +101,17 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
                 props.itemData.pm_time_out,
               )
             }}
+
+            <span class="text-body-2 font-weight-bold">
+              {{
+                getWorkHoursDecimal(
+                  props.itemData.am_time_in,
+                  props.itemData.am_time_out,
+                  props.itemData.pm_time_in,
+                  props.itemData.pm_time_out,
+                )
+              }}
+            </span>
           </p>
         </v-col>
 
