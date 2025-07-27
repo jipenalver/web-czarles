@@ -1,6 +1,6 @@
+import { MILLISECONDS_PER_DAY, getDate, prepareDate } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { getDate } from '@/utils/helpers/dates'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -41,6 +41,7 @@ export type AttendanceImage = {
 
 export type AttendanceTableFilter = {
   employee_id: string | null
+  attendance_at: Date[] | null
 }
 
 export const useAttendancesStore = defineStore('attendances', () => {
@@ -68,7 +69,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   async function getAttendancesTable(
     tableOptions: TableOptions,
-    { employee_id }: AttendanceTableFilter,
+    tableFilters: AttendanceTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
@@ -84,11 +85,11 @@ export const useAttendancesStore = defineStore('attendances', () => {
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getAttendancesFilter(query, { employee_id })
+    query = getAttendancesFilter(query, tableFilters)
 
     const { data } = await query
 
-    const { count } = await getAttendancesCount({ employee_id })
+    const { count } = await getAttendancesCount(tableFilters)
 
     attendancesTable.value = data?.map((item) => {
       return {
@@ -99,10 +100,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendancesTableTotal.value = count as number
   }
 
-  async function getAttendancesCount({ employee_id }: AttendanceTableFilter) {
+  async function getAttendancesCount(tableFilters: AttendanceTableFilter) {
     let query = supabase.from('attendances').select('*', { count: 'exact', head: true })
 
-    query = getAttendancesFilter(query, { employee_id })
+    query = getAttendancesFilter(query, tableFilters)
 
     return await query
   }
@@ -110,9 +111,24 @@ export const useAttendancesStore = defineStore('attendances', () => {
   function getAttendancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { employee_id }: AttendanceTableFilter,
+    { employee_id, attendance_at }: AttendanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
+
+    if (attendance_at) {
+      const dateQuery = (dates: Date[], isRange = false) => {
+        const startDate = dates[0]
+        const endDate = isRange
+          ? new Date(dates[dates.length - 1].getTime() + MILLISECONDS_PER_DAY)
+          : new Date(startDate.getTime() + MILLISECONDS_PER_DAY)
+
+        return query
+          .gte('am_time_in', prepareDate(startDate))
+          .lt('am_time_in', prepareDate(endDate))
+      }
+
+      query = dateQuery(attendance_at, attendance_at.length > 1)
+    }
 
     return query
   }
