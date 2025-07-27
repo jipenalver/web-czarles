@@ -88,10 +88,9 @@ const getTotalMinutes = (
       const shortage = expectedMinutes - actualMinutes
       // Apply penalty: deduct the shortage from actual time worked
       totalMinutes = Math.max(0, actualMinutes - shortage)
-    } else {
-      // If 8 hours or more, cap at 8 hours
-      totalMinutes = Math.min(actualMinutes, expectedMinutes)
     }
+    // If 8 hours or more, cap at 8 hours
+    else totalMinutes = Math.min(actualMinutes, expectedMinutes)
   } else {
     // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
     const amMinutes = getOfficeMinutes(amTimeIn, amTimeOut, 8, 12) // 8am-12pm
@@ -138,5 +137,5 @@ export const getWorkHoursDecimal = (
 
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60
-  return hours + minutes / 60
+  return (hours + minutes / 60).toFixed(2)
 }
