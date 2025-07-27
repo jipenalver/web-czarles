@@ -9,6 +9,8 @@ import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
 
+import PayrollDeductions from './PayrollDeductions.vue'
+
 
 // Props
 const props = defineProps<{
@@ -408,77 +410,23 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             {{ safeCurrencyFormat(overallEarningsTotal, formatCurrency) }}
           </td>
         </tr>
-        <tr v-if="showLateDeduction">
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">Late Deduction</td>
-          <td class="text-caption font-weight-bold text-end pa-2">
-            <!-- total late minutes for the month -->
-            <span v-if="monthLateDeduction !== undefined && monthLateDeduction > 0">
-              ({{ monthLateDeduction }} min.)
-            </span>
-          </td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.deductions.late, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">SSS</td>
-          <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.deductions.sss, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">PHIC</td>
-          <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.deductions.phic, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">HDMF</td>
-          <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.deductions.hdmf, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">Cash Advance</td>
-          <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.deductions.cashAdvance, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">Others</td>
-          <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.deductions.others, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption pa-2">Less Deductions</td>
-          <td class="pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.totalDeductions, formatCurrency) }}
-          </td>
-        </tr>
-        <tr>
-          <td class="pa-2" colspan="2"></td>
-          <td class="text-caption font-weight-bold border-t-sm border-s-sm pa-2">
-            TOTAL NET SALARY
-          </td>
-          <td class="border-t-sm pa-2">Php</td>
-          <td class="border-t-sm border-s-sm text-end pa-2">
-            {{ safeCurrencyFormat(netSalaryCalculation.netSalary, formatCurrency) }}
-          </td>
-        </tr>
+        <PayrollDeductions
+          :showLateDeduction="showLateDeduction"
+          :monthLateDeduction="monthLateDeduction"
+          :netSalaryCalculation="{
+            deductions: {
+              late: netSalaryCalculation.deductions.late ?? 0,
+              sss: netSalaryCalculation.deductions.sss ?? 0,
+              phic: netSalaryCalculation.deductions.phic ?? 0,
+              hdmf: netSalaryCalculation.deductions.hdmf ?? 0,
+              cashAdvance: netSalaryCalculation.deductions.cashAdvance ?? 0,
+              others: netSalaryCalculation.deductions.others ?? 0,
+            },
+            totalDeductions: netSalaryCalculation.totalDeductions,
+            netSalary: netSalaryCalculation.netSalary,
+          }"
+          :formatCurrency="formatCurrency"
+        />
       </tbody>
     </v-table>
 
