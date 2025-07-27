@@ -112,7 +112,7 @@ export function useEmployeesTable(
   }
 
   const onExportCSV = () => {
-    const filename = getDateISO(new Date()) + '-employees'
+    const filename = `${getDateISO(new Date())}-${props.componentView}`
 
     const csvData = () => {
       const defaultHeaders = tableHeaders
@@ -183,8 +183,8 @@ export function useEmployeesTable(
 
           csvData = [
             ...csvData,
-            item.daily_rate ? prepareCSV(item.daily_rate.toFixed(2)) : '',
-            prepareCSV(item.is_insured ? 'Yes' : 'No'),
+            item.daily_rate ? item.daily_rate.toFixed(2) : '',
+            item.is_insured ? 'Yes' : 'No',
 
             ...getBenefits('addons'),
             ...getBenefits('deductions'),
