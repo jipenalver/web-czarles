@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CashAdvancesFormDialog from './CashAdvancesFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useCashAdvancesTable } from './cashAdvancesTable'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -13,9 +14,9 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -98,8 +99,8 @@ const {
             </v-col>
 
             <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-tag-plus" color="primary" block @click="onAdd">
-                Add Designation
+              <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
+                Add Cash Advance
               </v-btn>
             </v-col>
           </v-row>
@@ -142,12 +143,12 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- <DesignationsFormDialog
+  <CashAdvancesFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></DesignationsFormDialog> -->
+  ></CashAdvancesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"

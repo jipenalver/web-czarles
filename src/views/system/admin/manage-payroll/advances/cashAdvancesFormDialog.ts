@@ -5,7 +5,8 @@ import {
 } from '@/stores/cashAdvances'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { ref, watch } from 'vue'
+import { useEmployeesStore } from '@/stores/employees'
+import { onMounted, ref, watch } from 'vue'
 
 export function useCashAdvancesFormDialog(
   props: {
@@ -17,12 +18,14 @@ export function useCashAdvancesFormDialog(
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const cashAdvancesStore = useCashAdvancesStore()
+  const employeesStore = useEmployeesStore()
 
   // States
   const formDataDefault = {
     employee_id: null,
-    amount: 0,
+    amount: undefined,
     description: '',
+    request_at: new Date(),
   }
   const formData = ref<Partial<CashAdvance>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -77,6 +80,10 @@ export function useCashAdvancesFormDialog(
     emit('update:isDialogVisible', false)
   }
 
+  onMounted(async () => {
+    if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+  })
+
   // Expose State and Actions
   return {
     formData,
@@ -85,5 +92,6 @@ export function useCashAdvancesFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
+    employeesStore,
   }
 }
