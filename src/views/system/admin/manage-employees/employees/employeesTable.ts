@@ -1,7 +1,7 @@
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
-import { generateCSV, generateCSVTrim } from '@/utils/helpers/others'
 import { type Employee, useEmployeesStore } from '@/stores/employees'
 import { getDateISO, getYearsOfService } from '@/utils/helpers/dates'
+import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useDesignationsStore } from '@/stores/designations'
 import { onMounted, ref } from 'vue'
@@ -139,33 +139,33 @@ export function useEmployeesTable(
 
       const csvRows = employeesStore.employees.map((item) => {
         let csvData = [
-          generateCSVTrim(item.lastname),
-          generateCSVTrim(item.firstname),
-          generateCSVTrim(item.middlename),
+          prepareCSV(item.lastname),
+          prepareCSV(item.firstname),
+          prepareCSV(item.middlename),
 
-          `"${generateCSVTrim(item.phone)}"`, // Double quotes for numbers
-          generateCSVTrim(item.email),
-          generateCSVTrim(item.designation.designation),
-          item.hired_at ? generateCSVTrim(date.format(item.hired_at, 'fullDate')) : '',
+          prepareCSV(item.phone),
+          prepareCSV(item.email),
+          prepareCSV(item.designation.designation),
+          item.hired_at ? prepareCSV(date.format(item.hired_at, 'fullDate')) : '',
 
-          item.birthdate ? generateCSVTrim(date.format(item.birthdate, 'fullDate')) : '',
-          generateCSVTrim(item.address),
+          item.birthdate ? prepareCSV(date.format(item.birthdate, 'fullDate')) : '',
+          prepareCSV(item.address),
           getYearsOfService(item.hired_at),
           item.is_permanent ? 'Permanent' : 'Contractual',
           item.is_field_staff ? 'Field' : 'Office',
-          `"${generateCSVTrim(item.tin_no)}"`,
-          `"${generateCSVTrim(item.sss_no)}"`,
-          `"${generateCSVTrim(item.philhealth_no)}"`,
-          `"${generateCSVTrim(item.pagibig_no)}"`,
-          item.area_origin ? generateCSVTrim(item.area_origin.area) : '',
-          item.area_assignment ? generateCSVTrim(item.area_assignment.area) : '',
+          prepareCSV(item.tin_no),
+          prepareCSV(item.sss_no),
+          prepareCSV(item.philhealth_no),
+          prepareCSV(item.pagibig_no),
+          item.area_origin ? prepareCSV(item.area_origin.area) : '',
+          item.area_assignment ? prepareCSV(item.area_assignment.area) : '',
         ]
 
         if (props.componentView === 'benefits')
           csvData = [
             ...csvData,
-            item.daily_rate ? generateCSVTrim(item.daily_rate.toFixed(2)) : '',
-            generateCSVTrim(item.is_insured ? 'Yes' : 'No'),
+            item.daily_rate ? prepareCSV(item.daily_rate.toFixed(2)) : '',
+            prepareCSV(item.is_insured ? 'Yes' : 'No'),
           ]
 
         if (props.componentView === 'payroll') csvData = [...csvData]
@@ -173,7 +173,7 @@ export function useEmployeesTable(
         return csvData.join(',')
       })
 
-      return '\uFEFF' + [csvHeaders, ...csvRows].join('\n')
+      return [csvHeaders, ...csvRows].join('\n')
     }
 
     generateCSV(filename, csvData())
