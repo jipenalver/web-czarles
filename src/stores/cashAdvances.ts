@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { MILLISECONDS_PER_DAY, prepareDate, prepareFormDates } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
-import { MILLISECONDS_PER_DAY, prepareDate } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { type Employee } from './employees'
@@ -9,7 +10,7 @@ import { ref } from 'vue'
 export type CashAdvance = {
   id: number
   created_at: string
-  request_at: string
+  request_at: string | Date
   amount: number
   description: string
   employee_id: number | null
@@ -125,11 +126,15 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
   }
 
   async function addCashAdvance(formData: Partial<CashAdvance>) {
-    return await supabase.from('cash_advances').insert(formData).select()
+    const preparedData = prepareFormDates(formData, ['hired_at'])
+
+    return await supabase.from('cash_advances').insert(preparedData).select()
   }
 
   async function updateCashAdvance(formData: Partial<CashAdvance>) {
-    return await supabase.from('cash_advances').update(formData).eq('id', formData.id).select()
+    const { employee, ...updateData } = prepareFormDates(formData, ['request_at'])
+
+    return await supabase.from('cash_advances').update(updateData).eq('id', formData.id).select()
   }
 
   async function deleteCashAdvance(id: number) {
