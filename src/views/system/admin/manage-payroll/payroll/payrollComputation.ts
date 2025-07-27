@@ -1,3 +1,5 @@
+// Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
+
 import { useAttendancesStore } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
 import { computed, type Ref, ref, watch } from 'vue'
@@ -20,31 +22,6 @@ export interface TableData {
   other_deductions?: number
 }
 
-// Reusable function for computing late minutes
-export function computeMonthLateMinutes(attendances: Array<{ am_time_in?: string | null, pm_time_in?: string | null }>): number {
-  function getExcessMinutes(defaultOut: string, actualOut: string): number {
-    const today = new Date().toISOString().split("T")[0]
-    const defaultDate = new Date(`${today}T${defaultOut}:00`)
-    const actualDate = new Date(`${today}T${actualOut}:00`)
-    const diffMs = actualDate.getTime() - defaultDate.getTime()
-    return Math.max(0, Math.floor(diffMs / 60000))
-  }
-
-  let totalLateAM = 0
-  let totalLatePM = 0
-
-  attendances.forEach(attendance => {
-    if (attendance.am_time_in) {
-      totalLateAM += getExcessMinutes('08:00', attendance.am_time_in)
-    }
-    if (attendance.pm_time_in) {
-      totalLatePM += getExcessMinutes('13:00', attendance.pm_time_in)
-    }
-  })
-
-  return totalLateAM + totalLatePM
-}
-
 export function usePayrollComputation(
   dailyRate: Ref<number>,
   grossSalary: Ref<number>,
@@ -52,10 +29,20 @@ export function usePayrollComputation(
   employeeId?: number,
   payrollMonth?: string,
   payrollYear?: number,
-  dateString?: string
+  dateString?: string,
 ) {
   const employeesStore = useEmployeesStore()
   const attendancesStore = useAttendancesStore()
+
+  // Helper function to compute excess minutes (late)
+  function getExcessMinutes(defaultOut: string, actualOut: string): number {
+    const today = new Date().toISOString().split('T')[0]
+    const defaultDate = new Date(`${today}T${defaultOut}:00`)
+    const actualDate = new Date(`${today}T${actualOut}:00`)
+    const diffMs = actualDate.getTime() - defaultDate.getTime()
+    const diffMinutes = Math.max(0, Math.floor(diffMs / 60000))
+    return diffMinutes
+  }
 
   // Basic calculations
   const codaAllowance = computed(() => tableData.value?.coda_allowance || 0)
@@ -84,42 +71,81 @@ export function usePayrollComputation(
     return emp?.daily_rate || dailyRate.value
   })
 
+  // monthLateDeduction for total late minutes in the month
   const monthLateDeduction = ref<number>(0)
+
+  // Late deduction formula: (dailyrate / 8 hours / 60 minutes) * total late minutes
+  const lateDeduction = computed(() => {
+    //compute ang deduction base sa total late minutes
+    const perMinuteRate = (dailyRate.value || 0) / 8 / 60
+    return perMinuteRate * (monthLateDeduction.value || 0)
+  })
+
+  // Regular work total (future-proof for deductions, etc.)
+  // Gamiton ang getEmployeeById ug i-filter by employeeId (props.employeeData?.id)
+  // Async computed for regular work total using attendance DB
   const regularWorkTotal = ref<number>(0)
 
   async function computeRegularWorkTotal() {
     let daily = dailyRate.value
+    let source = 'fallback'
 
-    // Get dateString from prop or localStorage
+    // Kuhaon ang dateString gikan sa prop, kung wala, kuhaon sa localStorage
     let usedDateString = dateString
     if (!usedDateString && typeof window !== 'undefined') {
       usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
     }
 
-    console.log('Calculating regular work total for employeeId:', employeeId, '| dateString (from prop/localStorage):', usedDateString)
+    // Calculating regular work total for employeeId ug dateString gikan sa PayrollTableDialog.vue or localStorage
+    console.log(
+      'Calculating regular work total for employeeId:',
+      employeeId,
+      '| dateString (from prop/localStorage):',
+      usedDateString,
+    )
+
+    // let amTimeIn: string | null | undefined = undefined
+    // let pmTimeIn: string | null | undefined = undefined
 
     if (employeeId && usedDateString) {
-      const attendances = await attendancesStore.getEmployeeAttendanceById(employeeId, usedDateString)
-      
+      const attendances = await attendancesStore.getEmployeeAttendanceById(
+        employeeId,
+        usedDateString,
+      )
       if (Array.isArray(attendances) && attendances.length > 0) {
-        // Use the reusable function to compute late minutes
-        monthLateDeduction.value = computeMonthLateMinutes(attendances)
+        const allAmTimeIn = attendances.map((a) => a.am_time_in)
+        const allPmTimeIn = attendances.map((a) => a.pm_time_in)
+        // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
+        let totalLateAM = 0
+        let totalLatePM = 0
+        allAmTimeIn.forEach((am) => {
+          const lateMinutes = am ? getExcessMinutes('08:00', am) : 0
+          totalLateAM += lateMinutes
+        })
+        allPmTimeIn.forEach((pm) => {
+          const lateMinutes = pm ? getExcessMinutes('13:00', pm) : 0
+          totalLatePM += lateMinutes
+        })
+        monthLateDeduction.value = totalLateAM + totalLatePM
+        // console.log('Total month late deduction (minutes):', monthLateDeduction.value)
       } else {
         monthLateDeduction.value = 0
       }
-
-      // Get daily rate from employee store if available
+      source = 'attendance'
+      // Optionally, you can still get daily rate from employee store if needed
       const emp = employeesStore.getEmployeeById(employeeId)
       if (emp) {
         daily = emp.daily_rate
       }
     }
-
-    regularWorkTotal.value = (daily ?? 0) * workDays.value
+    const total = (daily ?? 0) * workDays.value
+    regularWorkTotal.value = total
   }
 
   // Watch for changes and recompute
-  watch([dailyRate, workDays, () => employeeId, () => dateString], computeRegularWorkTotal, { immediate: true })
+  watch([dailyRate, workDays, () => employeeId, () => dateString], computeRegularWorkTotal, {
+    immediate: true,
+  })
 
   // Overtime calculations
   const overtimeHours = computed(() => tableData.value?.overtime_hours || 0)
@@ -130,16 +156,18 @@ export function usePayrollComputation(
   })
   const totalEarnings = computed(() => totalGrossSalary.value + overtimePay.value)
 
-  // Deduction fields for extensibility
+  // Dynamic deduction variables for future extensibility
+  // Magamit ni for any deduction type, dili lang fixed fields
   const deductionFields = [
     'sss_deduction',
     'philhealth_deduction',
     'pagibig_deduction',
     'tax_deduction',
     'other_deductions',
+    // add more deduction keys diri in the future
   ] as const
 
-  type DeductionKey = typeof deductionFields[number]
+  type DeductionKey = (typeof deductionFields)[number]
 
   // Dynamic deductions object
   const deductions = computed(() => {
@@ -152,24 +180,36 @@ export function usePayrollComputation(
     }
     if (tableData.value) {
       deductionFields.forEach((key) => {
+        // kuhaon ang value per deduction, default 0 kung wala
         result[key] = tableData.value?.[key] || 0
       })
     }
     return result
   })
 
-  // Individual deduction computeds for backward compatibility
+  // For backward compatibility, keep individual computed
   const sssDeduction = computed(() => deductions.value.sss_deduction)
   const philhealthDeduction = computed(() => deductions.value.philhealth_deduction)
   const pagibigDeduction = computed(() => deductions.value.pagibig_deduction)
   const taxDeduction = computed(() => deductions.value.tax_deduction)
   const otherDeductions = computed(() => deductions.value.other_deductions)
 
-  // Calculation functions (placeholder implementations)
-  const calculateIncomeTax = (taxableIncome: number): number => 0
-  const calculateSSS = (monthlyBasicSalary: number): number => 0
-  const calculatePhilHealth = (monthlyBasicSalary: number): number => 0
-  const calculatePagIbig = (monthlyBasicSalary: number): number => 0
+  // Calculation functions
+  const calculateIncomeTax = (taxableIncome: number): number => {
+    return 0
+  }
+
+  const calculateSSS = (monthlyBasicSalary: number): number => {
+    return 0
+  }
+
+  const calculatePhilHealth = (monthlyBasicSalary: number): number => {
+    return 0
+  }
+
+  const calculatePagIbig = (monthlyBasicSalary: number): number => {
+    return 0
+  }
 
   const calculateTotalDeductions = (): number => {
     return (
@@ -201,6 +241,7 @@ export function usePayrollComputation(
 
     // Deductions
     monthLateDeduction,
+    lateDeduction,
     sssDeduction,
     philhealthDeduction,
     pagibigDeduction,

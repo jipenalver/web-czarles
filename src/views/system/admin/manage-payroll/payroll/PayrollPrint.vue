@@ -75,6 +75,9 @@ const holidayDateString = computed(() => {
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 
+//check kung field staff ba ang employee, para dili ipakita ang late deduction
+const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
+
 // Composables
 const payrollPrint = usePayrollPrint(
   {
@@ -113,6 +116,7 @@ const {
   formatCurrency,
   employeeDailyRate,
   regularWorkTotal, // expose regularWorkTotal from composable
+  lateDeduction,
 } = payrollPrint
 
 // Methods
@@ -269,12 +273,12 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             {{ formatCurrency(totalGrossSalary) }}
           </td>
         </tr>
-        <tr>
+        <tr v-if="showLateDeduction">
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">Late Deduction</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ payrollPrint.monthLateDeduction }}
+            {{ formatCurrency(lateDeduction) }}
           </td>
         </tr>
         <tr>
