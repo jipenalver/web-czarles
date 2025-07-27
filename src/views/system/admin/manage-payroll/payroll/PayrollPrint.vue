@@ -118,7 +118,31 @@ const {
   regularWorkTotal, // expose regularWorkTotal from composable
   lateDeduction,
   monthLateDeduction, // expose monthLateDeduction for late minutes
+  computeOverallOvertimeCalculation,
 } = payrollPrint
+
+// Ref to hold the computed overall overtime hours
+const overallOvertime = ref<number>(0)
+
+async function updateOverallOvertime() {
+  overallOvertime.value = await computeOverallOvertimeCalculation()
+}
+
+onMounted(() => {
+  loadTrips()
+  fetchEmployeeHolidays()
+  updateOverallOvertime()
+})
+
+// Update overtime when relevant props change
+watch([
+  () => props.employeeData?.id,
+  () => filterDateString.value,
+  () => props.payrollData?.month,
+  () => props.payrollData?.year,
+], () => {
+  updateOverallOvertime()
+})
 
 // Extractor for holiday type code to full name
 function getHolidayTypeName(type: string | undefined): string {
@@ -296,9 +320,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2">@</td>
-          <td class="text-caption font-weight-bold text-end pa-2">/hour</td>
+          <td class="text-caption text-end pa-2"> {{ formatCurrency(overallOvertime) }} / hour</td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+           -
           </td>
         </tr>
 
@@ -308,7 +332,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="pa-2">@</td>
           <td class="text-caption font-weight-bold text-end pa-2">/month</td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+            0
           </td>
         </tr>
 
@@ -318,7 +342,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
           <td class="text-caption font-weight-bold text-end pa-2">Php</td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+           0
           </td>
         </tr>
         <tr v-if="showLateDeduction">
@@ -331,7 +355,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             </span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(lateDeduction) }}
+           0
           </td>
         </tr>
         <tr>
@@ -339,7 +363,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">SSS</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+            0
           </td>
         </tr>
         <tr>
@@ -347,7 +371,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">PHIC</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+           0
           </td>
         </tr>
         <tr>
@@ -355,7 +379,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">HDMF</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+            0
           </td>
         </tr>
         <tr>
@@ -363,7 +387,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">Cash Advance</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+            0
           </td>
         </tr>
         <tr>
@@ -371,7 +395,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-disabled pa-2">Others</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalGrossSalary) }}
+            0
           </td>
         </tr>
         <tr>
@@ -379,7 +403,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption pa-2">Less Deductions</td>
           <td class="pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2">
-            {{ formatCurrency(totalDeductions) }}
+            0
           </td>
         </tr>
         <tr>
@@ -388,7 +412,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             TOTAL NET SALARY
           </td>
           <td class="border-t-sm pa-2">Php</td>
-          <td class="border-t-sm border-s-sm text-end pa-2">{{ formatCurrency(netSalary) }}</td>
+          <td class="border-t-sm border-s-sm text-end pa-2">0</td>
         </tr>
       </tbody>
     </v-table>
