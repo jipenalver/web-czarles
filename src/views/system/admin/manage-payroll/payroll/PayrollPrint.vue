@@ -5,11 +5,11 @@ import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
+import PayrollDeductions from './PayrollDeductions.vue'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
 
-import PayrollDeductions from './PayrollDeductions.vue'
 
 
 // Props
@@ -317,9 +317,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
               </td>
               <td class="pa-2">@{{ safeCurrencyFormat(trip.per_trip ?? 0, formatCurrency) }}</td>
-              <td class="pa-2"></td>
+              <td class="pa-2">x {{ trip.trip_no ?? 1 }}</td>
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="trip">
-                {{ safeCurrencyFormat(trip.per_trip ?? 0, formatCurrency) }}
+                {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
               </td>
             </tr>
           </template>
@@ -383,8 +383,8 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <!-- Overtime -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
-          <td class="pa-2">@</td>
-          <td class="text-caption text-end pa-2">{{ safeCurrencyFormat(overallOvertime, formatCurrency) }} / hour</td>
+          <td class="pa-2"></td>
+          <td class="pa-2">{{ safeCurrencyFormat(overallOvertime, formatCurrency) }} / hour</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             <!-- overtime pay: daily rate / 8 * 1.25 * overtime hours -->
             {{ safeCurrencyFormat((employeeDailyRate / 8) * 1.25 * overallOvertime, formatCurrency) }}
@@ -394,10 +394,10 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <!-- Monthly trippings -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
-          <td class="pa-2">@</td>
-          <td class="text-caption font-weight-bold text-end pa-2">/month</td>
+          <td class="pa-2"></td>
+          <td class="pa-2"> {{ safeCurrencyFormat(tripsStore.trips.reduce((sum, trip) => sum + ((trip.per_trip ?? 0) * (trip.trip_no ?? 1)), 0), formatCurrency) }}/month</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="monthly-trippings">
-          0
+            {{ safeCurrencyFormat(tripsStore.trips.reduce((sum, trip) => sum + ((trip.per_trip ?? 0) * (trip.trip_no ?? 1)), 0), formatCurrency) }}
           </td>
         </tr>
 
@@ -426,6 +426,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             netSalary: netSalaryCalculation.netSalary,
           }"
           :formatCurrency="formatCurrency"
+          :employeeId="props.employeeData?.id ?? 0"
         />
       </tbody>
     </v-table>

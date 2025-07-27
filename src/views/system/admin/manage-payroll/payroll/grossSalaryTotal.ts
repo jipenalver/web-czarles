@@ -18,7 +18,12 @@ export function useOverallEarningsTotal(
     const regularWork = Number(regularWorkTotal.value) || 0
     total += regularWork
     // 2. Trips earnings
-    const tripsEarnings = trips.value?.reduce((sum, trip) => sum + (Number(trip.per_trip) || 0), 0) || 0
+    // trip_no as multiplier, default 1 kung wala
+    const tripsEarnings = trips.value?.reduce((sum, trip) => {
+      const perTrip = Number(trip.per_trip) || 0
+      const tripNo = Number(trip.trip_no) || 1
+      return sum + (perTrip * tripNo)
+    }, 0) || 0
     total += tripsEarnings
     // 3. Holiday earnings
     const holidayEarnings = holidays.value?.reduce((sum, holiday) => {
@@ -57,7 +62,12 @@ export function useEarningsBreakdown(
 ): ComputedRef<Record<string, number>> {
   return computed(() => {
     const regular = Number(regularWorkTotal.value) || 0
-    const tripsTotal = trips.value?.reduce((sum, trip) => sum + (Number(trip.per_trip) || 0), 0) || 0
+    // trip_no as multiplier, default 1 kung wala
+    const tripsTotal = trips.value?.reduce((sum, trip) => {
+      const perTrip = Number(trip.per_trip) || 0
+      const tripNo = Number(trip.trip_no) || 1
+      return sum + (perTrip * tripNo)
+    }, 0) || 0
     const holidayTotal = holidays.value?.reduce((sum, holiday) => {
       const baseRate = Number(dailyRate.value) || 0
       const type = holiday.type?.toLowerCase() || ''
