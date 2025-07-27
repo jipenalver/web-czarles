@@ -1,3 +1,19 @@
+// 👉 Get Holiday Type Name (for PayrollPrint.vue and others)
+export function getHolidayTypeName(type: string | undefined): string {
+  if (!type) return ''
+  switch (type) {
+    case 'RH':
+      return 'Regular Holiday'
+    case 'SNH':
+      return 'Special (Non-working) Holiday'
+    case 'SWH':
+      return 'Special (Working) Holiday'
+    case 'SR':
+      return 'Sunday Rate'
+    default:
+      return type
+  }
+}
 // 👉 Format date string to YYYY-MM (for payroll month storage)
 export const getYearMonthString = (dateStr: string): string => {
   if (!dateStr) return ''
