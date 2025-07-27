@@ -214,7 +214,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               </td>
               <td class="pa-2">@ 450 /per Trip</td>
               <td class="pa-2"></td>
-              <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+              <td class="border-b-thin border-s-sm text-end pa-2">trips total</td>
             </tr>
           </template>
           <template v-else>
@@ -235,7 +235,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               </td>
               <td class="pa-2">@</td>
               <td class="pa-2"></td>
-              <td class="border-b-thin border-s-sm text-end pa-2">-</td>
+              <td class="border-b-thin border-s-sm text-end pa-2">holiday total</td>
             </tr>
           </template>
           <template v-else>

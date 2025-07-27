@@ -96,13 +96,6 @@ export function usePayrollComputation(
       usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
     }
 
-    // Calculating regular work total for employeeId ug dateString gikan sa PayrollTableDialog.vue or localStorage
-    console.log(
-      'Calculating regular work total for employeeId:',
-      employeeId,
-      '| dateString (from prop/localStorage):',
-      usedDateString,
-    )
 
     // let amTimeIn: string | null | undefined = undefined
     // let pmTimeIn: string | null | undefined = undefined

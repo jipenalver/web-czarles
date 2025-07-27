@@ -92,8 +92,8 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
                   'Regular Holiday',
                   'Special (Non-working) Holiday',
                   'Special (Working) Holiday',
-                  'Local Holiday',
-                  'Company Holiday',
+                  'Sunday Rate',
+                  /* 'Local Holiday', */
                 ]"
                 :rules="[requiredValidator]"
               ></v-select>

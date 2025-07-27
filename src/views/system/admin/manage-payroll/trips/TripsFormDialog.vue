@@ -95,7 +95,8 @@ watch(
             </v-col>
 
             <v-col cols="12" md="6">
-              <v-select
+              <!-- gamit ug v-autocomplete para sa Unit dropdown -->
+              <v-autocomplete
                 v-model="formData.unit_id as any"
                 label="Unit"
                 :items="units"
@@ -104,11 +105,12 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-              ></v-select>
+              ></v-autocomplete>
             </v-col>
 
             <v-col cols="12" md="6">
-              <v-select
+              <!-- gamit ug v-autocomplete para sa Trip Location dropdown -->
+              <v-autocomplete
                 v-model="formData.trip_location_id as any"
                 label="Trip Location"
                 :items="tripLocations"
@@ -117,11 +119,12 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-              ></v-select>
+              ></v-autocomplete>
             </v-col>
 
             <v-col cols="12" md="6">
-              <v-select
+              <!-- gamit ug v-autocomplete para sa Employee dropdown -->
+              <v-autocomplete
                 v-model="formData.employee_id as any"
                 label="Employee"
                 :items="employees"
@@ -130,7 +133,7 @@ watch(
                 clearable
                 :return-object="false"
                 :rules="[requiredValidator]"
-              ></v-select>
+              ></v-autocomplete>
             </v-col>
 
             <v-col cols="12" md="6">
