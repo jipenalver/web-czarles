@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { getTime, getTotalWorkHours } from '@/utils/helpers/dates'
+import { getWorkHoursString } from '@/utils/helpers/calculation'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'
+import { getTime } from '@/utils/helpers/dates'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -93,7 +94,7 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
           <span class="text-body-2 font-weight-bold me-2">Rendered Time:</span>
           <p class="text-body-2 font-weight-bold">
             {{
-              getTotalWorkHours(
+              getWorkHoursString(
                 props.itemData.am_time_in,
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
@@ -214,7 +215,7 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
             <span class="text-body-2 font-weight-bold me-2">Rendered Overtime:</span>
             <p class="text-body-2 font-weight-bold">
               {{
-                getTotalWorkHours(
+                getWorkHoursString(
                   props.itemData.overtime_in,
                   props.itemData.overtime_out,
                   null,
