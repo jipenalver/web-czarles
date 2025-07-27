@@ -22,8 +22,7 @@ export type CashAdvanceTableFilter = {
 }
 
 export const useCashAdvancesStore = defineStore('cashAdvances', () => {
-  const selectQuery =
-    '*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*)'
+  const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
 
   // States
   const cashAdvances = ref<CashAdvance[]>([])
@@ -142,6 +141,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     cashAdvances,
     cashAdvancesTable,
     cashAdvancesTableTotal,
+    cashAdvancesCSV,
     $reset,
     getCashAdvances,
     getCashAdvancesCSV,
