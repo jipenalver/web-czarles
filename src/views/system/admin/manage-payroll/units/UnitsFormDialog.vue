@@ -36,7 +36,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-tag" title="Unit Information">
+    <v-card prepend-icon="mdi-dump-truck" title="Unit Information">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
