@@ -81,8 +81,8 @@ export function useCashAdvancesTable() {
   }
 
   const onFilterItems = async () => {
-    if (tableFilters.value.employee_id !== null) tableHeaders.value = tableHeaders.value.slice(1)
-    else tableHeaders.value = tableHeaders.value
+    if (tableFilters.value.employee_id !== null) tableHeaders.value = baseHeaders.slice(1)
+    else tableHeaders.value = baseHeaders
 
     onLoadItems(tableOptions.value)
 
