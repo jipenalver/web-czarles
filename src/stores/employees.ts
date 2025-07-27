@@ -76,6 +76,10 @@ export const useEmployeesStore = defineStore('employees', () => {
     })) as Employee[]
   }
 
+  function getEmployeesById(id: number) {
+    return employees.value.find((employee) => employee.id === id)
+  }
+
   async function getEmployeesTable(
     tableOptions: TableOptions,
     { search, designation_id }: EmployeeTableFilter,
@@ -146,6 +150,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     employeesTableTotal,
     $reset,
     getEmployees,
+    getEmployeesById,
     getEmployeesTable,
     addEmployee,
     updateEmployee,
