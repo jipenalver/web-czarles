@@ -152,7 +152,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
 
     const csvData = () => {
       const defaultHeaders = tableHeaders.value
-        .filter(({ title }) => title !== 'Actions' && title !== 'Employee')
+        .filter(({ title }) => !['Actions', 'Employee', 'Overtime Applied?'].includes(title))
         .map(({ title }) => title)
 
       const csvHeaders = [
@@ -216,6 +216,8 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+    if (attendancesStore.attendancesCSV.length === 0)
+      await attendancesStore.getAttendancesCSV(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions

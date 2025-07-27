@@ -121,7 +121,7 @@ export function useEmployeesTable(
 
     const csvData = () => {
       const defaultHeaders = tableHeaders
-        .filter(({ title }) => title !== 'Actions' && title !== 'Fullname')
+        .filter(({ title }) => !['Actions', 'Fullname'].includes(title))
         .map(({ title }) => title)
 
       const csvHeaders = [
@@ -208,7 +208,8 @@ export function useEmployeesTable(
   }
 
   onMounted(async () => {
-    await employeesStore.getEmployees()
+    if (employeesStore.employeesCSV.length === 0)
+      await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
