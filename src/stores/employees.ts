@@ -79,7 +79,7 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function getEmployeesCSV(tableOptions: TableOptions, tableFilters: EmployeeTableFilter) {
-    const { column, order } = tablePagination(tableOptions, 'am_time_in', false)
+    const { column, order } = tablePagination(tableOptions, 'lastname', false)
 
     let query = supabase.from('employees').select(selectQuery).order(column, { ascending: order })
 
