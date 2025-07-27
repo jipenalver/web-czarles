@@ -95,33 +95,49 @@ export function useNetSalaryCalculation(
   overallEarningsTotal: ComputedRef<number>,
   showLateDeduction: ComputedRef<boolean>,
   lateDeduction: Ref<number>,
-  sss?: Ref<number>,
-  phic?: Ref<number>,
-  hdmf?: Ref<number>,
+  employeeDeductions?: Ref<any[]>,
+ 
   cashAdvance?: Ref<number>,
-  others?: Ref<number>
+ 
 ): ComputedRef<{
   grossSalary: number
   deductions: Record<string, number>
   totalDeductions: number
   netSalary: number
+  dynamicDeductions?: Array<{ id: any, amount: number, benefit: string }>
 }> {
   return computed(() => {
     const totalEarnings = overallEarningsTotal.value
     const deductions = {
       late: showLateDeduction.value ? (Number(lateDeduction.value) || 0) : 0,
-      sss: sss ? (Number(sss.value) || 0) : 0,
-      phic: phic ? (Number(phic.value) || 0) : 0,
-      hdmf: hdmf ? (Number(hdmf.value) || 0) : 0,
       cashAdvance: cashAdvance ? (Number(cashAdvance.value) || 0) : 0,
-      others: others ? (Number(others.value) || 0) : 0
     }
-    const totalDeductionsAmount = Object.values(deductions).reduce((sum, amount) => sum + amount, 0)
+    // i-sum up ang tanan dynamic employee deductions (from PayrollDeductions.vue)
+    // Bisaya-English comment: i-initialize as empty, pero dapat gikan sa component ang employeeDeductions
+    let dynamicDeductions: Array<{ id: any, amount: number, benefit: string }> = []
+    if (!employeeDeductions) {
+      // Bisaya-English comment: warning kung wala gi-pasa ang employeeDeductions ref
+      console.warn('employeeDeductions ref was not provided to useNetSalaryCalculation. Dynamic deductions will be empty.')
+    }
+
+    console.log('Employee deductions:',dynamicDeductions)
+    let dynamicDeductionsTotal = 0
+    if (employeeDeductions && Array.isArray(employeeDeductions.value)) {
+      console.log('Employee deductions:', employeeDeductions.value)
+      dynamicDeductions = employeeDeductions.value.map((deduction) => ({
+        id: deduction.id,
+        amount: Number(deduction.amount) || 0,
+        benefit: deduction.employee_benefit?.benefit || 'Deduction'
+      }))
+      dynamicDeductionsTotal = dynamicDeductions.reduce((sum, d) => sum + d.amount, 0)
+    }
+    const totalDeductionsAmount = Object.values(deductions).reduce((sum, amount) => sum + amount, 0) + dynamicDeductionsTotal
     return {
       grossSalary: totalEarnings,
       deductions,
       totalDeductions: totalDeductionsAmount,
-      netSalary: totalEarnings - totalDeductionsAmount
+      netSalary: totalEarnings - totalDeductionsAmount,
+      dynamicDeductions
     }
   })
 }

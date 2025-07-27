@@ -1,23 +1,62 @@
 <script setup lang="ts">
-import { useOverallEarningsTotal, useEarningsBreakdown, useNetSalaryCalculation } from './grossSalaryTotal'
+import { useOverallEarningsTotal, useEarningsBreakdown, useNetSalaryCalculation } from './overallTotal'
 import { safeCurrencyFormat, getHolidayTypeName, formatTripDate, getMonthDateRange } from './helpers'
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
 import PayrollDeductions from './PayrollDeductions.vue'
-import { computed, watch, onMounted, ref } from 'vue'
-import { type Employee } from '@/stores/employees'
-import { useTripsStore } from '@/stores/trips'
-
-
-
+import { useEmployeesStore } from '@/stores/employees'
 // Props
 const props = defineProps<{
   employeeData: Employee | null
   payrollData: PayrollData
   tableData: TableData
 }>()
+
+// Pinia store for employees
+const employeesStore = useEmployeesStore()
+const employeeDeductions = ref<any[]>([])
+
+// Fetch and filter employee deductions when employeeId changes
+async function fetchEmployeeDeductions(employeeId: number | undefined) {
+  if (employeeId !== undefined) {
+    const employee = await employeesStore.getEmployeeById(employeeId)
+    if (employee && Array.isArray(employee.employee_deductions)) {
+      // filter ang deductions nga is_deduction === true
+      const filtered = employee.employee_deductions.filter(
+        (deduction: any) => deduction.employee_benefit?.is_deduction === true
+      )
+      // Bisaya-English comment: i-log ang benefit name ug benefit value para ma-check
+      filtered.forEach((deduction: any) => {
+        console.log('Deduction benefit:', {
+          benefit: deduction.employee_benefit?.benefit
+        })
+      })
+      employeeDeductions.value = filtered
+    } else {
+      employeeDeductions.value = []
+    }
+  } else {
+    employeeDeductions.value = []
+  }
+}
+
+// Watch for employeeId changes to fetch deductions
+watch(
+  () => props.employeeData?.id,
+  (id) => {
+    fetchEmployeeDeductions(id)
+  },
+  { immediate: true }
+)
+import { computed, watch, onMounted, ref } from 'vue'
+import { type Employee } from '@/stores/employees'
+import { useTripsStore } from '@/stores/trips'
+
+
+
+// ...existing code...
 
 // Month date range for display in "Days Regular Work for"
 const monthDateRange = computed(() => {
@@ -141,7 +180,8 @@ const earningsBreakdown = useEarningsBreakdown(
 const netSalaryCalculation = useNetSalaryCalculation(
   overallEarningsTotal,
   showLateDeduction,
-  lateDeduction
+  lateDeduction,
+  employeeDeductions, 
 )
 
 // Use imported safeCurrencyFormat from helpers.ts
@@ -427,6 +467,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           }"
           :formatCurrency="formatCurrency"
           :employeeId="props.employeeData?.id ?? 0"
+          :employeeDeductions="employeeDeductions"
         />
       </tbody>
     </v-table>
