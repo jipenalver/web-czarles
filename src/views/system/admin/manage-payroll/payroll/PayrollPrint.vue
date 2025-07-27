@@ -1,6 +1,15 @@
 <script setup lang="ts">
-import { useOverallEarningsTotal, useEarningsBreakdown, useNetSalaryCalculation } from './overallTotal'
-import { safeCurrencyFormat, getHolidayTypeName, formatTripDate, getMonthDateRange } from './helpers'
+import {
+  useOverallEarningsTotal,
+  useEarningsBreakdown,
+  useNetSalaryCalculation,
+} from './overallTotal'
+import {
+  safeCurrencyFormat,
+  getHolidayTypeName,
+  formatTripDate,
+  getMonthDateRange,
+} from './helpers'
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
@@ -25,12 +34,12 @@ async function fetchEmployeeDeductions(employeeId: number | undefined) {
     if (employee && Array.isArray(employee.employee_deductions)) {
       // filter ang deductions nga is_deduction === true
       const filtered = employee.employee_deductions.filter(
-        (deduction: any) => deduction.employee_benefit?.is_deduction === true
+        (deduction: any) => deduction.employee_benefit?.is_deduction === true,
       )
-      // Bisaya-English comment: i-log ang benefit name ug benefit value para ma-check
+      //i-log ang benefit name ug benefit value para ma-check
       filtered.forEach((deduction: any) => {
         console.log('Deduction benefit:', {
-          benefit: deduction.employee_benefit?.benefit
+          benefit: deduction.employee_benefit?.benefit,
         })
       })
       employeeDeductions.value = filtered
@@ -48,13 +57,11 @@ watch(
   (id) => {
     fetchEmployeeDeductions(id)
   },
-  { immediate: true }
+  { immediate: true },
 )
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-
-
 
 // ...existing code...
 
@@ -154,7 +161,6 @@ const {
   computeOverallOvertimeCalculation,
 } = payrollPrint
 
-
 // Use helpers for payroll calculations
 const overallEarningsTotal = useOverallEarningsTotal(
   regularWorkTotal,
@@ -163,7 +169,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   dailyRate,
   employeeDailyRate,
   overallOvertime,
-  codaAllowance
+  codaAllowance,
 )
 
 //debuging porpuses
@@ -174,18 +180,17 @@ const earningsBreakdown = useEarningsBreakdown(
   dailyRate,
   employeeDailyRate,
   overallOvertime,
-  codaAllowance
+  codaAllowance,
 )
 
 const netSalaryCalculation = useNetSalaryCalculation(
   overallEarningsTotal,
   showLateDeduction,
   lateDeduction,
-  employeeDeductions, 
+  employeeDeductions,
 )
 
 // Use imported safeCurrencyFormat from helpers.ts
-
 
 // Alias to avoid naming conflict with imported function
 const safeCurrencyFormatRaw = safeCurrencyFormat
@@ -235,26 +240,26 @@ async function updateOverallOvertime() {
 
 // Enhanced mounted hook
 onMounted(async () => {
-  await Promise.all([
-    loadTrips(),
-    fetchEmployeeHolidays(),
-    updateOverallOvertime()
-  ])
+  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime()])
   recalculateEarnings()
 })
 
 // Watch for changes in all earning components
-watch([
-  regularWorkTotal,
-  () => tripsStore.trips,
-  holidays,
-  overallOvertime,
-  employeeDailyRate,
-  dailyRate,
-  codaAllowance
-], () => {
-  recalculateEarnings()
-}, { deep: true, immediate: true })
+watch(
+  [
+    regularWorkTotal,
+    () => tripsStore.trips,
+    holidays,
+    overallOvertime,
+    employeeDailyRate,
+    dailyRate,
+    codaAllowance,
+  ],
+  () => {
+    recalculateEarnings()
+  },
+  { deep: true, immediate: true },
+)
 
 // Enhanced watchers for better reactivity
 watch(
@@ -265,14 +270,10 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([
-      updateOverallOvertime(),
-      loadTrips(),
-      fetchEmployeeHolidays()
-    ])
+    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays()])
     recalculateEarnings()
   },
-  { deep: true }
+  { deep: true },
 )
 
 // Individual watchers for specific data changes
@@ -403,12 +404,12 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
                 {{
                   holiday.type && holiday.type.toLowerCase().includes('rh')
-                  ? safeCurrencyFormat(dailyRate * 2, formatCurrency)
-                  : holiday.type && holiday.type.toLowerCase().includes('snh')
-                    ? safeCurrencyFormat(dailyRate * 1.5, formatCurrency)
-                    : holiday.type && holiday.type.toLowerCase().includes('swh')
-                      ? safeCurrencyFormat(dailyRate * 1.3, formatCurrency)
-                      : safeCurrencyFormat(dailyRate, formatCurrency)
+                    ? safeCurrencyFormat(dailyRate * 2, formatCurrency)
+                    : holiday.type && holiday.type.toLowerCase().includes('snh')
+                      ? safeCurrencyFormat(dailyRate * 1.5, formatCurrency)
+                      : holiday.type && holiday.type.toLowerCase().includes('swh')
+                        ? safeCurrencyFormat(dailyRate * 1.3, formatCurrency)
+                        : safeCurrencyFormat(dailyRate, formatCurrency)
                 }}
               </td>
             </tr>
@@ -427,7 +428,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="pa-2">{{ safeCurrencyFormat(overallOvertime, formatCurrency) }} / hour</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             <!-- overtime pay: daily rate / 8 * 1.25 * overtime hours -->
-            {{ safeCurrencyFormat((employeeDailyRate / 8) * 1.25 * overallOvertime, formatCurrency) }}
+            {{
+              safeCurrencyFormat((employeeDailyRate / 8) * 1.25 * overallOvertime, formatCurrency)
+            }}
           </td>
         </tr>
 
@@ -435,9 +438,30 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
-          <td class="pa-2"> {{ safeCurrencyFormat(tripsStore.trips.reduce((sum, trip) => sum + ((trip.per_trip ?? 0) * (trip.trip_no ?? 1)), 0), formatCurrency) }}/month</td>
-          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="monthly-trippings">
-            {{ safeCurrencyFormat(tripsStore.trips.reduce((sum, trip) => sum + ((trip.per_trip ?? 0) * (trip.trip_no ?? 1)), 0), formatCurrency) }}
+          <td class="pa-2">
+            {{
+              safeCurrencyFormat(
+                tripsStore.trips.reduce(
+                  (sum, trip) => sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1),
+                  0,
+                ),
+                formatCurrency,
+              )
+            }}/month
+          </td>
+          <td
+            class="border-b-thin border-s-sm text-end pa-2 total-cell"
+            data-total="monthly-trippings"
+          >
+            {{
+              safeCurrencyFormat(
+                tripsStore.trips.reduce(
+                  (sum, trip) => sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1),
+                  0,
+                ),
+                formatCurrency,
+              )
+            }}
           </td>
         </tr>
 

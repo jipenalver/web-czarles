@@ -31,7 +31,6 @@ export function usePayrollComputation(
   payrollYear?: number,
   dateString?: string,
 ) {
- 
   // Helper function to compute overtime hours between two time strings (HH:MM)
   function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
     // Debug: log overtimeIn and overtimeOut values

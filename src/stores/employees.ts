@@ -73,7 +73,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     const { data } = await supabase
       .from('employees')
       .select(
-        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))'
+        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
       )
       .eq('id', id)
       .single()

@@ -1,5 +1,7 @@
-
-export function safeCurrencyFormat(amount: number | string | null | undefined, formatCurrency: (n: number) => string): string {
+export function safeCurrencyFormat(
+  amount: number | string | null | undefined,
+  formatCurrency: (n: number) => string,
+): string {
   const numAmount = Number(amount) || 0
   return formatCurrency(numAmount)
 }
@@ -13,17 +15,25 @@ export function getHolidayTypeName(type: string | undefined): string {
   return type
 }
 
-
 export function formatTripDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-
 export function getMonthDateRange(year: number, month: string): string {
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ]
   const monthIndex = monthNames.indexOf(month)
   if (monthIndex === -1) return ''
