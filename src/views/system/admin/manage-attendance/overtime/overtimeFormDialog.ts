@@ -25,7 +25,7 @@ export function useOvertimeFormDialog(
   // States
   const formDataDefault = {
     date: null as string | null,
-    employee_id: null as string | null,
+    employee_id: null as number | null,
     is_overtime_applied: false,
     overtime_in: '',
     overtime_out: '',

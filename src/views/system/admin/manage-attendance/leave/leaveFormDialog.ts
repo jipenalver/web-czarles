@@ -25,7 +25,7 @@ export function useLeaveFormDialog(
   // States
   const formDataDefault = {
     date: null as string | null,
-    employee_id: null as string | null,
+    employee_id: null as number | null,
     is_am_leave: false,
     is_pm_leave: false,
     is_leave_with_pay: false,

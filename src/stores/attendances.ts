@@ -14,7 +14,6 @@ export type Attendance = {
   am_time_out: string | null
   pm_time_in: string | null
   pm_time_out: string | null
-  employee_id: string | null
   is_am_in_rectified: boolean
   is_am_out_rectified: boolean
   is_pm_in_rectified: boolean
@@ -24,6 +23,7 @@ export type Attendance = {
   overtime_out: string | null
   is_overtime_in_rectified: boolean
   is_overtime_out_rectified: boolean
+  employee_id: number | null
   employee: Employee
   attendance_images: AttendanceImage[]
   is_am_leave: boolean
@@ -40,7 +40,7 @@ export type AttendanceImage = {
 }
 
 export type AttendanceTableFilter = {
-  employee_id: string | null
+  employee_id: number | null
   attendance_at: Date[] | null
 }
 

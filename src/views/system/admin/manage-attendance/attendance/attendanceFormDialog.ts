@@ -29,7 +29,7 @@ export function useAttendanceFormDialog(
     am_time_out: '',
     pm_time_in: '',
     pm_time_out: '',
-    employee_id: null as string | null,
+    employee_id: null as number | null,
     is_am_in_rectified: false,
     is_am_out_rectified: false,
     is_pm_in_rectified: false,
