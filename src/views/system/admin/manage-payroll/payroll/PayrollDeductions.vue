@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { safeCurrencyFormat } from './helpers'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useEmployeesStore } from '@/stores/employees'
 
 interface Deductions {
   late: number
@@ -22,6 +23,21 @@ const props = defineProps<{
   formatCurrency: (value: number) => string
   employeeId: number | undefined
 }>()
+
+
+// Pinia store for employees
+const employeesStore = useEmployeesStore()
+onMounted(async () => {
+  // fetch ang employee by ID gamit supabase query
+  if (props.employeeId !== undefined) {
+    const employee = await employeesStore.getEmployeeById(props.employeeId)
+    // log ang employee details para makita ang sulod
+    console.log('getEmployeeById result:', employee)
+  } else {
+    // walay employeeId, skip fetch
+    console.log('No employeeId provided')
+  }
+})
 
 // log the employeeId for debugging
 console.log('PayrollDeductions employeeId:', props.employeeId)

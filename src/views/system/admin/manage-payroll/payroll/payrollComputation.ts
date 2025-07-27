@@ -106,7 +106,7 @@ export function usePayrollComputation(
   // Employee daily rate
   const employeeDailyRate = computed(() => {
     if (!employeeId) return dailyRate.value
-    const emp = employeesStore.getEmployeeById(employeeId)
+    const emp = employeesStore.getEmployeeByIdemp(employeeId)
     return emp?.daily_rate || dailyRate.value
   })
 
@@ -164,7 +164,7 @@ export function usePayrollComputation(
       }
       source = 'attendance'
       // Optionally, you can still get daily rate from employee store if needed
-      const emp = employeesStore.getEmployeeById(employeeId)
+      const emp = employeesStore.getEmployeeByIdemp(employeeId)
       if (emp) {
         daily = emp.daily_rate
       }

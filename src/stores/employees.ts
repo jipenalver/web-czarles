@@ -67,11 +67,17 @@ export const useEmployeesStore = defineStore('employees', () => {
       value: item.id,
     })) as Employee[]
   }
-  // Get employee by ID
-  function getEmployeeById(id: number): Employee | undefined {
-    // log ang employees.value para makita ang data sa console
-    // console.log('employees.value:', employees.value)
-    return employees.value.find((emp) => emp.id === id)
+  // Get employee by ID using Supabase query
+  async function getEmployeeById(id: number): Promise<Employee | undefined> {
+    // kuhaon ang employee with related designation, area, and deductions gamit join
+    const { data } = await supabase
+      .from('employees')
+      .select(
+        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))'
+      )
+      .eq('id', id)
+      .single()
+    return data as Employee | undefined
   }
   async function getEmployeesTable(
     tableOptions: TableOptions,
@@ -138,6 +144,9 @@ export const useEmployeesStore = defineStore('employees', () => {
     return await supabase.from('employees').delete().eq('id', id).select()
   }
 
+  function getEmployeeByIdemp(id: number): Employee | undefined {
+    return employees.value.find((emp) => emp.id === id)
+  }
   // Expose States and Actions
   return {
     employees,
@@ -149,6 +158,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    getEmployeeByIdemp,
     getEmployeeById,
   }
 })
