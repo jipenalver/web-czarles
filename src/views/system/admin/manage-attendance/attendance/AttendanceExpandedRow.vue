@@ -112,7 +112,7 @@ const isFieldStaff = (employeeId: number) =>
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
-                isFieldStaff(+props.itemData.employee_id!),
+                isFieldStaff(props.itemData.employee_id as number),
               )
             }}
 
@@ -123,7 +123,7 @@ const isFieldStaff = (employeeId: number) =>
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
-                  isFieldStaff(+props.itemData.employee_id!),
+                  isFieldStaff(props.itemData.employee_id as number),
                 )
               }})
             </span>
@@ -144,7 +144,7 @@ const isFieldStaff = (employeeId: number) =>
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
-                isFieldStaff(+props.itemData.employee_id!),
+                isFieldStaff(props.itemData.employee_id as number),
               )
             }}
 
@@ -155,7 +155,7 @@ const isFieldStaff = (employeeId: number) =>
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
-                  isFieldStaff(+props.itemData.employee_id!),
+                  isFieldStaff(props.itemData.employee_id as number),
                 )
               }})
             </span>
@@ -170,7 +170,7 @@ const isFieldStaff = (employeeId: number) =>
           <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
           <v-chip class="font-weight-black" color="default" size="small">
             {{
-              employeesStore.getEmployeesById(+props.itemData.employee_id!)?.is_field_staff
+              employeesStore.getEmployeesById(props.itemData.employee_id as number)?.is_field_staff
                 ? 'Yes'
                 : 'No'
             }}
