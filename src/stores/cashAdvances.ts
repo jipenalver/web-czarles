@@ -126,7 +126,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
   }
 
   async function addCashAdvance(formData: Partial<CashAdvance>) {
-    const preparedData = prepareFormDates(formData, ['hired_at'])
+    const preparedData = prepareFormDates(formData, ['request_at'])
 
     return await supabase.from('cash_advances').insert(preparedData).select()
   }
