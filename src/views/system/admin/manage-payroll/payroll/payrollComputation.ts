@@ -34,6 +34,16 @@ export function usePayrollComputation(
   const employeesStore = useEmployeesStore()
   const attendancesStore = useAttendancesStore()
 
+  // Helper function to compute excess minutes (late)
+  function getExcessMinutes(defaultOut: string, actualOut: string): number {
+    const today = new Date().toISOString().split("T")[0];
+    const defaultDate = new Date(`${today}T${defaultOut}:00`);
+    const actualDate = new Date(`${today}T${actualOut}:00`);
+    const diffMs = actualDate.getTime() - defaultDate.getTime();
+    const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+    return diffMinutes;
+  }
+
   // Basic calculations
   const codaAllowance = computed(() => tableData.value?.coda_allowance || 0)
   const totalGrossSalary = computed(() => grossSalary.value + codaAllowance.value)
@@ -64,13 +74,17 @@ export function usePayrollComputation(
 
   // Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
   async function getEmployeeTimeIns(empId?: number, dateStr?: string): Promise<{ amTimeIn: string | null; pmTimeIn: string | null }> {
-    if (!empId || !dateStr) return { amTimeIn: null, pmTimeIn: null }
+    if (!empId || !dateStr) {
+      // Kung walay empId or dateStr, default time_in values
+      return { amTimeIn: '08:00', pmTimeIn: '13:00' }
+    }
     const attendances = await attendancesStore.getEmployeeAttendanceById(empId, dateStr)
     if (Array.isArray(attendances) && attendances.length > 0) {
       // Gamiton ang pinakabag-o (first in array) na attendance record
       return { amTimeIn: attendances[0].am_time_in, pmTimeIn: attendances[0].pm_time_in }
     }
-    return { amTimeIn: null, pmTimeIn: null }
+    // Kung walay attendance record, default time_in values
+    return { amTimeIn: '08:00', pmTimeIn: '13:00' }
   }
 
   // Regular work total (future-proof for deductions, etc.)
@@ -81,8 +95,6 @@ export function usePayrollComputation(
   async function computeRegularWorkTotal() {
     let daily = dailyRate.value
     let source = 'fallback'
-    let amTimeIn: string | null | undefined = undefined
-    let pmTimeIn: string | null | undefined = undefined
 
     // Kuhaon ang dateString gikan sa prop, kung wala, kuhaon sa localStorage
     let usedDateString = dateString
@@ -93,22 +105,45 @@ export function usePayrollComputation(
     // Calculating regular work total for employeeId ug dateString gikan sa PayrollTableDialog.vue or localStorage
     console.log('Calculating regular work total for employeeId:', employeeId, '| dateString (from prop/localStorage):', usedDateString)
 
+    let amTimeIn: string | null | undefined = undefined
+    let pmTimeIn: string | null | undefined = undefined
+
     if (employeeId && usedDateString) {
-      // kuhaon ang attendance gamit ang getEmployeeAttendanceById, gamit ang dateString nga prop or localStorage
+      // Gamiton ang getEmployeeTimeIns para kuhaon ang time_in values
+      const timeIns = await getEmployeeTimeIns(employeeId, usedDateString)
+      amTimeIn = timeIns.amTimeIn
+      pmTimeIn = timeIns.pmTimeIn
+      // I-log ang output sa getEmployeeTimeIns
+      console.log('getEmployeeTimeIns output:', timeIns)
+      // I-log gihapon ang tanan am_time_in ug pm_time_in values separately kung naa attendance
       const attendances = await attendancesStore.getEmployeeAttendanceById(employeeId, usedDateString)
       if (Array.isArray(attendances) && attendances.length > 0) {
-        // I-log tanan am_time_in ug pm_time_in values separately
         const allAmTimeIn = attendances.map(a => a.am_time_in)
         const allPmTimeIn = attendances.map(a => a.pm_time_in)
         console.log('All am_time_in:', allAmTimeIn)
         console.log('All pm_time_in:', allPmTimeIn)
+        // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
+        let totalLateAM = 0
+        let totalLatePM = 0
+        allAmTimeIn.forEach((am, idx) => {
+          // Default AM time-in is 08:00
+          const lateMinutes = am ? getExcessMinutes('08:00', am) : 0
+          totalLateAM += lateMinutes
+          /* console.log(`Late minutes (AM) for index ${idx}:`, lateMinutes) */
+        })
+        allPmTimeIn.forEach((pm, idx) => {
+          // Default PM time-in is 13:00
+          const lateMinutes = pm ? getExcessMinutes('13:00', pm) : 0
+          totalLatePM += lateMinutes
+          /* console.log(`Late minutes (PM) for index ${idx}:`, lateMinutes) */
+        })
+        const monthLateDeduction = totalLateAM + totalLatePM
+        console.log('Total month late deduction (minutes):', monthLateDeduction)
         // Gamiton ang pinakabag-o (first in array) na attendance record
-        amTimeIn = attendances[0].am_time_in
-        pmTimeIn = attendances[0].pm_time_in
-        source = 'attendance'
         // kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
-        console.log('am_time_in:', amTimeIn, '| pm_time_in:', pmTimeIn)
+        /* console.log('am_time_in:', attendances[0].am_time_in, '| pm_time_in:', attendances[0].pm_time_in) */
       }
+      source = 'attendance'
       // Optionally, you can still get daily rate from employee store if needed
       const emp = employeesStore.getEmployeeById(employeeId)
       if (emp) {
