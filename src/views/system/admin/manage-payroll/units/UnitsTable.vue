@@ -90,7 +90,7 @@ const {
             </v-col>
 
             <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-tag-plus" color="primary" block @click="onAdd">
+              <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
                 Add Unit
               </v-btn>
             </v-col>
