@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { getWorkHoursDecimal, getWorkHoursString } from '@/utils/helpers/calculation'
+import {
+  getOvertimeHoursDecimal,
+  getOvertimeHoursString,
+  getWorkHoursDecimal,
+  getWorkHoursString,
+} from '@/utils/helpers/calculation'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'
+import { useEmployeesStore } from '@/stores/employees'
 import { getTime } from '@/utils/helpers/dates'
 import { useDisplay } from 'vuetify'
 
@@ -13,6 +19,8 @@ const props = defineProps<{
 }>()
 
 const { mobile } = useDisplay()
+
+const employeesStore = useEmployeesStore()
 
 const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttendanceTable(props)
 </script>
@@ -99,6 +107,7 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
+                employeesStore.getEmployeesById(+props.itemData.employee_id!)?.is_field_staff,
               )
             }}
 
@@ -109,6 +118,7 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
+                  employeesStore.getEmployeesById(+props.itemData.employee_id!)?.is_field_staff,
                 )
               }})
             </span>
@@ -225,7 +235,13 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
           >
             <span class="text-body-2 font-weight-bold me-2">Rendered Overtime:</span>
             <p class="text-body-2 font-weight-bold">
-              {{ getWorkHoursString(props.itemData.overtime_in, props.itemData.overtime_out) }}
+              {{ getOvertimeHoursString(props.itemData.overtime_in, props.itemData.overtime_out) }}
+
+              <span class="text-caption font-weight-black">
+                ({{
+                  getOvertimeHoursDecimal(props.itemData.overtime_in, props.itemData.overtime_out)
+                }})
+              </span>
             </p>
           </v-col>
         </template>
