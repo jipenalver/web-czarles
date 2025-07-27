@@ -1,5 +1,5 @@
 import type { PayrollData } from '@/views/system/admin/manage-payroll/payroll/payrollTableDialog'
-import { type ComputedRef,type Ref,computed,ref, toRef } from 'vue'
+import { type ComputedRef, type Ref, computed, ref, toRef } from 'vue'
 import { fetchHolidaysByDateString } from '@/stores/holidays'
 import { usePayrollComputation } from './payrollComputation'
 import { useTripsStore } from '@/stores/trips'
@@ -29,7 +29,7 @@ type UsePayrollRefsProps = {
 export function usePayrollRefs(
   props: UsePayrollRefsProps,
   dailyRate: ComputedRef<number>,
-  grossSalary: ComputedRef<number>
+  grossSalary: ComputedRef<number>,
 ) {
   const dailyRateRef = computed(() => dailyRate.value)
   const grossSalaryRef = computed(() => grossSalary.value)
@@ -41,9 +41,13 @@ export function usePayrollRefs(
 export function usePayrollPrint(
   props: UsePayrollRefsProps,
   dailyRate: ComputedRef<number>,
-  grossSalary: ComputedRef<number>
+  grossSalary: ComputedRef<number>,
 ) {
-  const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(props, dailyRate, grossSalary)
+  const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
+    props,
+    dailyRate,
+    grossSalary,
+  )
   // Use payrollComputation composable and expose its return
   return usePayrollComputation(
     dailyRateRef,
@@ -51,13 +55,12 @@ export function usePayrollPrint(
     tableDataRef,
     props.employeeData?.id,
     props.payrollData.month,
-    props.payrollData.year
+    props.payrollData.year,
   )
 }
 
 export function usePayrollFilters(dateString: string, employeeId: number | undefined) {
   const tripsStore = useTripsStore()
-
 
   async function fetchFilteredTrips() {
     // Tawag sa store action para fetch ug update sa trips
@@ -66,7 +69,5 @@ export function usePayrollFilters(dateString: string, employeeId: number | undef
 
   return {
     fetchFilteredTrips,
-
   }
 }
-

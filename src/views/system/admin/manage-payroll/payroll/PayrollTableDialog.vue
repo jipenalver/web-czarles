@@ -10,9 +10,6 @@ import { useDisplay } from 'vuetify'
 import { getYearMonthString } from '@/utils/helpers/others'
 import { ref } from 'vue'
 
-
-
-
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: Employee | null
@@ -56,7 +53,6 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
-
 const {
   tableOptions,
   tableFilters,
@@ -75,7 +71,7 @@ const chosenMonth = ref<string>('')
 // Helper function: convert year + month name to YYYY-MM-DD
 function getMonthYearAsDateString(year: number, monthName: string): string {
   // Pangitaon ang month index (0-based)
-  const monthIndex = monthNames.findIndex(m => m === monthName)
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
   const month = (monthIndex + 1).toString().padStart(2, '0')
   return `${year}-${month}-01`
 }
@@ -88,7 +84,14 @@ function onView(item: any) {
   // I-format ang dateString to YYYY-MM before saving to localStorage
   const yearMonth = getYearMonthString(dateString)
   localStorage.setItem('czarles_payroll_dateString', yearMonth)
-  console.log('Chosen month:', chosenMonth.value, '| Date string:', dateString, '| for employee:', props.itemData?.id)
+  console.log(
+    'Chosen month:',
+    chosenMonth.value,
+    '| Date string:',
+    dateString,
+    '| for employee:',
+    props.itemData?.id,
+  )
   // Pass dateString as prop to composable logic (if needed)
   baseOnView({ ...item, dateString })
 }
@@ -118,7 +121,7 @@ function onView(item: any) {
             v-model="tableFilters.year"
             label="Year"
             :items="[2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]"
-            style="min-width: 120px;"
+            style="min-width: 120px"
           ></v-select>
         </div>
       </template>
@@ -155,11 +158,10 @@ function onView(item: any) {
   </v-dialog>
 
   <PayrollPrintDialog
-  v-if="props.itemData && selectedData"
-  v-model:is-dialog-visible="isPrintDialogVisible"
-  :payroll-data="payrollData"
-  :employee-data="props.itemData"
-  :table-data="selectedData"
-/>
-
+    v-if="props.itemData && selectedData"
+    v-model:is-dialog-visible="isPrintDialogVisible"
+    :payroll-data="payrollData"
+    :employee-data="props.itemData"
+    :table-data="selectedData"
+  />
 </template>

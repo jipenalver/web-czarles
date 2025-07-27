@@ -1,20 +1,22 @@
-
-import { type TripLocation, type TripLocationTableFilter, useTripLocationsStore } from '@/stores/tripLocation'
+import { type TripLocation, useTripLocationsStore } from '@/stores/tripLocation'
 import { formActionDefault } from '@/utils/helpers/constants'
-import type { TableOptions } from '@/utils/helpers/tables'
+import { useEmployeesStore } from '@/stores/employees'
 import { ref, watch } from 'vue'
+
 export function useLocationsFormDialog(
   props: {
     isDialogVisible: boolean
     itemData: TripLocation | null
-    tableOptions: TableOptions
-    tableFilters: TripLocationTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void | ((event: 'refresh-table') => void),
+  emit: {
+    (event: 'update:isDialogVisible', value: boolean): void
+    (event: 'refresh-table', value: undefined): void
+  },
 ) {
   const tripLocationsStore = useTripLocationsStore()
+  const employeesStore = useEmployeesStore()
 
-  // State variables diri ta magbantay sa form data ug action state
+  // State
   const formDataDefault = {
     location: '',
     description: '',
@@ -24,12 +26,15 @@ export function useLocationsFormDialog(
   const refVForm = ref()
   const isUpdate = ref(false)
 
-  // Watch dialog visibility, reset or populate form depende kung edit or add
   watch(
     () => props.isDialogVisible,
-    () => {
+    async (visible) => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+      // Fetch employees when dialog opens
+      if (visible) {
+        await employeesStore.getEmployees()
+      }
     },
   )
 
@@ -37,13 +42,16 @@ export function useLocationsFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // Call store action depende kung update or add
+    // Convert form data to match API expectations
+    const submitData = {
+      ...formData.value,
+    }
+
     const { data, error } = isUpdate.value
-      ? await tripLocationsStore.updateTripLocation(formData.value)
-      : await tripLocationsStore.addTripLocation(formData.value)
+      ? await tripLocationsStore.updateTripLocation(submitData)
+      : await tripLocationsStore.addTripLocation(submitData)
 
     if (error) {
-      // Error handling, ipakita ang error message
       formAction.value = {
         ...formActionDefault,
         formMessage: error.message,
@@ -51,13 +59,10 @@ export function useLocationsFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      // Success, ipakita success message
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Location.`
 
-      // Refresh table ug locations list after add/update
-      await tripLocationsStore.getTripLocationsTable(props.tableOptions, props.tableFilters)
-      await tripLocationsStore.getTripLocations()
-
+      // Emit event to parent to refresh table after add/update
+      emit('refresh-table', undefined)
       setTimeout(() => {
         onFormReset()
       }, 1500)
@@ -66,20 +71,19 @@ export function useLocationsFormDialog(
     formAction.value.formAlert = true
   }
 
-  // Trigger Validators, check valid ba ang form before submit
+  // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
     if (valid) onSubmit()
   }
 
-  // Reset form, close dialog ra, ang refresh handled by store fetch
   const onFormReset = () => {
     formAction.value = { ...formActionDefault }
     formData.value = { ...formDataDefault }
     emit('update:isDialogVisible', false)
   }
 
-  // Expose State and Actions, para magamit sa component
+  // Expose State and Actions
   return {
     formData,
     formAction,
@@ -87,5 +91,6 @@ export function useLocationsFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
+    employees: employeesStore.employees,
   }
 }

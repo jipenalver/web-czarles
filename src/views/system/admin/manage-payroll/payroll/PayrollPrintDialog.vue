@@ -41,7 +41,7 @@ const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit
       </template>
 
       <v-card-text id="generate-payroll">
-        <PayrollPrint 
+        <PayrollPrint
           :employee-data="props.employeeData"
           :payroll-data="props.payrollData"
           :table-data="props.tableData"

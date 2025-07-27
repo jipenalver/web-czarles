@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
@@ -69,11 +68,11 @@ export const useEmployeesStore = defineStore('employees', () => {
     })) as Employee[]
   }
   // Get employee by ID
-function getEmployeeById(id: number): Employee | undefined {
-  // log ang employees.value para makita ang data sa console
-  // console.log('employees.value:', employees.value)
-  return employees.value.find(emp => emp.id === id)
-}
+  function getEmployeeById(id: number): Employee | undefined {
+    // log ang employees.value para makita ang data sa console
+    // console.log('employees.value:', employees.value)
+    return employees.value.find((emp) => emp.id === id)
+  }
   async function getEmployeesTable(
     tableOptions: TableOptions,
     { search, designation_id }: EmployeeTableFilter,

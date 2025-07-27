@@ -1,11 +1,8 @@
-
-
 // Import constants, types, and timezone helpers
 import { usePayrollComputation, type TableData as ComputationTableData } from './payrollComputation'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { ref, watch, computed, onUnmounted } from 'vue'
 import { type Employee } from '@/stores/employees'
-
 
 import {
   getCurrentMonthInPhilippines,
@@ -16,7 +13,6 @@ import {
   getSampleAllowances,
   getSampleDeductions,
 } from './currentMonth'
-
 
 // Table row type para sa payroll data
 export interface TableData {
@@ -34,7 +30,6 @@ export interface PayrollData {
   employee_id: number
 }
 
-
 // Composable para sa Payroll Table Dialog
 export function usePayrollTableDialog(
   props: {
@@ -43,7 +38,6 @@ export function usePayrollTableDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-
   // Payroll data generator using payrollComputation composable
   const generatePayrollData = (monthIndex: number): TableData => {
     // Use helpers from currentMonth.ts for sample/demo data
@@ -98,9 +92,7 @@ export function usePayrollTableDialog(
     employee_id: 0,
   })
 
-
   const selectedData = ref<TableData | null>(null)
-
 
   const currentMonth = ref<number>(getCurrentMonthInPhilippines())
   const currentYear = ref<number>(getCurrentYearInPhilippines())
@@ -124,9 +116,7 @@ export function usePayrollTableDialog(
 
   // Load payroll data based on available months
   const loadPayrollData = (): void => {
-    tableData.value = availableMonths.value.map((monthIndex) =>
-      generatePayrollData(monthIndex)
-    )
+    tableData.value = availableMonths.value.map((monthIndex) => generatePayrollData(monthIndex))
   }
 
   // Update current time (month/year) and reload if needed

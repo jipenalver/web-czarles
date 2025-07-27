@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { type Trip, type TripTableFilter } from '@/stores/trips'
 import { useTripLocationsStore } from '@/stores/tripLocation'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -7,7 +6,7 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useTripsFormDialog } from './TripsFormDialog'
 import { useEmployeesStore } from '@/stores/employees'
-import  {useUnitsStore } from '@/stores/units'
+import { useUnitsStore } from '@/stores/units'
 import { watch, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -47,7 +46,7 @@ watch(
       await tripLocationsStore.getTripLocations()
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 
@@ -68,7 +67,6 @@ watch(
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
-
             <v-col cols="12" md="6">
               <v-text-field
                 v-model="formData.date"
@@ -78,7 +76,7 @@ watch(
               ></v-text-field>
             </v-col>
 
-             <v-col cols="12" md="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="formData.trip_at"
                 label="Trip At"
@@ -87,8 +85,7 @@ watch(
               ></v-text-field>
             </v-col>
 
-
-              <v-col cols="12" md="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="formData.trip_no"
                 label="Trip Number"
@@ -97,10 +94,9 @@ watch(
               ></v-text-field>
             </v-col>
 
-
             <v-col cols="12" md="6">
               <v-select
-                v-model="(formData.unit_id as any)"
+                v-model="formData.unit_id as any"
                 label="Unit"
                 :items="units"
                 item-title="name"
@@ -111,10 +107,9 @@ watch(
               ></v-select>
             </v-col>
 
-
             <v-col cols="12" md="6">
               <v-select
-                v-model="(formData.trip_location_id as any)"
+                v-model="formData.trip_location_id as any"
                 label="Trip Location"
                 :items="tripLocations"
                 item-title="location"
@@ -125,10 +120,9 @@ watch(
               ></v-select>
             </v-col>
 
-
             <v-col cols="12" md="6">
               <v-select
-                v-model="(formData.employee_id as any)"
+                v-model="formData.employee_id as any"
                 label="Employee"
                 :items="employees"
                 item-title="label"
@@ -139,8 +133,6 @@ watch(
               ></v-select>
             </v-col>
 
-
-
             <v-col cols="12" md="6">
               <v-text-field
                 v-model="formData.km"
@@ -149,7 +141,6 @@ watch(
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
-
 
             <v-col cols="12" md="6">
               <v-text-field
@@ -162,19 +153,18 @@ watch(
             </v-col>
 
             <v-col cols="12">
-              <v-textarea 
-                v-model="formData.materials" 
-                label="Materials" 
+              <v-textarea
+                v-model="formData.materials"
+                label="Materials"
                 rows="2"
                 :rules="[requiredValidator]"
               ></v-textarea>
             </v-col>
 
-
             <v-col cols="12">
-              <v-textarea 
-                v-model="formData.description" 
-                label="Description" 
+              <v-textarea
+                v-model="formData.description"
+                label="Description"
                 rows="2"
                 :rules="[requiredValidator]"
               ></v-textarea>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { formatTripDate, getMonthDateRange } from '@/utils/helpers/others'
 import { type PayrollData, type TableData } from './payrollTableDialog'
@@ -8,9 +7,6 @@ import logoCzarles from '@/assets/logos/logo-czarles.png'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-
-
-
 
 // Props
 const props = defineProps<{
@@ -25,8 +21,18 @@ const monthDateRange = computed(() => {
 })
 // Constants
 const monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 // Reactive references
@@ -74,10 +80,10 @@ const payrollPrint = usePayrollPrint(
   {
     employeeData: props.employeeData,
     payrollData: props.payrollData,
-    tableData: props.tableData
+    tableData: props.tableData,
   },
   dailyRate,
-  grossSalary
+  grossSalary,
 )
 
 const holidays = ref<Holiday[]>([])
@@ -89,7 +95,10 @@ async function fetchEmployeeHolidays() {
     return
   }
   isHolidaysLoading.value = true
-  holidays.value = await fetchHolidaysByDateString(holidayDateString.value, String(props.employeeData.id))
+  holidays.value = await fetchHolidaysByDateString(
+    holidayDateString.value,
+    String(props.employeeData.id),
+  )
   isHolidaysLoading.value = false
 }
 const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
@@ -103,7 +112,7 @@ const {
   netSalary,
   formatCurrency,
   employeeDailyRate,
-  regularWorkTotal // expose regularWorkTotal from composable
+  regularWorkTotal, // expose regularWorkTotal from composable
 } = payrollPrint
 
 // Methods
@@ -149,10 +158,10 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
     <v-table class="mt-6 text-body-2" density="compact">
       <tbody>
         <tr>
-          <td class="text-caption pa-2" style="width: auto;">PAID TO</td>
-          <td class="pa-2 border-b-sm" style="width: 66%;">{{ fullName }}</td>
-          <td class="text-caption pa-2" style="width: auto;">POSITION</td>
-          <td class="pa-2 border-b-sm" style="width: 25%;">{{ designation }}</td>
+          <td class="text-caption pa-2" style="width: auto">PAID TO</td>
+          <td class="pa-2 border-b-sm" style="width: 66%">{{ fullName }}</td>
+          <td class="text-caption pa-2" style="width: auto">POSITION</td>
+          <td class="pa-2 border-b-sm" style="width: 25%">{{ designation }}</td>
         </tr>
         <tr>
           <td class="text-caption pa-2">ADDRESS</td>
@@ -162,7 +171,6 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         </tr>
       </tbody>
     </v-table>
-    
 
     <!-- Payroll Details Table -->
     <v-table class="mt-3 text-body-2 border" density="compact">
@@ -171,8 +179,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="text-caption text-center border-b-sm pa-2" colspan="4">PARTICULARS</td>
           <td class="text-caption text-center border-b-sm border-s-sm pa-2">AMOUNT</td>
         </tr>
-        
-        
+
         <tr>
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
@@ -180,7 +187,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           </td>
           <td class="pa-2">@ {{ formatCurrency(employeeDailyRate ?? 0) }}</td>
           <td class="pa-2">x {{ workDays }}</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(regularWorkTotal) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(regularWorkTotal) }}
+          </td>
         </tr>
         <!-- Unified Loading State for Trips and Holidays -->
         <tr v-if="isTripsLoading || isHolidaysLoading">
@@ -207,15 +216,9 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">
-                <v-img
-                  :src="logoCzarles"
-                  alt="No trips"
-                  max-width="300"
-                  class="mx-auto mb-2"
-                />
+                <v-img :src="logoCzarles" alt="No trips" max-width="300" class="mx-auto mb-2" />
                 No trips to preview for this payroll period.
               </td>
-              
             </tr>
           </template>
 
@@ -224,7 +227,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
-                {{ holiday.name }} ({{ holiday.type}})
+                {{ holiday.name }} ({{ holiday.type }})
               </td>
               <td class="pa-2">@</td>
               <td class="pa-2"></td>
@@ -233,19 +236,18 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           </template>
           <template v-else>
             <tr>
-              <td class="text-center pa-2" colspan="5">
-                No holidays for this payroll period.
-              </td>
+              <td class="text-center pa-2" colspan="5">No holidays for this payroll period.</td>
             </tr>
           </template>
         </template>
         <!-- overtime -->
-         <tr>
-          
-        <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
+        <tr>
+          <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2">@</td>
           <td class="text-caption font-weight-bold text-end pa-2">/hour</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
 
         <!-- monthly tripings -->
@@ -253,62 +255,81 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2">@</td>
           <td class="text-caption font-weight-bold text-end pa-2">/month</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
 
         <!-- Salary Calculation Rows -->
         <tr>
-          
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
           <td class="text-caption font-weight-bold text-end pa-2">Php</td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
-          <td class="text-caption text-disabled pa-2">Loss Deduction</td>
+          <td class="text-caption text-disabled pa-2">Late Deduction</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ payrollPrint.monthLateDeduction }}
+          </td>
         </tr>
-          <tr>
+        <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">SSS</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
-          <tr>
+        <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">PHIC</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
-          <tr>
+        <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">HDMF</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
-          <tr>
+        <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">Cash Advance</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
-          <tr>
+        <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption text-disabled pa-2">Others</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalGrossSalary) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalGrossSalary) }}
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption pa-2">Less Deductions</td>
           <td class="pa-2"></td>
-          <td class="border-b-thin border-s-sm text-end pa-2">{{ formatCurrency(totalDeductions) }}</td>
+          <td class="border-b-thin border-s-sm text-end pa-2">
+            {{ formatCurrency(totalDeductions) }}
+          </td>
         </tr>
         <tr>
           <td class="pa-2" colspan="2"></td>
-          <td class="text-caption font-weight-bold border-t-sm border-s-sm pa-2">TOTAL NET SALARY</td>
+          <td class="text-caption font-weight-bold border-t-sm border-s-sm pa-2">
+            TOTAL NET SALARY
+          </td>
           <td class="border-t-sm pa-2">Php</td>
           <td class="border-t-sm border-s-sm text-end pa-2">{{ formatCurrency(netSalary) }}</td>
         </tr>

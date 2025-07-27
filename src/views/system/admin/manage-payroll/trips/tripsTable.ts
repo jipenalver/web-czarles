@@ -34,7 +34,8 @@ export function useTripsTable() {
       isDialogVisible.value = true
     } catch (err) {
       // Error pag open dialog, rare pero handle lang gihapon
-      formAction.value.formMessage = 'Error opening add trip dialog: ' + (err instanceof Error ? err.message : String(err))
+      formAction.value.formMessage =
+        'Error opening add trip dialog: ' + (err instanceof Error ? err.message : String(err))
       formAction.value.formStatus = 400
       formAction.value.formAlert = true
     }
@@ -46,7 +47,8 @@ export function useTripsTable() {
       itemData.value = item
       isDialogVisible.value = true
     } catch (err) {
-      formAction.value.formMessage = 'Error opening update dialog: ' + (err instanceof Error ? err.message : String(err))
+      formAction.value.formMessage =
+        'Error opening update dialog: ' + (err instanceof Error ? err.message : String(err))
       formAction.value.formStatus = 400
       formAction.value.formAlert = true
     }
@@ -58,7 +60,8 @@ export function useTripsTable() {
       deleteId.value = id
       isConfirmDeleteDialog.value = true
     } catch (err) {
-      formAction.value.formMessage = 'Error preparing delete: ' + (err instanceof Error ? err.message : String(err))
+      formAction.value.formMessage =
+        'Error preparing delete: ' + (err instanceof Error ? err.message : String(err))
       formAction.value.formStatus = 400
       formAction.value.formAlert = true
     }
@@ -81,11 +84,14 @@ export function useTripsTable() {
           await tripsStore.getTrips()
         } catch (loadErr) {
           // Error pag reload, i-report lang pud
-          formAction.value.formMessage = 'Trip deleted, pero error pag reload: ' + (loadErr instanceof Error ? loadErr.message : String(loadErr))
+          formAction.value.formMessage =
+            'Trip deleted, pero error pag reload: ' +
+            (loadErr instanceof Error ? loadErr.message : String(loadErr))
         }
       }
     } catch (err) {
-      formAction.value.formMessage = 'Error deleting trip: ' + (err instanceof Error ? err.message : String(err))
+      formAction.value.formMessage =
+        'Error deleting trip: ' + (err instanceof Error ? err.message : String(err))
       formAction.value.formStatus = 400
     } finally {
       formAction.value.formAlert = true
@@ -98,7 +104,8 @@ export function useTripsTable() {
     try {
       onLoadItems(tableOptions.value)
     } catch (err) {
-      formAction.value.formMessage = 'Error filtering trips: ' + (err instanceof Error ? err.message : String(err))
+      formAction.value.formMessage =
+        'Error filtering trips: ' + (err instanceof Error ? err.message : String(err))
       formAction.value.formStatus = 400
       formAction.value.formAlert = true
     }
@@ -111,7 +118,8 @@ export function useTripsTable() {
       await tripsStore.getTripsTable({ page, itemsPerPage, sortBy }, tableFilters.value)
     } catch (err) {
       // Error pag load sa trips table
-      formAction.value.formMessage = 'Error loading trips: ' + (err instanceof Error ? err.message : String(err))
+      formAction.value.formMessage =
+        'Error loading trips: ' + (err instanceof Error ? err.message : String(err))
       formAction.value.formStatus = 400
       formAction.value.formAlert = true
     } finally {

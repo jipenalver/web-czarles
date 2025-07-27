@@ -1,5 +1,4 @@
-
-import { type TableOptions, tablePagination} from '@/utils/helpers/tables'
+import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { prepareDate } from '@/utils/helpers/others'
 import type { TripLocation } from './tripLocation'
@@ -14,14 +13,14 @@ export type Trip = {
   created_at: string
   unit_id: number | undefined
   trip_location_id: number | undefined
-  date: string 
-  materials: string 
+  date: string
+  materials: string
   km: number | undefined
   trip_no: number | undefined
   per_trip: number | undefined
   employee_id: number | undefined
-  user_id: string 
-  description: string 
+  user_id: string
+  description: string
   units?: Unit
   trip_location?: TripLocation
   employees?: Employee
@@ -63,7 +62,10 @@ export const useTripsStore = defineStore('trips', () => {
       console.error('[getTrips] Exception:', err)
     }
   }
-  async function fetchFilteredTrips(dateString: string, employeeId: number | undefined): Promise<Trip[]> {
+  async function fetchFilteredTrips(
+    dateString: string,
+    employeeId: number | undefined,
+  ): Promise<Trip[]> {
     if (!employeeId) return []
     // Extract YYYY-MM for filtering
     const yearMonth = dateString.slice(0, 7)
@@ -79,7 +81,9 @@ export const useTripsStore = defineStore('trips', () => {
     // Use join/alias as in store for trip_location and employees
     const { data, error } = await supabase
       .from('trips')
-      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)')
+      .select(
+        '*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)',
+      )
       .eq('employee_id', employeeId)
       .gte('date', `${yearMonth}-01`)
       .lt('date', `${nextMonthStr}-01`)
@@ -93,10 +97,9 @@ export const useTripsStore = defineStore('trips', () => {
     // Update the trips store (optional: replace or merge)
     trips.value = data as Trip[]
     // Debug log
-   /*  console.log('[fetchFilteredTrips] fetched trips from supabase:', data) */
+    /*  console.log('[fetchFilteredTrips] fetched trips from supabase:', data) */
     return data as Trip[]
   }
-
 
   async function getTripsTable(tableOptions: TableOptions, filters: TripTableFilter) {
     // Fetching trips table with search ug pagination
@@ -106,7 +109,9 @@ export const useTripsStore = defineStore('trips', () => {
 
     let query = supabase
       .from('trips')
-      .select('*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)')
+      .select(
+        '*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)',
+      )
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -121,11 +126,13 @@ export const useTripsStore = defineStore('trips', () => {
     const { count } = await getTripsCount({ ...filters, search })
 
     // Merge employee fullname into each trip
-    const tripsWithFullname = (tripsData as Trip[]).map(trip => ({
+    const tripsWithFullname = (tripsData as Trip[]).map((trip) => ({
       ...trip,
       employee_fullname: trip.employees
-        ? `${trip.employees.firstname} ${trip.employees.middlename} ${trip.employees.lastname}`.replace(/\s+/g, ' ').trim()
-        : ''
+        ? `${trip.employees.firstname} ${trip.employees.middlename} ${trip.employees.lastname}`
+            .replace(/\s+/g, ' ')
+            .trim()
+        : '',
     }))
 
     tripsTable.value = tripsWithFullname
@@ -134,9 +141,7 @@ export const useTripsStore = defineStore('trips', () => {
 
   async function getTripsCount(filters: TripTableFilter) {
     //Counting trips for pagination
-    let query = supabase
-      .from('trips')
-      .select('*', { count: 'exact', head: true })
+    let query = supabase.from('trips').select('*', { count: 'exact', head: true })
 
     query = getTripsFilter(query, filters)
 
@@ -176,7 +181,11 @@ export const useTripsStore = defineStore('trips', () => {
       }
       if (trip_at.length === 1 && isValidDate(trip_at[0])) {
         query = query.eq('date', prepareDate(trip_at[0]))
-      } else if (trip_at.length > 1 && isValidDate(trip_at[0]) && isValidDate(trip_at[trip_at.length - 1])) {
+      } else if (
+        trip_at.length > 1 &&
+        isValidDate(trip_at[0]) &&
+        isValidDate(trip_at[trip_at.length - 1])
+      ) {
         query = query
           .gte('date', prepareDate(trip_at[0])) // greater than or equal to `from` date
           .lte('date', prepareDate(trip_at[trip_at.length - 1])) // less than or equal to `to` date
@@ -202,7 +211,11 @@ export const useTripsStore = defineStore('trips', () => {
   async function updateTrip(formData: Partial<Trip>) {
     // Update Trip - always return actual Supabase error
     try {
-      const { data, error } = await supabase.from('trips').update(formData).eq('id', formData.id).select()
+      const { data, error } = await supabase
+        .from('trips')
+        .update(formData)
+        .eq('id', formData.id)
+        .select()
       // Ibalik gyud ang error gikan sa Supabase, dili null
       return { data, error }
     } catch (err) {

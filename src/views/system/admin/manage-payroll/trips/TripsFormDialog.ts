@@ -66,9 +66,10 @@ export function useTripsFormDialog(
       formAction.value = {
         ...formActionDefault,
         // Error message handling "I-check nato if naa bay message ang error, else generic error"
-        formMessage: (error && typeof error === 'object' && 'message' in error)
-          ? (error as { message: string }).message
-          : 'Unknown error occurred.',
+        formMessage:
+          error && typeof error === 'object' && 'message' in error
+            ? (error as { message: string }).message
+            : 'Unknown error occurred.',
         formStatus: 400,
         formProcess: false,
       }

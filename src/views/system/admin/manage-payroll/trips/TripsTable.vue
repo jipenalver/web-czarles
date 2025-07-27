@@ -107,7 +107,13 @@ const {
             </v-col>
 
             <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-map-marker-plus" color="primary" block @click="onAdd">
+              <v-btn
+                class="my-1"
+                prepend-icon="mdi-map-marker-plus"
+                color="primary"
+                block
+                @click="onAdd"
+              >
                 Add Trip
               </v-btn>
             </v-col>
@@ -127,15 +133,15 @@ const {
         </template>
 
         <template #item.employee_id="{ item }">
-          <span> {{ item.employee_fullname  }} </span>
+          <span> {{ item.employee_fullname }} </span>
         </template>
 
         <template #item.unit_id="{ item }">
-          <span> {{ item.units?.name  }} </span>
+          <span> {{ item.units?.name }} </span>
         </template>
 
         <template #item.trip_location_id="{ item }">
-          <span> {{ item.trip_location?.location  }} </span>
+          <span> {{ item.trip_location?.location }} </span>
         </template>
 
         <template #item.actions="{ item }">

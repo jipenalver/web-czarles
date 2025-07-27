@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { useDisplay,useDate } from 'vuetify'
+import { useDisplay, useDate } from 'vuetify'
 import { type Trip } from '@/stores/trips' // Assume Trip type exists
-
 
 const props = defineProps<{
   columnsLength: number
@@ -16,26 +15,54 @@ const date = useDate()
   <tr>
     <td :colspan="props.columnsLength" class="py-2">
       <v-row :class="mobile ? '' : 'px-4'" :no-gutters="!mobile" dense>
-       
-        <v-col cols="12" sm="6" class="d-flex align-center my-2" :class="mobile ? 'justify-space-between' : 'justify-start'">
+        <v-col
+          cols="12"
+          sm="6"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
           <span class="text-body-2 font-weight-bold me-2">Description:</span>
           <span class="text-body-2">{{ props.itemData.description || 'N/A' }}</span>
         </v-col>
-        <v-col cols="12" sm="2" class="d-flex align-center my-2" :class="mobile ? 'justify-space-between' : 'justify-start'">
+        <v-col
+          cols="12"
+          sm="2"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
           <span class="text-body-2 font-weight-bold me-2">KM:</span>
           <span class="text-body-2">{{ props.itemData.km || 'N/A' }}</span>
         </v-col>
-        <v-col cols="12" sm="2" class="d-flex align-center my-2" :class="mobile ? 'justify-space-between' : 'justify-start'">
+        <v-col
+          cols="12"
+          sm="2"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
           <span class="text-body-2 font-weight-bold me-2">Per Trip:</span>
-          <span class="text-body-2">{{ props.itemData.per_trip ? `₱${props.itemData.per_trip}` : 'N/A' }}</span>
+          <span class="text-body-2">{{
+            props.itemData.per_trip ? `₱${props.itemData.per_trip}` : 'N/A'
+          }}</span>
         </v-col>
-        <v-col cols="12" sm="2" class="d-flex align-center my-2" :class="mobile ? 'justify-space-between' : 'justify-start'">
+        <v-col
+          cols="12"
+          sm="2"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
           <span class="text-body-2 font-weight-bold me-2">Materials:</span>
           <span class="text-body-2">{{ props.itemData.materials || 'N/A' }}</span>
         </v-col>
-        <v-col cols="12" sm="6" class="d-flex align-center my-2" :class="mobile ? 'justify-space-between' : 'justify-start'">
+        <v-col
+          cols="12"
+          sm="6"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
           <span class="text-body-2 font-weight-bold me-2">Created Date:</span>
-          <span class="text-body-2 font-weight-bold">{{ date.format(props.itemData.created_at, 'fullDateTime') }}</span>
+          <span class="text-body-2 font-weight-bold">{{
+            date.format(props.itemData.created_at, 'fullDateTime')
+          }}</span>
         </v-col>
         <v-divider class="my-3" thickness="1"></v-divider>
       </v-row>

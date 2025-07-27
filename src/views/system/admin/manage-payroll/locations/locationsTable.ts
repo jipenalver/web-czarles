@@ -21,7 +21,6 @@ export function useLocationsTable() {
   const itemData = ref<TripLocation | null>(null)
   const formAction = ref({ ...formActionDefault })
 
-
   // Actions
   const onAdd = () => {
     itemData.value = null

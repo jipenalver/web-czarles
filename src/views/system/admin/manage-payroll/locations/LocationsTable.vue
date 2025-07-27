@@ -60,7 +60,9 @@ const {
         :headers="tableHeaders"
         :items="tripLocationsStore.tripLocationsTable"
         :items-length="tripLocationsStore.tripLocationsTableTotal"
-        @update:options="(options) => tripLocationsStore.getTripLocationsTable(options, tableFilters)"
+        @update:options="
+          (options) => tripLocationsStore.getTripLocationsTable(options, tableFilters)
+        "
         :hide-default-header="mobile"
         :mobile="mobile"
       >
@@ -81,7 +83,13 @@ const {
             </v-col>
 
             <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-map-marker-plus" color="primary" block @click="onAdd">
+              <v-btn
+                class="my-1"
+                prepend-icon="mdi-map-marker-plus"
+                color="primary"
+                block
+                @click="onAdd"
+              >
                 Add Location
               </v-btn>
             </v-col>
@@ -95,7 +103,7 @@ const {
         </template>
 
         <template #item.description="{ item }">
-          <span>{{ item.description}}</span>
+          <span>{{ item.description }}</span>
         </template>
 
         <template #item.actions="{ item }">

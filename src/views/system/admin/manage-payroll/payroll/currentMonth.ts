@@ -1,7 +1,9 @@
 // Payroll sample data helpers (for demo/sample only)
 export const baseBasicSalary = 25000
 export const variations = [0, 0, 0, 100, -100, 200, -50, -300, 500, 300, 100, 400]
-export const deductionVariations = [3200, 3100, 2900, 3400, 3000, 3600, 3300, 3150, 3500, 3250, 3800, 4200]
+export const deductionVariations = [
+  3200, 3100, 2900, 3400, 3000, 3600, 3300, 3150, 3500, 3250, 3800, 4200,
+]
 
 export function getSampleBasicSalary(monthIndex: number): number {
   return baseBasicSalary + (variations[monthIndex] || 0)
@@ -24,12 +26,7 @@ export function getSampleDeductions(monthIndex: number): number {
 // mga helper para sa timezone ug month/year sa PH
 
 // Import date helpers from others.ts
-import {
-  getDateISO,
-  getDate,
-  getDateWithWeekday,
-  prepareDate,
-} from '@/utils/helpers/others'
+import { getDateISO, getDate, getDateWithWeekday, prepareDate } from '@/utils/helpers/others'
 
 /**
  * Kuha current date/time sa Manila timezone (Asia/Manila)
@@ -60,6 +57,16 @@ export function getCurrentYearInPhilippines(): number {
  * Month names array (English, for display)
  */
 export const monthNames: string[] = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]

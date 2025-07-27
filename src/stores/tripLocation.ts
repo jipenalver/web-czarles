@@ -1,25 +1,19 @@
-
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-
-
-
 export type TripLocation = {
   id: number
   created_at: string
-  location: string 
-  description: string 
+  location: string
+  description: string
 }
-
 
 export type TripLocationTableFilter = {
   search: string | null
 }
-
 
 // Use shared TableOptions from helpers
 
@@ -28,15 +22,20 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
   const tripLocationsTable = ref<TripLocation[]>([])
   const tripLocationsTableTotal = ref(0)
 
-
   // Get all (no filter)
   async function getTripLocations() {
-    const { data } = await supabase.from('trip_locations').select().order('location', { ascending: true })
+    const { data } = await supabase
+      .from('trip_locations')
+      .select()
+      .order('location', { ascending: true })
     tripLocations.value = data as TripLocation[]
   }
 
   // Server-side search and pagination for table
-  async function getTripLocationsTable(tableOptions: TableOptions, { search }: TripLocationTableFilter = { search: null }) {
+  async function getTripLocationsTable(
+    tableOptions: TableOptions,
+    { search }: TripLocationTableFilter = { search: null },
+  ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'location')
     search = tableSearch(search)
 

@@ -19,10 +19,8 @@ const emit = defineEmits(['update:isDialogVisible', 'refresh-table'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useLocationsFormDialog(
-  props,
-  emit,
-)
+const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
+  useLocationsFormDialog(props, emit)
 </script>
 
 <template>
