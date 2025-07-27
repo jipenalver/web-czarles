@@ -1,3 +1,6 @@
+// 👉 Time Constants
+export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
+
 // 👉 Fix v-date-input; prepare local dates in form
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const prepareFormDates = (formData: { [key: string]: any }, dateColumns: string[] = []) => {
