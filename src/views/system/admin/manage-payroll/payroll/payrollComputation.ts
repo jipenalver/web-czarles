@@ -31,16 +31,7 @@ export function usePayrollComputation(
   payrollYear?: number,
   dateString?: string,
 ) {
-  // Log overall overtime rendered when composable is used
-  if (typeof window !== 'undefined') {
-    setTimeout(() => {
-      computeOverallOvertimeCalculation().then((overallOvertime) => {
-        // i-log ang overall overtime rendered
-        const formattedOvertime = overallOvertime.toFixed(2)
-        console.log('Overall overtime rendered (hours):', formattedOvertime)
-      })
-    }, 0)
-  }
+ 
   // Helper function to compute overtime hours between two time strings (HH:MM)
   function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
     // Debug: log overtimeIn and overtimeOut values
