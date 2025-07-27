@@ -1,5 +1,12 @@
+import {
+  getLateUndertimeHoursDecimal,
+  getOvertimeHoursDecimal,
+  getWorkHoursDecimal,
+} from '@/utils/helpers/attendance'
+import { getDate, getDateISO, getDateWithWeekday, getTime } from '@/utils/helpers/dates'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
+import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type AttendanceImage } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
@@ -136,6 +143,73 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     return images.some((image) => image.image_type === type)
   }
 
+  const onExportCSV = () => {
+    const filename = `${getDateISO(new Date())}-${props.componentView}`
+
+    const csvData = () => {
+      const defaultHeaders = tableHeaders.value
+        .filter(({ title }) => title !== 'Actions' && title !== 'Employee')
+        .map(({ title }) => title)
+
+      const csvHeaders = [
+        'Lastname',
+        'Firstname',
+        'Middlename',
+        'Day of the Week',
+        ...defaultHeaders,
+        'Rendered Time',
+        'Late/Undertime',
+        ...(props.componentView === 'overtime'
+          ? ['Overtime In', 'Overtime Out', 'Rendered Overtime']
+          : []),
+      ].join(',')
+
+      const csvRows = attendancesStore.attendances.map((item) => {
+        let csvData = [
+          prepareCSV(item.employee.lastname),
+          prepareCSV(item.employee.firstname),
+          prepareCSV(item.employee.middlename),
+          getDateWithWeekday(item.am_time_in as string)?.split(',')[0] ?? '',
+
+          prepareCSV(getDate(item.am_time_in) as string),
+          item.is_am_leave ? item.leave_type : item.am_time_in ? getTime(item.am_time_in) : '',
+          item.am_time_out ? getTime(item.am_time_out) : item.is_am_leave ? item.leave_type : '',
+          item.pm_time_in ? getTime(item.pm_time_in) : item.is_pm_leave ? item.leave_type : '',
+          item.pm_time_out ? getTime(item.pm_time_out) : item.is_pm_leave ? item.leave_type : '',
+          getWorkHoursDecimal(
+            item.am_time_in,
+            item.am_time_out,
+            item.pm_time_in,
+            item.pm_time_out,
+            item.employee.is_field_staff,
+          ),
+          getLateUndertimeHoursDecimal(
+            item.am_time_in,
+            item.am_time_out,
+            item.pm_time_in,
+            item.pm_time_out,
+            item.employee.is_field_staff,
+          ),
+        ]
+
+        if (props.componentView === 'overtime') {
+          csvData = [
+            ...csvData,
+            item.overtime_in ? getTime(item.overtime_in) : '',
+            item.overtime_out ? getTime(item.overtime_out) : '',
+            getOvertimeHoursDecimal(item.overtime_in, item.overtime_out),
+          ]
+        }
+
+        return csvData.join(',')
+      })
+
+      return [csvHeaders, ...csvRows].join('\n')
+    }
+
+    generateCSV(filename, csvData())
+  }
+
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
   })
@@ -164,6 +238,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     onFilterItems,
     onLoadItems,
     hasAttendanceImage,
+    onExportCSV,
     attendancesStore,
     employeesStore,
   }
