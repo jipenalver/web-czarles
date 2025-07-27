@@ -44,22 +44,7 @@ const props = defineProps<{
       {{ safeCurrencyFormat(netSalaryCalculation.deductions.sss, formatCurrency) }}
     </td>
   </tr>
-  <tr>
-    <td class="pa-2" colspan="2"></td>
-    <td class="text-caption text-disabled pa-2">PHIC</td>
-    <td class="text-caption font-weight-bold text-end pa-2"></td>
-    <td class="border-b-thin border-s-sm text-end pa-2">
-      {{ safeCurrencyFormat(netSalaryCalculation.deductions.phic, formatCurrency) }}
-    </td>
-  </tr>
-  <tr>
-    <td class="pa-2" colspan="2"></td>
-    <td class="text-caption text-disabled pa-2">HDMF</td>
-    <td class="text-caption font-weight-bold text-end pa-2"></td>
-    <td class="border-b-thin border-s-sm text-end pa-2">
-      {{ safeCurrencyFormat(netSalaryCalculation.deductions.hdmf, formatCurrency) }}
-    </td>
-  </tr>
+
   <tr>
     <td class="pa-2" colspan="2"></td>
     <td class="text-caption text-disabled pa-2">Cash Advance</td>
