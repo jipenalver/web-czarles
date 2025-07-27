@@ -4,6 +4,7 @@ import { getDateISO, getYearsOfService } from '@/utils/helpers/dates'
 import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useDesignationsStore } from '@/stores/designations'
+import { useBenefitsStore } from '@/stores/benefits'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -17,6 +18,7 @@ export function useEmployeesTable(
 
   const employeesStore = useEmployeesStore()
   const designationsStore = useDesignationsStore()
+  const benefitsStore = useBenefitsStore()
 
   // States
   const tableOptions = ref({
@@ -133,7 +135,14 @@ export function useEmployeesTable(
         'Pag-IBIG',
         'Origin',
         'Assignment',
-        ...(props.componentView === 'benefits' ? ['Daily Rate', 'Accident Insurance'] : []),
+        ...(props.componentView === 'benefits'
+          ? [
+              'Daily Rate',
+              'Accident Insurance',
+              ...benefitsStore.addons.map(({ benefit }) => benefit),
+              ...benefitsStore.deductions.map(({ benefit }) => benefit),
+            ]
+          : []),
         ...(props.componentView === 'payroll' ? [] : []),
       ].join(',')
 
@@ -161,12 +170,26 @@ export function useEmployeesTable(
           item.area_assignment ? prepareCSV(item.area_assignment.area) : '',
         ]
 
-        if (props.componentView === 'benefits')
+        if (props.componentView === 'benefits') {
+          const getBenefits = (benefitType: 'addons' | 'deductions') => {
+            return benefitsStore[benefitType].map((benefit) => {
+              const activeBenefit = item.employee_deductions.find(
+                ({ benefit_id }) => benefit_id === benefit.id,
+              )?.amount
+
+              return activeBenefit ? activeBenefit.toString() : '0.00'
+            })
+          }
+
           csvData = [
             ...csvData,
             item.daily_rate ? prepareCSV(item.daily_rate.toFixed(2)) : '',
             prepareCSV(item.is_insured ? 'Yes' : 'No'),
+
+            ...getBenefits('addons'),
+            ...getBenefits('deductions'),
           ]
+        }
 
         if (props.componentView === 'payroll') csvData = [...csvData]
 
