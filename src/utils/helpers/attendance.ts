@@ -156,3 +156,29 @@ export const getOvertimeHoursString = (overtimeIn: string | null, overtimeOut: s
 // 👉 Get total overtime hours as decimal
 export const getOvertimeHoursDecimal = (overtimeIn: string | null, overtimeOut: string | null) =>
   convertTimeToDecimal(getFieldMinutes(overtimeIn, overtimeOut))
+
+// 👉 Get total late/undertime hours as string
+export const getLateUndertimeHoursString = (
+  amTimeIn: string | null,
+  amTimeOut: string | null,
+  pmTimeIn: string | null = null,
+  pmTimeOut: string | null = null,
+  isField = false,
+) => {
+  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
+  const lateUndertime = 8 * 60 - totalMinutes
+  return convertTimeToString(Math.max(0, lateUndertime))
+}
+
+// 👉 Get total late/undertime hours as decimal
+export const getLateUndertimeHoursDecimal = (
+  amTimeIn: string | null,
+  amTimeOut: string | null,
+  pmTimeIn: string | null = null,
+  pmTimeOut: string | null = null,
+  isField = false,
+) => {
+  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
+  const lateUndertime = 8 * 60 - totalMinutes
+  return convertTimeToDecimal(Math.max(0, lateUndertime))
+}
