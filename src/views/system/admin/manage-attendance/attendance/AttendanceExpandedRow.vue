@@ -4,7 +4,7 @@ import {
   getOvertimeHoursString,
   getWorkHoursDecimal,
   getWorkHoursString,
-} from '@/utils/helpers/calculation'
+} from '@/utils/helpers/attendance'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'
