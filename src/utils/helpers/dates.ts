@@ -27,14 +27,11 @@ export const prepareDateTime = (date: Date | string) => {
 export const prepareDateRange = (dateRange: Date[], isRange = false) => {
   if (dateRange.length === 0) return { startDate: null, endDate: null }
 
-  const validDates = dateRange.filter((date) => date instanceof Date && !isNaN(date.getTime()))
-  if (validDates.length === 0) return { startDate: null, endDate: null }
-
   const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
-  const startDate = validDates[0]
+  const startDate = dateRange[0]
   const endDate = isRange
-    ? new Date(validDates[validDates.length - 1].getTime() + MILLISECONDS_PER_DAY)
+    ? new Date(dateRange[dateRange.length - 1].getTime() + MILLISECONDS_PER_DAY)
     : new Date(startDate.getTime() + MILLISECONDS_PER_DAY)
 
   return { startDate: prepareDate(startDate), endDate: prepareDate(endDate) }
