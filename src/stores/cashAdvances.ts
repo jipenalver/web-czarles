@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { MILLISECONDS_PER_DAY, prepareDate, prepareFormDates } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
+import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { type Employee } from './employees'
@@ -108,18 +108,9 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
     if (request_at) {
-      const dateQuery = (dates: Date[], isRange = false) => {
-        const startDate = dates[0]
-        const endDate = isRange
-          ? new Date(dates[dates.length - 1].getTime() + MILLISECONDS_PER_DAY)
-          : new Date(startDate.getTime() + MILLISECONDS_PER_DAY)
+      const { startDate, endDate } = prepareDateRange(request_at, request_at.length > 1)
 
-        return query
-          .gte('request_at', prepareDate(startDate))
-          .lt('request_at', prepareDate(endDate))
-      }
-
-      query = dateQuery(request_at, request_at.length > 1)
+      query = query.gte('request_at', startDate).lt('request_at', endDate)
     }
 
     return query

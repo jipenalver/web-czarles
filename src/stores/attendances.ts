@@ -1,6 +1,6 @@
-import { MILLISECONDS_PER_DAY, getDate, prepareDate } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { getDate, prepareDateRange } from '@/utils/helpers/dates'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -134,18 +134,8 @@ export const useAttendancesStore = defineStore('attendances', () => {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
     if (attendance_at) {
-      const dateQuery = (dates: Date[], isRange = false) => {
-        const startDate = dates[0]
-        const endDate = isRange
-          ? new Date(dates[dates.length - 1].getTime() + MILLISECONDS_PER_DAY)
-          : new Date(startDate.getTime() + MILLISECONDS_PER_DAY)
-
-        return query
-          .gte('am_time_in', prepareDate(startDate))
-          .lt('am_time_in', prepareDate(endDate))
-      }
-
-      query = dateQuery(attendance_at, attendance_at.length > 1)
+      const { startDate, endDate } = prepareDateRange(attendance_at, attendance_at.length > 1)
+      query = query.gte('am_time_in', startDate).lt('am_time_in', endDate)
     }
 
     return query
