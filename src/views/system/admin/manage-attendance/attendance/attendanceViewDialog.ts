@@ -1,6 +1,7 @@
 import { type Attendance, type AttendanceImage } from '@/stores/attendances'
-import { fileDownload, getDate } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { fileDownload } from '@/utils/helpers/others'
+import { getDate } from '@/utils/helpers/dates'
 import { ref, watch } from 'vue'
 
 export function useAttendanceViewDialog(

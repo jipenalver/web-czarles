@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
+import { prepareDateTime, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Benefit, type EmployeeDeduction } from './benefits'
-import { prepareFormDates } from '@/utils/helpers/others'
 import { type Designation } from './designations'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -12,6 +12,7 @@ import { ref } from 'vue'
 export type Employee = {
   id: number
   created_at: string
+  deleted_at: string | null
   firstname: string
   middlename: string
   lastname: string
@@ -45,27 +46,48 @@ export type EmployeeTableFilter = {
 }
 
 export const useEmployeesStore = defineStore('employees', () => {
+  const selectQuery =
+    '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))'
+
   // States
   const employees = ref<Employee[]>([])
   const employeesTable = ref<Employee[]>([])
   const employeesTableTotal = ref(0)
+  const employeesCSV = ref<Employee[]>([])
 
   // Reset State
   function $reset() {
     employees.value = []
     employeesTable.value = []
     employeesTableTotal.value = 0
+    employeesCSV.value = []
   }
 
   // Actions
   async function getEmployees() {
-    const { data } = await supabase.from('employees').select()
+    const { data } = await supabase.from('employees').select(selectQuery).is('deleted_at', null)
 
     employees.value = data?.map((item) => ({
       ...item,
       label: `${item.firstname} ${item.middlename ? item.middlename + ' ' : ''}${item.lastname}`,
       value: item.id,
     })) as Employee[]
+  }
+
+  function getEmployeesById(id: number) {
+    return employees.value.find((employee) => employee.id === id)
+  }
+
+  async function getEmployeesCSV(tableOptions: TableOptions, tableFilters: EmployeeTableFilter) {
+    const { column, order } = tablePagination(tableOptions, 'lastname', false)
+
+    let query = supabase.from('employees').select(selectQuery).order(column, { ascending: order })
+
+    query = getEmployeesFilter(query, tableFilters)
+
+    const { data } = await query
+
+    employeesCSV.value = data as Employee[]
   }
 
   async function getEmployeesTable(
@@ -77,9 +99,8 @@ export const useEmployeesStore = defineStore('employees', () => {
 
     let query = supabase
       .from('employees')
-      .select(
-        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
-      )
+      .select(selectQuery)
+      .is('deleted_at', null)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -130,7 +151,11 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function deleteEmployee(id: number) {
-    return await supabase.from('employees').delete().eq('id', id).select()
+    return await supabase
+      .from('employees')
+      .update({ deleted_at: prepareDateTime(new Date()) })
+      .eq('id', id)
+      .select()
   }
 
   // Expose States and Actions
@@ -138,8 +163,11 @@ export const useEmployeesStore = defineStore('employees', () => {
     employees,
     employeesTable,
     employeesTableTotal,
+    employeesCSV,
     $reset,
     getEmployees,
+    getEmployeesCSV,
+    getEmployeesById,
     getEmployeesTable,
     addEmployee,
     updateEmployee,
