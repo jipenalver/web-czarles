@@ -135,7 +135,8 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     if (attendance_at) {
       const { startDate, endDate } = prepareDateRange(attendance_at, attendance_at.length > 1)
-      query = query.gte('am_time_in', startDate).lt('am_time_in', endDate)
+
+      if (startDate && endDate) query = query.gte('am_time_in', startDate).lt('am_time_in', endDate)
     }
 
     return query

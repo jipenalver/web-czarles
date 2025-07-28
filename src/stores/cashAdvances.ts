@@ -110,7 +110,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     if (request_at) {
       const { startDate, endDate } = prepareDateRange(request_at, request_at.length > 1)
 
-      query = query.gte('request_at', startDate).lt('request_at', endDate)
+      if (startDate && endDate) query = query.gte('request_at', startDate).lt('request_at', endDate)
     }
 
     return query
