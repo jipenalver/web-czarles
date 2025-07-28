@@ -1,6 +1,3 @@
-// 👉 Time Constants
-export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
-
 // 👉 Fix v-date-input; prepare local dates in form
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const prepareFormDates = (formData: { [key: string]: any }, dateColumns: string[] = []) => {
@@ -27,17 +24,20 @@ export const prepareDateTime = (date: Date | string) => {
 }
 
 // 👉 Fix v-date-input; prepare date range
-export const prepareDateRange = (daterange: string[] | null) => {
-  if (daterange === null) return null
+export const prepareDateRange = (dateRange: Date[], isRange = false) => {
+  if (dateRange.length === 0) return { startDate: null, endDate: null }
 
-  const formattedDates = daterange.map((date) => getDateISO(new Date(date)))
+  const validDates = dateRange.filter((date) => date instanceof Date && !isNaN(date.getTime()))
+  if (validDates.length === 0) return { startDate: null, endDate: null }
 
-  const dates =
-    formattedDates.length > 1
-      ? `${formattedDates[0]} to ${formattedDates[formattedDates.length - 1]}`
-      : formattedDates[0]
+  const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
-  return dates
+  const startDate = validDates[0]
+  const endDate = isRange
+    ? new Date(validDates[validDates.length - 1].getTime() + MILLISECONDS_PER_DAY)
+    : new Date(startDate.getTime() + MILLISECONDS_PER_DAY)
+
+  return { startDate: prepareDate(startDate), endDate: prepareDate(endDate) }
 }
 
 // 👉 Get date in ISO format without UTC conversion
