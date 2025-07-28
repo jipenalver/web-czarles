@@ -1,6 +1,6 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { getDate } from '@/utils/helpers/others'
+import { getDate, prepareDateRange } from '@/utils/helpers/dates'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -14,7 +14,6 @@ export type Attendance = {
   am_time_out: string | null
   pm_time_in: string | null
   pm_time_out: string | null
-  employee_id: string | null
   is_am_in_rectified: boolean
   is_am_out_rectified: boolean
   is_pm_in_rectified: boolean
@@ -24,6 +23,7 @@ export type Attendance = {
   overtime_out: string | null
   is_overtime_in_rectified: boolean
   is_overtime_out_rectified: boolean
+  employee_id: number | null
   employee: Employee
   attendance_images: AttendanceImage[]
   is_am_leave: boolean
@@ -40,35 +40,56 @@ export type AttendanceImage = {
 }
 
 export type AttendanceTableFilter = {
-  employee_id: string | null
+  employee_id: number | null
+  attendance_at: Date[] | null
 }
 
 export const useAttendancesStore = defineStore('attendances', () => {
+  const selectQuery =
+    '*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*)'
+
   // States
   const attendances = ref<Attendance[]>([])
   const attendancesTable = ref<Attendance[]>([])
   const attendancesTableTotal = ref(0)
+  const attendancesCSV = ref<Attendance[]>([])
 
   // Reset State
   function $reset() {
     attendances.value = []
     attendancesTable.value = []
     attendancesTableTotal.value = 0
+    attendancesCSV.value = []
   }
 
   // Actions
   async function getAttendances() {
     const { data } = await supabase
       .from('attendances')
-      .select('*, employee:employee_id (id, firstname, lastname), attendance_images (*)')
+      .select(selectQuery)
       .order('am_time_in', { ascending: false })
 
     attendances.value = data as Attendance[]
   }
 
+  async function getAttendancesCSV(
+    tableOptions: TableOptions,
+    tableFilters: AttendanceTableFilter,
+  ) {
+    const { column, order } = tablePagination(tableOptions, 'am_time_in', false)
+
+    let query = supabase.from('attendances').select(selectQuery).order(column, { ascending: order })
+
+    query = getAttendancesFilter(query, tableFilters)
+
+    const { data } = await query
+
+    attendancesCSV.value = data as Attendance[]
+  }
+
   async function getAttendancesTable(
     tableOptions: TableOptions,
-    { employee_id }: AttendanceTableFilter,
+    tableFilters: AttendanceTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
@@ -78,17 +99,15 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     let query = supabase
       .from('attendances')
-      .select(
-        '*, employee:employee_id (id, firstname, lastname), attendance_images (image_path, image_type, created_at)',
-      )
+      .select(selectQuery)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getAttendancesFilter(query, { employee_id })
+    query = getAttendancesFilter(query, tableFilters)
 
     const { data } = await query
 
-    const { count } = await getAttendancesCount({ employee_id })
+    const { count } = await getAttendancesCount(tableFilters)
 
     attendancesTable.value = data?.map((item) => {
       return {
@@ -99,10 +118,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendancesTableTotal.value = count as number
   }
 
-  async function getAttendancesCount({ employee_id }: AttendanceTableFilter) {
+  async function getAttendancesCount(tableFilters: AttendanceTableFilter) {
     let query = supabase.from('attendances').select('*', { count: 'exact', head: true })
 
-    query = getAttendancesFilter(query, { employee_id })
+    query = getAttendancesFilter(query, tableFilters)
 
     return await query
   }
@@ -110,9 +129,15 @@ export const useAttendancesStore = defineStore('attendances', () => {
   function getAttendancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { employee_id }: AttendanceTableFilter,
+    { employee_id, attendance_at }: AttendanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
+
+    if (attendance_at) {
+      const { startDate, endDate } = prepareDateRange(attendance_at, attendance_at.length > 1)
+
+      if (startDate && endDate) query = query.gte('am_time_in', startDate).lt('am_time_in', endDate)
+    }
 
     return query
   }
@@ -141,8 +166,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendances,
     attendancesTable,
     attendancesTableTotal,
+    attendancesCSV,
     $reset,
     getAttendances,
+    getAttendancesCSV,
     getAttendancesTable,
     addAttendance,
     updateAttendance,

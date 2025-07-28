@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { getTime, getTotalWorkHours } from '@/utils/helpers/others'
+import {
+  getLateUndertimeHoursDecimal,
+  getLateUndertimeHoursString,
+  getOvertimeHoursDecimal,
+  getOvertimeHoursString,
+  getWorkHoursDecimal,
+  getWorkHoursString,
+} from '@/utils/helpers/attendance'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'
+import { useEmployeesStore } from '@/stores/employees'
+import { getTime } from '@/utils/helpers/dates'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -13,7 +22,12 @@ const props = defineProps<{
 
 const { mobile } = useDisplay()
 
+const employeesStore = useEmployeesStore()
+
 const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttendanceTable(props)
+
+const isFieldStaff = (employeeId: number) =>
+  employeesStore.getEmployeesById(employeeId)?.is_field_staff
 </script>
 
 <template>
@@ -91,15 +105,28 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">Rendered Time:</span>
-          <p class="text-body-2 font-weight-bold">
+          <p class="text-body-2">
             {{
-              getTotalWorkHours(
+              getWorkHoursString(
                 props.itemData.am_time_in,
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
+                isFieldStaff(props.itemData.employee_id as number),
               )
             }}
+
+            <span class="text-caption font-weight-black">
+              ({{
+                getWorkHoursDecimal(
+                  props.itemData.am_time_in,
+                  props.itemData.am_time_out,
+                  props.itemData.pm_time_in,
+                  props.itemData.pm_time_out,
+                  isFieldStaff(props.itemData.employee_id as number),
+                )
+              }})
+            </span>
           </p>
         </v-col>
 
@@ -110,7 +137,44 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">Late / Undertime:</span>
-          <span></span>
+          <p class="text-body-2">
+            {{
+              getLateUndertimeHoursString(
+                props.itemData.am_time_in,
+                props.itemData.am_time_out,
+                props.itemData.pm_time_in,
+                props.itemData.pm_time_out,
+                isFieldStaff(props.itemData.employee_id as number),
+              )
+            }}
+
+            <span class="text-caption font-weight-black">
+              ({{
+                getLateUndertimeHoursDecimal(
+                  props.itemData.am_time_in,
+                  props.itemData.am_time_out,
+                  props.itemData.pm_time_in,
+                  props.itemData.pm_time_out,
+                  isFieldStaff(props.itemData.employee_id as number),
+                )
+              }})
+            </span>
+          </p>
+        </v-col>
+
+        <v-col
+          cols="12"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
+          <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
+          <v-chip class="font-weight-black" color="default" size="small">
+            {{
+              employeesStore.getEmployeesById(props.itemData.employee_id as number)?.is_field_staff
+                ? 'Yes'
+                : 'No'
+            }}
+          </v-chip>
         </v-col>
 
         <template v-if="props.componentView === 'overtime'">
@@ -212,15 +276,14 @@ const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttenda
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
             <span class="text-body-2 font-weight-bold me-2">Rendered Overtime:</span>
-            <p class="text-body-2 font-weight-bold">
-              {{
-                getTotalWorkHours(
-                  props.itemData.overtime_in,
-                  props.itemData.overtime_out,
-                  null,
-                  null,
-                )
-              }}
+            <p class="text-body-2">
+              {{ getOvertimeHoursString(props.itemData.overtime_in, props.itemData.overtime_out) }}
+
+              <span class="text-caption font-weight-black">
+                ({{
+                  getOvertimeHoursDecimal(props.itemData.overtime_in, props.itemData.overtime_out)
+                }})
+              </span>
             </p>
           </v-col>
         </template>

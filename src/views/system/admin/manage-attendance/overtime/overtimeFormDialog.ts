@@ -4,7 +4,7 @@ import {
   type AttendanceTableFilter,
   useAttendancesStore,
 } from '@/stores/attendances'
-import { getDate, getTime24Hour } from '@/utils/helpers/others'
+import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
@@ -25,7 +25,7 @@ export function useOvertimeFormDialog(
   // States
   const formDataDefault = {
     date: null as string | null,
-    employee_id: null as string | null,
+    employee_id: null as number | null,
     is_overtime_applied: false,
     overtime_in: '',
     overtime_out: '',
