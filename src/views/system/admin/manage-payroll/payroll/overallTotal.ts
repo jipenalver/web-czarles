@@ -124,10 +124,10 @@ export function useNetSalaryCalculation(
       )
     }
 
-    console.log('Employee deductions:', dynamicDeductions)
+   /*  console.log('Employee deductions:', dynamicDeductions) */
     let dynamicDeductionsTotal = 0
     if (employeeDeductions && Array.isArray(employeeDeductions.value)) {
-      console.log('Employee deductions:', employeeDeductions.value)
+     /*  console.log('Employee deductions:', employeeDeductions.value) */
       dynamicDeductions = employeeDeductions.value.map((deduction) => ({
         id: deduction.id,
         amount: Number(deduction.amount) || 0,

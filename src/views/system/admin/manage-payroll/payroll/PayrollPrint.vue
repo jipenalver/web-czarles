@@ -16,6 +16,7 @@ import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
 import PayrollDeductions from './PayrollDeductions.vue'
 import { useEmployeesStore } from '@/stores/employees'
+import { fetchEmployeeDeductions } from './benefits'
 // Props
 const props = defineProps<{
   employeeData: Employee | null
@@ -26,36 +27,20 @@ const props = defineProps<{
 // Pinia store for employees
 const employeesStore = useEmployeesStore()
 const employeeDeductions = ref<any[]>([])
+const employeeNonDeductions = ref<any[]>([])
 
-// Fetch and filter employee deductions when employeeId changes
-async function fetchEmployeeDeductions(employeeId: number | undefined) {
-  if (employeeId !== undefined) {
-    const employee = await employeesStore.getEmployeeById(employeeId)
-    if (employee && Array.isArray(employee.employee_deductions)) {
-      // filter ang deductions nga is_deduction === true
-      const filtered = employee.employee_deductions.filter(
-        (deduction: any) => deduction.employee_benefit?.is_deduction === true,
-      )
-      //i-log ang benefit name ug benefit value para ma-check
-      filtered.forEach((deduction: any) => {
-        console.log('Deduction benefit:', {
-          benefit: deduction.employee_benefit?.benefit,
-        })
-      })
-      employeeDeductions.value = filtered
-    } else {
-      employeeDeductions.value = []
-    }
-  } else {
-    employeeDeductions.value = []
-  }
+// Use fetchEmployeeDeductions from cashAdvance.ts
+async function updateEmployeeDeductions(employeeId: number | undefined) {
+  const result = await fetchEmployeeDeductions(employeeId)
+  employeeDeductions.value = result.deductions
+  employeeNonDeductions.value = result.nonDeductions
 }
 
 // Watch for employeeId changes to fetch deductions
 watch(
   () => props.employeeData?.id,
   (id) => {
-    fetchEmployeeDeductions(id)
+    updateEmployeeDeductions(id)
   },
   { immediate: true },
 )
@@ -434,6 +419,24 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           </td>
         </tr>
 
+        <!-- Non-deductions (benefits) before Monthly Trippings -->
+        <template v-if="employeeNonDeductions.length > 0">
+          <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id">
+            <td class="border-b-thin text-center pa-2" colspan="2">
+              {{ benefit.employee_benefit?.benefit || 'Other Benefit' }}
+            </td>
+            <td class="pa-2"></td>
+            <td class="pa-2">
+              {{ safeCurrencyFormat(benefit.value ?? 0, formatCurrency) }}
+            </td>
+            <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="benefit">
+              {{ safeCurrencyFormat(benefit.value ?? 0, formatCurrency) }}
+              <span v-if="benefit.employee_benefit?.amount">
+                (Amount: {{ safeCurrencyFormat(benefit.employee_benefit.amount ?? 0, formatCurrency) }})
+              </span>
+            </td>
+          </tr>
+        </template>
         <!-- Monthly trippings -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
