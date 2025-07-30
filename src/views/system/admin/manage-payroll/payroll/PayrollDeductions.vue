@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { safeCurrencyFormat } from './helpers'
-import { computed, onMounted, ref } from 'vue'
-import { useEmployeesStore } from '@/stores/employees'
+
 
 interface Deductions {
   late: number

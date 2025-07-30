@@ -7,7 +7,7 @@ import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
-import { getYearMonthString } from '@/utils/helpers/others'
+import { getYearMonthString } from './helpers'
 import { ref } from 'vue'
 
 const props = defineProps<{
