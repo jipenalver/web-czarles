@@ -51,7 +51,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
   computed(() => props.overallEarningsTotal),
   computed(() => props.showLateDeduction),
   computed(() => props.lateDeduction),
-  ref(props.employeeDeductions),
+  computed(() => props.employeeDeductions),
   totalCashAdvance
 )
 

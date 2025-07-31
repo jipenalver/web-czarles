@@ -2,7 +2,9 @@ import { computed, type Ref, type ComputedRef } from 'vue'
 import type { Holiday } from '@/stores/holidays'
 import type { Trip } from '@/stores/trips'
 
-// Helper to compute overall earnings total
+/**
+ * Computes the overall earnings total including regular work, trips, holidays, overtime, and benefits
+ */
 export function useOverallEarningsTotal(
   regularWorkTotal: Ref<number>,
   trips: Ref<Trip[]>,
@@ -15,41 +17,47 @@ export function useOverallEarningsTotal(
 ): ComputedRef<number> {
   return computed(() => {
     let total = 0
+
     // 1. Regular work earnings
     const regularWork = Number(regularWorkTotal.value) || 0
     total += regularWork
-    // 2. Trips earnings
-    // trip_no as multiplier, default 1 kung wala
-    const tripsEarnings =
-      trips.value?.reduce((sum, trip) => {
-        const perTrip = Number(trip.per_trip) || 0
-        const tripNo = Number(trip.trip_no) || 1
-        return sum + perTrip * tripNo
-      }, 0) || 0
+
+    // 2. Trips earnings - trip_no as multiplier, default 1 if not provided
+    const tripsEarnings = trips.value?.reduce((sum, trip) => {
+      const perTrip = Number(trip.per_trip) || 0
+      const tripNo = Number(trip.trip_no) || 1
+      return sum + (perTrip * tripNo)
+    }, 0) || 0
     total += tripsEarnings
-    // 3. Holiday earnings
-    const holidayEarnings =
-      holidays.value?.reduce((sum, holiday) => {
-        const baseRate = Number(dailyRate.value) || 0
-        const type = holiday.type?.toLowerCase() || ''
-        let multiplier = 1
-        if (type.includes('rh')) multiplier = 2.0
-        else if (type.includes('snh')) multiplier = 1.5
-        else if (type.includes('swh')) multiplier = 1.3
-        return sum + baseRate * multiplier
-      }, 0) || 0
+
+    // 3. Holiday earnings with different multipliers based on type
+    const holidayEarnings = holidays.value?.reduce((sum, holiday) => {
+      const baseRate = Number(dailyRate.value) || 0
+      const type = holiday.type?.toLowerCase() || ''
+      
+      let multiplier = 1
+      if (type.includes('rh')) multiplier = 2.0        // Regular Holiday
+      else if (type.includes('snh')) multiplier = 1.5  // Special Non-working Holiday
+      else if (type.includes('swh')) multiplier = 1.3  // Special Working Holiday
+      
+      return sum + (baseRate * multiplier)
+    }, 0) || 0
     total += holidayEarnings
-    // 4. Overtime earnings
+
+    // 4. Overtime earnings (1.25x hourly rate)
     const overtimeRate = ((Number(employeeDailyRate.value) || 0) / 8) * 1.25
     const overtimeEarnings = overtimeRate * (Number(overallOvertime.value) || 0)
     total += overtimeEarnings
-    // 5. Monthly trippings (future use)
+
+    // 5. Monthly trippings (reserved for future use)
     const monthlyTrippings = 0
     total += monthlyTrippings
 
     // 6. Add non-deductions (benefits)
     if (nonDeductions && Array.isArray(nonDeductions.value)) {
-      const nonDeductionTotal = nonDeductions.value.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
+      const nonDeductionTotal = nonDeductions.value.reduce((sum, item) => {
+        return sum + (Number(item.amount) || 0)
+      }, 0)
       total += nonDeductionTotal
     }
 
@@ -57,7 +65,9 @@ export function useOverallEarningsTotal(
   })
 }
 
-// Helper to compute earnings breakdown
+/**
+ * Computes detailed breakdown of earnings by category
+ */
 export function useEarningsBreakdown(
   regularWorkTotal: Ref<number>,
   trips: Ref<Trip[]>,
@@ -68,27 +78,35 @@ export function useEarningsBreakdown(
   codaAllowance: Ref<number>,
 ): ComputedRef<Record<string, number>> {
   return computed(() => {
+    // Regular work earnings
     const regular = Number(regularWorkTotal.value) || 0
-    // trip_no as multiplier, default 1 kung wala
-    const tripsTotal =
-      trips.value?.reduce((sum, trip) => {
-        const perTrip = Number(trip.per_trip) || 0
-        const tripNo = Number(trip.trip_no) || 1
-        return sum + perTrip * tripNo
-      }, 0) || 0
-    const holidayTotal =
-      holidays.value?.reduce((sum, holiday) => {
-        const baseRate = Number(dailyRate.value) || 0
-        const type = holiday.type?.toLowerCase() || ''
-        let multiplier = 1
-        if (type.includes('rh')) multiplier = 2.0
-        else if (type.includes('snh')) multiplier = 1.5
-        else if (type.includes('swh')) multiplier = 1.3
-        return sum + baseRate * multiplier
-      }, 0) || 0
-    const overtime =
-      ((Number(employeeDailyRate.value) || 0) / 8) * 1.25 * (Number(overallOvertime.value) || 0)
+
+    // Trips earnings - trip_no as multiplier, default 1 if not provided
+    const tripsTotal = trips.value?.reduce((sum, trip) => {
+      const perTrip = Number(trip.per_trip) || 0
+      const tripNo = Number(trip.trip_no) || 1
+      return sum + (perTrip * tripNo)
+    }, 0) || 0
+
+    // Holiday earnings with multipliers
+    const holidayTotal = holidays.value?.reduce((sum, holiday) => {
+      const baseRate = Number(dailyRate.value) || 0
+      const type = holiday.type?.toLowerCase() || ''
+      
+      let multiplier = 1
+      if (type.includes('rh')) multiplier = 2.0        // Regular Holiday
+      else if (type.includes('snh')) multiplier = 1.5  // Special Non-working Holiday
+      else if (type.includes('swh')) multiplier = 1.3  // Special Working Holiday
+      
+      return sum + (baseRate * multiplier)
+    }, 0) || 0
+
+    // Overtime earnings
+    const overtime = ((Number(employeeDailyRate.value) || 0) / 8) * 1.25 * (Number(overallOvertime.value) || 0)
+
+    // Allowances
     const allowances = Number(codaAllowance.value) || 0
+
     return {
       regular,
       trips: tripsTotal,
@@ -100,13 +118,14 @@ export function useEarningsBreakdown(
   })
 }
 
-// Helper to compute net salary calculation
+/**
+ * Computes net salary after deductions including late deductions, cash advances, and dynamic employee deductions
+ */
 export function useNetSalaryCalculation(
   overallEarningsTotal: ComputedRef<number>,
   showLateDeduction: ComputedRef<boolean>,
   lateDeduction: Ref<number>,
   employeeDeductions?: Ref<any[]>,
-
   cashAdvance?: Ref<number>,
 ): ComputedRef<{
   grossSalary: number
@@ -117,39 +136,49 @@ export function useNetSalaryCalculation(
 }> {
   return computed(() => {
     const totalEarnings = overallEarningsTotal.value
+
+    // Fixed deductions
     const deductions = {
-      late: showLateDeduction.value ? Number(lateDeduction.value) || 0 : 0,
-      cashAdvance: cashAdvance ? Number(cashAdvance.value) || 0 : 0,
-    }
-    // i-sum up ang tanan dynamic employee deductions (from PayrollDeductions.vue)
-    // i-initialize as empty, pero dapat gikan sa component ang employeeDeductions
-    let dynamicDeductions: Array<{ id: any; amount: number; benefit: string }> = []
-    if (!employeeDeductions) {
-      // warning kung wala gi-pasa ang employeeDeductions ref
-      console.warn(
-        'employeeDeductions ref was not provided to useNetSalaryCalculation. Dynamic deductions will be empty.',
-      )
+      late: showLateDeduction.value ? (Number(lateDeduction.value) || 0) : 0,
+      cashAdvance: cashAdvance ? (Number(cashAdvance.value) || 0) : 0,
     }
 
-   /*  console.log('Employee deductions:', dynamicDeductions) */
+    // Process dynamic employee deductions (from PayrollDeductions.vue)
+    let dynamicDeductions: Array<{ id: any; amount: number; benefit: string }> = []
     let dynamicDeductionsTotal = 0
-    if (employeeDeductions && Array.isArray(employeeDeductions.value)) {
-     /*  console.log('Employee deductions:', employeeDeductions.value) */
-      dynamicDeductions = employeeDeductions.value.map((deduction) => ({
-        id: deduction.id,
-        amount: Number(deduction.amount) || 0,
-        benefit: deduction.employee_benefit?.benefit || 'Deduction',
-      }))
+
+    // Bisaya-English comment: sigurado nga array ang employeeDeductions.value, bisan Proxy(Array)
+    const deductionsArray = Array.isArray(employeeDeductions?.value)
+      ? employeeDeductions.value
+      : []
+
+    if (deductionsArray.length > 0) {
+      dynamicDeductions = deductionsArray
+        .filter((deduction) => deduction && (deduction.id !== undefined || deduction.amount))
+        .map((deduction) => ({
+          id: deduction.id,
+          amount: Number(deduction.amount) || 0,
+          benefit: deduction.employee_benefit?.benefit || 'Deduction',
+        }))
       dynamicDeductionsTotal = dynamicDeductions.reduce((sum, d) => sum + d.amount, 0)
+      // Bisaya-English comment: debug info kung naa gyud deductions
+      if (dynamicDeductions.length > 0) {
+        console.log('Dynamic deductions:', dynamicDeductions)
+      }
     }
-    const totalDeductionsAmount =
+
+    // Calculate totals
+    const totalDeductionsAmount = 
       Object.values(deductions).reduce((sum, amount) => sum + amount, 0) + dynamicDeductionsTotal
-    return {
+
+    const result = {
       grossSalary: totalEarnings,
       deductions,
       totalDeductions: totalDeductionsAmount,
       netSalary: totalEarnings - totalDeductionsAmount,
       dynamicDeductions,
     }
+
+    return result
   })
 }
