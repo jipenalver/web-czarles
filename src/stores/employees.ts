@@ -70,13 +70,27 @@ export const useEmployeesStore = defineStore('employees', () => {
   // Get employee by ID using Supabase query
   async function getEmployeeById(id: number): Promise<Employee | undefined> {
     // kuhaon ang employee with related designation, area, and deductions gamit join
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('employees')
       .select(
-        '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))',
+        `
+      *,
+      employee_deductions (
+        *,
+        employee_benefit:benefit_id (*)
+      ),
+      cash_advances (*)
+    `,
       )
       .eq('id', id)
       .single()
+
+    if (error) {
+      console.error('Error fetching employee:', error)
+      return undefined
+    }
+
+    console.log('getEmployeeById result:', data) // display ang result sa query para sa debugging
     return data as Employee | undefined
   }
   async function getEmployeesTable(
