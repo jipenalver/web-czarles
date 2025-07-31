@@ -353,7 +353,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">
-                <v-img :src="logoCzarles" alt="No trips" max-width="300" class="mx-auto mb-2" />
+               
                 No trips to preview for this payroll period.
               </td>
             </tr>
