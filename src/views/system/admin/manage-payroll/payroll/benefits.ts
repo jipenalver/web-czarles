@@ -16,17 +16,8 @@ export async function fetchEmployeeDeductions(employeeId: number | undefined) {
       const filteredFalse = employee.employee_deductions.filter(
         (deduction: any) => deduction.employee_benefit?.is_deduction === false,
       )
-      //i-log ang benefit name ug benefit value para ma-check
-      filtered.forEach((deduction: any) => {
-        console.log('Deduction benefit:', {
-          benefit: deduction.employee_benefit?.benefit,
-        })
-      })
-      filteredFalse.forEach((deduction: any) => {
-        console.log('Non-deduction benefit:', {
-          benefit: deduction.employee_benefit?.benefit,
-        })
-      })
+    
+     
       employeeDeductions.value = filtered
       employeeNonDeductions.value = filteredFalse
     } else {
@@ -37,10 +28,13 @@ export async function fetchEmployeeDeductions(employeeId: number | undefined) {
     employeeDeductions.value = []
     employeeNonDeductions.value = []
   }
-  return {
+  const result = {
     deductions: employeeDeductions.value,
     nonDeductions: employeeNonDeductions.value,
   }
+  // Debug: log the return value
+  console.log('[fetchEmployeeDeductions] return:', result)
+  return result
 }
 
 

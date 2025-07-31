@@ -155,6 +155,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   employeeDailyRate,
   overallOvertime,
   codaAllowance,
+  employeeNonDeductions,
 )
 
 //debuging porpuses
@@ -344,7 +345,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               </td>
               <td class="pa-2">@{{ safeCurrencyFormat(trip.per_trip ?? 0, formatCurrency) }}</td>
               <td class="pa-2">x {{ trip.trip_no ?? 1 }}</td>
-              <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="trip">
+              <td class="text-grey-darken-1 border-b-thin border-s-sm text-end pa-2 total-cell" data-total="trip">
                 {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
               </td>
             </tr>
@@ -427,13 +428,11 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
             </td>
             <td class="pa-2"></td>
             <td class="pa-2">
-              {{ safeCurrencyFormat(benefit.value ?? 0, formatCurrency) }}
+              -
             </td>
             <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="benefit">
-              {{ safeCurrencyFormat(benefit.value ?? 0, formatCurrency) }}
-              <span v-if="benefit.employee_benefit?.amount">
-                (Amount: {{ safeCurrencyFormat(benefit.employee_benefit.amount ?? 0, formatCurrency) }})
-              </span>
+              {{ safeCurrencyFormat(benefit.amount ?? 0, formatCurrency) }}
+             
             </td>
           </tr>
         </template>

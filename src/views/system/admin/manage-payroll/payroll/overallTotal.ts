@@ -11,6 +11,7 @@ export function useOverallEarningsTotal(
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
+  nonDeductions?: Ref<any[]>,
 ): ComputedRef<number> {
   return computed(() => {
     let total = 0
@@ -45,6 +46,12 @@ export function useOverallEarningsTotal(
     // 5. Monthly trippings (future use)
     const monthlyTrippings = 0
     total += monthlyTrippings
+
+    // 6. Add non-deductions (benefits)
+    if (nonDeductions && Array.isArray(nonDeductions.value)) {
+      const nonDeductionTotal = nonDeductions.value.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
+      total += nonDeductionTotal
+    }
 
     return total
   })
