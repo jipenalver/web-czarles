@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { safeCurrencyFormat } from './helpers'
+import { fetchCashAdvances } from './cashadvance'
+import { ref, watch, computed } from 'vue'
+import { useNetSalaryCalculation } from './overallTotal'
 
 
 interface Deductions {
@@ -14,15 +17,43 @@ interface Deductions {
 const props = defineProps<{
   showLateDeduction: boolean
   monthLateDeduction: number | undefined
-  netSalaryCalculation: {
-    deductions: Deductions
-    totalDeductions: number
-    netSalary: number
-  }
   formatCurrency: (value: number) => string
   employeeId: number | undefined
   employeeDeductions: any[]
+  filterDateString?: string
+  overallEarningsTotal: number
+  lateDeduction: number
 }>()
+
+const cashAdvances = ref<any[]>([])
+
+// Fetch cash advances when employeeId or filterDateString changes
+watch(
+  () => [props.filterDateString, props.employeeId],
+  async ([filterDateString, employeeId]) => {
+    if (typeof employeeId === 'number' && filterDateString) {
+      // kuhaon ang cash advances para sa employee ug payroll month
+      cashAdvances.value = await fetchCashAdvances(filterDateString as string, employeeId)
+    } else {
+      cashAdvances.value = []
+    }
+  },
+  { immediate: true },
+)
+
+// Compute total cash advance from all ca.amount
+const totalCashAdvance = computed(() =>
+  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0)
+)
+
+// Setup netSalaryCalculation using useNetSalaryCalculation composable
+const netSalaryCalculation = useNetSalaryCalculation(
+  computed(() => props.overallEarningsTotal),
+  computed(() => props.showLateDeduction),
+  computed(() => props.lateDeduction),
+  ref(props.employeeDeductions),
+  totalCashAdvance
+)
 
 // ...existing code...
 </script>
@@ -53,12 +84,13 @@ const props = defineProps<{
     </td>
   </tr>
 
-  <tr>
+  <!-- Cash Advance Rows -->
+  <tr v-for="ca in cashAdvances" :key="'cashadvance-' + ca.id">
     <td class="pa-2" colspan="2"></td>
     <td class="text-caption text-disabled pa-2">Cash Advance</td>
-    <td class="text-caption font-weight-bold text-end pa-2"></td>
+    <td class="text-caption font-weight-bold text-end pa-2">{{ ca.date }}</td>
     <td class="border-b-thin border-s-sm text-end pa-2 text-disabled">
-      {{ safeCurrencyFormat(netSalaryCalculation.deductions.cashAdvance, formatCurrency) }}
+      {{ safeCurrencyFormat(ca.amount || 0, formatCurrency) }}
     </td>
   </tr>
 

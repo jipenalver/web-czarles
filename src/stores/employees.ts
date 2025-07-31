@@ -90,7 +90,7 @@ export const useEmployeesStore = defineStore('employees', () => {
       return undefined
     }
 
-    console.log('getEmployeeById result:', data) // display ang result sa query para sa debugging
+   /*  console.log('getEmployeeById result:', data) // display ang result sa query para sa debugging */
     return data as Employee | undefined
   }
   async function getEmployeesTable(

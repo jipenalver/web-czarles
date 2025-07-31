@@ -272,7 +272,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
 })
 
 // Debug logging (uncomment for debugging)
-// console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
+console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
 // console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
 </script>
 
@@ -479,21 +479,12 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <PayrollDeductions
           :showLateDeduction="showLateDeduction"
           :monthLateDeduction="monthLateDeduction"
-          :netSalaryCalculation="{
-            deductions: {
-              late: netSalaryCalculation.deductions.late ?? 0,
-              sss: netSalaryCalculation.deductions.sss ?? 0,
-              phic: netSalaryCalculation.deductions.phic ?? 0,
-              hdmf: netSalaryCalculation.deductions.hdmf ?? 0,
-              cashAdvance: netSalaryCalculation.deductions.cashAdvance ?? 0,
-              others: netSalaryCalculation.deductions.others ?? 0,
-            },
-            totalDeductions: netSalaryCalculation.totalDeductions,
-            netSalary: netSalaryCalculation.netSalary,
-          }"
           :formatCurrency="formatCurrency"
-          :employeeId="props.employeeData?.id ?? 0"
+          :employeeId="props.employeeData?.id"
           :employeeDeductions="employeeDeductions"
+          :filterDateString="filterDateString"
+          :overallEarningsTotal="overallEarningsTotal"
+          :lateDeduction="lateDeduction"
         />
       </tbody>
     </v-table>
