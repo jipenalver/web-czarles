@@ -4,6 +4,8 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { ref, watch, computed, onUnmounted } from 'vue'
 import { type Employee } from '@/stores/employees'
 
+import { useOverallEarningsTotal, useNetSalaryCalculation } from './overallTotal'
+
 import {
   getCurrentMonthInPhilippines,
   getCurrentYearInPhilippines,
@@ -38,36 +40,54 @@ export function usePayrollTableDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  // Payroll data generator using payrollComputation composable
+  // Payroll data generator using overallTotal composables
+  // NOTE: This assumes you have the required data for each month (trips, holidays, overtime, etc.)
+  // You may need to fetch or compute these per employee/month
+  // ...existing code...
   const generatePayrollData = (monthIndex: number): TableData => {
-    // Use helpers from currentMonth.ts for sample/demo data
-    const basicSalary = getSampleBasicSalary(monthIndex)
-    const overtime = getSampleOvertime()
-    const allowances = getSampleAllowances()
-    const grossPay = basicSalary + overtime + allowances
-    const deductions = getSampleDeductions(monthIndex)
+    // Example: Replace these with actual data fetches per employee/month
+    // For demo, use empty arrays/refs
+    const regularWorkTotal = ref(0) // dapat actual regular work total
+    const trips = ref([]) // dapat actual trips for the month
+    const holidays = ref([]) // dapat actual holidays for the month
+    const dailyRate = computed(() => 0) // dapat actual daily rate
+    const employeeDailyRate = computed(() => 0) // dapat actual employee daily rate
+    const overallOvertime = ref(0) // dapat actual overtime hours
+    const codaAllowance = ref(0) // dapat actual allowance
+    const nonDeductions = ref([]) // dapat actual non-deductions/benefits
+    const lateDeduction = ref(0) // dapat actual late deduction
+    const employeeDeductions = ref([]) // dapat actual employee deductions
+    const cashAdvance = ref(0) // dapat actual cash advance
+    const showLateDeduction = computed(() => false) // dapat actual logic
 
-    // Prepare tableData for computation composable
-    const computationTableData: ComputationTableData = {
-      gross_pay: grossPay,
-      deductions: deductions,
-      coda_allowance: allowances,
-      overtime_hours: Math.round(overtime / (basicSalary / 22 / 8)), // estimate hours
-      // You can add more fields as needed for computation
-    }
+    // Compute overall earnings
+    const overallEarningsTotal = useOverallEarningsTotal(
+      regularWorkTotal,
+      trips,
+      holidays,
+      dailyRate,
+      employeeDailyRate,
+      overallOvertime,
+      codaAllowance,
+      nonDeductions,
+    )
 
-    // Use composable for all math
-    const dailyRate = ref(Math.round(basicSalary / 22))
-    const grossSalary = ref(grossPay)
-    const tableDataRef = ref<ComputationTableData | null>(computationTableData)
-    const payroll = usePayrollComputation(dailyRate, grossSalary, tableDataRef)
+    // Compute net salary
+    const netSalaryCalc = useNetSalaryCalculation(
+      overallEarningsTotal,
+      showLateDeduction,
+      lateDeduction,
+      employeeDeductions,
+      cashAdvance,
+    )
 
+    // For demo, use month name and zeros
     return {
       month: monthNames[monthIndex],
-      basic_salary: basicSalary,
-      gross_pay: payroll.totalGrossSalary.value,
-      deductions: payroll.totalDeductions.value,
-      net_pay: payroll.netSalary.value,
+      basic_salary: Number(dailyRate.value) * 22, // estimate
+      gross_pay: overallEarningsTotal.value,
+      deductions: netSalaryCalc.value.totalDeductions,
+      net_pay: netSalaryCalc.value.netSalary,
     }
   }
 

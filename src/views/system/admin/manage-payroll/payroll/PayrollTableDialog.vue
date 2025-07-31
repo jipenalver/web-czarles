@@ -53,6 +53,7 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
+// tableData now uses actual payroll computation from overallTotal.ts composables
 const {
   tableOptions,
   tableFilters,

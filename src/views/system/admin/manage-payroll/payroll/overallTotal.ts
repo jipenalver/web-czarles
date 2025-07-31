@@ -147,7 +147,7 @@ export function useNetSalaryCalculation(
     let dynamicDeductions: Array<{ id: any; amount: number; benefit: string }> = []
     let dynamicDeductionsTotal = 0
 
-    // Bisaya-English comment: sigurado nga array ang employeeDeductions.value, bisan Proxy(Array)
+    //sigurado nga array ang employeeDeductions.value, bisan Proxy(Array)
     const deductionsArray = Array.isArray(employeeDeductions?.value)
       ? employeeDeductions.value
       : []
@@ -161,7 +161,7 @@ export function useNetSalaryCalculation(
           benefit: deduction.employee_benefit?.benefit || 'Deduction',
         }))
       dynamicDeductionsTotal = dynamicDeductions.reduce((sum, d) => sum + d.amount, 0)
-      // Bisaya-English comment: debug info kung naa gyud deductions
+      // debug info kung naa gyud deductions
       if (dynamicDeductions.length > 0) {
         console.log('Dynamic deductions:', dynamicDeductions)
       }
