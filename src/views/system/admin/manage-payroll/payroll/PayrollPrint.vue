@@ -324,7 +324,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
             Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            <div class="text-caption text-grey-darken-1 mt-1">
+           <!--  <div class="text-caption text-grey-darken-1 mt-1">
               <div class="d-flex justify-space-between">
                 <span>Total work days:</span>
                 <span class="font-weight-medium">{{ workDays }}</span>
@@ -337,7 +337,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
                 <span>Absent days:</span>
                 <span class="font-weight-medium text-error">{{ absentDays }}</span>
               </div>
-            </div>
+            </div> -->
           </td>
           <td class="pa-2">@ {{ safeCurrencyFormat(employeeDailyRate ?? 0, formatCurrency) }}</td>
           <td class="pa-2">x {{ effectiveWorkDays }}</td>

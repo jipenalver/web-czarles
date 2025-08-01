@@ -144,6 +144,8 @@ export function usePayrollComputation(
       if (Array.isArray(attendances) && attendances.length > 0) {
         const allAmTimeIn = attendances.map((a) => a.am_time_in)
         const allPmTimeIn = attendances.map((a) => a.pm_time_in)
+        const allAmTimeOut = attendances.map((a) => a.am_time_out)
+        const allPmTimeOut = attendances.map((a) => a.pm_time_out)
         
         // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
         let totalLateAM = 0
@@ -162,13 +164,23 @@ export function usePayrollComputation(
         let employeePresentDays = 0
         
         attendances.forEach((attendance: any) => {
-          // Check if AM or PM time-in exists (since time-out might not be tracked)
-          const hasAmData = !!attendance.am_time_in // core function para sa pag count sa working days ug absent days
-          const hasPmData = !!attendance.pm_time_in
-          console.log('Attendance:', attendance, '| hasAmData:', hasAmData, '| hasPmData:', hasPmData)
+          // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
+          const hasAmData = attendance.am_time_in !== null && attendance.am_time_in !== undefined && attendance.am_time_out !== null && attendance.am_time_out !== undefined
+          const hasPmData = attendance.pm_time_in !== null && attendance.pm_time_in !== undefined && attendance.pm_time_out != null && attendance.pm_time_out != undefined
+          console.log(
+            'Attendance:',
+            {
+              am_time_in: attendance.am_time_in,
+              am_time_out: attendance.am_time_out,
+              pm_time_in: attendance.pm_time_in,
+              pm_time_out: attendance.pm_time_out,
+            },
+            '| hasAmData:', hasAmData,
+            '| hasPmData:', hasPmData
+          )
           
-          // Kung naa attendance data (either AM or PM), consider as present
-          if (hasAmData || hasPmData) {
+          // Kung naa attendance data (either AM or PM), consider as present direa nato kubion in the future and halfday chuchu..
+          if (hasAmData && hasPmData) {
             employeePresentDays++
           }
         })
@@ -286,5 +298,8 @@ export function usePayrollComputation(
     formatCurrency,
     formatNumber,
     employeeDailyRate,
+    
+    // Compute function for regular work total
+    computeRegularWorkTotal,
   }
 }
