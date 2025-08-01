@@ -62,6 +62,7 @@ const {
   isPrintDialogVisible,
   payrollData,
   selectedData,
+  availableYears,
   onView: baseOnView,
   onDialogClose,
 } = usePayrollTableDialog(props, emit)
@@ -121,7 +122,7 @@ function onView(item: any) {
           <v-select
             v-model="tableFilters.year"
             label="Year"
-            :items="[2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]"
+            :items="availableYears"
             style="min-width: 120px"
           ></v-select>
         </div>

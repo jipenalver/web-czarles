@@ -202,7 +202,7 @@ export function usePayrollTableDialog(
   })
 
   const tableFilters = ref<{ year: number }>({
-    year: getCurrentYearInPhilippines(),
+    year: getCurrentYearInPhilippines(), // Start with current year, will be updated when employee data loads
   })
   const tableData = ref<TableData[]>([])
   const formAction = ref({ ...formActionDefault })
@@ -220,20 +220,78 @@ export function usePayrollTableDialog(
   const currentYear = ref<number>(getCurrentYearInPhilippines())
   let updateInterval: ReturnType<typeof setInterval> | undefined
 
+  // Compute starting year based sa employee hired_at date
+  const startingYear = computed<number>(() => {
+    const employeeHiredAt = props.itemData?.hired_at
+    if (!employeeHiredAt) {
+      return getCurrentYearInPhilippines()
+    }
+    const hiredDate = new Date(employeeHiredAt)
+    return hiredDate.getFullYear()
+  })
+
+  // Available years from hired year to current year
+  const availableYears = computed<number[]>(() => {
+    const start = startingYear.value
+    const end = currentYear.value
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+  })
+
   const availableMonths = computed<number[]>(() => {
     const current = currentMonth.value
     const year = tableFilters.value.year
     const currentYearInPH = currentYear.value
-    // kung current year, kutob ra sa current month
-    if (year === currentYearInPH) {
-      return Array.from({ length: current + 1 }, (_, i) => i)
-    } else if (year < currentYearInPH) {
-      // Kung past year, tanan 12 months
-      return Array.from({ length: 12 }, (_, i) => i)
-    } else {
-      // Kung future year, walay months
+    
+    // Check employee hired_at date para sa start month ug year
+    const employeeHiredAt = props.itemData?.hired_at
+    if (!employeeHiredAt) {
+      // Kung walay hired_at, use existing logic
+      if (year === currentYearInPH) {
+        return Array.from({ length: current + 1 }, (_, i) => i)
+      } else if (year < currentYearInPH) {
+        return Array.from({ length: 12 }, (_, i) => i)
+      } else {
+        return []
+      }
+    }
+    
+    const hiredDate = new Date(employeeHiredAt)
+    const hiredYear = hiredDate.getFullYear()
+    const hiredMonth = hiredDate.getMonth() // 0-based index
+    
+    // Kung selected year is before hired year, walay available months
+    if (year < hiredYear) {
       return []
     }
+    
+    // Kung selected year is same as hired year
+    if (year === hiredYear) {
+      // Kung current year pa gihapon, kutob ra sa current month or hired month onwards
+      if (year === currentYearInPH) {
+        const endMonth = Math.min(current, 11) // Max 11 (December)
+        const startMonth = hiredMonth
+        if (startMonth > endMonth) return []
+        return Array.from({ length: endMonth - startMonth + 1 }, (_, i) => i + startMonth)
+      } else {
+        // Past year, from hired month to December
+        return Array.from({ length: 12 - hiredMonth }, (_, i) => i + hiredMonth)
+      }
+    }
+    
+    // Kung selected year is after hired year pero before current year
+    if (year > hiredYear && year < currentYearInPH) {
+      // Full year available (January to December)
+      return Array.from({ length: 12 }, (_, i) => i)
+    }
+    
+    // Kung selected year is current year pero after hired year
+    if (year === currentYearInPH && year > hiredYear) {
+      // From January to current month
+      return Array.from({ length: current + 1 }, (_, i) => i)
+    }
+    
+    // Future year, walay months
+    return []
   })
 
   // Load payroll data based on available months
@@ -273,6 +331,12 @@ export function usePayrollTableDialog(
       if (isVisible) {
         // update time ug load data pag open
         await updateCurrentTime()
+        // Update year filter based sa employee hired_at
+        if (props.itemData?.hired_at) {
+          const employeeStartingYear = startingYear.value
+          // Set to current year or employee starting year, whichever is appropriate
+          tableFilters.value.year = Math.max(employeeStartingYear, currentYear.value)
+        }
         await loadPayrollData()
         // Start interval (every 1 min)
         updateInterval = setInterval(() => updateCurrentTime().catch(console.error), 60000)
@@ -282,6 +346,18 @@ export function usePayrollTableDialog(
           clearInterval(updateInterval)
           updateInterval = undefined
         }
+      }
+    },
+  )
+
+  // Watch: employee data changes para sa year filter update
+  watch(
+    () => props.itemData?.hired_at,
+    (hiredAt) => {
+      if (hiredAt && props.isDialogVisible) {
+        const employeeStartingYear = startingYear.value
+        // Update year filter to most recent available year or current year
+        tableFilters.value.year = Math.max(employeeStartingYear, currentYear.value)
       }
     },
   )
@@ -336,6 +412,8 @@ export function usePayrollTableDialog(
     selectedData,
     currentMonth: computed(() => monthNames[currentMonth.value]),
     currentYear,
+    startingYear,
+    availableYears,
     availableMonths,
     onView,
     onDialogClose,
