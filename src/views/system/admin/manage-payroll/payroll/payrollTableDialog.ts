@@ -1,19 +1,19 @@
 // Import constants, types, and timezone helpers
 import { usePayrollComputation, type TableData as ComputationTableData } from './payrollComputation'
-import { formActionDefault } from '@/utils/helpers/constants'
-import { ref, watch, computed, onUnmounted } from 'vue'
-import { type Employee } from '@/stores/employees'
-
 import { useOverallEarningsTotal, useNetSalaryCalculation } from './overallTotal'
+import { formActionDefault } from '@/utils/helpers/constants'
+import { fetchHolidaysByDateString } from '@/stores/holidays'
+import { ref, watch, computed, onUnmounted } from 'vue'
+import { useEmployeesStore } from '@/stores/employees'
+import { useBenefitsStore } from '@/stores/benefits'
+import { type Employee } from '@/stores/employees'
+import { fetchCashAdvances } from './cashAdvance'
+import { useTripsStore } from '@/stores/trips'
 
 import {
   getCurrentMonthInPhilippines,
   getCurrentYearInPhilippines,
   monthNames,
-  getSampleBasicSalary,
-  getSampleOvertime,
-  getSampleAllowances,
-  getSampleDeductions,
 } from './currentMonth'
 
 // Table row type para sa payroll data
@@ -40,54 +40,156 @@ export function usePayrollTableDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  // Payroll data generator using overallTotal composables
-  // NOTE: This assumes you have the required data for each month (trips, holidays, overtime, etc.)
-  // You may need to fetch or compute these per employee/month
-  // ...existing code...
-  const generatePayrollData = (monthIndex: number): TableData => {
-    // Example: Replace these with actual data fetches per employee/month
-    // For demo, use empty arrays/refs
-    const regularWorkTotal = ref(0) // dapat actual regular work total
-    const trips = ref([]) // dapat actual trips for the month
-    const holidays = ref([]) // dapat actual holidays for the month
-    const dailyRate = computed(() => 0) // dapat actual daily rate
-    const employeeDailyRate = computed(() => 0) // dapat actual employee daily rate
-    const overallOvertime = ref(0) // dapat actual overtime hours
-    const codaAllowance = ref(0) // dapat actual allowance
-    const nonDeductions = ref([]) // dapat actual non-deductions/benefits
-    const lateDeduction = ref(0) // dapat actual late deduction
-    const employeeDeductions = ref([]) // dapat actual employee deductions
-    const cashAdvance = ref(0) // dapat actual cash advance
-    const showLateDeduction = computed(() => false) // dapat actual logic
+  // Store instances
+  const tripsStore = useTripsStore()
+  const employeesStore = useEmployeesStore()
+  const benefitsStore = useBenefitsStore()
 
-    // Compute overall earnings
-    const overallEarningsTotal = useOverallEarningsTotal(
-      regularWorkTotal,
-      trips,
-      holidays,
-      dailyRate,
-      employeeDailyRate,
-      overallOvertime,
-      codaAllowance,
-      nonDeductions,
-    )
+  // Async payroll data generator using overallTotal composables
+  const generatePayrollData = async (monthIndex: number): Promise<TableData> => {
+    const employeeId = props.itemData?.id
+    const year = tableFilters.value.year
+    const monthName = monthNames[monthIndex]
 
-    // Compute net salary
-    const netSalaryCalc = useNetSalaryCalculation(
-      overallEarningsTotal,
-      showLateDeduction,
-      lateDeduction,
-      employeeDeductions,
-      cashAdvance,
-    )
+    // Create dateString in YYYY-MM format for data fetching
+    const dateString = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`
+    // Create full date string for cash advances (YYYY-MM-DD format)
+    const cashAdvanceDateString = `${dateString}-01`
 
-    // For demo, use month name and zeros
-    return {
-      month: monthNames[monthIndex],
-      basic_salary: Number(dailyRate.value) * 22, // estimate
-      gross_pay: overallEarningsTotal.value,
-      deductions: netSalaryCalc.value.totalDeductions,
-      net_pay: netSalaryCalc.value.netSalary,
+    if (!employeeId) {
+      return {
+        month: monthName,
+        basic_salary: 0,
+        gross_pay: 0,
+        deductions: 0,
+        net_pay: 0,
+      }
+    }
+
+    try {
+      // Fetch actual data para sa specific month ug employee
+      const [trips, holidays, employeeData, employeeDeductions, cashAdvances] = await Promise.all([
+        tripsStore.fetchFilteredTrips(dateString, employeeId),
+        fetchHolidaysByDateString(dateString, employeeId.toString()),
+        employeesStore.getEmployeeById(employeeId),
+        benefitsStore.getDeductionsById(employeeId),
+        fetchCashAdvances(cashAdvanceDateString, employeeId),
+      ])
+
+      // Setup reactive refs para sa computation
+      const regularWorkTotal = ref(0)
+      const tripsRef = ref(trips || [])
+      const holidaysRef = ref(holidays || [])
+      const dailyRate = computed(() => employeeData?.daily_rate || 0)
+      const employeeDailyRate = computed(() => employeeData?.daily_rate || 0)
+      const overallOvertime = ref(0)
+      const codaAllowance = ref(0) // pwede ni ma-fetch from benefits or separate allowance table
+      const nonDeductions = ref(
+        employeeDeductions?.filter((d: any) => d.benefit?.is_deduction === false) || [],
+      )
+      const lateDeduction = ref(0)
+      const employeeDeductionsRef = ref(
+        employeeDeductions?.filter((d: any) => d.benefit?.is_deduction === true) || [],
+      )
+
+      // Calculate total cash advance amount para sa month
+      const totalCashAdvance =
+        cashAdvances?.reduce((sum, advance) => sum + (Number(advance.amount) || 0), 0) || 0
+      const cashAdvance = ref(totalCashAdvance)
+
+      // Debug log para sa cash advances
+      if (totalCashAdvance > 0) {
+        console.log(
+          `Cash advances for ${monthName} ${year}:`,
+          cashAdvances,
+          'Total:',
+          totalCashAdvance,
+        )
+      }
+
+      const showLateDeduction = computed(() => true)
+
+      // Use payrollComputation para sa regular work ug overtime calculation
+      const payrollComp = usePayrollComputation(
+        dailyRate,
+        ref(0), // grossSalary will be computed by overallEarningsTotal
+        ref(null), // tableData not needed for this computation
+        employeeId,
+        monthName,
+        year,
+        dateString,
+      )
+
+      // Calculate basic salary using employee daily rate ug work days
+      console.log(`Basic salary calculation for ${monthName} ${year}:`, {
+        employeeDailyRate: payrollComp.employeeDailyRate.value,
+        workDays: payrollComp.workDays.value,
+        basicSalary: payrollComp.employeeDailyRate.value * payrollComp.workDays.value,
+        employeeId,
+      })
+
+      // Set regular work total - note: payroll computation has watch that auto-computes this
+      regularWorkTotal.value = payrollComp.regularWorkTotal.value
+
+      // Compute overtime hours for the month
+      const overtimeHours = await payrollComp.computeOverallOvertimeCalculation()
+      overallOvertime.value = overtimeHours
+
+      // Get late deduction from payroll computation
+      lateDeduction.value = payrollComp.lateDeduction.value
+
+      // Calculate basic salary using employee daily rate ug work days
+      const basicSalary = payrollComp.employeeDailyRate.value * payrollComp.workDays.value
+
+      // Compute overall earnings using overallTotal composable
+      const overallEarningsTotal = useOverallEarningsTotal(
+        regularWorkTotal,
+        tripsRef,
+        holidaysRef,
+        dailyRate,
+        employeeDailyRate,
+        overallOvertime,
+        codaAllowance,
+        nonDeductions,
+      )
+
+      // Compute net salary using overallTotal composable
+      const netSalaryCalc = useNetSalaryCalculation(
+        overallEarningsTotal,
+        showLateDeduction,
+        ref(lateDeduction.value),
+        employeeDeductionsRef,
+        cashAdvance,
+      )
+
+      // Calculate net pay: basic salary + gross pay - deductions
+      const netPay = basicSalary + overallEarningsTotal.value - netSalaryCalc.value.totalDeductions
+
+      // Debug log para sa net pay calculation
+      console.log(`Net pay calculation for ${monthName} ${year}:`, {
+        basicSalary,
+        grossPay: overallEarningsTotal.value,
+        totalDeductions: netSalaryCalc.value.totalDeductions,
+        netPay,
+        formula: `${basicSalary} + ${overallEarningsTotal.value} - ${netSalaryCalc.value.totalDeductions} = ${netPay}`,
+      })
+
+      return {
+        month: monthName,
+        basic_salary: basicSalary,
+        gross_pay: overallEarningsTotal.value,
+        deductions: netSalaryCalc.value.totalDeductions,
+        net_pay: netPay,
+      }
+    } catch (error) {
+      console.error(`Error generating payroll data for ${monthName} ${year}:`, error)
+      return {
+        month: monthName,
+        basic_salary: 0,
+        gross_pay: 0,
+        deductions: 0,
+        net_pay: 0,
+      }
     }
   }
 
@@ -135,12 +237,23 @@ export function usePayrollTableDialog(
   })
 
   // Load payroll data based on available months
-  const loadPayrollData = (): void => {
-    tableData.value = availableMonths.value.map((monthIndex) => generatePayrollData(monthIndex))
+  const loadPayrollData = async (): Promise<void> => {
+    tableOptions.value.isLoading = true
+    try {
+      const payrollPromises = availableMonths.value.map((monthIndex) =>
+        generatePayrollData(monthIndex),
+      )
+      tableData.value = await Promise.all(payrollPromises)
+    } catch (error) {
+      console.error('Error loading payroll data:', error)
+      tableData.value = []
+    } finally {
+      tableOptions.value.isLoading = false
+    }
   }
 
   // Update current time (month/year) and reload if needed
-  const updateCurrentTime = (): void => {
+  const updateCurrentTime = async (): Promise<void> => {
     const newMonth = getCurrentMonthInPhilippines()
     const newYear = getCurrentYearInPhilippines()
     if (newMonth !== currentMonth.value || newYear !== currentYear.value) {
@@ -148,7 +261,7 @@ export function usePayrollTableDialog(
       currentYear.value = newYear
       //kung current year gihapon, reload para ma-include new month
       if (tableFilters.value.year === newYear) {
-        loadPayrollData()
+        await loadPayrollData()
       }
     }
   }
@@ -156,13 +269,13 @@ export function usePayrollTableDialog(
   // Watch: dialog visibility
   watch(
     () => props.isDialogVisible,
-    (isVisible) => {
+    async (isVisible) => {
       if (isVisible) {
         // update time ug load data pag open
-        updateCurrentTime()
-        loadPayrollData()
+        await updateCurrentTime()
+        await loadPayrollData()
         // Start interval (every 1 min)
-        updateInterval = setInterval(updateCurrentTime, 60000)
+        updateInterval = setInterval(() => updateCurrentTime().catch(console.error), 60000)
       } else {
         // Stop interval pag close
         if (updateInterval) {
@@ -176,15 +289,15 @@ export function usePayrollTableDialog(
   // Watch: year filter changes
   watch(
     () => tableFilters.value.year,
-    () => {
-      loadPayrollData()
+    async () => {
+      await loadPayrollData()
     },
   )
 
   // Watch: available months (month transition)
-  watch(availableMonths, () => {
+  watch(availableMonths, async () => {
     if (props.isDialogVisible) {
-      loadPayrollData()
+      await loadPayrollData()
     }
   })
 
