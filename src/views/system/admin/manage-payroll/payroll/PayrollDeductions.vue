@@ -115,7 +115,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
     <td class="text-caption font-weight-bold border-t-sm border-s-sm pa-1">TOTAL NET SALARY</td>
     <td class="border-t-sm pa-1">Php</td>
     <td class="border-t-sm border-s-sm text-end pa-1">
-      {{ safeCurrencyFormat(netSalaryCalculation.netSalary, formatCurrency) }}
+      ₱{{ safeCurrencyFormat(netSalaryCalculation.netSalary, formatCurrency) }}
     </td>
   </tr>
 </template>

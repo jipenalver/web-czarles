@@ -145,6 +145,18 @@ function onView(item: any) {
               {{ item.month }}
             </v-btn>
           </template>
+          <template #item.basic_salary="{ item }">
+            ₱{{ item.basic_salary.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+          </template>
+          <template #item.gross_pay="{ item }">
+            ₱{{ item.gross_pay.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+          </template>
+          <template #item.deductions="{ item }">
+            ₱{{ item.deductions.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+          </template>
+          <template #item.net_pay="{ item }">
+            ₱{{ item.net_pay.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+          </template>
         </v-data-table>
       </v-card-text>
 

@@ -471,10 +471,10 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
         <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
-          <td class="text-caption font-weight-bold text-end pa-2">Php</td>
-          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overall">
-            {{ safeCurrencyFormat(overallEarningsTotal, formatCurrency) }}
-          </td>
+         <td class="text-caption font-weight-bold text-end pa-2"></td>
+         <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overall">
+           ₱{{ safeCurrencyFormat(overallEarningsTotal, formatCurrency) }}
+         </td>
         </tr>
         <PayrollDeductions
           :showLateDeduction="showLateDeduction"
