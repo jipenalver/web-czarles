@@ -13,10 +13,13 @@ import {
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
-import logoCzarles from '@/assets/logos/logo-czarles.png'
+// import logoCzarles from '@/assets/logos/logo-czarles.png'
 import PayrollDeductions from './PayrollDeductions.vue'
 import { useEmployeesStore } from '@/stores/employees'
 import { fetchEmployeeDeductions } from './benefits'
+import { computed, watch, onMounted, ref } from 'vue'
+import { type Employee } from '@/stores/employees'
+import { useTripsStore } from '@/stores/trips'
 // Props
 const props = defineProps<{
   employeeData: Employee | null
@@ -44,9 +47,7 @@ watch(
   },
   { immediate: true },
 )
-import { computed, watch, onMounted, ref } from 'vue'
-import { type Employee } from '@/stores/employees'
-import { useTripsStore } from '@/stores/trips'
+
 
 // ...existing code...
 
