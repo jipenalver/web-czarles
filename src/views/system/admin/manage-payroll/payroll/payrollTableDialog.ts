@@ -98,14 +98,14 @@ export function usePayrollTableDialog(
       const cashAdvance = ref(totalCashAdvance)
 
       // Debug log para sa cash advances
-      if (totalCashAdvance > 0) {
+    /*   if (totalCashAdvance > 0) {
         console.log(
           `Cash advances for ${monthName} ${year}:`,
           cashAdvances,
           'Total:',
           totalCashAdvance,
         )
-      }
+      } */
 
       const showLateDeduction = computed(() => true)
 
@@ -121,12 +121,14 @@ export function usePayrollTableDialog(
       )
 
       // Calculate basic salary using employee daily rate ug work days
-      console.log(`Basic salary calculation for ${monthName} ${year}:`, {
+      /* console.log(`Basic salary calculation for ${monthName} ${year}:`, {
         employeeDailyRate: payrollComp.employeeDailyRate.value,
         workDays: payrollComp.workDays.value,
-        basicSalary: payrollComp.employeeDailyRate.value * payrollComp.workDays.value,
+        presentDays: payrollComp.presentDays.value,
+        absentDays: payrollComp.absentDays.value,
+        basicSalary: payrollComp.employeeDailyRate.value * payrollComp.presentDays.value,
         employeeId,
-      })
+      }) */
 
       // Set regular work total - note: payroll computation has watch that auto-computes this
       regularWorkTotal.value = payrollComp.regularWorkTotal.value
@@ -138,8 +140,8 @@ export function usePayrollTableDialog(
       // Get late deduction from payroll computation
       lateDeduction.value = payrollComp.lateDeduction.value
 
-      // Calculate basic salary using employee daily rate ug work days
-      const basicSalary = payrollComp.employeeDailyRate.value * payrollComp.workDays.value
+      // Calculate basic salary using employee daily rate ug present days (not total work days)
+      const basicSalary = payrollComp.employeeDailyRate.value * payrollComp.presentDays.value
 
       // Compute overall earnings using overallTotal composable
       const overallEarningsTotal = useOverallEarningsTotal(
@@ -166,13 +168,16 @@ export function usePayrollTableDialog(
       const netPay = basicSalary + overallEarningsTotal.value - netSalaryCalc.value.totalDeductions
 
       // Debug log para sa net pay calculation
-      console.log(`Net pay calculation for ${monthName} ${year}:`, {
+     /*  console.log(`Net pay calculation for ${monthName} ${year}:`, {
         basicSalary,
         grossPay: overallEarningsTotal.value,
         totalDeductions: netSalaryCalc.value.totalDeductions,
         netPay,
+        presentDays: payrollComp.presentDays.value,
+        absentDays: payrollComp.absentDays.value,
+        workDays: payrollComp.workDays.value,
         formula: `${basicSalary} + ${overallEarningsTotal.value} - ${netSalaryCalc.value.totalDeductions} = ${netPay}`,
-      })
+      }) */
 
       return {
         month: monthName,

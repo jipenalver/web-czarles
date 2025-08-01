@@ -162,9 +162,9 @@ export function useNetSalaryCalculation(
         }))
       dynamicDeductionsTotal = dynamicDeductions.reduce((sum, d) => sum + d.amount, 0)
       // debug info kung naa gyud deductions
-      if (dynamicDeductions.length > 0) {
+     /*  if (dynamicDeductions.length > 0) {
         console.log('Dynamic deductions:', dynamicDeductions)
-      }
+      } */
     }
 
     // Calculate totals

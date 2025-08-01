@@ -123,6 +123,8 @@ export function usePayrollComputation(
   // Gamiton ang getEmployeeById ug i-filter by employeeId (props.employeeData?.id)
   // Async computed for regular work total using attendance DB
   const regularWorkTotal = ref<number>(0)
+  const absentDays = ref<number>(0)
+  const presentDays = ref<number>(0)
 
   async function computeRegularWorkTotal() {
     let daily = dailyRate.value
@@ -134,9 +136,6 @@ export function usePayrollComputation(
       usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
     }
 
-    // let amTimeIn: string | null | undefined = undefined
-    // let pmTimeIn: string | null | undefined = undefined
-
     if (employeeId && usedDateString) {
       const attendances = await attendancesStore.getEmployeeAttendanceById(
         employeeId,
@@ -145,6 +144,7 @@ export function usePayrollComputation(
       if (Array.isArray(attendances) && attendances.length > 0) {
         const allAmTimeIn = attendances.map((a) => a.am_time_in)
         const allPmTimeIn = attendances.map((a) => a.pm_time_in)
+        
         // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
         let totalLateAM = 0
         let totalLatePM = 0
@@ -157,9 +157,33 @@ export function usePayrollComputation(
           totalLatePM += lateMinutes
         })
         monthLateDeduction.value = totalLateAM + totalLatePM
-        console.log('Total month late deduction (minutes):', monthLateDeduction.value)
+        
+        // Check attendance data for present/absent days calculation
+        let employeePresentDays = 0
+        
+        attendances.forEach((attendance: any) => {
+          // Check if AM or PM time-in exists (since time-out might not be tracked)
+          const hasAmData = !!attendance.am_time_in // core function para sa pag count sa working days ug absent days
+          const hasPmData = !!attendance.pm_time_in
+          console.log('Attendance:', attendance, '| hasAmData:', hasAmData, '| hasPmData:', hasPmData)
+          
+          // Kung naa attendance data (either AM or PM), consider as present
+          if (hasAmData || hasPmData) {
+            employeePresentDays++
+          }
+        })
+        
+        // Calculate absent days: total working days minus present days
+        const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
+        
+        presentDays.value = employeePresentDays
+        absentDays.value = totalAbsentDays
+        console.log('Total working days:', workDays.value, '| Present days:', employeePresentDays, '| Absent days:', totalAbsentDays)
+     /*    console.log('Total month late deduction (minutes):', monthLateDeduction.value) */
       } else {
         monthLateDeduction.value = 0
+        presentDays.value = 0
+        absentDays.value = workDays.value // All days considered absent kung wala attendance records
       }
       source = 'attendance'
       // Optionally, you can still get daily rate from employee store if needed
@@ -168,7 +192,10 @@ export function usePayrollComputation(
         daily = emp.daily_rate
       }
     }
-    const total = (daily ?? 0) * workDays.value
+    
+    // Calculate regular work total: (total work days - absent days) * daily rate
+    const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
+    const total = (daily ?? 0) * effectiveWorkDays
     regularWorkTotal.value = total
   }
 
@@ -238,6 +265,8 @@ export function usePayrollComputation(
     totalDeductions,
     netSalary,
     regularWorkTotal,
+    absentDays,
+    presentDays,
 
     // Overtime
     overtimeHours,

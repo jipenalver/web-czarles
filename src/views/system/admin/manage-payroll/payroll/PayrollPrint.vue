@@ -119,6 +119,9 @@ const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 // Check if field staff to determine if late deduction should be shown
 const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
 
+// Effective work days (present days based on attendance)
+const effectiveWorkDays = computed(() => presentDays?.value || 0)
+
 // Composables
 const payrollPrint = usePayrollPrint(
   {
@@ -142,6 +145,8 @@ const {
   formatCurrency,
   employeeDailyRate,
   regularWorkTotal,
+  absentDays,
+  presentDays,
   lateDeduction,
   monthLateDeduction,
   computeOverallOvertimeCalculation,
@@ -319,9 +324,23 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
             Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
+            <div class="text-caption text-grey-darken-1 mt-1">
+              <div class="d-flex justify-space-between">
+                <span>Total work days:</span>
+                <span class="font-weight-medium">{{ workDays }}</span>
+              </div>
+              <div class="d-flex justify-space-between">
+                <span>Present days:</span>
+                <span class="font-weight-medium text-success">{{ presentDays }}</span>
+              </div>
+              <div v-if="absentDays > 0" class="d-flex justify-space-between">
+                <span>Absent days:</span>
+                <span class="font-weight-medium text-error">{{ absentDays }}</span>
+              </div>
+            </div>
           </td>
           <td class="pa-2">@ {{ safeCurrencyFormat(employeeDailyRate ?? 0, formatCurrency) }}</td>
-          <td class="pa-2">x {{ workDays }}</td>
+          <td class="pa-2">x {{ effectiveWorkDays }}</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
             {{ safeCurrencyFormat(regularWorkTotal, formatCurrency) }}
           </td>
