@@ -7,7 +7,7 @@ import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
-import { getYearMonthString } from './helpers'
+import { getYearMonthString, safeCurrencyFormat } from './helpers'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -147,16 +147,16 @@ function onView(item: any) {
             </v-btn>
           </template>
           <template #item.basic_salary="{ item }">
-            ₱{{ item.basic_salary.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+            ₱{{ safeCurrencyFormat(item.basic_salary, n => n.toFixed(2)) }}
           </template>
           <template #item.gross_pay="{ item }">
-            ₱{{ item.gross_pay.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+            ₱{{ safeCurrencyFormat(item.gross_pay, n => n.toFixed(2)) }}
           </template>
           <template #item.deductions="{ item }">
-            ₱{{ item.deductions.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+            ₱{{ safeCurrencyFormat(item.deductions, n => n.toFixed(2)) }}
           </template>
           <template #item.net_pay="{ item }">
-            ₱{{ item.net_pay.toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+            ₱{{ safeCurrencyFormat(item.net_pay, n => n.toFixed(2)) }}
           </template>
         </v-data-table>
       </v-card-text>
