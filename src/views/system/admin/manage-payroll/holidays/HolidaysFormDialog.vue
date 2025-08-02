@@ -4,6 +4,7 @@ import { useHolidaysFormDialog } from './holidaysFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
+import { getHolidayTypeCode } from './helpers'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -26,18 +27,10 @@ const {
   onFormReset,
 } = useHolidaysFormDialog(props, emit)
 
-// Mapping for holiday type label to code
-const holidayTypeMap: Record<string, string> = {
-  'Regular Holiday': 'RH',
-  'Special (Non-working) Holiday': 'SNH',
-  'Special (Working) Holiday': 'SWH',
-  'Sunday Rate': 'SR',
-}
-
 function onFormSubmit() {
   // i-map ang label to code before submit
-  if (formData.value.type && holidayTypeMap[formData.value.type]) {
-    formData.value.type = holidayTypeMap[formData.value.type]
+  if (formData.value.type) {
+    formData.value.type = getHolidayTypeCode(formData.value.type)
   }
   baseOnFormSubmit()
 }

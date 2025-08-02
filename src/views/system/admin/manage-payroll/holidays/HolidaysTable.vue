@@ -4,6 +4,7 @@ import HolidaysFormDialog from './HolidaysFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useHolidaysTable } from './holidaysTable'
+import { getHolidayTypeLabel } from './helpers'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -116,6 +117,12 @@ const {
 
         <template #item.name="{ item }">
           <span class="font-weight-bold"> {{ item.name }} </span>
+        </template>
+
+        <template #item.type="{ item }">
+          <span class="font-weight-bold">
+            {{ item.type ? getHolidayTypeLabel(item.type) : '' }}
+          </span>
         </template>
 
         <template #item.created_at="{ item }">
