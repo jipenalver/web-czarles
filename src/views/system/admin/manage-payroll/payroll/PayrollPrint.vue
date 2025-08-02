@@ -533,8 +533,8 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
 
 <style scoped>
 /* Hide mini payroll section by default */
-.mini-payroll-hidden {
+/* .mini-payroll-hidden {
   display: none;
-}
+} */
 
 </style>

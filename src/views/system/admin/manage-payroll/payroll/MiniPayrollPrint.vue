@@ -376,7 +376,7 @@ const specialHolidays = computed(() => {
         <v-row dense class="mb-1" v-for="(trip, index) in projectSiteAllowances" :key="'trip-' + trip.id">
           <v-col cols="6" class="text-caption pa-1">Project Site Allowance</v-col>
           <v-col cols="3" class="text-body-2 text-center pa-1">
-           x {{ trip.trip_no || 1 }}
+           x{{ trip.trip_no || 1 }}
           </v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
