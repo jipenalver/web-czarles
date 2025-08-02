@@ -15,6 +15,7 @@ import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
 // import logoCzarles from '@/assets/logos/logo-czarles.png'
 import PayrollDeductions from './PayrollDeductions.vue'
+import MiniPayrollPrint from './MiniPayrollPrint.vue'
 import { useEmployeesStore } from '@/stores/employees'
 import { fetchEmployeeDeductions } from './benefits'
 import { computed, watch, onMounted, ref } from 'vue'
@@ -324,20 +325,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
             Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
-           <!--  <div class="text-caption text-grey-darken-1 mt-1">
-              <div class="d-flex justify-space-between">
-                <span>Total work days:</span>
-                <span class="font-weight-medium">{{ workDays }}</span>
-              </div>
-              <div class="d-flex justify-space-between">
-                <span>Present days:</span>
-                <span class="font-weight-medium text-success">{{ presentDays }}</span>
-              </div>
-              <div v-if="absentDays > 0" class="d-flex justify-space-between">
-                <span>Absent days:</span>
-                <span class="font-weight-medium text-error">{{ absentDays }}</span>
-              </div>
-            </div> -->
+        
           </td>
           <td class="pa-2">@ {{ safeCurrencyFormat(employeeDailyRate ?? 0, formatCurrency) }}</td>
           <td class="pa-2">x {{ effectiveWorkDays }}</td>
@@ -531,6 +519,15 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
       </v-col>
       <v-col cols="12" sm="9" class="d-flex justify-center align-center"></v-col>
     </v-row>
+
+    <!-- Mini Payroll Print - Hidden from regular view, only for printing -->
+    <div id="mini-payroll-print" style="display: none;">
+      <MiniPayrollPrint
+        :employee-data="props.employeeData"
+        :payroll-data="props.payrollData"
+        :table-data="props.tableData"
+      />
+    </div>
   </v-container>
 </template>
 
