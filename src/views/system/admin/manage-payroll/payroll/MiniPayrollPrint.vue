@@ -13,6 +13,7 @@ import {
 import { fetchHolidaysByDateString, type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint, usePayrollFilters } from './usePayrollPrint'
+import { fetchCashAdvances } from './cashAdvance'
 import PayrollDeductions from './PayrollDeductions.vue'
 import { useEmployeesStore } from '@/stores/employees'
 import { fetchEmployeeDeductions } from './benefits'
@@ -31,22 +32,7 @@ const props = defineProps<{
 const employeesStore = useEmployeesStore()
 const employeeDeductions = ref<any[]>([])
 const employeeNonDeductions = ref<any[]>([])
-
-// Use fetchEmployeeDeductions from cashAdvance.ts
-async function updateEmployeeDeductions(employeeId: number | undefined) {
-  const result = await fetchEmployeeDeductions(employeeId)
-  employeeDeductions.value = result.deductions
-  employeeNonDeductions.value = result.nonDeductions
-}
-
-// Watch for employeeId changes to fetch deductions
-watch(
-  () => props.employeeData?.id,
-  (id) => {
-    updateEmployeeDeductions(id)
-  },
-  { immediate: true },
-)
+const cashAdvances = ref<any[]>([])
 
 // Month date range for display
 const monthDateRange = computed(() => {
@@ -68,25 +54,6 @@ const monthNames = [
   'November',
   'December',
 ]
-
-// Reactive references
-const isTripsLoading = ref(false)
-const isHolidaysLoading = ref(false)
-const holidays = ref<Holiday[]>([])
-const overallOvertime = ref<number>(0)
-const reactiveTotalEarnings = ref(0)
-const tripsStore = useTripsStore()
-
-// Computed properties for employee information
-const fullName = computed(() => {
-  if (!props.employeeData) return 'N/A'
-  const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
-  return `${props.employeeData.firstname}${middleName}${props.employeeData.lastname}`
-})
-
-const designation = computed(() => {
-  return props.employeeData?.designation?.designation || 'N/A'
-})
 
 // Date formatting computeds
 const formattedPeriod = computed(() => {
@@ -112,6 +79,60 @@ const filterDateString = computed(() => {
 const holidayDateString = computed(() => {
   const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
   return `${props.payrollData.year}-${month}`
+})
+
+// Use fetchEmployeeDeductions from benefits.ts
+async function updateEmployeeDeductions(employeeId: number | undefined) {
+  const result = await fetchEmployeeDeductions(employeeId)
+  employeeDeductions.value = result.deductions
+  employeeNonDeductions.value = result.nonDeductions
+}
+
+// Watch for employeeId changes to fetch deductions
+watch(
+  () => props.employeeData?.id,
+  (id) => {
+    updateEmployeeDeductions(id)
+  },
+  { immediate: true },
+)
+
+// Fetch cash advances when employeeId or filterDateString changes
+watch(
+  () => [filterDateString.value, props.employeeData?.id],
+  async ([filterDateString, employeeId]) => {
+    if (typeof employeeId === 'number' && filterDateString) {
+      // kuhaon ang cash advances para sa employee ug payroll month
+      cashAdvances.value = await fetchCashAdvances(filterDateString as string, employeeId)
+    } else {
+      cashAdvances.value = []
+    }
+  },
+  { immediate: true },
+)
+
+// Compute total cash advance from all ca.amount
+const totalCashAdvance = computed(() =>
+  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0)
+)
+
+// Reactive references
+const isTripsLoading = ref(false)
+const isHolidaysLoading = ref(false)
+const holidays = ref<Holiday[]>([])
+const overallOvertime = ref<number>(0)
+const reactiveTotalEarnings = ref(0)
+const tripsStore = useTripsStore()
+
+// Computed properties for employee information
+const fullName = computed(() => {
+  if (!props.employeeData) return 'N/A'
+  const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
+  return `${props.employeeData.firstname}${middleName}${props.employeeData.lastname}`
+})
+
+const designation = computed(() => {
+  return props.employeeData?.designation?.designation || 'N/A'
 })
 
 // Payroll calculation computeds
@@ -166,11 +187,23 @@ const overallEarningsTotal = useOverallEarningsTotal(
   employeeNonDeductions,
 )
 
+// Use earnings breakdown for debugging purposes
+const earningsBreakdown = useEarningsBreakdown(
+  regularWorkTotal,
+  computed(() => tripsStore.trips),
+  holidays,
+  dailyRate,
+  employeeDailyRate,
+  overallOvertime,
+  codaAllowance,
+)
+
 const netSalaryCalculation = useNetSalaryCalculation(
   overallEarningsTotal,
   showLateDeduction,
   lateDeduction,
   employeeDeductions,
+  totalCashAdvance
 )
 
 // Use imported safeCurrencyFormat from helpers.ts
@@ -266,7 +299,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
 
-// Computed values for trips display
+// Computed values for trips and holidays display
 const projectSiteAllowances = computed(() => {
   return tripsStore.trips?.filter(trip => trip.trip_location?.location?.includes('Project Site')) || []
 })
@@ -286,27 +319,9 @@ const specialHolidays = computed(() => {
   return holidays.value?.filter(holiday => holiday.type === 'special') || []
 })
 
-// Total deductions calculation
-const totalDeductionsAmount = computed(() => {
-  let total = 0
-  
-  // Late deduction if applicable
-  if (showLateDeduction.value) {
-    total += lateDeduction.value || 0
-  }
-  
-  // Employee deductions
-  employeeDeductions.value.forEach(deduction => {
-    total += deduction.amount || 0
-  })
-  
-  return total
-})
-
-// Net pay calculation
-const netPay = computed(() => {
-  return overallEarningsTotal.value - totalDeductionsAmount.value
-})
+// Debug logging (uncomment for debugging)
+// console.log('[MiniPayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
+// console.log('[MiniPayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
 </script>
 
 <template>
@@ -361,7 +376,7 @@ const netPay = computed(() => {
         <v-row dense class="mb-1" v-for="(trip, index) in projectSiteAllowances" :key="'trip-' + trip.id">
           <v-col cols="6" class="text-caption pa-1">Project Site Allowance</v-col>
           <v-col cols="3" class="text-body-2 text-center pa-1">
-            {{ trip.trip_no || 1 }}
+           x {{ trip.trip_no || 1 }}
           </v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
@@ -369,60 +384,48 @@ const netPay = computed(() => {
         </v-row>
       </template>
       
-      <!-- Sunday Work Rate -->
-      <template v-if="sundayWorkTrips.length > 0">
-        <v-row dense class="mb-1" v-for="(trip, index) in sundayWorkTrips" :key="'sunday-' + trip.id">
-          <v-col cols="6" class="text-caption pa-1">Sunday Work Rate</v-col>
+      <!-- Other trips (non-project site) -->
+      <template v-for="trip in tripsStore.trips?.filter(t => !t.trip_location?.location?.includes('Project Site'))" :key="'other-trip-' + trip.id">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">{{ trip.trip_location?.location || 'Trip' }}</v-col>
           <v-col cols="3" class="text-body-2 text-center pa-1">
-            {{ trip.trip_no || 1 }}
+            x{{ trip.trip_no || 1 }}
           </v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1) * 1.3, formatCurrency) }}
+            {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
           </v-col>
-        </v-row>
-      </template>
-      <template v-else>
-        <v-row dense class="mb-1">
-          <v-col cols="6" class="text-caption pa-1">Sunday Work Rate</v-col>
-          <v-col cols="3" class="pa-1"></v-col>
-          <v-col cols="3" class="text-body-2 text-end pa-1">-</v-col>
         </v-row>
       </template>
       
       <!-- Holiday Work (Special) -->
       <template v-if="specialHolidays.length > 0">
-        <v-row dense class="mb-1" v-for="(holiday, index) in specialHolidays" :key="'special-' + holiday.id">
-          <v-col cols="6" class="text-caption pa-1">Holiday Work (Special)</v-col>
+        <v-row dense class="mb-1" v-for="holiday in specialHolidays" :key="'special-' + holiday.id">
+          <v-col cols="6" class="text-caption pa-1">Holiday Work ({{ getHolidayTypeName(holiday.type || '') }})</v-col>
           <v-col cols="3" class="text-body-2 text-center pa-1">1</v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat(employeeDailyRate * 1.3, formatCurrency) }}
+            {{ safeCurrencyFormat(dailyRate * 1.3, formatCurrency) }}
           </v-col>
-        </v-row>
-      </template>
-      <template v-else>
-        <v-row dense class="mb-1">
-          <v-col cols="6" class="text-caption pa-1">Holiday Work (Special)</v-col>
-          <v-col cols="3" class="pa-1"></v-col>
-          <v-col cols="3" class="text-body-2 text-end pa-1">-</v-col>
         </v-row>
       </template>
       
       <!-- Holiday Work (Regular) -->
-      <v-row dense class="mb-1">
-        <v-col cols="6" class="text-caption pa-1">Holiday Work (Regular)</v-col>
-        <v-col cols="3" class="pa-1"></v-col>
-        <v-col cols="3" class="text-body-2 text-end pa-1">
-          <template v-if="regularHolidays.length > 0">
-            {{ safeCurrencyFormat((employeeDailyRate * regularHolidays.length * 2), formatCurrency) }}
-          </template>
-          <template v-else>-</template>
-        </v-col>
-      </v-row>
+      <template v-if="regularHolidays.length > 0">
+        <v-row dense class="mb-1" v-for="holiday in regularHolidays" :key="'regular-' + holiday.id">
+          <v-col cols="6" class="text-caption pa-1">Holiday Work ({{ getHolidayTypeName(holiday.type || '') }})</v-col>
+          <v-col cols="3" class="text-body-2 text-center pa-1">1</v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(dailyRate * 2, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
       
       <!-- Overtime Work -->
       <v-row dense class="mb-1">
         <v-col cols="6" class="text-caption pa-1">Overtime Work</v-col>
-        <v-col cols="3" class="pa-1"></v-col>
+        <v-col cols="3" class="text-body-2 text-center pa-1">
+            <template v-if="overallOvertime > 0">{{ overallOvertime.toFixed(2) }}h</template>
+            <template v-else>0.00h</template>
+        </v-col>
         <v-col cols="3" class="text-body-2 text-end pa-1">
           <template v-if="overallOvertime > 0">
             {{ safeCurrencyFormat((employeeDailyRate / 8) * 1.25 * overallOvertime, formatCurrency) }}
@@ -430,6 +433,17 @@ const netPay = computed(() => {
           <template v-else>-</template>
         </v-col>
       </v-row>
+      
+      <!-- Non-deductions (benefits) -->
+      <template v-if="employeeNonDeductions.length > 0">
+        <v-row dense class="mb-1" v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id">
+          <v-col cols="6" class="text-caption pa-1">{{ benefit.employee_benefit?.benefit || 'Benefit' }}</v-col>
+          <v-col cols="3" class="pa-1"></v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(benefit.amount || 0, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
       
       <!-- Monthly Trippings -->
       <v-row dense class="mb-2">
@@ -452,87 +466,54 @@ const netPay = computed(() => {
       <!-- Deductions Section -->
       <v-row dense class="mb-2">
         <v-col cols="12" class="text-caption font-weight-bold italic pa-1">
-          LESS : DEDUCTION
+          LESS : DEDUCTIONS
         </v-col>
       </v-row>
       
-      <!-- SSS -->
-      <v-row dense class="mb-1">
-        <v-col cols="3" class="text-caption pa-1">SSS</v-col>
-        <v-col cols="4" class="text-caption pa-1">DEC&JAN 405+450</v-col>
-        <v-col cols="5" class="text-body-2 text-end pa-1">
-          {{ 
-            employeeDeductions.find(d => d.benefit?.benefit_name?.toLowerCase().includes('sss'))?.amount 
-            ? safeCurrencyFormat(employeeDeductions.find(d => d.benefit?.benefit_name?.toLowerCase().includes('sss')).amount, formatCurrency)
-            : '500.00'
-          }}
-        </v-col>
-      </v-row>
+      <!-- Late Deduction -->
+      <template v-if="showLateDeduction && lateDeduction > 0">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">
+            Late Deduction
+            <span v-if="monthLateDeduction !== undefined && monthLateDeduction > 0" class="text-caption ms-1">
+              ({{ monthLateDeduction }} min.)
+            </span>
+          </v-col>
+          <v-col cols="6" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(lateDeduction, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
       
-      <!-- PHIC -->
-      <v-row dense class="mb-1">
-        <v-col cols="3" class="text-caption pa-1">PHIC</v-col>
-        <v-col cols="4" class="text-caption pa-1">DEC&JAN 250+250</v-col>
-        <v-col cols="5" class="text-body-2 text-end pa-1">
-          {{ 
-            employeeDeductions.find(d => d.benefit?.benefit_name?.toLowerCase().includes('phic') || d.benefit?.benefit_name?.toLowerCase().includes('philhealth'))?.amount 
-            ? safeCurrencyFormat(employeeDeductions.find(d => d.benefit?.benefit_name?.toLowerCase().includes('phic') || d.benefit?.benefit_name?.toLowerCase().includes('philhealth')).amount, formatCurrency)
-            : '250.00'
-          }}
-        </v-col>
-      </v-row>
+      <!-- Employee Deductions -->
+      <template v-for="deduction in employeeDeductions" :key="'deduction-' + deduction.id">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">{{ deduction.employee_benefit?.benefit || 'Deduction' }}</v-col>
+          <v-col cols="6" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(deduction.amount || 0, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
       
-      <!-- HDMF -->
-      <v-row dense class="mb-1">
-        <v-col cols="3" class="text-caption pa-1">HDMF</v-col>
-        <v-col cols="4" class="pa-1"></v-col>
-        <v-col cols="5" class="text-body-2 text-end pa-1">-</v-col>
-      </v-row>
-      
-      <!-- SSS LOAN -->
-      <v-row dense class="mb-1">
-        <v-col cols="6" class="text-caption pa-1">SSS LOAN (24 MOS) 1 OF 24</v-col>
-        <v-col cols="6" class="text-body-2 text-end pa-1">-</v-col>
-      </v-row>
-      
-      <!-- HDMF LOAN -->
-      <v-row dense class="mb-1">
-        <v-col cols="6" class="text-caption pa-1">HDMF LOAN (24 MOS) 1 OF 24</v-col>
-        <v-col cols="6" class="text-body-2 text-end pa-1">-</v-col>
-      </v-row>
-      
-      <!-- Cash Advance -->
-      <v-row dense class="mb-1">
-        <v-col cols="6" class="text-caption pa-1">Cash Advance</v-col>
-        <v-col cols="6" class="text-body-2 text-end pa-1">
-          {{ 
-            employeeDeductions.find(d => d.benefit?.benefit_name?.toLowerCase().includes('cash advance'))?.amount 
-            ? safeCurrencyFormat(employeeDeductions.find(d => d.benefit?.benefit_name?.toLowerCase().includes('cash advance')).amount, formatCurrency)
-            : '3,000.00'
-          }}
-        </v-col>
-      </v-row>
-      
-      <!-- Salary deposit -->
-      <v-row dense class="mb-1">
-        <v-col cols="6" class="text-caption pa-1">Salary deposit</v-col>
-        <v-col cols="6" class="text-body-2 text-end pa-1"></v-col>
-      </v-row>
-      
-      <!-- Others -->
-      <v-row dense class="mb-2">
-        <v-col cols="6" class="text-caption pa-1">Others <span class="text-body-2">Cedula</span></v-col>
-        <v-col cols="6" class="text-body-2 text-end pa-1">
-          <span class="text-decoration-line-through">213</span>
-        </v-col>
-      </v-row>
+      <!-- Cash Advances -->
+      <template v-for="ca in cashAdvances" :key="'cashadvance-' + ca.id">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">
+            Cash Advance
+            <span class="text-caption font-weight-bold ms-1">{{ ca.date }}</span>
+          </v-col>
+          <v-col cols="6" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(ca.amount || 0, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
       
       <!-- Total Deduction -->
       <v-row dense class="mb-2">
         <v-col cols="6" class="text-caption font-weight-bold pa-1">Total Deduction</v-col>
         <v-col cols="3" class="text-caption pa-1">Php</v-col>
         <v-col cols="3" class="text-body-2 text-end font-weight-bold border-b-sm pa-1">
-          {{ safeCurrencyFormat(totalDeductionsAmount, formatCurrency) }}
+          {{ safeCurrencyFormat(netSalaryCalculation.totalDeductions, formatCurrency) }}
         </v-col>
       </v-row>
       
@@ -540,7 +521,7 @@ const netPay = computed(() => {
       <v-row dense>
         <v-col cols="6" class="text-h6 font-weight-bold pa-1">NET PAY</v-col>
         <v-col cols="6" class="text-h6 text-end font-weight-bold pa-1">
-          {{ safeCurrencyFormat(netPay, formatCurrency) }}
+          {{ safeCurrencyFormat(netSalaryCalculation.netSalary, formatCurrency) }}
         </v-col>
       </v-row>
     </v-card>

@@ -11,6 +11,7 @@ export function usePayrollPrintDialog(
 ) {
   // States
   const formAction = ref({ ...formActionDefault })
+  const isPrinting = ref(false)
 
   watch(
     () => props.isDialogVisible,
@@ -19,37 +20,63 @@ export function usePayrollPrintDialog(
   /* https://www.npmjs.com/package/html2pdf.js/v/0.9.0 */
   // Actions
   const onPrint = async () => {
+    // Set printing state to true para ma-show ang loading overlay
+    isPrinting.value = true
+    
     // Get the payroll element na naka-contain sa both full ug mini payroll
     const payrollElement = document.getElementById('generate-payroll')
     const miniPayrollSection = document.getElementById('mini-payroll-section')
     
-    if (!payrollElement) return // wala element, di mag proceed
-
-    // Temporarily show and transform ang mini payroll section para sa printing
-    if (miniPayrollSection) {
-      miniPayrollSection.style.display = 'block'
-      // Apply CSS transformations programmatically para sure na ma-apply
-      miniPayrollSection.style.transform = 'rotate(90deg) scale(0.8)'
-      miniPayrollSection.style.transformOrigin = 'top left'
-      miniPayrollSection.style.position = 'absolute'
-      miniPayrollSection.style.top = '750px'
-      miniPayrollSection.style.left = '800px'
-      miniPayrollSection.style.width = '800px'
-      miniPayrollSection.style.height = '800px'
-    
+    if (!payrollElement) {
+      isPrinting.value = false
+      return // wala element, di mag proceed
     }
 
-    // Apply scaling to main container
+    // Store original styles para ma-restore later
+    const originalStyles = {
+      miniPayroll: {
+        display: miniPayrollSection?.style.display || '',
+        transform: miniPayrollSection?.style.transform || '',
+        transformOrigin: miniPayrollSection?.style.transformOrigin || '',
+        position: miniPayrollSection?.style.position || '',
+        top: miniPayrollSection?.style.top || '',
+        left: miniPayrollSection?.style.left || '',
+        width: miniPayrollSection?.style.width || '',
+        height: miniPayrollSection?.style.height || '',
+      },
+      mainContainer: null as any
+    }
+
     const mainContainer = payrollElement.querySelector('.v-container') as HTMLElement
     if (mainContainer) {
-      mainContainer.style.transform = 'scale(1.3)'
-      mainContainer.style.transformOrigin = 'top center'
-      mainContainer.style.position = 'absolute'
-      mainContainer.style.left = '320px'
- 
+      originalStyles.mainContainer = {
+        transform: mainContainer.style.transform || '',
+        transformOrigin: mainContainer.style.transformOrigin || '',
+        position: mainContainer.style.position || '',
+        left: mainContainer.style.left || '',
+      }
     }
 
     try {
+      // Apply transformations para sa PDF generation
+      if (miniPayrollSection) {
+        miniPayrollSection.style.display = 'block'
+        miniPayrollSection.style.transform = 'rotate(90deg) scale(0.8)'
+        miniPayrollSection.style.transformOrigin = 'top left'
+        miniPayrollSection.style.position = 'absolute'
+        miniPayrollSection.style.top = '750px'
+        miniPayrollSection.style.left = '680px'
+        miniPayrollSection.style.width = '800px'
+        miniPayrollSection.style.height = '800px'
+      }
+
+      if (mainContainer) {
+        mainContainer.style.transform = 'scale(1.3)'
+        mainContainer.style.transformOrigin = 'top center'
+        mainContainer.style.position = 'absolute'
+        mainContainer.style.left = '320px'
+      }
+
       // Generate PDF with optimized settings para sa scaled content
       await html2pdf(payrollElement, {
         margin: 0.1,
@@ -68,23 +95,28 @@ export function usePayrollPrintDialog(
           orientation: 'portrait'
         }
       })
+      
+
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      formAction.value = {
+        formProcess: false,
+        formAlert: true,
+        formMessage: 'Error occurred while generating PDF. Please try again.',
+        formStatus: 500
+      }
     } finally {
-      // Reset styles after printing
-      if (miniPayrollSection) {
-        miniPayrollSection.style.display = 'none'
-        miniPayrollSection.style.transform = ''
-        miniPayrollSection.style.transformOrigin = ''
-        miniPayrollSection.style.position = ''
-        miniPayrollSection.style.top = ''
-        miniPayrollSection.style.left = ''
-        miniPayrollSection.style.width = ''
-        miniPayrollSection.style.height = ''
+      // Reset all styles to original values
+      if (miniPayrollSection && originalStyles.miniPayroll) {
+        Object.assign(miniPayrollSection.style, originalStyles.miniPayroll)
       }
       
-      if (mainContainer) {
-        mainContainer.style.transform = ''
-        mainContainer.style.transformOrigin = ''
+      if (mainContainer && originalStyles.mainContainer) {
+        Object.assign(mainContainer.style, originalStyles.mainContainer)
       }
+      
+      // Reset printing state
+      isPrinting.value = false
     }
   }
 
@@ -96,6 +128,7 @@ export function usePayrollPrintDialog(
   // Expose State and Actions
   return {
     formAction,
+    isPrinting,
     onPrint,
     onDialogClose,
   }

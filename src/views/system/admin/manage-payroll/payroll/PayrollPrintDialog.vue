@@ -16,7 +16,7 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit)
+const { formAction, isPrinting, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit)
 </script>
 
 <template>
@@ -32,15 +32,46 @@ const { formAction, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-fast" title="Payroll Preview">
+    <v-card prepend-icon="mdi-cash-fast" title="Payroll Preview" class="position-relative">
+      <!-- Loading overlay para matago ang entire dialog during printing -->
+      <v-overlay 
+        v-model="isPrinting" 
+        contained 
+        persistent
+        class="d-flex justify-center align-center"
+      >
+        <v-card class="pa-6 text-center w-100" elevation="8" max-width="800">
+          <v-progress-circular 
+            indeterminate 
+            color="primary" 
+            size="64" 
+            width="6"
+            class="mb-4"
+          />
+          <h3 class="text-h6 text-primary mb-2">Generating PDF...</h3>
+          <p class="text-body-2 text-grey-darken-1 mb-0">
+            Please wait while we prepare your payroll document
+          </p>
+        </v-card>
+      </v-overlay>
+
       <template #append>
-        <v-btn variant="text" density="comfortable" @click="onPrint" icon>
+        <v-btn 
+          variant="text" 
+          density="comfortable" 
+          @click="onPrint" 
+          :disabled="isPrinting"
+          :loading="isPrinting"
+          icon
+        >
           <v-icon icon="mdi-printer" color="primary"></v-icon>
-          <v-tooltip activator="parent" location="top"> Print Employee Payroll </v-tooltip>
+          <v-tooltip activator="parent" location="top"> 
+            {{ isPrinting ? 'Generating PDF...' : 'Print Employee Payroll' }}
+          </v-tooltip>
         </v-btn>
       </template>
 
-      <v-card-text id="generate-payroll">
+      <v-card-text id="generate-payroll">        
         <PayrollPrint
           :employee-data="props.employeeData"
           :payroll-data="props.payrollData"
