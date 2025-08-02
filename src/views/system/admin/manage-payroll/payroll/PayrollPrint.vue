@@ -28,6 +28,17 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
+// Expose functions para ma-access sa parent component
+defineExpose({
+  initializePayrollCalculations,
+  recalculateEarnings,
+  reloadAllFunctions,
+  // Individual reload functions
+  loadTrips,
+  fetchEmployeeHolidays,
+  updateOverallOvertime,
+  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id)
+})
 // Pinia store for employees
 const employeesStore = useEmployeesStore()
 const employeeDeductions = ref<any[]>([])
@@ -183,28 +194,123 @@ const netSalaryCalculation = useNetSalaryCalculation(
   employeeDeductions,
 )
 
+// Additional computed values para better display sa useOverallEarningsTotal results
+const displayTotalEarnings = computed(() => {
+  // Ensure na ma-trigger ang useOverallEarningsTotal computation
+  return overallEarningsTotal.value || 0
+})
+
+const displayEarningsBreakdown = computed(() => {
+  // Display breakdown gikan sa earningsBreakdown composable
+  return earningsBreakdown.value
+})
+
+const displayNetSalary = computed(() => {
+  // Display net salary calculation results
+  return netSalaryCalculation.value
+})
+
 // Use imported safeCurrencyFormat from helpers.ts
 
 // Alias to avoid naming conflict with imported function
 const safeCurrencyFormatRaw = safeCurrencyFormat
 
-// Function to recalculate total earnings
+// Function to recalculate total earnings - trigger useOverallEarningsTotal calculation
 function recalculateEarnings() {
+  // This triggers the computed value recalculation para sa useOverallEarningsTotal
   reactiveTotalEarnings.value = overallEarningsTotal.value
+  
+  // Log para makita kung na-trigger ang calculation
+  console.log('[PayrollPrint] Overall earnings recalculated:', overallEarningsTotal.value)
+}
+
+// Function to initialize and trigger useOverallEarningsTotal on mount
+async function initializePayrollCalculations() {
+  try {
+    console.log('[PayrollPrint] Starting payroll calculations initialization...')
+    
+    // Reset loading states
+    isTripsLoading.value = true
+    isHolidaysLoading.value = true
+    
+    // Reset data arrays para fresh start
+    holidays.value = []
+    overallOvertime.value = 0
+    employeeDeductions.value = []
+    employeeNonDeductions.value = []
+    
+    // Load employee deductions first
+    if (props.employeeData?.id) {
+      await updateEmployeeDeductions(props.employeeData.id)
+    }
+    
+    // Load all required data simultaneously
+    await Promise.all([
+      loadTrips(),
+      fetchEmployeeHolidays(),
+      updateOverallOvertime()
+    ])
+    
+    // Force trigger ang useOverallEarningsTotal computation after all data is loaded
+    recalculateEarnings()
+    
+    console.log('[PayrollPrint] Payroll calculations initialized successfully')
+    console.log('[PayrollPrint] Final totals:', {
+      regularWork: regularWorkTotal.value,
+      trips: tripsStore.trips?.length || 0,
+      holidays: holidays.value?.length || 0,
+      overtime: overallOvertime.value,
+      totalEarnings: overallEarningsTotal.value
+    })
+  } catch (error) {
+    console.error('[PayrollPrint] Error initializing payroll calculations:', error)
+    // Reset loading states on error
+    isTripsLoading.value = false
+    isHolidaysLoading.value = false
+  }
+}
+
+// Comprehensive reload function para sa lahat ng functions
+async function reloadAllFunctions() {
+  try {
+    console.log('[PayrollPrint] Reloading all payroll functions - comprehensive reload...')
+    
+    // Clear all existing data
+    tripsStore.trips = []
+    holidays.value = []
+    overallOvertime.value = 0
+    employeeDeductions.value = []
+    employeeNonDeductions.value = []
+    reactiveTotalEarnings.value = 0
+    
+    // Reset loading states
+    isTripsLoading.value = true
+    isHolidaysLoading.value = true
+    
+    // Re-initialize everything from scratch
+    await initializePayrollCalculations()
+    
+    console.log('[PayrollPrint] All functions reloaded successfully')
+  } catch (error) {
+    console.error('[PayrollPrint] Error during comprehensive reload:', error)
+  }
 }
 
 // Holiday fetching function
 async function fetchEmployeeHolidays() {
   if (!props.employeeData?.id) {
     holidays.value = []
+    isHolidaysLoading.value = false
     return
   }
-  isHolidaysLoading.value = true
+  
   try {
+    console.log('[PayrollPrint] Fetching holidays for employee:', props.employeeData.id)
     holidays.value = await fetchHolidaysByDateString(
       holidayDateString.value,
       String(props.employeeData.id),
     )
+    console.log('[PayrollPrint] Holidays fetched:', holidays.value?.length || 0)
   } catch (error) {
     console.error('Error fetching holidays:', error)
     holidays.value = []
@@ -215,29 +321,45 @@ async function fetchEmployeeHolidays() {
 
 // Trip loading function
 function loadTrips() {
-  isTripsLoading.value = true
-  Promise.resolve(fetchFilteredTrips()).finally(() => {
+  if (!props.employeeData?.id) {
     isTripsLoading.value = false
-  })
+    return Promise.resolve()
+  }
+  
+  console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id)
+  isTripsLoading.value = true
+  
+  return Promise.resolve(fetchFilteredTrips())
+    .then(() => {
+      console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0)
+    })
+    .catch((error) => {
+      console.error('[PayrollPrint] Error loading trips:', error)
+    })
+    .finally(() => {
+      isTripsLoading.value = false
+    })
 }
 
 // Overtime calculation function
 async function updateOverallOvertime() {
   try {
+    console.log('[PayrollPrint] Calculating overtime for employee:', props.employeeData?.id)
     overallOvertime.value = await computeOverallOvertimeCalculation()
+    console.log('[PayrollPrint] Overtime calculated:', overallOvertime.value)
   } catch (error) {
     console.error('Error calculating overtime:', error)
     overallOvertime.value = 0
   }
 }
 
-// Enhanced mounted hook
+// Enhanced mounted hook - properly trigger useOverallEarningsTotal
 onMounted(async () => {
-  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime()])
-  recalculateEarnings()
+  // Call ang initialization function na mag-trigger sa useOverallEarningsTotal
+  await initializePayrollCalculations()
 })
 
-// Watch for changes in all earning components
+// Watch for changes in all earning components - trigger useOverallEarningsTotal recalculation
 watch(
   [
     regularWorkTotal,
@@ -247,14 +369,16 @@ watch(
     employeeDailyRate,
     dailyRate,
     codaAllowance,
+    employeeNonDeductions, // Include non-deductions in watch para ma-trigger ang useOverallEarningsTotal
   ],
   () => {
+    // Trigger ang useOverallEarningsTotal computation whenever may changes
     recalculateEarnings()
   },
   { deep: true, immediate: true },
 )
 
-// Enhanced watchers for better reactivity
+// Enhanced watchers for better reactivity - re-trigger useOverallEarningsTotal calculations
 watch(
   [
     () => props.employeeData?.id,
@@ -263,8 +387,8 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays()])
-    recalculateEarnings()
+    // Re-initialize all calculations including useOverallEarningsTotal when key data changes
+    await initializePayrollCalculations()
   },
   { deep: true },
 )
@@ -278,9 +402,22 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
 
+// Additional watcher para monitor ang useOverallEarningsTotal changes
+watch(
+  () => overallEarningsTotal.value,
+  (newTotal, oldTotal) => {
+    console.log('[PayrollPrint] useOverallEarningsTotal updated:', { oldTotal, newTotal })
+    // Update ang reactive total earnings
+    reactiveTotalEarnings.value = newTotal
+  },
+  { immediate: true }
+)
+
 // Debug logging (uncomment for debugging)
 console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
-// console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
+console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
+console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
+console.log('[PayrollPrint] Net Salary Calculation:', netSalaryCalculation.value)
 </script>
 
 <template>
@@ -481,7 +618,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
          <td class="text-caption font-weight-bold text-end pa-2"></td>
          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overall">
-           ₱{{ safeCurrencyFormat(overallEarningsTotal, formatCurrency) }}
+           {{ safeCurrencyFormat(displayTotalEarnings, formatCurrency) }}
          </td>
         </tr>
         <PayrollDeductions
