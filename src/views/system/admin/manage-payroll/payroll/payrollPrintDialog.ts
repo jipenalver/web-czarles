@@ -19,56 +19,73 @@ export function usePayrollPrintDialog(
   /* https://www.npmjs.com/package/html2pdf.js/v/0.9.0 */
   // Actions
   const onPrint = async () => {
-    // Get both elements
-    const fullPayrollElement = document.getElementById('generate-payroll')
-    const miniPayrollElement = document.getElementById('mini-payroll-print')
+    // Get the payroll element na naka-contain sa both full ug mini payroll
+    const payrollElement = document.getElementById('generate-payroll')
+    const miniPayrollSection = document.getElementById('mini-payroll-section')
     
-    if (!fullPayrollElement || !miniPayrollElement) return // wala element, di mag proceed
+    if (!payrollElement) return // wala element, di mag proceed
 
-    // Create a container div para sa combined content
-    const combinedContainer = document.createElement('div')
-    combinedContainer.style.display = 'block'
-    combinedContainer.style.width = '100%'
+    // Temporarily show and transform ang mini payroll section para sa printing
+    if (miniPayrollSection) {
+      miniPayrollSection.style.display = 'block'
+      // Apply CSS transformations programmatically para sure na ma-apply
+      miniPayrollSection.style.transform = 'rotate(90deg) scale(0.8)'
+      miniPayrollSection.style.transformOrigin = 'top left'
+      miniPayrollSection.style.position = 'absolute'
+      miniPayrollSection.style.top = '750px'
+      miniPayrollSection.style.left = '800px'
+      miniPayrollSection.style.width = '800px'
+      miniPayrollSection.style.height = '800px'
     
-    // Save original styles
-    const fullOriginalTransform = fullPayrollElement.style.transform
-    const fullOriginalTransformOrigin = fullPayrollElement.style.transformOrigin
-    const miniOriginalDisplay = miniPayrollElement.style.display
-    const miniOriginalTransform = miniPayrollElement.style.transform
-    const miniOriginalTransformOrigin = miniPayrollElement.style.transformOrigin
-    
-    // Clone both elements para di ma-disturb ang original
-    const fullClone = fullPayrollElement.cloneNode(true) as HTMLElement
-    const miniClone = miniPayrollElement.cloneNode(true) as HTMLElement
-    
-    // Apply transforms to clones
-    fullClone.style.transform = 'scaleY(0.7)'
-    fullClone.style.transformOrigin = 'top center'
-    fullClone.style.marginBottom = '20px' // spacing between pages
-    
-    miniClone.style.transform = 'scale(1)'
-    miniClone.style.transformOrigin = 'top center'
-    miniClone.style.display = 'block'
-    miniClone.style.pageBreakBefore = 'always' // force new page
-    
-    // Append clones to container
-    combinedContainer.appendChild(fullClone)
-    combinedContainer.appendChild(miniClone)
-    
-    // Temporarily add container to body
-    document.body.appendChild(combinedContainer)
-    
-    // Generate combined PDF
-    await html2pdf(combinedContainer, {
-      margin: 0.25,
-      filename: 'payroll-complete.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-    }).then(() => {
-      // Cleanup - remove ang temporary container
-      document.body.removeChild(combinedContainer)
-    })
+    }
+
+    // Apply scaling to main container
+    const mainContainer = payrollElement.querySelector('.v-container') as HTMLElement
+    if (mainContainer) {
+      mainContainer.style.transform = 'scale(1.3)'
+      mainContainer.style.transformOrigin = 'top center'
+      mainContainer.style.position = 'absolute'
+      mainContainer.style.left = '320px'
+ 
+    }
+
+    try {
+      // Generate PDF with optimized settings para sa scaled content
+      await html2pdf(payrollElement, {
+        margin: 0.1,
+        filename: 'payroll-complete.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 1.5, // Higher scale para mas clear ang bigger content
+          useCORS: true,
+          allowTaint: true,
+          width: 1400, // Larger width para sa bigger content
+          height: 1850 // Larger height
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'a4', 
+          orientation: 'portrait'
+        }
+      })
+    } finally {
+      // Reset styles after printing
+      if (miniPayrollSection) {
+        miniPayrollSection.style.display = 'none'
+        miniPayrollSection.style.transform = ''
+        miniPayrollSection.style.transformOrigin = ''
+        miniPayrollSection.style.position = ''
+        miniPayrollSection.style.top = ''
+        miniPayrollSection.style.left = ''
+        miniPayrollSection.style.width = ''
+        miniPayrollSection.style.height = ''
+      }
+      
+      if (mainContainer) {
+        mainContainer.style.transform = ''
+        mainContainer.style.transformOrigin = ''
+      }
+    }
   }
 
   const onDialogClose = () => {
