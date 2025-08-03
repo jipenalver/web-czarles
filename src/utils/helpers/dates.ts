@@ -128,6 +128,14 @@ export const getTime24Hour = (date: Date | string | null) => {
   return `${hours}:${minutes}`
 }
 
+// 👉 Get first date and last date of the month
+export const getFirstAndLastDateOfMonth = (date: Date = new Date()) => {
+  const firstDate = new Date(date.getFullYear(), date.getMonth(), 1)
+  const lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+
+  return [firstDate, lastDate]
+}
+
 // 👉 Get Years of Service
 export const getYearsOfService = (hiredAt: string) => {
   if (!hiredAt) return 'n/a'

@@ -1,24 +1,29 @@
-import { type CashAdvance, useCashAdvancesStore } from '@/stores/cashAdvances'
 import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
+import { generateCSV, getMoneyText, prepareCSV } from '@/utils/helpers/others'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
-import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { type Trip, useTripsStore } from '@/stores/trips'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
-export function useCashAdvancesTable() {
+export function useTripsTable() {
   const date = useDate()
 
-  const cashAdvancesStore = useCashAdvancesStore()
+  const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
 
   // States
   const baseHeaders: TableHeader[] = [
     { title: 'Employee', key: 'employee', sortable: false, align: 'start' },
-    { title: 'Amount', key: 'amount', align: 'start' },
-    { title: 'Description', key: 'description', align: 'start' },
-    { title: 'Date Requested', key: 'request_at', align: 'center' },
+    { title: 'Unit', key: 'unit', sortable: false, align: 'start' },
+    { title: 'Date', key: 'trip_at', align: 'start' },
+    { title: 'Location-Destination', key: 'trip_location', sortable: false, align: 'start' },
+    { title: 'Materials Loaded', key: 'materials', align: 'start' },
+    { title: 'KM', key: 'km', align: 'start' },
+    { title: 'No. of Trips', key: 'trip_no', align: 'start' },
+    { title: 'Per Trip', key: 'per_trip', align: 'start' },
+    { title: 'Amount', key: 'amount', sortable: false, align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
@@ -30,12 +35,12 @@ export function useCashAdvancesTable() {
   })
   const tableFilters = ref({
     employee_id: null,
-    request_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    trip_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
-  const itemData = ref<CashAdvance | null>(null)
+  const itemData = ref<Trip | null>(null)
   const formAction = ref({ ...formActionDefault })
 
   // Actions
@@ -44,7 +49,7 @@ export function useCashAdvancesTable() {
     isDialogVisible.value = true
   }
 
-  const onUpdate = (item: CashAdvance) => {
+  const onUpdate = (item: Trip) => {
     itemData.value = item
     isDialogVisible.value = true
   }
@@ -57,13 +62,13 @@ export function useCashAdvancesTable() {
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    const { data, error } = await cashAdvancesStore.deleteCashAdvance(deleteId.value)
+    const { data, error } = await tripsStore.deleteTrip(deleteId.value)
 
     if (error) {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Cash Advance.'
+      formAction.value.formMessage = 'Successfully Deleted Trip.'
 
       await onLoadItems(tableOptions.value)
     }
@@ -73,11 +78,11 @@ export function useCashAdvancesTable() {
   }
 
   const onFilterDate = async (isCleared = false) => {
-    if (isCleared) tableFilters.value.request_at = null
+    if (isCleared) tableFilters.value.trip_at = null
 
     onLoadItems(tableOptions.value)
 
-    await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    await tripsStore.getTripsCSV(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -86,19 +91,19 @@ export function useCashAdvancesTable() {
 
     onLoadItems(tableOptions.value)
 
-    await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    await tripsStore.getTripsCSV(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
     tableOptions.value.isLoading = true
 
-    await cashAdvancesStore.getCashAdvancesTable({ page, itemsPerPage, sortBy }, tableFilters.value)
+    await tripsStore.getTripsTable({ page, itemsPerPage, sortBy }, tableFilters.value)
 
     tableOptions.value.isLoading = false
   }
 
   const onExportCSV = () => {
-    const filename = `${getDateISO(new Date())}-cash-advances`
+    const filename = `${getDateISO(new Date())}-trips`
 
     const csvData = () => {
       const defaultHeaders = tableHeaders.value
@@ -107,15 +112,20 @@ export function useCashAdvancesTable() {
 
       const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
 
-      const csvRows = cashAdvancesStore.cashAdvancesCSV.map((item) => {
+      const csvRows = tripsStore.tripsCSV.map((item) => {
         const csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),
           prepareCSV(item.employee.middlename),
 
-          prepareCSV(item.amount.toString()),
-          prepareCSV(item.description),
-          item.request_at ? prepareCSV(date.format(item.request_at, 'fullDate')) : '',
+          prepareCSV(item.unit.name),
+          item.trip_at ? prepareCSV(date.format(item.trip_at, 'fullDate')) : '',
+          prepareCSV(item.trip_location.location),
+          prepareCSV(item.materials),
+          prepareCSV(item.km.toString()),
+          prepareCSV(item.trip_no.toString()),
+          prepareCSV(getMoneyText(item.per_trip)),
+          prepareCSV(getMoneyText(item.trip_no * item.per_trip)),
         ]
 
         return csvData.join(',')
@@ -129,8 +139,8 @@ export function useCashAdvancesTable() {
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (cashAdvancesStore.cashAdvancesCSV.length === 0)
-      await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    if (tripsStore.tripsCSV.length === 0)
+      await tripsStore.getTripsCSV(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
@@ -150,7 +160,7 @@ export function useCashAdvancesTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    cashAdvancesStore,
+    tripsStore,
     employeesStore,
   }
 }
