@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAttendanceViewDialog } from './attendanceViewDialog'
-import { getDate, getTime } from '@/utils/helpers/others'
+import { getDate, getTime } from '@/utils/helpers/dates'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useDisplay } from 'vuetify'

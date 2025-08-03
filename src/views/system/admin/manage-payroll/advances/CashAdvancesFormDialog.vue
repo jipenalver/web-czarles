@@ -1,26 +1,24 @@
 <script setup lang="ts">
-import { type Unit, type UnitTableFilter } from '@/stores/units'
+import { type CashAdvance, type CashAdvanceTableFilter } from '@/stores/cashAdvances'
+import { useCashAdvancesFormDialog } from './cashAdvancesFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
-import { useUnitsFormDialog } from './unitsFormDialog'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Unit | null
+  itemData: CashAdvance | null
   tableOptions: TableOptions
-  tableFilters: UnitTableFilter
+  tableFilters: CashAdvanceTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useUnitsFormDialog(
-  props,
-  emit,
-)
+const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, employeesStore } =
+  useCashAdvancesFormDialog(props, emit)
 </script>
 
 <template>
@@ -36,16 +34,41 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-dump-truck" title="Unit Information">
+    <v-card prepend-icon="mdi-cash-refund" title="Cash Advance Details">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
+              <v-autocomplete
+                v-model="formData.employee_id"
+                :items="employeesStore.employees"
+                label="Employee"
+                item-title="label"
+                item-value="id"
+                :rules="[requiredValidator]"
+              ></v-autocomplete>
+            </v-col>
+
+            <v-col cols="12">
               <v-text-field
-                v-model="formData.name"
-                label="Name"
+                v-model="formData.amount"
+                prepend-inner-icon="mdi-currency-php"
+                label="Amount"
+                type="number"
                 :rules="[requiredValidator]"
               ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+              <v-date-input
+                v-model="formData.request_at"
+                prepend-icon=""
+                prepend-inner-icon="mdi-calendar"
+                label="Date Requested"
+                placeholder="Select Date"
+                :rules="[requiredValidator]"
+                hide-actions
+              ></v-date-input>
             </v-col>
 
             <v-col cols="12">
@@ -69,7 +92,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Unit' : 'Add Unit' }}
+            {{ isUpdate ? 'Update Cash Advance' : 'Add Cash Advance' }}
           </v-btn>
         </v-card-actions>
       </v-form>

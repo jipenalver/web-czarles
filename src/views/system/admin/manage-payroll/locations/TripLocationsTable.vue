@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import TripLocationsFormDialog from './tripLocationsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import { useTripLocationsTable } from './tripLocationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import UnitsFormDialog from './UnitsFormDialog.vue'
-import { useUnitsTable } from './unitsTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -12,8 +12,8 @@ const { mobile } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
-    title: 'Name',
-    key: 'name',
+    title: 'Location',
+    key: 'location',
     align: 'start',
   },
   {
@@ -47,8 +47,8 @@ const {
   onConfirmDelete,
   onSearchItems,
   onLoadItems,
-  unitsStore,
-} = useUnitsTable()
+  tripLocationsStore,
+} = useTripLocationsTable()
 </script>
 
 <template>
@@ -67,8 +67,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="unitsStore.unitsTable"
-        :items-length="unitsStore.unitsTableTotal"
+        :items="tripLocationsStore.tripLocationsTable"
+        :items-length="tripLocationsStore.tripLocationsTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
@@ -82,7 +82,7 @@ const {
                 v-model="tableFilters.search"
                 density="compact"
                 prepend-inner-icon="mdi-magnify"
-                placeholder="Search Unit, Description"
+                placeholder="Search Location, Description"
                 clearable
                 @click:clear="onSearchItems"
                 @input="onSearchItems"
@@ -91,7 +91,7 @@ const {
 
             <v-col cols="12" sm="3">
               <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
-                Add Unit
+                Add Location
               </v-btn>
             </v-col>
           </v-row>
@@ -99,8 +99,8 @@ const {
           <v-divider class="my-5"></v-divider>
         </template>
 
-        <template #item.name="{ item }">
-          <span class="font-weight-bold"> {{ item.name }} </span>
+        <template #item.location="{ item }">
+          <span class="font-weight-bold"> {{ item.location }} </span>
         </template>
 
         <template #item.created_at="{ item }">
@@ -113,12 +113,12 @@ const {
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Unit</v-tooltip>
+              <v-tooltip activator="parent" location="top">Edit Location</v-tooltip>
             </v-btn>
 
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Unit</v-tooltip>
+              <v-tooltip activator="parent" location="top">Delete Location</v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -126,17 +126,17 @@ const {
     </v-card-text>
   </v-card>
 
-  <UnitsFormDialog
+  <TripLocationsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></UnitsFormDialog>
+  ></TripLocationsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this unit?"
+    text="Are you sure you want to delete this location?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>

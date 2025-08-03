@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { getIDNumber, getMoneyText, getYearsOfService } from '@/utils/helpers/others'
+import { getIDNumber, getMoneyText } from '@/utils/helpers/others'
+import { getYearsOfService } from '@/utils/helpers/dates'
 import { type Employee } from '@/stores/employees'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'

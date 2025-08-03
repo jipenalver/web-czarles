@@ -1,6 +1,6 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { prepareFormDates } from '@/utils/helpers/others'
+import { prepareFormDates } from '@/utils/helpers/dates'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -82,9 +82,9 @@ export const useHolidaysStore = defineStore('holidays', () => {
   }
 
   async function updateHoliday(formData: Partial<Holiday>) {
-    const preparedData = prepareFormDates(formData, ['holiday_at'])
+    const updatedData = prepareFormDates(formData, ['holiday_at'])
 
-    return await supabase.from('holidays').update(preparedData).eq('id', formData.id).select()
+    return await supabase.from('holidays').update(updatedData).eq('id', formData.id).select()
   }
 
   async function deleteHoliday(id: number) {

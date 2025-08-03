@@ -1,26 +1,24 @@
 <script setup lang="ts">
-import { type Unit, type UnitTableFilter } from '@/stores/units'
+import { type TripLocation, type TripLocationTableFilter } from '@/stores/tripLocations'
+import { useTripLocationsFormDialog } from './tripLocationsFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
-import { useUnitsFormDialog } from './unitsFormDialog'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Unit | null
+  itemData: TripLocation | null
   tableOptions: TableOptions
-  tableFilters: UnitTableFilter
+  tableFilters: TripLocationTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useUnitsFormDialog(
-  props,
-  emit,
-)
+const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
+  useTripLocationsFormDialog(props, emit)
 </script>
 
 <template>
@@ -36,14 +34,14 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-dump-truck" title="Unit Information">
+    <v-card prepend-icon="mdi-office-building-marker" title="Trip Location Details">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
               <v-text-field
-                v-model="formData.name"
-                label="Name"
+                v-model="formData.location"
+                label="Location"
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
@@ -69,7 +67,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Unit' : 'Add Unit' }}
+            {{ isUpdate ? 'Update Location' : 'Add Location' }}
           </v-btn>
         </v-card-actions>
       </v-form>
