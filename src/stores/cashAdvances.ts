@@ -36,6 +36,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     cashAdvances.value = []
     cashAdvancesTable.value = []
     cashAdvancesTableTotal.value = 0
+    cashAdvancesCSV.value = []
   }
 
   // Actions
