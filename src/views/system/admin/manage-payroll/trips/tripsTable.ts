@@ -1,5 +1,5 @@
+import { generateCSV, getMoneyText, prepareCSV } from '@/utils/helpers/others'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
-import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type Trip, useTripsStore } from '@/stores/trips'
 import { useEmployeesStore } from '@/stores/employees'
@@ -124,8 +124,8 @@ export function useTripsTable() {
           prepareCSV(item.materials),
           prepareCSV(item.km.toString()),
           prepareCSV(item.trip_no.toString()),
-          prepareCSV(item.per_trip.toString()),
-          prepareCSV((item.trip_no * item.per_trip).toFixed(2)),
+          prepareCSV(getMoneyText(item.per_trip)),
+          prepareCSV(getMoneyText(item.trip_no * item.per_trip)),
         ]
 
         return csvData.join(',')
