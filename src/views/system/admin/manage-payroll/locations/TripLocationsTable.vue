@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TripLocationsFormDialog from './tripLocationsFormDialog.vue'
+import TripLocationsFormDialog from './TripLocationsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useTripLocationsTable } from './tripLocationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
