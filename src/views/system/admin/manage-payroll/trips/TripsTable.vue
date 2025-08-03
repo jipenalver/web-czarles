@@ -2,6 +2,7 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { getMoneyText } from '@/utils/helpers/others'
+import TripsFormDialog from './TripsFormDialog.vue'
 import { useTripsTable } from './tripsTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -13,9 +14,9 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -153,6 +154,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <TripsFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></TripsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
