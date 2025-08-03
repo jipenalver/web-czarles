@@ -82,9 +82,9 @@ export const useHolidaysStore = defineStore('holidays', () => {
   }
 
   async function updateHoliday(formData: Partial<Holiday>) {
-    const preparedData = prepareFormDates(formData, ['holiday_at'])
+    const updatedData = prepareFormDates(formData, ['holiday_at'])
 
-    return await supabase.from('holidays').update(preparedData).eq('id', formData.id).select()
+    return await supabase.from('holidays').update(updatedData).eq('id', formData.id).select()
   }
 
   async function deleteHoliday(id: number) {
