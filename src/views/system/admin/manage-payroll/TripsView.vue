@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import TripLocationsTable from './locations/TripLocationsTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import UnitsTable from './units/UnitsTable.vue'
@@ -66,7 +67,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <UnitsTable></UnitsTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="locations"> </v-tabs-window-item>
+          <v-tabs-window-item value="locations">
+            <TripLocationsTable></TripLocationsTable>
+          </v-tabs-window-item>
         </v-tabs-window>
       </v-container>
     </template>
