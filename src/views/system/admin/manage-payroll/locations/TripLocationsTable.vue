@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TripLocationsFormDialog from './tripLocationsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useTripLocationsTable } from './tripLocationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
@@ -36,9 +37,9 @@ const tableHeaders: TableHeader[] = [
 const {
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -124,6 +125,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <TripLocationsFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></TripLocationsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
