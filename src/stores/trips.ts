@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
+import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { prepareDateRange } from '@/utils/helpers/dates'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -14,7 +15,7 @@ export type Trip = {
 
 export type TripTableFilter = {
   employee_id: number | null
-  date_at: Date[] | null
+  trip_at: Date[] | null
 }
 
 export const useTripsStore = defineStore('trips', () => {
@@ -25,12 +26,14 @@ export const useTripsStore = defineStore('trips', () => {
   const trips = ref<Trip[]>([])
   const tripsTable = ref<Trip[]>([])
   const tripsTableTotal = ref(0)
+  const tripsCSV = ref<Trip[]>([])
 
   // Reset State
   function $reset() {
     trips.value = []
     tripsTable.value = []
     tripsTableTotal.value = 0
+    tripsCSV.value = []
   }
 
   // Actions
@@ -38,9 +41,21 @@ export const useTripsStore = defineStore('trips', () => {
     const { data } = await supabase
       .from('trips')
       .select(selectQuery)
-      .order('request_at', { ascending: false })
+      .order('trip_at', { ascending: false })
 
     trips.value = data as Trip[]
+  }
+
+  async function getTripsCSV(tableOptions: TableOptions, tableFilters: TripTableFilter) {
+    const { column, order } = tablePagination(tableOptions, 'trip_at', false)
+
+    let query = supabase.from('trips').select(selectQuery).order(column, { ascending: order })
+
+    query = getTripsFilter(query, tableFilters)
+
+    const { data } = await query
+
+    tripsCSV.value = data as Trip[]
   }
 
   async function getTripsTable(tableOptions: TableOptions, tableFilters: TripTableFilter) {
@@ -73,25 +88,31 @@ export const useTripsStore = defineStore('trips', () => {
   function getTripsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any>,
-    { employee_id, date_at }: TripTableFilter,
+    { employee_id, trip_at }: TripTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
-    if (date_at) {
-      const { startDate, endDate } = prepareDateRange(date_at, date_at.length > 1)
+    if (trip_at) {
+      const { startDate, endDate } = prepareDateRange(trip_at, trip_at.length > 1)
 
-      if (startDate && endDate) query = query.gte('date_at', startDate).lt('date_at', endDate)
+      if (startDate && endDate) query = query.gte('trip_at', startDate).lt('trip_at', endDate)
     }
 
     return query
   }
 
   async function addTrip(formData: Partial<Trip>) {
+    const preparedData = prepareFormDates(formData, ['trip_at'])
+
     return await supabase.from('trips').insert(formData).select()
   }
 
   async function updateTrip(formData: Partial<Trip>) {
-    return await supabase.from('trips').update(formData).eq('id', formData.id).select()
+    const { employee, unit, trip_location, ...updatedData } = prepareFormDates(formData, [
+      'trip_at',
+    ])
+
+    return await supabase.from('trips').update(updatedData).eq('id', formData.id).select()
   }
 
   async function deleteTrip(id: number) {
@@ -103,8 +124,10 @@ export const useTripsStore = defineStore('trips', () => {
     trips,
     tripsTable,
     tripsTableTotal,
+    tripsCSV,
     $reset,
     getTrips,
+    getTripsCSV,
     getTripsTable,
     addTrip,
     updateTrip,
