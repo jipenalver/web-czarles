@@ -2,15 +2,27 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { type TripLocation } from './tripLocations'
 import { supabase } from '@/utils/supabase'
+import { type Employee } from './employees'
 import { defineStore } from 'pinia'
+import { type Unit } from './units'
 import { ref } from 'vue'
 
 export type Trip = {
   id: number
   created_at: string
-  location: string
-  description: string
+  unit_id: number | null
+  unit: Unit
+  trip_location_id: number | null
+  trip_location: TripLocation
+  trip_at: string | Date
+  materials: string
+  km: number
+  trip_no: number
+  per_trip: number
+  employee_id: number | null
+  employee: Employee
 }
 
 export type TripTableFilter = {
@@ -104,7 +116,7 @@ export const useTripsStore = defineStore('trips', () => {
   async function addTrip(formData: Partial<Trip>) {
     const preparedData = prepareFormDates(formData, ['trip_at'])
 
-    return await supabase.from('trips').insert(formData).select()
+    return await supabase.from('trips').insert(preparedData).select()
   }
 
   async function updateTrip(formData: Partial<Trip>) {
