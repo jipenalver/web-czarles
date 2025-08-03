@@ -1,9 +1,9 @@
 import { type CashAdvance, useCashAdvancesStore } from '@/stores/cashAdvances'
+import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
-import { getDateISO } from '@/utils/helpers/dates'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -30,7 +30,7 @@ export function useCashAdvancesTable() {
   })
   const tableFilters = ref({
     employee_id: null,
-    request_at: null as Date[] | null,
+    request_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
