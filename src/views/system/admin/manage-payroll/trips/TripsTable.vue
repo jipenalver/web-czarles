@@ -113,10 +113,22 @@ const {
           </span>
         </template>
 
+        <template #item.unit="{ item }">
+          {{ item.unit.name }}
+        </template>
+
         <template #item.trip_at="{ item }">
           <span class="font-weight-bold">
             {{ date.format(item.trip_at, 'fullDate') }}
           </span>
+        </template>
+
+        <template #item.trip_location="{ item }">
+          {{ item.trip_location.location }}
+        </template>
+
+        <template #item.per_trip="{ item }">
+          {{ getMoneyText(item.per_trip) }}
         </template>
 
         <template #item.amount="{ item }">
