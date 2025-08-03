@@ -78,7 +78,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
     let query = supabase
       .from('cash_advances')
-      .select('*, employee:employee_id (id, firstname, lastname, middlename)')
+      .select(selectQuery)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
@@ -92,10 +92,10 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     cashAdvancesTableTotal.value = count as number
   }
 
-  async function getCashAdvancesCount({ employee_id, request_at }: CashAdvanceTableFilter) {
+  async function getCashAdvancesCount(tableFilters: CashAdvanceTableFilter) {
     let query = supabase.from('cash_advances').select('*', { count: 'exact', head: true })
 
-    query = getCashAdvancesFilter(query, { employee_id, request_at })
+    query = getCashAdvancesFilter(query, tableFilters)
 
     return await query
   }
