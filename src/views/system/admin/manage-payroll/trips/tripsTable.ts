@@ -1,9 +1,9 @@
+import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { generateCSV, getMoneyText, prepareCSV } from '@/utils/helpers/others'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type Trip, useTripsStore } from '@/stores/trips'
 import { useEmployeesStore } from '@/stores/employees'
-import { getDateISO } from '@/utils/helpers/dates'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -35,7 +35,7 @@ export function useTripsTable() {
   })
   const tableFilters = ref({
     employee_id: null,
-    trip_at: null as Date[] | null,
+    trip_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
