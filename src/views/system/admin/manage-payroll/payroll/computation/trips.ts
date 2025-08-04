@@ -1,0 +1,41 @@
+import type { Trip } from '@/stores/trips'
+import { supabase } from '@/utils/supabase'
+
+export async function fetchFilteredTrips(
+  dateString: string = new Date().toISOString().slice(0, 7), // Default to current month YYYY-MM
+  employeeId: number | undefined = undefined,
+): Promise<Trip[]> {
+  if (!employeeId) return []
+  // Extract YYYY-MM for filtering
+  const yearMonth = dateString.slice(0, 7)
+  // Compute next month for range filtering
+  const [year, month] = yearMonth.split('-').map(Number)
+  let nextYear = year
+  let nextMonth = month + 1
+  if (nextMonth > 12) {
+    nextMonth = 1
+    nextYear += 1
+  }
+  const nextMonthStr = `${nextYear}-${nextMonth.toString().padStart(2, '0')}`
+  // Use join/alias as in store for trip_location and employees
+  const { data, error } = await supabase
+    .from('trips')
+    .select(
+      '*, units:unit_id(name, created_at), trip_location:trip_location_id(), employees:employee_id(firstname,middlename,lastname)',
+    )
+    .eq('employee_id', employeeId)
+    .gte('trip_at', `${yearMonth}-01`)
+    .lt('trip_at', `${nextMonthStr}-01`)
+    .order('trip_at', { ascending: true })
+
+  if (error) {
+    //error pag fetch sa trips para payroll filter
+    console.error('[fetchFilteredTrips] error:', error)
+    return []
+  }
+  // Update the trips store (optional: replace or merge)
+  // trips.value = data as Trip[]
+  // Debug log
+  /*  console.log('[fetchFilteredTrips] fetched trips from supabase:', data) */
+  return data as Trip[]
+}

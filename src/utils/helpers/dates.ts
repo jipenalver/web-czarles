@@ -168,3 +168,14 @@ export const getYearsOfService = (hiredAt: string) => {
 
   return result || 'Less than 1 month'
 }
+
+// 👉 Get last date of the month
+export const getLastDateOfMonth = (dateString: string): Date => {
+  const [year, month] = dateString.split('-').map(Number)
+  if (month === 12)
+    // December -> January of next year
+    return new Date(year + 1, 0, 1)
+  else
+    // Any other month -> next month same year
+    return new Date(year, month, 1)
+}

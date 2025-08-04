@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { usePayrollTableDialog } from './payrollTableDialog'
+import { usePayrollTableDialog, type TableData } from './payrollTableDialog'
 import { type TableHeader } from '@/utils/helpers/tables'
+import PayrollPrintDialog from './PayrollPrintDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Employee } from '@/stores/employees'
+import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
-import PayrollPrintDialog from './PayrollPrintDialog.vue'
+
+import { getYearMonthString, safeCurrencyFormat } from './helpers'
+import { ref } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
   itemData: Employee | null
+  dateString?: string
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -48,6 +53,7 @@ const tableHeaders: TableHeader[] = [
   },
 ]
 
+// tableData now uses actual payroll computation from overallTotal.ts composables
 const {
   tableOptions,
   tableFilters,
@@ -55,9 +61,42 @@ const {
   formAction,
   isPrintDialogVisible,
   payrollData,
-  onView,
+  selectedData,
+  availableYears,
+  onView: baseOnView,
   onDialogClose,
 } = usePayrollTableDialog(props, emit)
+
+// Variable para isave ang month na gipili sa client
+const chosenMonth = ref<string>('')
+
+// Helper function: convert year + month name to YYYY-MM-DD
+function getMonthYearAsDateString(year: number, monthName: string): string {
+  // Pangitaon ang month index (0-based)
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const month = (monthIndex + 1).toString().padStart(2, '0')
+  return `${year}-${month}-01`
+}
+
+// Wrapper function para sa onView, para ma-save ug ma-console.log ang month ug date string
+function onView(item: TableData) {
+  chosenMonth.value = item.month
+  // isave nato ang month na gipili, then i-console.log para sa debugging
+  const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
+  // I-format ang dateString to YYYY-MM before saving to localStorage
+  const yearMonth = getYearMonthString(dateString)
+  localStorage.setItem('czarles_payroll_dateString', yearMonth)
+  /*  console.log(
+    'Chosen month:',
+    chosenMonth.value,
+    '| Date string:',
+    dateString,
+    '| for employee:',
+    props.itemData?.id,
+  ) */
+  // Pass dateString as prop to composable logic (if needed)
+  baseOnView({ ...item, dateString })
+}
 </script>
 
 <template>
@@ -79,23 +118,26 @@ const {
       :subtitle="`${props.itemData?.firstname} ${props.itemData?.lastname}`"
     >
       <template #append>
-        <v-select
-          v-model="tableFilters.year"
-          label="Year"
-          :items="[2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]"
-        ></v-select>
+        <div class="d-flex ga-3 align-center">
+          <v-select
+            v-model="tableFilters.year"
+            label="Year"
+            :items="availableYears"
+            style="min-width: 120px"
+          ></v-select>
+        </div>
       </template>
 
       <v-card-text>
         <!-- eslint-disable vue/valid-v-slot -->
-        <v-data-table-server
+        <v-data-table
           v-model:items-per-page="tableOptions.itemsPerPage"
           v-model:page="tableOptions.page"
           v-model:sort-by="tableOptions.sortBy"
           :loading="tableOptions.isLoading"
           :headers="tableHeaders"
           :items="tableData"
-          :items-length="12"
+          :items-per-page-options="[6, 12]"
           :hide-default-header="mobile"
           :mobile="mobile"
         >
@@ -104,7 +146,19 @@ const {
               {{ item.month }}
             </v-btn>
           </template>
-        </v-data-table-server>
+          <template #item.basic_salary="{ item }">
+            ₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}
+          </template>
+          <template #item.gross_pay="{ item }">
+            ₱{{ safeCurrencyFormat(item.gross_pay, (n: number) => n.toFixed(2)) }}
+          </template>
+          <template #item.deductions="{ item }">
+            ₱{{ safeCurrencyFormat(item.deductions, (n: number) => n.toFixed(2)) }}
+          </template>
+          <template #item.net_pay="{ item }">
+            ₱{{ safeCurrencyFormat(item.net_pay, (n: number) => n.toFixed(2)) }}
+          </template>
+        </v-data-table>
       </v-card-text>
 
       <v-divider></v-divider>
@@ -118,7 +172,10 @@ const {
   </v-dialog>
 
   <PayrollPrintDialog
+    v-if="props.itemData && selectedData"
     v-model:is-dialog-visible="isPrintDialogVisible"
     :payroll-data="payrollData"
-  ></PayrollPrintDialog>
+    :employee-data="props.itemData"
+    :table-data="selectedData"
+  />
 </template>
