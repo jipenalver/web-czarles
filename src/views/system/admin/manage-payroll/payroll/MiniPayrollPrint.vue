@@ -156,6 +156,7 @@ const payrollPrint = usePayrollPrint(
   },
   dailyRate,
   grossSalary,
+  filterDateString,
 )
 
 // const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
@@ -183,7 +184,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   computed(() => tripsStore.trips),
   holidays,
   dailyRate,
-  employeeDailyRate,
+  computed(() => employeeDailyRate.value),
   overallOvertime,
   codaAllowance,
   employeeNonDeductions,

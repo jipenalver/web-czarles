@@ -43,6 +43,7 @@ export function usePayrollPrint(
   props: UsePayrollRefsProps,
   dailyRate: ComputedRef<number>,
   grossSalary: ComputedRef<number>,
+  filterDateString: ComputedRef<string>,
 ) {
   const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
     props,
@@ -57,6 +58,8 @@ export function usePayrollPrint(
     props.employeeData?.id,
     props.payrollData.month,
     props.payrollData.year,
+    undefined, // dateString param (keeping for backward compatibility)
+    filterDateString,
   )
 }
 

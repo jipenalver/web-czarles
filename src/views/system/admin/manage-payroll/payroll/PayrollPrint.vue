@@ -132,8 +132,20 @@ const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 // Check if field staff to determine if late deduction should be shown
 const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
 
+// Check if employee is field staff
+const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
+
 // Effective work days (present days based on attendance)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)
+
+// Total hours worked for field staff (calculated from regularWorkTotal and hourly rate)
+const totalHoursWorked = computed(() => {
+  if (props.employeeData?.is_field_staff && employeeDailyRate.value > 0) {
+    const hourlyRate = employeeDailyRate.value / 8
+    return regularWorkTotal.value / hourlyRate
+  }
+  return 0
+})
 
 // Composables
 const payrollPrint = usePayrollPrint(
@@ -144,6 +156,7 @@ const payrollPrint = usePayrollPrint(
   },
   dailyRate,
   grossSalary,
+  filterDateString,
 )
 
 // const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
@@ -171,10 +184,11 @@ const overallEarningsTotal = useOverallEarningsTotal(
   computed(() => tripsStore.trips),
   holidays,
   dailyRate,
-  employeeDailyRate,
+  computed(() => employeeDailyRate.value),
   overallOvertime,
   codaAllowance,
   employeeNonDeductions,
+  isFieldStaff,
 )
 
 //debuging porpuses
@@ -253,7 +267,9 @@ async function initializePayrollCalculations() {
 
     console.log('[PayrollPrint] Payroll calculations initialized successfully')
     console.log('[PayrollPrint] Final totals:', {
+      isFieldStaff: isFieldStaff.value,
       regularWork: regularWorkTotal.value,
+      totalHoursWorked: isFieldStaff.value ? totalHoursWorked.value : 'N/A (Office Staff)',
       trips: tripsStore.trips?.length || 0,
       holidays: holidays.value?.length || 0,
       overtime: overallOvertime.value,
@@ -412,7 +428,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
 
 // // Debug logging (uncomment for debugging)
 console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
-console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
+//console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
 // console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
 // console.log('[PayrollPrint] Net Salary Calculation:', netSalaryCalculation.value)
 </script>
@@ -458,10 +474,29 @@ console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', 
         <tr>
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
-            Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
+            <span v-if="props.employeeData?.is_field_staff">
+              Actual Hours Worked for <span class="font-weight-bold">{{ monthDateRange }}</span>
+            </span>
+            <span v-else>
+              Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
+            </span>
           </td>
-          <td class="pa-2">@ {{ safeCurrencyFormat(employeeDailyRate ?? 0, formatCurrency) }}</td>
-          <td class="pa-2">x {{ effectiveWorkDays }}</td>
+          <td class="pa-2">
+            <span v-if="props.employeeData?.is_field_staff">
+              @ {{ safeCurrencyFormat((employeeDailyRate ?? 0) / 8, formatCurrency) }}/hr
+            </span>
+            <span v-else>
+              @ {{ safeCurrencyFormat(employeeDailyRate ?? 0, formatCurrency) }}
+            </span>
+          </td>
+          <td class="pa-2">
+            <span v-if="props.employeeData?.is_field_staff">
+              {{ totalHoursWorked.toFixed(2) }} hours
+            </span>
+            <span v-else>
+              x {{ effectiveWorkDays }}
+            </span>
+          </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
             {{ safeCurrencyFormat(regularWorkTotal, formatCurrency) }}
           </td>

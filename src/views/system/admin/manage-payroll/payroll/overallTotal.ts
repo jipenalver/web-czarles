@@ -15,11 +15,13 @@ export function useOverallEarningsTotal(
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
   nonDeductions?: Ref<EmployeeDeduction[]>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  isFieldStaff?: ComputedRef<boolean>, // Reserved for future field staff specific logic
 ): ComputedRef<number> {
   return computed(() => {
     let total = 0
 
-    // 1. Regular work earnings
+    // 1. Regular work earnings (already calculated correctly in computeRegularWorkTotal)
     const regularWork = Number(regularWorkTotal.value) || 0
     total += regularWork
 
@@ -81,9 +83,11 @@ export function useEarningsBreakdown(
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  isFieldStaff?: ComputedRef<boolean>, // Reserved for future field staff specific logic
 ): ComputedRef<Record<string, number>> {
   return computed(() => {
-    // Regular work earnings
+    // Regular work earnings (already calculated correctly in computeRegularWorkTotal)
     const regular = Number(regularWorkTotal.value) || 0
 
     // Trips earnings - trip_no as multiplier, default 1 if not provided

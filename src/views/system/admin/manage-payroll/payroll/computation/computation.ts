@@ -31,6 +31,8 @@ export async function getEmployeeAttendanceById(
     return null
   }
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
+
+ // console.log('getEmployeeAttendanceById data:', data)
   return Array.isArray(data)
     ? data.map((row) => ({
         am_time_in: getTimeHHMM(row.am_time_in),

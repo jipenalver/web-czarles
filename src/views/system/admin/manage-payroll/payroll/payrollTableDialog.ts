@@ -122,6 +122,7 @@ export function usePayrollTableDialog(
         monthName,
         year,
         dateString,
+        ref(cashAdvanceDateString), // pass filterDateString as reactive reference
       )
 
       // Calculate basic salary using employee daily rate ug work days

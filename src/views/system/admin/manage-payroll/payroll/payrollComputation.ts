@@ -1,7 +1,9 @@
 // Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
 
 import { computed, type Ref, ref, watch } from 'vue'
-import { getEmployeeAttendanceById, getEmployeeByIdemp } from './computation/computation'
+import { getEmployeeAttendanceById } from './computation/computation'
+import { getTotalMinutesForMonth } from './computation/attendace'
+import { useEmployeesStore } from '@/stores/employees'
 
 export interface PayrollData {
   month: string
@@ -29,7 +31,11 @@ export function usePayrollComputation(
   payrollMonth?: string,
   payrollYear?: number,
   dateString?: string,
+  filterDateString?: Ref<string>,
 ) {
+  // Initialize employees store
+  const employeesStore = useEmployeesStore()
+
   // Helper function to compute overtime hours between two time strings (HH:MM)
   function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
     // Debug: log overtimeIn and overtimeOut values
@@ -99,11 +105,20 @@ export function usePayrollComputation(
   })
 
   // Employee daily rate
-  const employeeDailyRate = computed(() => {
-    if (!employeeId) return dailyRate.value
-    const emp = getEmployeeByIdemp(employeeId)
-    return emp?.daily_rate || dailyRate.value
-  })
+  const employeeDailyRate = ref<number>(dailyRate.value)
+  
+  // Update employee daily rate when employeeId changes
+  const updateEmployeeDailyRate = async () => {
+    if (!employeeId) {
+      employeeDailyRate.value = dailyRate.value
+      return
+    }
+    const emp = await employeesStore.getEmployeesById(employeeId)
+    employeeDailyRate.value = emp?.daily_rate || dailyRate.value
+  }
+  
+  // Call updateEmployeeDailyRate when needed
+  updateEmployeeDailyRate()
 
   // monthLateDeduction for total late minutes in the month
   const monthLateDeduction = ref<number>(0)
@@ -135,82 +150,116 @@ export function usePayrollComputation(
     if (employeeId && usedDateString) {
       const attendances = await getEmployeeAttendanceById(employeeId, usedDateString)
       if (Array.isArray(attendances) && attendances.length > 0) {
-        const allAmTimeIn = attendances.map((a) => a.am_time_in)
-        const allPmTimeIn = attendances.map((a) => a.pm_time_in)
-        // const allAmTimeOut = attendances.map((a) => a.am_time_out)
-        // const allPmTimeOut = attendances.map((a) => a.pm_time_out)
-
-        // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
-        let totalLateAM = 0
-        let totalLatePM = 0
-        allAmTimeIn.forEach((am) => {
-          const lateMinutes = am ? getExcessMinutes('08:00', am) : 0
-          totalLateAM += lateMinutes
-        })
-        allPmTimeIn.forEach((pm) => {
-          const lateMinutes = pm ? getExcessMinutes('13:00', pm) : 0
-          totalLatePM += lateMinutes
-        })
-        monthLateDeduction.value = totalLateAM + totalLatePM
-
-        // Check attendance data for present/absent days calculation
-        let employeePresentDays = 0
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        attendances.forEach((attendance: any) => {
-          // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
-          const hasAmData =
-            attendance.am_time_in !== null &&
-            attendance.am_time_in !== undefined &&
-            attendance.am_time_out !== null &&
-            attendance.am_time_out !== undefined
-          const hasPmData =
-            attendance.pm_time_in !== null &&
-            attendance.pm_time_in !== undefined &&
-            attendance.pm_time_out != null &&
-            attendance.pm_time_out != undefined
-          /*   console.log(
-            'Attendance:',
-            {
-              am_time_in: attendance.am_time_in,
-              am_time_out: attendance.am_time_out,
-              pm_time_in: attendance.pm_time_in,
-              pm_time_out: attendance.pm_time_out,
-            },
-            '| hasAmData:', hasAmData,
-            '| hasPmData:', hasPmData
-          ) */
-
-          // Kung naa attendance data (either AM or PM), consider as present direa nato kubion in the future and halfday chuchu..
-          if (hasAmData && hasPmData) {
-            employeePresentDays++
+        // Get employee info to check if field staff
+        const emp = await employeesStore.getEmployeesById(employeeId)
+        //console.log('Employee:', emp)
+        const isFieldStaff = emp?.is_field_staff || undefined
+        //console.log('Is Field Staff:', isFieldStaff)
+        if (isFieldStaff) {
+          // For field staff, use getTotalMinutesForMonth to calculate actual work hours for the entire month
+          let totalWorkMinutes = 0
+          
+          // Get filterDateString value, fallback to usedDateString if not provided
+          const dateStringForCalculation = filterDateString?.value || usedDateString
+          
+          if (dateStringForCalculation) {
+            // Use getTotalMinutesForMonth to get total minutes worked for the entire month
+            totalWorkMinutes = await getTotalMinutesForMonth(
+              dateStringForCalculation, // filterDateString format: "YYYY-MM-01"
+              employeeId,
+              true // isField = true
+            )
+            console.log('=== FIELD STAFF CALCULATION ===')
+            console.log('Total minutes worked for month:', totalWorkMinutes)
+            console.log('Date string used:', dateStringForCalculation)
+            console.log('Employee ID:', employeeId)
           }
-        })
 
-        // Calculate absent days: total working days minus present days
-        const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
+          // For field staff, calculate pay based on actual hours worked
+          const totalWorkHours = totalWorkMinutes / 60 // Convert minutes to hours
+          const hourlyRate = daily / 8
+          regularWorkTotal.value = totalWorkHours * hourlyRate
+          
+          // Set present days based on days with any attendance
+          let employeePresentDays = 0
+          attendances.forEach((attendance) => {
+            const hasAnyData = 
+              attendance.am_time_in || attendance.am_time_out ||
+              attendance.pm_time_in || attendance.pm_time_out
+            if (hasAnyData) employeePresentDays++
+          })
+          
+          presentDays.value = employeePresentDays
+          absentDays.value = Math.max(0, workDays.value - employeePresentDays)
+          monthLateDeduction.value = 0 // Field staff don't have late deductions
+          
+        } else {
+          // For office staff, use existing logic
+          const allAmTimeIn = attendances.map((a) => a.am_time_in)
+          const allPmTimeIn = attendances.map((a) => a.pm_time_in)
 
-        presentDays.value = employeePresentDays
-        absentDays.value = totalAbsentDays
-        //console.log('Total working days:', workDays.value, '| Present days:', employeePresentDays, '| Absent days:', totalAbsentDays)
-        /*    console.log('Total month late deduction (minutes):', monthLateDeduction.value) */
+          // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
+          let totalLateAM = 0
+          let totalLatePM = 0
+          allAmTimeIn.forEach((am) => {
+            const lateMinutes = am ? getExcessMinutes('08:00', am) : 0
+            totalLateAM += lateMinutes
+          })
+          allPmTimeIn.forEach((pm) => {
+            const lateMinutes = pm ? getExcessMinutes('13:00', pm) : 0
+            totalLatePM += lateMinutes
+          })
+          monthLateDeduction.value = totalLateAM + totalLatePM
+
+          // Check attendance data for present/absent days calculation
+          let employeePresentDays = 0
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          attendances.forEach((attendance: any) => {
+            // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
+            const hasAmData =
+              attendance.am_time_in !== null &&
+              attendance.am_time_in !== undefined &&
+              attendance.am_time_out !== null &&
+              attendance.am_time_out !== undefined
+            const hasPmData =
+              attendance.pm_time_in !== null &&
+              attendance.pm_time_in !== undefined &&
+              attendance.pm_time_out != null &&
+              attendance.pm_time_out != undefined
+
+            // Kung naa attendance data (either AM or PM), consider as present direa nato kubion in the future and halfday chuchu..
+            if (hasAmData && hasPmData) {
+              employeePresentDays++
+            }
+          })
+
+          // Calculate absent days: total working days minus present days
+          const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
+
+          presentDays.value = employeePresentDays
+          absentDays.value = totalAbsentDays
+
+          // Calculate regular work total: (total work days - absent days) * daily rate
+          const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
+          regularWorkTotal.value = (daily ?? 0) * effectiveWorkDays
+        }
+        
+        // Update daily rate from employee data if available
+        if (emp) {
+          daily = emp.daily_rate
+        }
       } else {
         monthLateDeduction.value = 0
         presentDays.value = 0
         absentDays.value = workDays.value // All days considered absent kung wala attendance records
+        regularWorkTotal.value = 0
       }
-      // source = 'attendance'
-      // Optionally, you can still get daily rate from employee store if needed
-      const emp = getEmployeeByIdemp(employeeId)
-      if (emp) {
-        daily = emp.daily_rate
-      }
+    } else {
+      // No employee ID or date string, use fallback calculation
+      const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
+      regularWorkTotal.value = (daily ?? 0) * effectiveWorkDays
     }
-
-    // Calculate regular work total: (total work days - absent days) * daily rate
-    const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
-    const total = (daily ?? 0) * effectiveWorkDays
-    regularWorkTotal.value = total
   }
 
   // Watch for changes and recompute
