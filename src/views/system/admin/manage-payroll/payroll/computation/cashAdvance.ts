@@ -1,5 +1,5 @@
 import { supabase } from '@/utils/supabase'
-import { getLastDateOfMonth } from '@/utils/helpers/dates'
+import { getLastDateOfMonth } from '../helpers'
 
 export async function fetchCashAdvances(filterDateString: string, employeeId: number | undefined) {
   if (!employeeId) return [{ amount: 0 }]

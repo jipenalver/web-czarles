@@ -115,3 +115,32 @@ export const getMonthShortText = (date: Date | string | null) => {
   ]
   return months[dateValue.getMonth()]
 }
+
+export const getTimeHHMM = (val: string | null): string | null => {
+  if (!val) return null
+  // If ISO string, extract time part (HH:mm:ss)
+  let time = null
+  const match = val.match(/T(\d{2}:\d{2}:\d{2})/)
+  if (match) time = match[1]
+  // If already time-only, or space-separated, get last part
+  if (!time) {
+    if (/^\d{2}:\d{2}:\d{2}$/.test(val)) time = val
+    else if (val.includes(' ')) time = val.split(' ').pop() || null
+    else time = val
+  }
+  // Only return HH:MM
+  if (time && /^\d{2}:\d{2}:\d{2}$/.test(time)) return time.slice(0, 5)
+  if (time && /^\d{2}:\d{2}$/.test(time)) return time
+  return null
+}
+
+export const getLastDateOfMonth = (dateString: string): string => {
+  const [year, month] = dateString.split('-').map(Number)
+  if (month === 12) {
+    // December -> January of next year
+    return `${year + 1}-01-01`
+  } else {
+    // Any other month -> next month same year
+    return `${year}-${String(month + 1).padStart(2, '0')}-01`
+  }
+}

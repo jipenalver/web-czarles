@@ -1,6 +1,6 @@
 import { useEmployeesStore, type Employee } from '@/stores/employees'
-import { getTime } from '@/utils/helpers/dates'
 import { supabase } from '@/utils/supabase'
+import { getTimeHHMM } from '../helpers'
 
 export async function getEmployeeAttendanceById(
   employeeId: number | string,
@@ -33,12 +33,12 @@ export async function getEmployeeAttendanceById(
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
   return Array.isArray(data)
     ? data.map((row) => ({
-        am_time_in: getTime(row.am_time_in),
-        am_time_out: getTime(row.am_time_out),
-        pm_time_in: getTime(row.pm_time_in),
-        pm_time_out: getTime(row.pm_time_out),
-        overtime_in: getTime(row.overtime_in),
-        overtime_out: getTime(row.overtime_out),
+        am_time_in: getTimeHHMM(row.am_time_in),
+        am_time_out: getTimeHHMM(row.am_time_out),
+        pm_time_in: getTimeHHMM(row.pm_time_in),
+        pm_time_out: getTimeHHMM(row.pm_time_out),
+        overtime_in: getTimeHHMM(row.overtime_in),
+        overtime_out: getTimeHHMM(row.overtime_out),
       }))
     : null
 }

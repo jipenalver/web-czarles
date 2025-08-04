@@ -1,6 +1,6 @@
 import type { Holiday } from '@/stores/holidays'
-import { getLastDateOfMonth } from '@/utils/helpers/dates'
 import { supabase } from '@/utils/supabase'
+import { getLastDateOfMonth } from '../helpers'
 
 export async function fetchHolidaysByDateString(
   dateString: string,
