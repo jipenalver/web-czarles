@@ -167,7 +167,7 @@ export function usePayrollComputation(
           // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
           const hasAmData = attendance.am_time_in !== null && attendance.am_time_in !== undefined && attendance.am_time_out !== null && attendance.am_time_out !== undefined
           const hasPmData = attendance.pm_time_in !== null && attendance.pm_time_in !== undefined && attendance.pm_time_out != null && attendance.pm_time_out != undefined
-          console.log(
+        /*   console.log(
             'Attendance:',
             {
               am_time_in: attendance.am_time_in,
@@ -177,7 +177,7 @@ export function usePayrollComputation(
             },
             '| hasAmData:', hasAmData,
             '| hasPmData:', hasPmData
-          )
+          ) */
           
           // Kung naa attendance data (either AM or PM), consider as present direa nato kubion in the future and halfday chuchu..
           if (hasAmData && hasPmData) {
@@ -190,7 +190,7 @@ export function usePayrollComputation(
         
         presentDays.value = employeePresentDays
         absentDays.value = totalAbsentDays
-        console.log('Total working days:', workDays.value, '| Present days:', employeePresentDays, '| Absent days:', totalAbsentDays)
+        //console.log('Total working days:', workDays.value, '| Present days:', employeePresentDays, '| Absent days:', totalAbsentDays)
      /*    console.log('Total month late deduction (minutes):', monthLateDeduction.value) */
       } else {
         monthLateDeduction.value = 0

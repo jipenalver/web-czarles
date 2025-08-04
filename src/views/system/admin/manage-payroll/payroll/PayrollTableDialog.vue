@@ -86,14 +86,14 @@ function onView(item: any) {
   // I-format ang dateString to YYYY-MM before saving to localStorage
   const yearMonth = getYearMonthString(dateString)
   localStorage.setItem('czarles_payroll_dateString', yearMonth)
-  console.log(
+ /*  console.log(
     'Chosen month:',
     chosenMonth.value,
     '| Date string:',
     dateString,
     '| for employee:',
     props.itemData?.id,
-  )
+  ) */
   // Pass dateString as prop to composable logic (if needed)
   baseOnView({ ...item, dateString })
 }

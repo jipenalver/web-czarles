@@ -33,7 +33,7 @@ export async function fetchEmployeeDeductions(employeeId: number | undefined) {
     nonDeductions: employeeNonDeductions.value,
   }
   // Debug: log the return value
-  console.log('[fetchEmployeeDeductions] return:', result)
+ // console.log('[fetchEmployeeDeductions] return:', result)
   return result
 }
 
