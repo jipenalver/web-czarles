@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import { displayHolidayTypes } from '@/utils/helpers/constants'
 import HolidaysFormDialog from './HolidaysFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useHolidaysTable } from './holidaysTable'
-import { useDisplay } from 'vuetify'
-import { useDate } from 'vuetify'
+import { useDisplay, useDate } from 'vuetify'
 
 const date = useDate()
 const { mobile } = useDisplay()
@@ -116,6 +116,10 @@ const {
 
         <template #item.name="{ item }">
           <span class="font-weight-bold"> {{ item.name }} </span>
+        </template>
+
+        <template #item.type="{ item }">
+          {{ displayHolidayTypes[item.type] || item.type }}
         </template>
 
         <template #item.created_at="{ item }">
