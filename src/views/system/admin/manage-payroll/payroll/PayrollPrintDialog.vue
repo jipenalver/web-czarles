@@ -5,6 +5,7 @@ import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 import { ref, watch, nextTick } from 'vue'
+import AppAlert from '@/components/common/AppAlert.vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
