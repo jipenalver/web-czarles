@@ -16,7 +16,9 @@ export function getHolidayTypeName(type: string | undefined): string {
 }
 
 export function formatTripDate(date: string | Date): string {
+  if (!date) return ''
   const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) return ''
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 

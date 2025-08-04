@@ -221,13 +221,13 @@ function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
   
   // Log para makita kung na-trigger ang calculation
-  console.log('[PayrollPrint] Overall earnings recalculated:', overallEarningsTotal.value)
+  /* console.log('[PayrollPrint] Overall earnings recalculated:', overallEarningsTotal.value) */
 }
 
 // Function to initialize and trigger useOverallEarningsTotal on mount
 async function initializePayrollCalculations() {
   try {
-    console.log('[PayrollPrint] Starting payroll calculations initialization...')
+   // console.log('[PayrollPrint] Starting payroll calculations initialization...')
     
     // Reset loading states
     isTripsLoading.value = true
@@ -254,16 +254,16 @@ async function initializePayrollCalculations() {
     // Force trigger ang useOverallEarningsTotal computation after all data is loaded
     recalculateEarnings()
     
-    console.log('[PayrollPrint] Payroll calculations initialized successfully')
+   /*  console.log('[PayrollPrint] Payroll calculations initialized successfully')
     console.log('[PayrollPrint] Final totals:', {
       regularWork: regularWorkTotal.value,
       trips: tripsStore.trips?.length || 0,
       holidays: holidays.value?.length || 0,
       overtime: overallOvertime.value,
       totalEarnings: overallEarningsTotal.value
-    })
+    }) */
   } catch (error) {
-    console.error('[PayrollPrint] Error initializing payroll calculations:', error)
+   // console.error('[PayrollPrint] Error initializing payroll calculations:', error)
     // Reset loading states on error
     isTripsLoading.value = false
     isHolidaysLoading.value = false
@@ -273,7 +273,7 @@ async function initializePayrollCalculations() {
 // Comprehensive reload function para sa lahat ng functions
 async function reloadAllFunctions() {
   try {
-    console.log('[PayrollPrint] Reloading all payroll functions - comprehensive reload...')
+   // console.log('[PayrollPrint] Reloading all payroll functions - comprehensive reload...')
     
     // Clear all existing data
     tripsStore.trips = []
@@ -290,7 +290,7 @@ async function reloadAllFunctions() {
     // Re-initialize everything from scratch
     await initializePayrollCalculations()
     
-    console.log('[PayrollPrint] All functions reloaded successfully')
+   // console.log('[PayrollPrint] All functions reloaded successfully')
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
   }
@@ -305,12 +305,12 @@ async function fetchEmployeeHolidays() {
   }
   
   try {
-    console.log('[PayrollPrint] Fetching holidays for employee:', props.employeeData.id)
+  //  console.log('[PayrollPrint] Fetching holidays for employee:', props.employeeData.id)
     holidays.value = await fetchHolidaysByDateString(
       holidayDateString.value,
       String(props.employeeData.id),
     )
-    console.log('[PayrollPrint] Holidays fetched:', holidays.value?.length || 0)
+  //  console.log('[PayrollPrint] Holidays fetched:', holidays.value?.length || 0)
   } catch (error) {
     console.error('Error fetching holidays:', error)
     holidays.value = []
@@ -326,12 +326,12 @@ function loadTrips() {
     return Promise.resolve()
   }
   
-  console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id)
+  //console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id)
   isTripsLoading.value = true
   
   return Promise.resolve(fetchFilteredTrips())
     .then(() => {
-      console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0)
+    //  console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0)
     })
     .catch((error) => {
       console.error('[PayrollPrint] Error loading trips:', error)
@@ -344,9 +344,9 @@ function loadTrips() {
 // Overtime calculation function
 async function updateOverallOvertime() {
   try {
-    console.log('[PayrollPrint] Calculating overtime for employee:', props.employeeData?.id)
+   // console.log('[PayrollPrint] Calculating overtime for employee:', props.employeeData?.id)
     overallOvertime.value = await computeOverallOvertimeCalculation()
-    console.log('[PayrollPrint] Overtime calculated:', overallOvertime.value)
+   // console.log('[PayrollPrint] Overtime calculated:', overallOvertime.value)
   } catch (error) {
     console.error('Error calculating overtime:', error)
     overallOvertime.value = 0
@@ -406,18 +406,18 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
 watch(
   () => overallEarningsTotal.value,
   (newTotal, oldTotal) => {
-    console.log('[PayrollPrint] useOverallEarningsTotal updated:', { oldTotal, newTotal })
+   // console.log('[PayrollPrint] useOverallEarningsTotal updated:', { oldTotal, newTotal })
     // Update ang reactive total earnings
     reactiveTotalEarnings.value = newTotal
   },
   { immediate: true }
 )
 
-// Debug logging (uncomment for debugging)
-console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
-console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
-console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
-console.log('[PayrollPrint] Net Salary Calculation:', netSalaryCalculation.value)
+// // Debug logging (uncomment for debugging)
+// console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
+// console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
+// console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
+// console.log('[PayrollPrint] Net Salary Calculation:', netSalaryCalculation.value)
 </script>
 
 <template>

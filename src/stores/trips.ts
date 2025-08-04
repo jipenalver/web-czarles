@@ -85,9 +85,9 @@ export const useTripsStore = defineStore('trips', () => {
         '*, units:unit_id(name, created_at), trip_location:trip_location_id(*), employees:employee_id(firstname,middlename,lastname)',
       )
       .eq('employee_id', employeeId)
-      .gte('date', `${yearMonth}-01`)
-      .lt('date', `${nextMonthStr}-01`)
-      .order('date', { ascending: true })
+      .gte('trip_at', `${yearMonth}-01`)
+      .lt('trip_at', `${nextMonthStr}-01`)
+      .order('trip_at', { ascending: true })
 
     if (error) {
       //error pag fetch sa trips para payroll filter
