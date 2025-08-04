@@ -32,7 +32,7 @@ export function usePayrollPrintDialog(
       return // wala element, di mag proceed
     }
 
-    // Store original styles para ma-restore later
+    // Store original styles and theme para ma-restore later
     const originalStyles = {
       miniPayroll: {
         display: miniPayrollSection?.style.display || '',
@@ -52,6 +52,10 @@ export function usePayrollPrintDialog(
       } | null,
     }
 
+    // Store original theme and force light theme for PDF
+    const vApp = payrollElement.closest('.v-application') as HTMLElement
+    const originalTheme = vApp?.getAttribute('data-theme') || 'light'
+
     const mainContainer = payrollElement.querySelector('.v-container') as HTMLElement
     if (mainContainer) {
       originalStyles.mainContainer = {
@@ -63,6 +67,11 @@ export function usePayrollPrintDialog(
     }
 
     try {
+      // Force light theme for PDF generation
+      if (vApp) {
+        vApp.setAttribute('data-theme', 'light')
+      }
+
       // Apply transformations para sa PDF generation
       if (miniPayrollSection) {
         miniPayrollSection.style.display = 'block'
@@ -116,6 +125,11 @@ export function usePayrollPrintDialog(
 
       if (mainContainer && originalStyles.mainContainer) {
         Object.assign(mainContainer.style, originalStyles.mainContainer)
+      }
+
+      // Restore original theme
+      if (vApp) {
+        vApp.setAttribute('data-theme', originalTheme)
       }
 
       // Reset printing state

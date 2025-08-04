@@ -10,7 +10,7 @@ export async function fetchEmployeeDeductions(employeeId: number | undefined) {
   const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 
   if (employeeId !== undefined) {
-    const employee = employeesStore.getEmployeesById(employeeId)
+    const employee = await employeesStore.getEmployeesById(employeeId)
     if (employee && Array.isArray(employee.employee_deductions)) {
       // filter ang deductions nga is_deduction === true
       const filtered = employee.employee_deductions.filter(

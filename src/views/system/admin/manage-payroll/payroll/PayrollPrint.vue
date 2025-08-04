@@ -251,14 +251,14 @@ async function initializePayrollCalculations() {
     // Force trigger ang useOverallEarningsTotal computation after all data is loaded
     recalculateEarnings()
 
-    /*  console.log('[PayrollPrint] Payroll calculations initialized successfully')
+    console.log('[PayrollPrint] Payroll calculations initialized successfully')
     console.log('[PayrollPrint] Final totals:', {
       regularWork: regularWorkTotal.value,
       trips: tripsStore.trips?.length || 0,
       holidays: holidays.value?.length || 0,
       overtime: overallOvertime.value,
       totalEarnings: overallEarningsTotal.value
-    }) */
+    })
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
     // Reset loading states on error
@@ -317,25 +317,25 @@ async function fetchEmployeeHolidays() {
 }
 
 // Trip loading function
-function loadTrips() {
+async function loadTrips() {
   if (!props.employeeData?.id) {
     isTripsLoading.value = false
-    return Promise.resolve()
+    return
   }
 
-  //console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id)
+  console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id, 'with date:', filterDateString.value)
   isTripsLoading.value = true
 
-  return Promise.resolve(fetchFilteredTrips())
-    .then(() => {
-      //  console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0)
-    })
-    .catch((error) => {
-      console.error('[PayrollPrint] Error loading trips:', error)
-    })
-    .finally(() => {
-      isTripsLoading.value = false
-    })
+  try {
+    const fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
+    tripsStore.trips = fetchedTrips
+    console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0, 'trips:', fetchedTrips)
+  } catch (error) {
+    console.error('[PayrollPrint] Error loading trips:', error)
+    tripsStore.trips = []
+  } finally {
+    isTripsLoading.value = false
+  }
 }
 
 // Overtime calculation function
@@ -391,8 +391,8 @@ watch(
 )
 
 // Individual watchers for specific data changes
-watch([filterDateString, () => props.employeeData?.id], () => {
-  loadTrips()
+watch([filterDateString, () => props.employeeData?.id], async () => {
+  await loadTrips()
 })
 
 watch([holidayDateString, () => props.employeeData?.id], () => {
@@ -400,19 +400,19 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
 })
 
 // Additional watcher para monitor ang useOverallEarningsTotal changes
-watch(
-  () => overallEarningsTotal.value,
-  (newTotal, oldTotal) => {
-    console.log('[PayrollPrint] useOverallEarningsTotal updated:', { oldTotal, newTotal })
-    // Update ang reactive total earnings
-    reactiveTotalEarnings.value = newTotal
-  },
-  { immediate: true },
-)
+// watch(
+//   () => overallEarningsTotal.value,
+//   (newTotal, oldTotal) => {
+//     console.log('[PayrollPrint] useOverallEarningsTotal updated:', { oldTotal, newTotal })
+//     // Update ang reactive total earnings
+//     reactiveTotalEarnings.value = newTotal
+//   },
+//   { immediate: true },
+// )
 
 // // Debug logging (uncomment for debugging)
-// console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
-// console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
+console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
+console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
 // console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
 // console.log('[PayrollPrint] Net Salary Calculation:', netSalaryCalculation.value)
 </script>
@@ -667,7 +667,7 @@ watch(
 
 <style scoped>
 /* Hide mini payroll section by default */
-.mini-payroll-hidden {
+/* .mini-payroll-hidden {
   display: none;
-}
+} */
 </style>

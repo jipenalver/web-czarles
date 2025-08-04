@@ -125,14 +125,14 @@ export function usePayrollTableDialog(
       )
 
       // Calculate basic salary using employee daily rate ug work days
-      /* console.log(`Basic salary calculation for ${monthName} ${year}:`, {
+      console.log(`Basic salary calculation for ${monthName} ${year}:`, {
         employeeDailyRate: payrollComp.employeeDailyRate.value,
         workDays: payrollComp.workDays.value,
         presentDays: payrollComp.presentDays.value,
         absentDays: payrollComp.absentDays.value,
         basicSalary: payrollComp.employeeDailyRate.value * payrollComp.presentDays.value,
         employeeId,
-      }) */
+      })
 
       // Set regular work total - note: payroll computation has watch that auto-computes this
       regularWorkTotal.value = payrollComp.regularWorkTotal.value

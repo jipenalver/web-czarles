@@ -65,6 +65,9 @@ const {
                   <v-list-item @click="onExportCSV">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
+                  <v-list-item>
+                    <v-list-item-title>Export to PDF</v-list-item-title>
+                  </v-list-item>
                 </v-list>
               </v-menu>
             </v-col>
