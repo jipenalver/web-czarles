@@ -32,7 +32,7 @@ export async function fetchFilteredTrips(
   const { data, error } = await supabase
     .from('trips')
     .select(
-      '*, units:unit_id(name, created_at), trip_location:trip_location_id(), employees:employee_id(firstname,middlename,lastname)',
+      '*, employee:employee_id (id, firstname, lastname, middlename), unit:unit_id (*), trip_location:trip_location_id (*)',
     )
     .eq('employee_id', employeeId)
     .gte('trip_at', `${yearMonth}-01`)

@@ -323,13 +323,13 @@ async function loadTrips() {
     return
   }
 
-  console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id, 'with date:', filterDateString.value)
+  //console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id, 'with date:', filterDateString.value)
   isTripsLoading.value = true
 
   try {
     const fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
     tripsStore.trips = fetchedTrips
-    console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0, 'trips:', fetchedTrips)
+   // console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0, 'trips:', fetchedTrips)
   } catch (error) {
     console.error('[PayrollPrint] Error loading trips:', error)
     tripsStore.trips = []
