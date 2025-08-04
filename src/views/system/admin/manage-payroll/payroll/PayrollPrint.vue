@@ -667,7 +667,7 @@ console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', 
 
 <style scoped>
 /* Hide mini payroll section by default */
-/* .mini-payroll-hidden {
+.mini-payroll-hidden {
   display: none;
-} */
+}
 </style>

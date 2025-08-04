@@ -23,6 +23,29 @@ export function usePayrollPrintDialog(
     // Set printing state to true para ma-show ang loading overlay
     isPrinting.value = true
 
+    // Check if currently in dark mode from localStorage
+    const currentTheme = localStorage.getItem('theme') || 'light'
+    const isDarkMode = currentTheme === 'dark'
+    
+    // If in dark mode, temporarily switch to light mode for printing
+    if (isDarkMode) {
+      // Trigger theme toggle by simulating click on theme button
+      const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+      if (themeToggleButton) {
+        (themeToggleButton as HTMLButtonElement).click()
+      } else {
+        // Fallback: directly update localStorage and trigger theme change
+        localStorage.setItem('theme', 'light')
+        const vApp = document.querySelector('.v-application') as HTMLElement
+        if (vApp) {
+          vApp.setAttribute('data-theme', 'light')
+        }
+      }
+      
+      // Wait a moment for theme to apply
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
     // Get the payroll element na naka-contain sa both full ug mini payroll
     const payrollElement = document.getElementById('generate-payroll')
     const miniPayrollSection = document.getElementById('mini-payroll-section')
@@ -32,7 +55,7 @@ export function usePayrollPrintDialog(
       return // wala element, di mag proceed
     }
 
-    // Store original styles and theme para ma-restore later
+    // Store original styles para ma-restore later
     const originalStyles = {
       miniPayroll: {
         display: miniPayrollSection?.style.display || '',
@@ -52,10 +75,6 @@ export function usePayrollPrintDialog(
       } | null,
     }
 
-    // Store original theme and force light theme for PDF
-    const vApp = payrollElement.closest('.v-application') as HTMLElement
-    const originalTheme = vApp?.getAttribute('data-theme') || 'light'
-
     const mainContainer = payrollElement.querySelector('.v-container') as HTMLElement
     if (mainContainer) {
       originalStyles.mainContainer = {
@@ -67,10 +86,6 @@ export function usePayrollPrintDialog(
     }
 
     try {
-      // Force light theme for PDF generation
-      if (vApp) {
-        vApp.setAttribute('data-theme', 'light')
-      }
 
       // Apply transformations para sa PDF generation
       if (miniPayrollSection) {
@@ -127,9 +142,20 @@ export function usePayrollPrintDialog(
         Object.assign(mainContainer.style, originalStyles.mainContainer)
       }
 
-      // Restore original theme
-      if (vApp) {
-        vApp.setAttribute('data-theme', originalTheme)
+      // Restore original theme only if we changed it (was in dark mode)
+      if (isDarkMode) {
+        // Trigger theme toggle again to restore dark mode
+        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        if (themeToggleButton) {
+          (themeToggleButton as HTMLButtonElement).click()
+        } else {
+          // Fallback: directly restore dark theme
+          localStorage.setItem('theme', 'dark')
+          const vApp = document.querySelector('.v-application') as HTMLElement
+          if (vApp) {
+            vApp.setAttribute('data-theme', 'dark')
+          }
+        }
       }
 
       // Reset printing state
