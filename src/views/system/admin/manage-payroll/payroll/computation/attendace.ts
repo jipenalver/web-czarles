@@ -1,22 +1,75 @@
 import { getEmployeeAttendanceById } from './computation'
 
-// 👉 Get Field minutes worked (handles overnight shifts)
+// 👉 Get Field minutes worked (handles overnight shifts) - Time-only calculation
 const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | null) => {
-  const checkIn = new Date(timeIn as string)
-  const checkOut = new Date(timeOut as string)
+ // console.log('[getFieldMinutes] Input:', { timeIn, timeOut })
+  
+  try {
+    // Handle null or undefined inputs
+    if (!timeIn || !timeOut) {
+      console.warn('[getFieldMinutes] Missing timeIn or timeOut:', { timeIn, timeOut })
+      return 0
+    }
 
-  if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) return 0
+    // Helper function to convert time input to minutes since midnight
+    const timeToMinutes = (timeInput: string | Date): number => {
+      let hours: number, minutes: number
 
-  let diffMs = checkOut.getTime() - checkIn.getTime()
+      if (timeInput instanceof Date) {
+        hours = timeInput.getHours()
+        minutes = timeInput.getMinutes()
+      } else if (typeof timeInput === 'string') {
+        // Handle HH:MM format
+        if (/^\d{1,2}:\d{2}$/.test(timeInput.trim())) {
+          [hours, minutes] = timeInput.trim().split(':').map(Number)
+        } else {
+          // Handle full datetime string - extract time part
+          const date = new Date(timeInput)
+          if (isNaN(date.getTime())) {
+            throw new Error(`Invalid time format: ${timeInput}`)
+          }
+          hours = date.getHours()
+          minutes = date.getMinutes()
+        }
+      } else {
+        throw new Error(`Unsupported time input type: ${typeof timeInput}`)
+      }
 
-  // Handle overnight shifts: if end time is earlier than start time, assume it's the next day
-  if (diffMs < 0) {
-    const nextDayEnd = new Date(checkOut)
-    nextDayEnd.setDate(nextDayEnd.getDate() + 1)
-    diffMs = nextDayEnd.getTime() - checkIn.getTime()
+      return hours * 60 + minutes
+    }
+
+    const startMinutes = timeToMinutes(timeIn)
+    const endMinutes = timeToMinutes(timeOut)
+
+   /*  console.log('[getFieldMinutes] Time converted to minutes:', { 
+      startMinutes, 
+      endMinutes,
+      startTime: `${Math.floor(startMinutes / 60)}:${(startMinutes % 60).toString().padStart(2, '0')}`,
+      endTime: `${Math.floor(endMinutes / 60)}:${(endMinutes % 60).toString().padStart(2, '0')}`
+    }) */
+
+    let totalMinutes: number
+
+    // Handle overnight shifts: if end time is earlier than start time
+    if (endMinutes < startMinutes) {
+     // console.log('[getFieldMinutes] Detected overnight shift')
+      // Add 24 hours (1440 minutes) to end time for overnight calculation
+      totalMinutes = (endMinutes + 1440) - startMinutes
+    } else {
+      // Regular same-day shift
+      totalMinutes = endMinutes - startMinutes
+    }
+
+    // Ensure non-negative result
+    totalMinutes = Math.max(0, totalMinutes)
+    
+    //console.log('[getFieldMinutes] Calculated minutes:', totalMinutes)
+    
+    return totalMinutes
+  } catch (error) {
+    console.error('[getFieldMinutes] Error processing time:', error, { timeIn, timeOut })
+    return 0
   }
-
-  return Math.max(0, Math.floor(diffMs / (1000 * 60)))
 }
 
 // 👉 Get Office minutes worked with penalties for late arrivals and early departures
@@ -83,6 +136,14 @@ export const getTotalMinutes = (
   pmTimeOut: string | null = null,
   isField = false,
 ) => {
+//   console.log('[getTotalMinutes] Input:', {
+//     amTimeIn,
+//     amTimeOut,
+//     pmTimeIn,
+//     pmTimeOut,
+//     isField
+//   })
+
   let totalMinutes = 0
 
   if (isField) {
@@ -91,39 +152,32 @@ export const getTotalMinutes = (
     const pmMinutes = getFieldMinutes(pmTimeIn, pmTimeOut)
     const actualMinutes = amMinutes + pmMinutes
 
+   // console.log('[getTotalMinutes] Field staff - amMinutes:', amMinutes, 'pmMinutes:', pmMinutes, 'actualMinutes:', actualMinutes)
+
     // Apply 8-hour requirement with penalty
     const expectedMinutes = 8 * 60 // 8 hours = 480 minutes
     if (actualMinutes < expectedMinutes) {
       const shortage = expectedMinutes - actualMinutes
       // Apply penalty: deduct the shortage from actual time worked
       totalMinutes = Math.max(0, actualMinutes - shortage)
+     // console.log('[getTotalMinutes] Field staff shortage:', shortage, 'totalMinutes:', totalMinutes)
+    } else {
+      // If 8 hours or more, cap at 8 hours
+      totalMinutes = Math.min(actualMinutes, expectedMinutes)
+      // console.log('[getTotalMinutes] Field staff actualMinutes >= expected:', actualMinutes, 'totalMinutes:', totalMinutes)
     }
-    // If 8 hours or more, cap at 8 hours
-    else totalMinutes = Math.min(actualMinutes, expectedMinutes)
   } else {
     // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
     const amMinutes = getOfficeMinutes(amTimeIn, amTimeOut, 8, 12) // 8am-12pm
     const pmMinutes = getOfficeMinutes(pmTimeIn, pmTimeOut, 13, 17) // 1pm-5pm
     totalMinutes = amMinutes + pmMinutes
+    // console.log('[getTotalMinutes] Office staff amMinutes:', amMinutes, 'pmMinutes:', pmMinutes, 'totalMinutes:', totalMinutes)
   }
 
+ // console.log('[getTotalMinutes] Output totalMinutes:', totalMinutes)
   return totalMinutes
 }
 
-/**
- * Get total minutes worked for entire month - Fetches all attendance records within month range
- * @param filterDateString - Format: "YYYY-MM-01" (e.g., "2024-12-01")
- * @param employeeId - The ID of the employee
- * @param isField - Whether the employee is field staff or office staff
- * @returns Promise<number> - Total minutes worked for the entire month
- * 
- * @example
- * // For office staff in December 2024
- * const totalMinutes = await getTotalMinutesForMonth("2024-12-01", 123, false)
- * 
- * // For field staff in December 2024
- * const totalMinutes = await getTotalMinutesForMonth("2024-12-01", 123, true)
- */
 export const getTotalMinutesForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
@@ -137,15 +191,30 @@ export const getTotalMinutesForMonth = async (
   try {
     // Fetch tanan attendance records para sa specific month
     const attendances = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+
+    // console.log(`[getTotalMinutesForMonth] Debug info:`, {
+    //   employeeId,
+    //   dateStringForQuery,
+    //   attendancesCount: attendances?.length || 0,
+    //   isField
+    // })
     
     if (!Array.isArray(attendances) || attendances.length === 0) {
+      console.log(`[getTotalMinutesForMonth] No attendance records found for employee ${employeeId} in ${dateStringForQuery}`)
       return 0
     }
 
     let totalMonthMinutes = 0
 
     // Process each attendance record using getTotalMinutes
-    attendances.forEach((attendance) => {
+    attendances.forEach((attendance, /* index */) => {
+      // console.log(`[getTotalMinutesForMonth] Processing attendance ${index + 1}:`, {
+      //   am_time_in: attendance.am_time_in,
+      //   am_time_out: attendance.am_time_out,
+      //   pm_time_in: attendance.pm_time_in,
+      //   pm_time_out: attendance.pm_time_out
+      // })
+      
       const dailyMinutes = getTotalMinutes(
         attendance.am_time_in,
         attendance.am_time_out,
@@ -153,9 +222,12 @@ export const getTotalMinutesForMonth = async (
         attendance.pm_time_out,
         isField
       )
+      
+      // console.log(`[getTotalMinutesForMonth] Daily minutes calculated:`, dailyMinutes)
       totalMonthMinutes += dailyMinutes
     })
-    //console.log(`[getTotalMinutesForMonth] Total minutes for employee ${employeeId} in month ${dateStringForQuery}:`, totalMonthMinutes)
+    
+    // console.log(`[getTotalMinutesForMonth] Total minutes for employee ${employeeId} in month ${dateStringForQuery}:`, totalMonthMinutes)
     return totalMonthMinutes
   } catch (error) {
     console.error('Error sa getTotalMinutesForMonth:', error)
@@ -163,137 +235,3 @@ export const getTotalMinutesForMonth = async (
   }
 }
 
-// 👉 Convert total minutes to a human-readable string
-const convertTimeToString = (totalMinutes: number) => {
-  if (totalMinutes === 0) return '0 minutes'
-
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  const hourText = hours === 1 ? 'hour' : 'hours'
-  const minuteText = minutes === 1 ? 'minute' : 'minutes'
-
-  if (hours === 0) return `${minutes} ${minuteText}`
-  if (minutes === 0) return `${hours} ${hourText}`
-  return `${hours} ${hourText} ${minutes} ${minuteText}`
-}
-
-// 👉 Convert total minutes to a decimal string
-const convertTimeToDecimal = (totalMinutes: number) => {
-  if (totalMinutes === 0) return 0
-
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  return Math.round((hours + minutes / 60) * 100) / 100
-}
-
-// 👉 Get total work hours (AM + PM) for entire month
-export const getWorkHoursStringForMonth = async (
-  filterDateString: string,
-  employeeId: number,
-  isField = false,
-) => {
-  const totalMinutes = await getTotalMinutesForMonth(filterDateString, employeeId, isField)
-  return convertTimeToString(totalMinutes)
-}
-
-// 👉 Get total work hours (AM + PM) in decimal for entire month
-export const getWorkHoursDecimalForMonth = async (
-  filterDateString: string,
-  employeeId: number,
-  isField = false,
-) => {
-  const totalMinutes = await getTotalMinutesForMonth(filterDateString, employeeId, isField)
-  return convertTimeToDecimal(totalMinutes)
-}
-
-// 👉 Get total work hours (AM + PM) - Single day calculation
-export const getWorkHoursString = (
-  amTimeIn: string | null,
-  amTimeOut: string | null,
-  pmTimeIn: string | null = null,
-  pmTimeOut: string | null = null,
-  isField = false,
-) => convertTimeToString(getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField))
-
-// 👉 Get total work hours (AM + PM) in decimal - Single day calculation
-export const getWorkHoursDecimal = (
-  amTimeIn: string | null,
-  amTimeOut: string | null,
-  pmTimeIn: string | null = null,
-  pmTimeOut: string | null = null,
-  isField = false,
-) => convertTimeToDecimal(getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField))
-
-// 👉 Get total overtime hours as string
-export const getOvertimeHoursString = (overtimeIn: string | null, overtimeOut: string | null) =>
-  convertTimeToString(getFieldMinutes(overtimeIn, overtimeOut))
-
-// 👉 Get total overtime hours as decimal
-export const getOvertimeHoursDecimal = (overtimeIn: string | null, overtimeOut: string | null) =>
-  convertTimeToDecimal(getFieldMinutes(overtimeIn, overtimeOut))
-
-// 👉 Get total late/undertime hours for entire month as string
-export const getLateUndertimeHoursStringForMonth = async (
-  filterDateString: string,
-  employeeId: number,
-  isField = false,
-  expectedDailyHours = 8,
-) => {
-  const totalMinutes = await getTotalMinutesForMonth(filterDateString, employeeId, isField)
-  
-  // Calculate expected total hours for the month
-  const { getEmployeeAttendanceById } = await import('./computation')
-  const dateStringForQuery = filterDateString.substring(0, 7)
-  const attendances = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
-  const workingDays = Array.isArray(attendances) ? attendances.length : 0
-  
-  const expectedTotalMinutes = workingDays * expectedDailyHours * 60
-  const lateUndertime = expectedTotalMinutes - totalMinutes
-  return convertTimeToString(Math.max(0, lateUndertime))
-}
-
-// 👉 Get total late/undertime hours for entire month as decimal
-export const getLateUndertimeHoursDecimalForMonth = async (
-  filterDateString: string,
-  employeeId: number,
-  isField = false,
-  expectedDailyHours = 8,
-) => {
-  const totalMinutes = await getTotalMinutesForMonth(filterDateString, employeeId, isField)
-  
-  // Calculate expected total hours for the month
-  const { getEmployeeAttendanceById } = await import('./computation')
-  const dateStringForQuery = filterDateString.substring(0, 7)
-  const attendances = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
-  const workingDays = Array.isArray(attendances) ? attendances.length : 0
-  
-  const expectedTotalMinutes = workingDays * expectedDailyHours * 60
-  const lateUndertime = expectedTotalMinutes - totalMinutes
-  return convertTimeToDecimal(Math.max(0, lateUndertime))
-}
-
-// 👉 Get total late/undertime hours as string - Single day calculation
-export const getLateUndertimeHoursString = (
-  amTimeIn: string | null,
-  amTimeOut: string | null,
-  pmTimeIn: string | null = null,
-  pmTimeOut: string | null = null,
-  isField = false,
-) => {
-  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
-  const lateUndertime = 8 * 60 - totalMinutes
-  return convertTimeToString(Math.max(0, lateUndertime))
-}
-
-// 👉 Get total late/undertime hours as decimal - Single day calculation
-export const getLateUndertimeHoursDecimal = (
-  amTimeIn: string | null,
-  amTimeOut: string | null,
-  pmTimeIn: string | null = null,
-  pmTimeOut: string | null = null,
-  isField = false,
-) => {
-  const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
-  const lateUndertime = 8 * 60 - totalMinutes
-  return convertTimeToDecimal(Math.max(0, lateUndertime))
-}

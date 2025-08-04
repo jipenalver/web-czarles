@@ -106,15 +106,18 @@ export function usePayrollComputation(
 
   // Employee daily rate
   const employeeDailyRate = ref<number>(dailyRate.value)
+  const isFieldStaff = ref<boolean>(false)
   
   // Update employee daily rate when employeeId changes
   const updateEmployeeDailyRate = async () => {
     if (!employeeId) {
       employeeDailyRate.value = dailyRate.value
+      isFieldStaff.value = false
       return
     }
     const emp = await employeesStore.getEmployeesById(employeeId)
     employeeDailyRate.value = emp?.daily_rate || dailyRate.value
+    isFieldStaff.value = emp?.is_field_staff || false
   }
   
   // Call updateEmployeeDailyRate when needed
@@ -169,10 +172,10 @@ export function usePayrollComputation(
               employeeId,
               true // isField = true
             )
-            console.log('=== FIELD STAFF CALCULATION ===')
+          /*   console.log('=== FIELD STAFF CALCULATION ===')
             console.log('Total minutes worked for month:', totalWorkMinutes)
             console.log('Date string used:', dateStringForCalculation)
-            console.log('Employee ID:', employeeId)
+            console.log('Employee ID:', employeeId) */
           }
 
           // For field staff, calculate pay based on actual hours worked
@@ -349,6 +352,7 @@ export function usePayrollComputation(
     formatCurrency,
     formatNumber,
     employeeDailyRate,
+    isFieldStaff,
 
     // Compute function for regular work total
     computeRegularWorkTotal,

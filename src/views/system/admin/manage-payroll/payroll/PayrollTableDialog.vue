@@ -63,6 +63,7 @@ const {
   payrollData,
   selectedData,
   availableYears,
+  isCurrentEmployeeFieldStaff,
   onView: baseOnView,
   onDialogClose,
 } = usePayrollTableDialog(props, emit)
@@ -86,14 +87,26 @@ function onView(item: TableData) {
   // I-format ang dateString to YYYY-MM before saving to localStorage
   const yearMonth = getYearMonthString(dateString)
   localStorage.setItem('czarles_payroll_dateString', yearMonth)
-  /*  console.log(
-    'Chosen month:',
-    chosenMonth.value,
-    '| Date string:',
-    dateString,
-    '| for employee:',
-    props.itemData?.id,
-  ) */
+
+  // Enhanced console log para sa field staff debugging
+  if (isCurrentEmployeeFieldStaff.value) {
+    console.log(`🏃 FIELD STAFF - Month clicked: ${chosenMonth.value}`, {
+      employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+      employeeId: props.itemData?.id,
+      month: chosenMonth.value,
+      year: tableFilters.value.year,
+      dateString,
+      yearMonth,
+      basicSalary: item.basic_salary,
+    })
+  } else {
+    console.log(`🏢 OFFICE STAFF - Month clicked: ${chosenMonth.value}`, {
+      employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+      dateString,
+      basicSalary: item.basic_salary,
+    })
+  }
+
   // Pass dateString as prop to composable logic (if needed)
   baseOnView({ ...item, dateString })
 }
@@ -115,7 +128,7 @@ function onView(item: TableData) {
     <v-card
       prepend-icon="mdi-account-cash"
       :title="`Payslip ${tableFilters.year}`"
-      :subtitle="`${props.itemData?.firstname} ${props.itemData?.lastname}`"
+      :subtitle="`${props.itemData?.firstname} ${props.itemData?.lastname}${isCurrentEmployeeFieldStaff ? ' • 🏃 Field Staff' : ' • 🏢 Office Staff'}`"
     >
       <template #append>
         <div class="d-flex ga-3 align-center">
@@ -129,6 +142,8 @@ function onView(item: TableData) {
       </template>
 
       <v-card-text>
+        <!-- Field Staff Debug Information -->
+
         <!-- eslint-disable vue/valid-v-slot -->
         <v-data-table
           v-model:items-per-page="tableOptions.itemsPerPage"
@@ -147,7 +162,10 @@ function onView(item: TableData) {
             </v-btn>
           </template>
           <template #item.basic_salary="{ item }">
-            ₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}
+            <div class="d-flex align-center ga-2">
+              <span v-if="isCurrentEmployeeFieldStaff">₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}Work in Prog..</span>
+              <span v-else>₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}</span>
+            </div>
           </template>
           <template #item.gross_pay="{ item }">
             ₱{{ safeCurrencyFormat(item.gross_pay, (n: number) => n.toFixed(2)) }}

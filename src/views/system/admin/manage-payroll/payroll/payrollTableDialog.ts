@@ -127,11 +127,15 @@ export function usePayrollTableDialog(
 
       // Calculate basic salary using employee daily rate ug work days
       /* console.log(`Basic salary calculation for ${monthName} ${year}:`, {
+        isFieldStaff: payrollComp.isFieldStaff.value,
         employeeDailyRate: payrollComp.employeeDailyRate.value,
         workDays: payrollComp.workDays.value,
         presentDays: payrollComp.presentDays.value,
         absentDays: payrollComp.absentDays.value,
-        basicSalary: payrollComp.employeeDailyRate.value * payrollComp.presentDays.value,
+        regularWorkTotal: payrollComp.regularWorkTotal.value,
+        basicSalaryFormula: payrollComp.isFieldStaff.value 
+          ? 'Field Staff: Uses regularWorkTotal (actual hours worked)'
+          : 'Office Staff: employeeDailyRate * presentDays',
         employeeId,
       }) */
 
@@ -145,8 +149,26 @@ export function usePayrollTableDialog(
       // Get late deduction from payroll computation
       lateDeduction.value = payrollComp.lateDeduction.value
 
-      // Calculate basic salary using employee daily rate ug present days (not total work days)
-      const basicSalary = payrollComp.employeeDailyRate.value * payrollComp.presentDays.value
+      // Calculate basic salary - para sa field staff, gamiton ang regularWorkTotal instead of dailyRate * presentDays
+      let basicSalary: number
+      if (payrollComp.isFieldStaff.value) {
+        // Para sa field staff, ang basic salary is based sa actual hours worked (regularWorkTotal)
+        basicSalary = payrollComp.regularWorkTotal.value
+        // Print regularWorkTotal value para sa field staff debugging
+        console.log(`🏃 FIELD STAFF REGULARWORKTOTAL for ${monthName} ${year}:`, {
+          employeeId,
+          employeeName: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+          regularWorkTotal: payrollComp.regularWorkTotal.value,
+          basicSalary,
+          presentDays: payrollComp.presentDays.value,
+          absentDays: payrollComp.absentDays.value,
+          workDays: payrollComp.workDays.value,
+          employeeDailyRate: payrollComp.employeeDailyRate.value,
+        })
+      } else {
+        // Para sa office staff, traditional calculation: daily rate * present days
+        basicSalary = payrollComp.employeeDailyRate.value * payrollComp.presentDays.value
+      }
 
       // Compute overall earnings using overallTotal composable
       const overallEarningsTotal = useOverallEarningsTotal(
@@ -174,6 +196,7 @@ export function usePayrollTableDialog(
 
       // Debug log para sa net pay calculation
       /*  console.log(`Net pay calculation for ${monthName} ${year}:`, {
+        isFieldStaff: payrollComp.isFieldStaff.value,
         basicSalary,
         grossPay: overallEarningsTotal.value,
         totalDeductions: netSalaryCalc.value.totalDeductions,
@@ -181,6 +204,7 @@ export function usePayrollTableDialog(
         presentDays: payrollComp.presentDays.value,
         absentDays: payrollComp.absentDays.value,
         workDays: payrollComp.workDays.value,
+        regularWorkTotal: payrollComp.regularWorkTotal.value,
         formula: `${basicSalary} + ${overallEarningsTotal.value} - ${netSalaryCalc.value.totalDeductions} = ${netPay}`,
       }) */
 
@@ -394,6 +418,11 @@ export function usePayrollTableDialog(
     }
   })
 
+  // Compute if current employee is field staff
+  const isCurrentEmployeeFieldStaff = computed(() => {
+    return props.itemData?.is_field_staff || false
+  })
+
   // Action: view/print payroll row
   const onView = (item: TableData): void => {
     payrollData.value = {
@@ -425,6 +454,7 @@ export function usePayrollTableDialog(
     startingYear,
     availableYears,
     availableMonths,
+    isCurrentEmployeeFieldStaff,
     onView,
     onDialogClose,
   }
