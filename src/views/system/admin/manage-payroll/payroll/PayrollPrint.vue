@@ -482,7 +482,7 @@ watch(
             <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
-                {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.date) }}
+                {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
               </td>
               <td class="pa-2">@{{ safeCurrencyFormat(trip.per_trip ?? 0, formatCurrency) }}</td>
               <td class="pa-2">x {{ trip.trip_no ?? 1 }}</td>
@@ -567,7 +567,7 @@ watch(
         <template v-if="employeeNonDeductions.length > 0">
           <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id">
             <td class="border-b-thin text-center pa-2" colspan="2">
-              {{ benefit.employee_benefit?.benefit || 'Other Benefit' }}
+              {{ benefit.benefit.benefit || 'Other Benefit' }}
             </td>
             <td class="pa-2"></td>
             <td class="pa-2">-</td>

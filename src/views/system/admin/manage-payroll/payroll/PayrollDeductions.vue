@@ -80,7 +80,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
         <template v-for="deduction in props.employeeDeductions" :key="deduction.id">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <span class="text-caption text-disabled" style="font-size: 12px">{{
-              deduction.employee_benefit?.benefit || 'Deduction'
+              deduction.benefit?.benefit || 'Deduction'
             }}</span>
             <span
               class="border-b-thin border-s-sm text-end pa-0 text-disabled"
@@ -96,7 +96,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
             <div class="d-flex align-center">
               <span class="text-caption text-disabled" style="font-size: 12px">Cash Advance</span>
               <span class="text-caption font-weight-bold text-end ms-1" style="font-size: 12px">{{
-                ca.date
+                ca.request_at
               }}</span>
             </div>
             <span

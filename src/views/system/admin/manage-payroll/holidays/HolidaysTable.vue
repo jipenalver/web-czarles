@@ -119,7 +119,7 @@ const {
         </template>
 
         <template #item.type="{ item }">
-          {{ displayHolidayTypes[item.type] || item.type }}
+          {{ displayHolidayTypes[item.type as keyof typeof displayHolidayTypes] || item.type }}
         </template>
 
         <template #item.created_at="{ item }">

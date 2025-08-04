@@ -456,7 +456,7 @@ const specialHolidays = computed(() => {
           :key="'benefit-' + benefit.id"
         >
           <v-col cols="6" class="text-caption pa-1">{{
-            benefit.employee_benefit?.benefit || 'Benefit'
+            benefit.benefit.benefit || 'Benefit'
           }}</v-col>
           <v-col cols="3" class="pa-1"></v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
@@ -512,7 +512,7 @@ const specialHolidays = computed(() => {
       <template v-for="deduction in employeeDeductions" :key="'deduction-' + deduction.id">
         <v-row dense class="mb-1">
           <v-col cols="6" class="text-caption pa-1">{{
-            deduction.employee_benefit?.benefit || 'Deduction'
+            deduction.benefit.benefit || 'Deduction'
           }}</v-col>
           <v-col cols="6" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat(deduction.amount || 0, formatCurrency) }}
@@ -525,7 +525,7 @@ const specialHolidays = computed(() => {
         <v-row dense class="mb-1">
           <v-col cols="6" class="text-caption pa-1">
             Cash Advance
-            <span class="text-caption font-weight-bold ms-1">{{ ca.date }}</span>
+            <span class="text-caption font-weight-bold ms-1">{{ ca.request_at }}</span>
           </v-col>
           <v-col cols="6" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat(ca.amount || 0, formatCurrency) }}
