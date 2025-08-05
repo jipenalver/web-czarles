@@ -8,7 +8,7 @@ import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
 import { getYearMonthString, safeCurrencyFormat } from './helpers'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -111,12 +111,6 @@ function onView(item: TableData) {
   baseOnView({ ...item, dateString })
 }
 
-// Compute total net pay for field staff
-const totalNetPay = computed(() => {
-  if (!isCurrentEmployeeFieldStaff.value) return 0
-  return tableData.value.reduce((sum, item) => sum + (item.net_pay || 0), 0)
-})
-
 // Compute the sum of net_pay + attendance calculation for field staff
 const calculateFieldStaffNetPay = (item: TableData) => {
   const netPay = item.net_pay || 0
@@ -197,7 +191,7 @@ const calculateFieldStaffNetPay = (item: TableData) => {
               ₱{{ safeCurrencyFormat(calculateFieldStaffNetPay(item), (n: number) => n.toFixed(2)) }}
             </span>
             <span v-else>
-              ₱{{ safeCurrencyFormat(totalNetPay, (n: number) => n.toFixed(2)) }}
+              ₱{{ safeCurrencyFormat(item.net_pay, (n: number) => n.toFixed(2)) }}
             </span>
           </template>
         </v-data-table>

@@ -38,8 +38,6 @@ export function usePayrollComputation(
 
   // Helper function to compute overtime hours between two time strings (HH:MM)
   function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
-    // Debug: log overtimeIn and overtimeOut values
-    /* console.log('computeOvertimeHours:', { overtimeIn, overtimeOut }) */
     if (!overtimeIn || !overtimeOut) return 0
     // parse time strings to Date objects (use today as date)
     const today = new Date().toISOString().split('T')[0]
@@ -107,7 +105,7 @@ export function usePayrollComputation(
   // Employee daily rate
   const employeeDailyRate = ref<number>(dailyRate.value)
   const isFieldStaff = ref<boolean>(false)
-  
+
   // Update employee daily rate when employeeId changes
   const updateEmployeeDailyRate = async () => {
     if (!employeeId) {
@@ -119,9 +117,9 @@ export function usePayrollComputation(
     employeeDailyRate.value = emp?.daily_rate || dailyRate.value
     isFieldStaff.value = emp?.is_field_staff || false
   }
-  
-  // Call updateEmployeeDailyRate when needed
-  updateEmployeeDailyRate()
+
+  // Watch for employeeId changes and update daily rate
+  watch(() => employeeId, updateEmployeeDailyRate, { immediate: true })
 
   // monthLateDeduction for total late minutes in the month
   const monthLateDeduction = ref<number>(0)
@@ -155,16 +153,14 @@ export function usePayrollComputation(
       if (Array.isArray(attendances) && attendances.length > 0) {
         // Get employee info to check if field staff
         const emp = await employeesStore.getEmployeesById(employeeId)
-        //console.log('Employee:', emp)
         const isFieldStaff = emp?.is_field_staff || undefined
-        //console.log('Is Field Staff:', isFieldStaff)
         if (isFieldStaff) {
           // For field staff, use getTotalMinutesForMonth to calculate actual work hours for the entire month
           let totalWorkMinutes = 0
-          
+
           // Get filterDateString value, fallback to usedDateString if not provided
           const dateStringForCalculation = filterDateString?.value || usedDateString
-          
+
           if (dateStringForCalculation) {
             // Use getTotalMinutesForMonth to get total minutes worked for the entire month
             totalWorkMinutes = await getTotalMinutesForMonth(
@@ -172,30 +168,26 @@ export function usePayrollComputation(
               employeeId,
               true // isField = true
             )
-          /*   console.log('=== FIELD STAFF CALCULATION ===')
-            console.log('Total minutes worked for month:', totalWorkMinutes)
-            console.log('Date string used:', dateStringForCalculation)
-            console.log('Employee ID:', employeeId) */
           }
 
           // For field staff, calculate pay based on actual hours worked
           const totalWorkHours = totalWorkMinutes / 60 // Convert minutes to hours
           const hourlyRate = daily / 8
           regularWorkTotal.value = totalWorkHours * hourlyRate
-          
+
           // Set present days based on days with any attendance
           let employeePresentDays = 0
           attendances.forEach((attendance) => {
-            const hasAnyData = 
+            const hasAnyData =
               attendance.am_time_in || attendance.am_time_out ||
               attendance.pm_time_in || attendance.pm_time_out
             if (hasAnyData) employeePresentDays++
           })
-          
+
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
           monthLateDeduction.value = 0 // Field staff don't have late deductions
-          
+
         } else {
           // For office staff, use existing logic
           const allAmTimeIn = attendances.map((a) => a.am_time_in)
@@ -217,8 +209,7 @@ export function usePayrollComputation(
           // Check attendance data for present/absent days calculation
           let employeePresentDays = 0
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          attendances.forEach((attendance: any) => {
+          attendances.forEach((attendance) => {
             // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
             const hasAmData =
               attendance.am_time_in !== null &&
@@ -231,7 +222,7 @@ export function usePayrollComputation(
               attendance.pm_time_out != null &&
               attendance.pm_time_out != undefined
 
-            // Kung naa attendance data (either AM or PM), consider as present direa nato kubion in the future and halfday chuchu..
+            // Consider present if both AM and PM data are available
             if (hasAmData && hasPmData) {
               employeePresentDays++
             }
@@ -247,7 +238,7 @@ export function usePayrollComputation(
           const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
           regularWorkTotal.value = (daily ?? 0) * effectiveWorkDays
         }
-        
+
         // Update daily rate from employee data if available
         if (emp) {
           daily = emp.daily_rate
@@ -260,6 +251,9 @@ export function usePayrollComputation(
       }
     } else {
       // No employee ID or date string, use fallback calculation
+      monthLateDeduction.value = 0
+      presentDays.value = 0
+      absentDays.value = workDays.value // All days considered absent if no attendance records
       const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
       regularWorkTotal.value = (daily ?? 0) * effectiveWorkDays
     }
@@ -299,11 +293,11 @@ export function usePayrollComputation(
       philhealth_deduction: 0,
       pagibig_deduction: 0,
       tax_deduction: 0,
-      other_deductions: 20000,
+      other_deductions: 0,
     }
     if (tableData.value) {
       deductionFields.forEach((key) => {
-        // kuhaon ang value per deduction, default 0 kung wala
+        // Get value per deduction, default 0 if not available
         result[key] = tableData.value?.[key] || 0
       })
     }

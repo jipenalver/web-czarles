@@ -15,8 +15,7 @@ export function useOverallEarningsTotal(
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
   nonDeductions?: Ref<EmployeeDeduction[]>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  isFieldStaff?: ComputedRef<boolean>, // Reserved for future field staff specific logic
+  isFieldStaff?: ComputedRef<boolean>,
 ): ComputedRef<number> {
   return computed(() => {
     let total = 0
@@ -83,8 +82,7 @@ export function useEarningsBreakdown(
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  isFieldStaff?: ComputedRef<boolean>, // Reserved for future field staff specific logic
+  isFieldStaff?: ComputedRef<boolean>,
 ): ComputedRef<Record<string, number>> {
   return computed(() => {
     // Regular work earnings (already calculated correctly in computeRegularWorkTotal)
@@ -161,7 +159,7 @@ export function useNetSalaryCalculation(
     let dynamicDeductions: Array<{ id: number; amount: number; benefit: string }> = []
     let dynamicDeductionsTotal = 0
 
-    //sigurado nga array ang employeeDeductions.value, bisan Proxy(Array)
+    // Ensure employeeDeductions.value is an array, even if it's a Proxy(Array)
     const deductionsArray = Array.isArray(employeeDeductions?.value) ? employeeDeductions.value : []
 
     if (deductionsArray.length > 0) {
@@ -173,10 +171,6 @@ export function useNetSalaryCalculation(
           benefit: deduction.benefit?.benefit || 'Deduction',
         }))
       dynamicDeductionsTotal = dynamicDeductions.reduce((sum, d) => sum + d.amount, 0)
-      // debug info kung naa gyud deductions
-      /*  if (dynamicDeductions.length > 0) {
-        console.log('Dynamic deductions:', dynamicDeductions)
-      } */
     }
 
     // Calculate totals

@@ -168,17 +168,7 @@ export function usePayrollTableDialog(
       if (payrollComp.isFieldStaff.value) {
         // Para sa field staff, ang basic salary is based sa actual hours worked (regularWorkTotal)
         basicSalary = payrollComp.regularWorkTotal.value
-        // Print regularWorkTotal value para sa field staff debugging
-        console.log(`🏃 FIELD STAFF REGULARWORKTOTAL for ${monthName} ${year}:`, {
-          employeeId,
-          employeeName: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
-          regularWorkTotal: payrollComp.regularWorkTotal.value,
-          basicSalary,
-          presentDays: payrollComp.presentDays.value,
-          absentDays: payrollComp.absentDays.value,
-          workDays: payrollComp.workDays.value,
-          employeeDailyRate: payrollComp.employeeDailyRate.value,
-        })
+        // Field staff basic salary is based on actual hours worked (regularWorkTotal)
       } else {
         // Para sa office staff, traditional calculation: daily rate * present days
         basicSalary = payrollComp.employeeDailyRate.value * payrollComp.presentDays.value
