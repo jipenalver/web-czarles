@@ -6,12 +6,33 @@ export function usePayrollPrintDialog(
   props: {
     isDialogVisible: boolean
     itemId?: number
+    employeeData?: {
+      lastname?: string
+      firstname?: string
+    }
+    payrollData?: {
+      month?: string
+      year?: number
+    }
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   // States
   const formAction = ref({ ...formActionDefault })
   const isPrinting = ref(false)
+
+  // Function to generate dynamic filename
+  const generateFilename = () => {
+    const employeeName = props.employeeData?.lastname || 'employee'
+    const month = props.payrollData?.month || 'unknown'
+    const year = props.payrollData?.year || new Date().getFullYear()
+
+    // Format the filename: lastname-month-year-payroll.pdf
+    const formattedMonth = month.toLowerCase().replace(/\s+/g, '-')
+    const filename = `${employeeName}-${formattedMonth}-${year}-payroll.pdf`
+
+    return filename
+  }
 
   watch(
     () => props.isDialogVisible,
@@ -26,7 +47,7 @@ export function usePayrollPrintDialog(
     // Check if currently in dark mode from localStorage
     const currentTheme = localStorage.getItem('theme') || 'light'
     const isDarkMode = currentTheme === 'dark'
-    
+
     // If in dark mode, temporarily switch to light mode for printing
     if (isDarkMode) {
       // Trigger theme toggle by simulating click on theme button
@@ -41,7 +62,7 @@ export function usePayrollPrintDialog(
           vApp.setAttribute('data-theme', 'light')
         }
       }
-      
+
       // Wait a moment for theme to apply
       await new Promise(resolve => setTimeout(resolve, 100))
     }
@@ -109,7 +130,7 @@ export function usePayrollPrintDialog(
       // Generate PDF with optimized settings para sa scaled content
       await html2pdf(payrollElement, {
         margin: 0.1,
-        filename: 'payroll-complete.pdf',
+        filename: generateFilename(),
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
           scale: 1.5, // Higher scale para mas clear ang bigger content

@@ -19,7 +19,15 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formAction, isPrinting, onPrint, onDialogClose } = usePayrollPrintDialog(props, emit)
+const { formAction, isPrinting, onPrint, onDialogClose } = usePayrollPrintDialog(
+  {
+    isDialogVisible: props.isDialogVisible,
+    itemId: props.employeeData?.id,
+    employeeData: props.employeeData,
+    payrollData: props.payrollData
+  },
+  emit
+)
 
 // Ref para sa PayrollPrint component para ma-trigger ang reload
 const payrollPrintRef = ref<InstanceType<typeof PayrollPrint> | null>(null)
