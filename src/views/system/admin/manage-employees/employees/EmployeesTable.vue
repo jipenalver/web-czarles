@@ -7,6 +7,7 @@ import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import RatesFormDialog from '../rates/RatesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { getRandomCode } from '@/utils/helpers/others'
 import { useEmployeesTable } from './employeesTable'
 import { useDisplay } from 'vuetify'
@@ -75,6 +76,9 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
+  onExportPDFHandler,
+  isPrinting,
+  pdfFormAction,
   employeesStore,
   designationsStore,
 } = useEmployeesTable(props, tableHeaders)
@@ -86,6 +90,20 @@ const {
     :form-message="formAction.formMessage"
     :form-status="formAction.formStatus"
   ></AppAlert>
+
+  <AppAlert
+    v-model:is-alert-visible="pdfFormAction.formAlert"
+    :form-message="pdfFormAction.formMessage"
+    :form-status="pdfFormAction.formStatus"
+  ></AppAlert>
+
+  <!-- Loading dialog para sa PDF generation -->
+  <LoadingDialog
+    v-model:is-visible="isPrinting"
+    title="Generating PDF..."
+    subtitle="Please wait while we prepare your report"
+    description="This may take a few moments"
+  ></LoadingDialog>
 
   <v-card>
     <v-card-text>
@@ -114,6 +132,9 @@ const {
                 <v-list>
                   <v-list-item @click="onExportCSV">
                     <v-list-item-title>Export to CSV</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="onExportPDFHandler">
+                    <v-list-item-title>Export to PDF</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-menu>
@@ -162,6 +183,38 @@ const {
           </v-row>
 
           <v-divider class="my-5"></v-divider>
+        </template>
+
+        <!-- PDF Export Container - wraps the table content only -->
+        <template #bottom>
+          <div style="display: none;" id="employees-table">
+            <h2 class="text-center mb-4">
+              {{ props.componentView.toUpperCase() }} EMPLOYEES REPORT
+            </h2>
+            <table class="w-100" style="border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key"
+                      style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+                    {{ header.title }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in employeesStore.employeesTable" :key="item.id">
+                  <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
+                    {{ item.lastname }}, {{ item.firstname }}
+                  </td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.phone }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.email }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.designation.designation }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
+                    {{ date.format(item.hired_at, 'fullDate') }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </template>
 
         <template #item.lastname="{ item }">

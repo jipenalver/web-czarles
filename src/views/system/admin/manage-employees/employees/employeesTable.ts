@@ -5,6 +5,7 @@ import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useDesignationsStore } from '@/stores/designations'
 import { useBenefitsStore } from '@/stores/benefits'
+import { useEmployeesPDF } from './pdf/employeePDF'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -19,6 +20,7 @@ export function useEmployeesTable(
   const employeesStore = useEmployeesStore()
   const designationsStore = useDesignationsStore()
   const benefitsStore = useBenefitsStore()
+  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useEmployeesPDF()
 
   // States
   const tableOptions = ref({
@@ -207,6 +209,10 @@ export function useEmployeesTable(
     generateCSV(filename, csvData())
   }
 
+  const onExportPDFHandler = async () => {
+    await onExportPDF(tableFilters.value, props.componentView)
+  }
+
   onMounted(async () => {
     if (employeesStore.employeesCSV.length === 0)
       await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
@@ -234,6 +240,9 @@ export function useEmployeesTable(
     onFilterItems,
     onLoadItems,
     onExportCSV,
+    onExportPDFHandler,
+    isPrinting,
+    pdfFormAction,
     employeesStore,
     designationsStore,
   }
