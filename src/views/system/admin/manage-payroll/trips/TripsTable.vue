@@ -132,8 +132,18 @@ const {
             <h2 class="text-center mb-4">TRIPS REPORT</h2>
             <table class="w-100" style="border-collapse: collapse;">
               <thead>
+                <tr v-if="tableFilters.employee_id">
+                  <th colspan="8" style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+                    Employee: 
+                    {{
+                      (employeesStore.employees.find(e => e.id === tableFilters.employee_id)?.lastname || '') +
+                      ', ' +
+                      (employeesStore.employees.find(e => e.id === tableFilters.employee_id)?.firstname || '')
+                    }}
+                  </th>
+                </tr>
                 <tr>
-                  <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key" 
+                  <th v-for="header in tableHeaders.filter(h => h.key !== 'actions' && (tableFilters.employee_id ? h.key !== 'employee' : true))" :key="header.key" 
                       style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
                     {{ header.title }}
                   </th>
@@ -141,7 +151,7 @@ const {
               </thead>
               <tbody>
                 <tr v-for="item in tripsStore.tripsTable" :key="item.id">
-                  <td style="border: 1px solid #ddd; padding: 6px;">
+                  <td v-if="!tableFilters.employee_id" style="border: 1px solid #ddd; padding: 6px;">
                     {{ item.employee.lastname + ', ' + item.employee.firstname }}
                   </td>
                   <td style="border: 1px solid #ddd; padding: 6px;">{{ item.unit.name }}</td>
