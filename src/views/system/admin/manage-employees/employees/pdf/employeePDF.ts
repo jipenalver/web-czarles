@@ -70,21 +70,23 @@ export function useEmployeesPDF() {
       // Generate filename based on filters and component view
       const filename = generateFilename(filters, componentView)
 
-      // Generate PDF with landscape orientation and full width/height
+      // Generate PDF with portrait orientation and automatic page breaks
       await html2pdf(employeesTableElement, {
-        margin: [0.3, 0.3, 0.3, 0.3], // Small margins for full utilization
+        margin: [0.3, 0.3, 0.3, 0.3], // Smaller margins for more compact layout
         filename: `${filename}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 0.95 },
         html2canvas: {
-          scale: 2,
+          scale: 1.8, // Increased scale for better readability despite small font
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
+          width: 800, // Adjusted width for portrait
+          height: 1100, // Adjusted height for portrait
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'landscape', // Landscape orientation
+          orientation: 'portrait', // Portrait orientation
         },
       })
 
