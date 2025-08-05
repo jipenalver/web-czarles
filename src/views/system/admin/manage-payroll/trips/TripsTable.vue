@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { getMoneyText } from '@/utils/helpers/others'
 import TripsFormDialog from './TripsFormDialog.vue'
 import { useTripsTable } from './tripsTable'
@@ -47,11 +48,13 @@ const {
     :form-status="pdfFormAction.formStatus"
   ></AppAlert>
 
-  <!-- Loading overlay para sa PDF generation -->
-  <v-overlay v-model="isPrinting" class="d-flex align-center justify-center">
-    <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
-    <span class="ml-4 text-h6">Generating PDF...</span>
-  </v-overlay>
+  <!-- Loading dialog para sa PDF generation -->
+  <LoadingDialog
+    v-model:is-visible="isPrinting"
+    title="Generating PDF..."
+    subtitle="Please wait while we prepare your report"
+    description="This may take a few moments"
+  ></LoadingDialog>
 
   <v-card>
     <v-card-text>
