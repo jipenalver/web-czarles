@@ -26,6 +26,9 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
+  onExportPDFHandler,
+  isPrinting,
+  pdfFormAction,
   tripsStore,
   employeesStore,
 } = useTripsTable()
@@ -37,6 +40,18 @@ const {
     :form-message="formAction.formMessage"
     :form-status="formAction.formStatus"
   ></AppAlert>
+
+  <AppAlert
+    v-model:is-alert-visible="pdfFormAction.formAlert"
+    :form-message="pdfFormAction.formMessage"
+    :form-status="pdfFormAction.formStatus"
+  ></AppAlert>
+
+  <!-- Loading overlay para sa PDF generation -->
+  <v-overlay v-model="isPrinting" class="d-flex align-center justify-center">
+    <v-progress-circular indeterminate size="64" color="primary"></v-progress-circular>
+    <span class="ml-4 text-h6">Generating PDF...</span>
+  </v-overlay>
 
   <v-card>
     <v-card-text>
@@ -65,7 +80,7 @@ const {
                   <v-list-item @click="onExportCSV">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <v-list-item>
+                  <v-list-item @click="onExportPDFHandler">
                     <v-list-item-title>Export to PDF</v-list-item-title>
                   </v-list-item>
                 </v-list>
@@ -109,6 +124,42 @@ const {
           </v-row>
 
           <v-divider class="my-5"></v-divider>
+        </template>
+
+        <!-- PDF Export Container - wraps the table content only -->
+        <template #bottom>
+          <div style="display: none;" id="trips-table">
+            <h2 class="text-center mb-4">TRIPS REPORT</h2>
+            <table class="w-100" style="border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key" 
+                      style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+                    {{ header.title }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in tripsStore.tripsTable" :key="item.id">
+                  <td style="border: 1px solid #ddd; padding: 6px;">
+                    {{ item.employee.lastname + ', ' + item.employee.firstname }}
+                  </td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.unit.name }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">
+                    {{ date.format(item.trip_at, 'fullDate') }}
+                  </td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.trip_location.location }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.materials }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.km }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.trip_no }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px;">{{ getMoneyText(item.per_trip) }}</td>
+                  <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
+                    {{ getMoneyText(item.trip_no * item.per_trip) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </template>
 
         <template #item.employee="{ item }">
