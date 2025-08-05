@@ -163,8 +163,13 @@ function onView(item: TableData) {
           </template>
           <template #item.basic_salary="{ item }">
             <div class="d-flex align-center ga-2">
-              <span v-if="isCurrentEmployeeFieldStaff">₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}Work in Prog..</span>
-              <span v-else>₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}</span>
+              <span v-if="isCurrentEmployeeFieldStaff"
+                >₱{{ safeCurrencyFormat(item.employeeDailyRate / 8, (n: number) => n.toFixed(2)) }}/hr
+               </span
+              >
+              <span v-else
+                >₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}</span
+              >
             </div>
           </template>
           <template #item.gross_pay="{ item }">

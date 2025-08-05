@@ -24,6 +24,7 @@ export interface TableData {
   gross_pay: number
   deductions: number
   net_pay: number
+  employeeDailyRate: number
   dateString?: string // Optional date string for cash advances
 }
 
@@ -65,6 +66,7 @@ export function usePayrollTableDialog(
         gross_pay: 0,
         deductions: 0,
         net_pay: 0,
+        employeeDailyRate: 0,
       }
     }
 
@@ -133,7 +135,7 @@ export function usePayrollTableDialog(
         presentDays: payrollComp.presentDays.value,
         absentDays: payrollComp.absentDays.value,
         regularWorkTotal: payrollComp.regularWorkTotal.value,
-        basicSalaryFormula: payrollComp.isFieldStaff.value 
+        basicSalaryFormula: payrollComp.isFieldStaff.value
           ? 'Field Staff: Uses regularWorkTotal (actual hours worked)'
           : 'Office Staff: employeeDailyRate * presentDays',
         employeeId,
@@ -214,6 +216,7 @@ export function usePayrollTableDialog(
         gross_pay: overallEarningsTotal.value,
         deductions: netSalaryCalc.value.totalDeductions,
         net_pay: netPay,
+        employeeDailyRate: payrollComp.employeeDailyRate.value,
       }
     } catch (error) {
       console.error(`Error generating payroll data for ${monthName} ${year}:`, error)
@@ -223,6 +226,7 @@ export function usePayrollTableDialog(
         gross_pay: 0,
         deductions: 0,
         net_pay: 0,
+        employeeDailyRate: 0,
       }
     }
   }
