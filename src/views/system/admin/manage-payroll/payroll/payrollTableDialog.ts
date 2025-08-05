@@ -16,6 +16,7 @@ import {
 } from './currentMonth'
 import { fetchHolidaysByDateString } from './computation/holidays'
 import { fetchFilteredTrips } from './computation/trips'
+import { getTotalMinutesForMonth } from './computation/attendace'
 
 // Table row type para sa payroll data
 export interface TableData {
@@ -25,6 +26,7 @@ export interface TableData {
   deductions: number
   net_pay: number
   employeeDailyRate: number
+  attendanceMinutes?: number // Total minutes worked for the month
   dateString?: string // Optional date string for cash advances
 }
 
@@ -67,6 +69,7 @@ export function usePayrollTableDialog(
         deductions: 0,
         net_pay: 0,
         employeeDailyRate: 0,
+        attendanceMinutes: 0,
       }
     }
 
@@ -79,6 +82,22 @@ export function usePayrollTableDialog(
         benefitsStore.getDeductionsById(employeeId),
         fetchCashAdvances(cashAdvanceDateString, employeeId),
       ])
+
+      // Calculate total attendance minutes for the month
+      const filterDateString = `${dateString}-01` // Format: "YYYY-MM-01"
+      const isFieldStaff = employeeData?.is_field_staff || false
+      const attendanceMinutes = await getTotalMinutesForMonth(filterDateString, employeeId, isFieldStaff)
+
+      // Console log the attendance minutes result
+      // console.log(`📊 ATTENDANCE MINUTES for ${monthName} ${year}:`, {
+      //   employeeId,
+      //   employeeName: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+      //   isFieldStaff,
+      //   filterDateString,
+      //   attendanceMinutes,
+      //   hoursWorked: (attendanceMinutes / 60).toFixed(2),
+      //   daysWorked: (attendanceMinutes / 480).toFixed(2), // Assuming 8 hours per day
+      // })
 
       // Setup reactive refs para sa computation
       const regularWorkTotal = ref(0)
@@ -217,6 +236,7 @@ export function usePayrollTableDialog(
         deductions: netSalaryCalc.value.totalDeductions,
         net_pay: netPay,
         employeeDailyRate: payrollComp.employeeDailyRate.value,
+        attendanceMinutes: attendanceMinutes,
       }
     } catch (error) {
       console.error(`Error generating payroll data for ${monthName} ${year}:`, error)
@@ -227,6 +247,7 @@ export function usePayrollTableDialog(
         deductions: 0,
         net_pay: 0,
         employeeDailyRate: 0,
+        attendanceMinutes: 0,
       }
     }
   }

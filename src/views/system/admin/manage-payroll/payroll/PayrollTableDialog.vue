@@ -89,23 +89,23 @@ function onView(item: TableData) {
   localStorage.setItem('czarles_payroll_dateString', yearMonth)
 
   // Enhanced console log para sa field staff debugging
-  if (isCurrentEmployeeFieldStaff.value) {
-    console.log(`🏃 FIELD STAFF - Month clicked: ${chosenMonth.value}`, {
-      employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
-      employeeId: props.itemData?.id,
-      month: chosenMonth.value,
-      year: tableFilters.value.year,
-      dateString,
-      yearMonth,
-      basicSalary: item.basic_salary,
-    })
-  } else {
-    console.log(`🏢 OFFICE STAFF - Month clicked: ${chosenMonth.value}`, {
-      employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
-      dateString,
-      basicSalary: item.basic_salary,
-    })
-  }
+  // if (isCurrentEmployeeFieldStaff.value) {
+  //   console.log(`🏃 FIELD STAFF - Month clicked: ${chosenMonth.value}`, {
+  //     employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+  //     employeeId: props.itemData?.id,
+  //     month: chosenMonth.value,
+  //     year: tableFilters.value.year,
+  //     dateString,
+  //     yearMonth,
+  //     basicSalary: item.basic_salary,
+  //   })
+  // } else {
+  //   console.log(`🏢 OFFICE STAFF - Month clicked: ${chosenMonth.value}`, {
+  //     employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+  //     dateString,
+  //     basicSalary: item.basic_salary,
+  //   })
+  // }
 
   // Pass dateString as prop to composable logic (if needed)
   baseOnView({ ...item, dateString })
@@ -164,8 +164,8 @@ function onView(item: TableData) {
           <template #item.basic_salary="{ item }">
             <div class="d-flex align-center ga-2">
               <span v-if="isCurrentEmployeeFieldStaff"
-                >₱{{ safeCurrencyFormat(item.employeeDailyRate / 8, (n: number) => n.toFixed(2)) }}/hr
-               </span
+                >₱{{ safeCurrencyFormat(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8), (n: number) => n.toFixed(2)) }}
+                </span
               >
               <span v-else
                 >₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}</span
