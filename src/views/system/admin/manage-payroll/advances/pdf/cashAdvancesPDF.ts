@@ -5,7 +5,7 @@ import { ref } from 'vue'
 
 interface CashAdvancesFilters {
   employee_id: number | null
-  created_at: Date[] | null
+  request_at: Date[] | null
 }
 
 export function useCashAdvancesPDF() {
@@ -22,7 +22,7 @@ export function useCashAdvancesPDF() {
       // Check if currently in dark mode from localStorage
       const currentTheme = localStorage.getItem('theme') || 'light'
       const isDarkMode = currentTheme === 'dark'
-      
+
       // If in dark mode, temporarily switch to light mode for printing
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
@@ -37,7 +37,7 @@ export function useCashAdvancesPDF() {
             vApp.setAttribute('data-theme', 'light')
           }
         }
-        
+
         // Wait a moment for theme to apply
         await new Promise(resolve => setTimeout(resolve, 100))
       }
@@ -133,20 +133,20 @@ export function useCashAdvancesPDF() {
   const generateFilename = (filters: CashAdvancesFilters) => {
     const baseDate = getDateISO(new Date())
     let filename = `${baseDate}-cash-advances-report`
-    
+
     if (filters.employee_id) {
       filename += '-employee-specific'
     }
-    
-    if (filters.created_at && filters.created_at.length > 0) {
-      const startDate = getDateISO(filters.created_at[0])
+
+    if (filters.request_at && filters.request_at.length > 0) {
+      const startDate = getDateISO(filters.request_at[0])
       filename += `-${startDate}`
-      if (filters.created_at.length > 1) {
-        const endDate = getDateISO(filters.created_at[1])
+      if (filters.request_at.length > 1) {
+        const endDate = getDateISO(filters.request_at[1])
         filename += `-to-${endDate}`
       }
     }
-    
+
     return filename
   }
 
