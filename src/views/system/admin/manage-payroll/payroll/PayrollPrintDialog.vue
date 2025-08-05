@@ -6,6 +6,7 @@ import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 import { ref, watch, nextTick } from 'vue'
 import AppAlert from '@/components/common/AppAlert.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -34,18 +35,18 @@ async function reloadAllPayrollFunctions() {
   try {
     console.log('[PayrollPrintDialog] Reloading all payroll functions...')
     isReloadingData.value = true
-    
+
     // Option 1: Force re-render ng PayrollPrint component
     payrollPrintKey.value++
-    
+
     // Wait for next tick para ma-ensure na na-mount na ang bagong component instance
     await nextTick()
-    
+
     // Option 2: Kung naa na ang ref, directly call ang reload function
     if (payrollPrintRef.value && payrollPrintRef.value.reloadAllFunctions) {
       await payrollPrintRef.value.reloadAllFunctions()
     }
-    
+
     console.log('[PayrollPrintDialog] Payroll functions reloaded successfully')
   } catch (error) {
     console.error('[PayrollPrintDialog] Error reloading payroll functions:', error)
@@ -60,7 +61,7 @@ async function manualRefreshPayroll() {
     try {
       console.log('[PayrollPrintDialog] Manual refresh of payroll data...')
       isReloadingData.value = true
-      
+
       // Call individual reload functions
       await Promise.all([
         payrollPrintRef.value.loadTrips?.(),
@@ -68,10 +69,10 @@ async function manualRefreshPayroll() {
         payrollPrintRef.value.updateOverallOvertime?.(),
         payrollPrintRef.value.updateEmployeeDeductions?.()
       ])
-      
+
       // Force recalculation
       payrollPrintRef.value.recalculateEarnings?.()
-      
+
       console.log('[PayrollPrintDialog] Manual refresh completed')
     } catch (error) {
       console.error('[PayrollPrintDialog] Error during manual refresh:', error)
@@ -125,83 +126,59 @@ watch(
   >
     <v-card prepend-icon="mdi-cash-fast" title="Payroll Preview" class="position-relative">
       <!-- Loading overlay para matago ang entire dialog during printing -->
-      <v-overlay 
-        v-model="isPrinting" 
-        contained 
-        persistent
-        class="d-flex justify-center align-center"
-        z-index="10"
-      >
-        <v-card class="pa-6 text-center w-100" elevation="8" max-width="800">
-          <v-progress-circular 
-            indeterminate 
-            color="primary" 
-            size="64" 
-            width="6"
-            class="mb-4"
-          />
-          <h3 class="text-h6 text-primary mb-2">Generating PDF...</h3>
-          <p class="text-body-2 text-grey-darken-1 mb-0">
-            Please wait while we prepare your payroll document
-          </p>
-        </v-card>
-      </v-overlay>
+      <LoadingDialog
+        v-model:is-visible="isPrinting"
+        title="Generating PDF..."
+        subtitle="Please wait while we prepare your payroll document"
+        description="This may take a few moments"
+        :progress-size="80"
+        :progress-width="6"
+        progress-color="primary"
+      ></LoadingDialog>
 
       <!-- Loading overlay para sa data reload -->
-      <v-overlay 
-        v-model="isReloadingData" 
-        contained 
-        persistent
-        class="d-flex justify-center align-center"
-        z-index="9"
-      >
-        <v-card class="pa-6 text-center w-100" elevation="8" max-width="800">
-          <v-progress-circular 
-            indeterminate 
-            color="success" 
-            size="48" 
-            width="4"
-            class="mb-4"
-          />
-          <h3 class="text-h6 text-success mb-2">Refreshing Data...</h3>
-          <p class="text-body-2 text-grey-darken-1 mb-0">
-            Loading latest payroll information
-          </p>
-        </v-card>
-      </v-overlay>
+      <LoadingDialog
+        v-model:is-visible="isReloadingData"
+        title="Refreshing Data..."
+        subtitle="Loading latest payroll information"
+        description="Please wait while we update the data"
+        :progress-size="64"
+        :progress-width="4"
+        progress-color="success"
+      ></LoadingDialog>
 
       <template #append>
-        <v-btn 
-          variant="text" 
-          density="comfortable" 
-          @click="manualRefreshPayroll" 
+        <v-btn
+          variant="text"
+          density="comfortable"
+          @click="manualRefreshPayroll"
           :disabled="isPrinting || isReloadingData"
           :loading="isReloadingData"
           icon
           class="me-2"
         >
           <v-icon icon="mdi-refresh" color="success"></v-icon>
-          <v-tooltip activator="parent" location="top"> 
+          <v-tooltip activator="parent" location="top">
             {{ isReloadingData ? 'Refreshing Data...' : 'Refresh Payroll Data' }}
           </v-tooltip>
         </v-btn>
-        
-        <v-btn 
-          variant="text" 
-          density="comfortable" 
-          @click="onPrint" 
+
+        <v-btn
+          variant="text"
+          density="comfortable"
+          @click="onPrint"
           :disabled="isPrinting || isReloadingData"
           :loading="isPrinting"
           icon
         >
           <v-icon icon="mdi-printer" color="primary"></v-icon>
-          <v-tooltip activator="parent" location="top"> 
+          <v-tooltip activator="parent" location="top">
             {{ isPrinting ? 'Generating PDF...' : 'Print Employee Payroll' }}
           </v-tooltip>
         </v-btn>
       </template>
 
-      <v-card-text id="generate-payroll">        
+      <v-card-text id="generate-payroll">
         <PayrollPrint
           ref="payrollPrintRef"
           :key="payrollPrintKey"
