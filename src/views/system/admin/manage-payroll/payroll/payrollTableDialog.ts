@@ -4,9 +4,9 @@ import { useOverallEarningsTotal, useNetSalaryCalculation } from './overallTotal
 import { formActionDefault } from '@/utils/helpers/constants'
 import { ref, watch, computed, onUnmounted } from 'vue'
 import { useEmployeesStore } from '@/stores/employees'
-import { useBenefitsStore, type EmployeeDeduction } from '@/stores/benefits'
 import { type Employee } from '@/stores/employees'
 import { fetchCashAdvances } from './computation/cashAdvance'
+import { fetchEmployeeDeductions } from './computation/benefits'
 // import { useTripsStore } from '@/stores/trips'
 
 import {
@@ -48,7 +48,6 @@ export function usePayrollTableDialog(
   // Store instances
   // const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
-  const benefitsStore = useBenefitsStore()
 
   // Async payroll data generator using overallTotal composables
   const generatePayrollData = async (monthIndex: number): Promise<TableData> => {
@@ -75,11 +74,11 @@ export function usePayrollTableDialog(
 
     try {
       // Fetch actual data para sa specific month ug employee
-      const [trips, holidays, employeeData, employeeDeductions, cashAdvances] = await Promise.all([
+      const [trips, holidays, employeeData, employeeDeductionsResult, cashAdvances] = await Promise.all([
         fetchFilteredTrips(dateString, employeeId),
         fetchHolidaysByDateString(dateString, employeeId.toString()),
         employeesStore.getEmployeesById(employeeId),
-        benefitsStore.getDeductionsById(employeeId),
+        fetchEmployeeDeductions(employeeId),
         fetchCashAdvances(cashAdvanceDateString, employeeId),
       ])
 
@@ -107,15 +106,9 @@ export function usePayrollTableDialog(
       const employeeDailyRate = computed(() => employeeData?.daily_rate || 0)
       const overallOvertime = ref(0)
       const codaAllowance = ref(0) // pwede ni ma-fetch from benefits or separate allowance table
-      const nonDeductions = ref(
-        employeeDeductions?.filter((d: EmployeeDeduction) => d.benefit?.is_deduction === false) ||
-          [],
-      )
+      const nonDeductions = ref(employeeDeductionsResult.nonDeductions || [])
       const lateDeduction = ref(0)
-      const employeeDeductionsRef = ref(
-        employeeDeductions?.filter((d: EmployeeDeduction) => d.benefit?.is_deduction === true) ||
-          [],
-      )
+      const employeeDeductionsRef = ref(employeeDeductionsResult.deductions || [])
 
       // Calculate total cash advance amount para sa month
       const totalCashAdvance =
