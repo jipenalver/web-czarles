@@ -215,6 +215,13 @@ const displayTotalEarnings = computed(() => {
   return overallEarningsTotal.value || 0
 })
 
+// Computed para sa monthly trippings total - para ma-avoid ang TypeScript errors sa template
+const monthlyTrippingsTotal = computed(() => {
+  return tripsStore.trips.reduce((sum, trip) => {
+    return sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1)
+  }, 0)
+})
+
 // const displayEarningsBreakdown = computed(() => {
 //   // Display breakdown gikan sa earningsBreakdown composable
 //   return earningsBreakdown.value
@@ -616,31 +623,13 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
           <td class="pa-2">
-            {{
-              safeCurrencyFormat(
-                tripsStore.trips.reduce(
-                  (sum: number, trip: { per_trip?: number; trip_no?: number }) =>
-                    sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1),
-                  0,
-                ),
-                formatCurrency,
-              )
-            }}/month
+            {{ safeCurrencyFormat(monthlyTrippingsTotal, formatCurrency) }}/month
           </td>
           <td
             class="border-b-thin border-s-sm text-end pa-2 total-cell"
             data-total="monthly-trippings"
           >
-            {{
-              safeCurrencyFormat(
-                tripsStore.trips.reduce(
-                  (sum: number, trip: { per_trip?: number; trip_no?: number }) =>
-                    sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1),
-                  0,
-                ),
-                formatCurrency,
-              )
-            }}
+            {{ safeCurrencyFormat(monthlyTrippingsTotal, formatCurrency) }}
           </td>
         </tr>
 
