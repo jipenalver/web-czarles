@@ -2,7 +2,7 @@
 
 import { computed, type Ref, ref, watch } from 'vue'
 import { getEmployeeAttendanceById } from './computation/computation'
-import { getTotalMinutesForMonth } from './computation/attendace'
+import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth } from './computation/attendace'
 import { useEmployeesStore } from '@/stores/employees'
 
 export interface PayrollData {
@@ -154,6 +154,11 @@ export function usePayrollComputation(
         // Get employee info to check if field staff
         const emp = await employeesStore.getEmployeesById(employeeId)
         const isFieldStaff = emp?.is_field_staff || undefined
+        
+        // Get paid leave days para sa month
+        const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId)
+        console.log(`[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`, paidLeaveDays)
+        
         if (isFieldStaff) {
           // For field staff, use getTotalMinutesForMonth to calculate actual work hours for the entire month
           let totalWorkMinutes = 0
@@ -175,7 +180,7 @@ export function usePayrollComputation(
           const hourlyRate = daily / 8
           regularWorkTotal.value = totalWorkHours * hourlyRate
 
-          // Set present days based on days with any attendance
+          // Set present days based on days with any attendance + paid leave days
           let employeePresentDays = 0
           attendances.forEach((attendance) => {
             const hasAnyData =
@@ -183,6 +188,10 @@ export function usePayrollComputation(
               attendance.pm_time_in || attendance.pm_time_out
             if (hasAnyData) employeePresentDays++
           })
+          
+          // Add paid leave days to present days para field staff
+          employeePresentDays += paidLeaveDays
+          console.log(`[computeRegularWorkTotal] Field staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`)
 
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
@@ -227,8 +236,12 @@ export function usePayrollComputation(
               employeePresentDays++
             }
           })
+          
+          // Add paid leave days to present days para office staff
+          employeePresentDays += paidLeaveDays
+          console.log(`[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`)
 
-          // Calculate absent days: total working days minus present days
+          // Calculate absent days: total working days minus present days (including paid leave)
           const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
 
           presentDays.value = employeePresentDays

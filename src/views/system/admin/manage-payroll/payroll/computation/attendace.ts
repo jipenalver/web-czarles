@@ -1,9 +1,23 @@
 import { getEmployeeAttendanceById } from './computation'
-
+// this script is naka connect sa computation.ts file IMPORTANT
+// 👉 Get total paid leave days para sa employee sa specific month
+// Attendance type definition para klaro ang properties
+type AttendanceRecord = {
+  am_time_in: string | null
+  am_time_out: string | null
+  pm_time_in: string | null
+  pm_time_out: string | null
+  overtime_in: string | null
+  overtime_out: string | null
+  is_leave_with_pay?: boolean
+  leave_type?: string
+  leave_reason?: string
+  date?: string
+}
 // 👉 Get Field minutes worked (handles overnight shifts) - Time-only calculation
 const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | null) => {
- // console.log('[getFieldMinutes] Input:', { timeIn, timeOut })
-  
+  // console.log('[getFieldMinutes] Input:', { timeIn, timeOut })
+
   try {
     // Handle null or undefined inputs
     if (!timeIn || !timeOut) {
@@ -21,7 +35,7 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
       } else if (typeof timeInput === 'string') {
         // Handle HH:MM format
         if (/^\d{1,2}:\d{2}$/.test(timeInput.trim())) {
-          [hours, minutes] = timeInput.trim().split(':').map(Number)
+          ;[hours, minutes] = timeInput.trim().split(':').map(Number)
         } else {
           // Handle full datetime string - extract time part
           const date = new Date(timeInput)
@@ -41,7 +55,7 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
     const startMinutes = timeToMinutes(timeIn)
     const endMinutes = timeToMinutes(timeOut)
 
-   /*  console.log('[getFieldMinutes] Time converted to minutes:', { 
+    /*  console.log('[getFieldMinutes] Time converted to minutes:', { 
       startMinutes, 
       endMinutes,
       startTime: `${Math.floor(startMinutes / 60)}:${(startMinutes % 60).toString().padStart(2, '0')}`,
@@ -52,9 +66,9 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
 
     // Handle overnight shifts: if end time is earlier than start time
     if (endMinutes < startMinutes) {
-     // console.log('[getFieldMinutes] Detected overnight shift')
+      // console.log('[getFieldMinutes] Detected overnight shift')
       // Add 24 hours (1440 minutes) to end time for overnight calculation
-      totalMinutes = (endMinutes + 1440) - startMinutes
+      totalMinutes = endMinutes + 1440 - startMinutes
     } else {
       // Regular same-day shift
       totalMinutes = endMinutes - startMinutes
@@ -62,9 +76,9 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
 
     // Ensure non-negative result
     totalMinutes = Math.max(0, totalMinutes)
-    
+
     //console.log('[getFieldMinutes] Calculated minutes:', totalMinutes)
-    
+
     return totalMinutes
   } catch (error) {
     console.error('[getFieldMinutes] Error processing time:', error, { timeIn, timeOut })
@@ -136,13 +150,13 @@ export const getTotalMinutes = (
   pmTimeOut: string | null = null,
   isField = false,
 ) => {
-//   console.log('[getTotalMinutes] Input:', {
-//     amTimeIn,
-//     amTimeOut,
-//     pmTimeIn,
-//     pmTimeOut,
-//     isField
-//   })
+  //   console.log('[getTotalMinutes] Input:', {
+  //     amTimeIn,
+  //     amTimeOut,
+  //     pmTimeIn,
+  //     pmTimeOut,
+  //     isField
+  //   })
 
   let totalMinutes = 0
 
@@ -152,7 +166,7 @@ export const getTotalMinutes = (
     const pmMinutes = getFieldMinutes(pmTimeIn, pmTimeOut)
     const actualMinutes = amMinutes + pmMinutes
 
-   // console.log('[getTotalMinutes] Field staff - amMinutes:', amMinutes, 'pmMinutes:', pmMinutes, 'actualMinutes:', actualMinutes)
+    // console.log('[getTotalMinutes] Field staff - amMinutes:', amMinutes, 'pmMinutes:', pmMinutes, 'actualMinutes:', actualMinutes)
 
     // Apply 8-hour requirement with penalty
     const expectedMinutes = 8 * 60 // 8 hours = 480 minutes
@@ -160,7 +174,7 @@ export const getTotalMinutes = (
       const shortage = expectedMinutes - actualMinutes
       // Apply penalty: deduct the shortage from actual time worked
       totalMinutes = Math.max(0, actualMinutes - shortage)
-     // console.log('[getTotalMinutes] Field staff shortage:', shortage, 'totalMinutes:', totalMinutes)
+      // console.log('[getTotalMinutes] Field staff shortage:', shortage, 'totalMinutes:', totalMinutes)
     } else {
       // If 8 hours or more, cap at 8 hours
       totalMinutes = Math.min(actualMinutes, expectedMinutes)
@@ -174,7 +188,7 @@ export const getTotalMinutes = (
     // console.log('[getTotalMinutes] Office staff amMinutes:', amMinutes, 'pmMinutes:', pmMinutes, 'totalMinutes:', totalMinutes)
   }
 
- // console.log('[getTotalMinutes] Output totalMinutes:', totalMinutes)
+  // console.log('[getTotalMinutes] Output totalMinutes:', totalMinutes)
   return totalMinutes
 }
 
@@ -183,11 +197,9 @@ export const getTotalMinutesForMonth = async (
   employeeId: number,
   isField = false,
 ): Promise<number> => {
-
-  
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
-  
+
   try {
     // Fetch tanan attendance records para sa specific month
     const attendances = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
@@ -198,35 +210,37 @@ export const getTotalMinutesForMonth = async (
     //   attendancesCount: attendances?.length || 0,
     //   isField
     // })
-    
+
     if (!Array.isArray(attendances) || attendances.length === 0) {
-      console.log(`[getTotalMinutesForMonth] No attendance records found for employee ${employeeId} in ${dateStringForQuery}`)
+      /* console.log(
+        `[getTotalMinutesForMonth] No attendance records found for employee ${employeeId} in ${dateStringForQuery}`,
+      ) */
       return 0
     }
 
     let totalMonthMinutes = 0
 
     // Process each attendance record using getTotalMinutes
-    attendances.forEach((attendance, /* index */) => {
+    attendances.forEach((attendance /* index */) => {
       // console.log(`[getTotalMinutesForMonth] Processing attendance ${index + 1}:`, {
       //   am_time_in: attendance.am_time_in,
       //   am_time_out: attendance.am_time_out,
       //   pm_time_in: attendance.pm_time_in,
       //   pm_time_out: attendance.pm_time_out
       // })
-      
+
       const dailyMinutes = getTotalMinutes(
         attendance.am_time_in,
         attendance.am_time_out,
         attendance.pm_time_in,
         attendance.pm_time_out,
-        isField
+        isField,
       )
-      
+
       // console.log(`[getTotalMinutesForMonth] Daily minutes calculated:`, dailyMinutes)
       totalMonthMinutes += dailyMinutes
     })
-    
+
     // console.log(`[getTotalMinutesForMonth] Total minutes for employee ${employeeId} in month ${dateStringForQuery}:`, totalMonthMinutes)
     return totalMonthMinutes
   } catch (error) {
@@ -235,3 +249,53 @@ export const getTotalMinutesForMonth = async (
   }
 }
 
+
+
+export const getPaidLeaveDaysForMonth = async (
+  filterDateString: string, // Format: "YYYY-MM-01"
+  employeeId: number,
+): Promise<number> => {
+  // Extract year-month from filterDateString para sa month range
+  const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
+
+  try {
+    // Fetch tanan attendance records para sa specific month
+    const attendancesResult = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+    const attendances: AttendanceRecord[] = attendancesResult || []
+
+    if (!Array.isArray(attendances) || attendances.length === 0) {
+      return 0
+    }
+
+    let paidLeaveDaysCounter = 0
+
+    // Simple iteration: if is_leave_with_pay is true, count it and use am_time_in as day indicator
+    attendances.forEach((attendance) => {
+      // Console log para check kung may data ang is_leave_with_pay
+      console.log(`[getPaidLeaveDaysForMonth] Checking attendance record:`, {
+        am_time_in: attendance.am_time_in,
+        is_leave_with_pay: attendance.is_leave_with_pay,
+        has_leave_data: attendance.is_leave_with_pay !== undefined && attendance.is_leave_with_pay !== null
+      })
+      
+      if (attendance.is_leave_with_pay === true) {
+        paidLeaveDaysCounter++
+        // Use am_time_in as day indicator para sa paid leave
+        console.log(`[getPaidLeaveDaysForMonth] Paid leave day found:`, {
+          day_indicator: attendance.am_time_in,
+          leave_type: attendance.leave_type,
+          leave_reason: attendance.leave_reason
+        })
+      }
+    })
+
+    console.log(
+      `[getPaidLeaveDaysForMonth] Total paid leave days for employee ${employeeId} in month ${dateStringForQuery}:`,
+      paidLeaveDaysCounter,
+    )
+    return paidLeaveDaysCounter
+  } catch (error) {
+    console.error('Error sa getPaidLeaveDaysForMonth:', error)
+    return 0
+  }
+}

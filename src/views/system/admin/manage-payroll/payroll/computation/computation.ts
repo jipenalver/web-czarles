@@ -12,6 +12,10 @@ export async function getEmployeeAttendanceById(
   pm_time_out: string | null
   overtime_in: string | null
   overtime_out: string | null
+  is_leave_with_pay?: boolean
+  leave_type?: string
+  leave_reason?: string
+ 
 }> | null> {
   // query sa attendance records for the given employee ug month
   const startOfMonth = `${dateString}-01T00:00:00.000Z`
@@ -21,7 +25,7 @@ export async function getEmployeeAttendanceById(
 
   const { data, error } = await supabase
     .from('attendances')
-    .select('am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out')
+    .select('am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason')
     .eq('employee_id', employeeId)
     .gte('am_time_in', startOfMonth) // Filter by am_time_in for the month
     .lt('am_time_in', endOfMonth)
@@ -41,6 +45,10 @@ export async function getEmployeeAttendanceById(
         pm_time_out: getTimeHHMM(row.pm_time_out),
         overtime_in: getTimeHHMM(row.overtime_in),
         overtime_out: getTimeHHMM(row.overtime_out),
+        is_leave_with_pay: row.is_leave_with_pay,
+        leave_type: row.leave_type,
+        leave_reason: row.leave_reason,
+       
       }))
     : null
 }
