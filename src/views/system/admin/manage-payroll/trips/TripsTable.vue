@@ -129,52 +129,6 @@ const {
           <v-divider class="my-5"></v-divider>
         </template>
 
-        <!-- PDF Export Container - wraps the table content only -->
-        <template #bottom>
-          <div style="display: none;" id="trips-table">
-            <h2 class="text-center mb-4">TRIPS REPORT</h2>
-            <table class="w-100" style="border-collapse: collapse;">
-              <thead>
-                <tr v-if="tableFilters.employee_id">
-                  <th colspan="8" style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
-                    Employee: 
-                    {{
-                      (employeesStore.employees.find(e => e.id === tableFilters.employee_id)?.lastname || '') +
-                      ', ' +
-                      (employeesStore.employees.find(e => e.id === tableFilters.employee_id)?.firstname || '')
-                    }}
-                  </th>
-                </tr>
-                <tr>
-                  <th v-for="header in tableHeaders.filter(h => h.key !== 'actions' && (tableFilters.employee_id ? h.key !== 'employee' : true))" :key="header.key" 
-                      style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
-                    {{ header.title }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in tripsStore.tripsTable" :key="item.id">
-                  <td v-if="!tableFilters.employee_id" style="border: 1px solid #ddd; padding: 6px;">
-                    {{ item.employee.lastname + ', ' + item.employee.firstname }}
-                  </td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.unit.name }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">
-                    {{ date.format(item.trip_at, 'fullDate') }}
-                  </td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.trip_location.location }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.materials }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.km }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.trip_no }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ getMoneyText(item.per_trip) }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
-                    {{ getMoneyText(item.trip_no * item.per_trip) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-
         <template #item.employee="{ item }">
           <span class="font-weight-bold">
             {{ item.employee.lastname + ', ' + item.employee.firstname }}
@@ -221,6 +175,50 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <!-- PDF Export Container - hidden table para sa PDF generation -->
+  <div style="display: none;" id="trips-table">
+    <h2 class="text-center mb-4">TRIPS REPORT</h2>
+    <table class="w-100" style="border-collapse: collapse;">
+      <thead>
+        <tr v-if="tableFilters.employee_id">
+          <th colspan="8" style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+            Employee: 
+            {{
+              (employeesStore.employees.find(e => e.id === tableFilters.employee_id)?.lastname || '') +
+              ', ' +
+              (employeesStore.employees.find(e => e.id === tableFilters.employee_id)?.firstname || '')
+            }}
+          </th>
+        </tr>
+        <tr>
+          <th v-for="header in tableHeaders.filter(h => h.key !== 'actions' && (tableFilters.employee_id ? h.key !== 'employee' : true))" :key="header.key" 
+              style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+            {{ header.title }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in tripsStore.tripsTable" :key="item.id">
+          <td v-if="!tableFilters.employee_id" style="border: 1px solid #ddd; padding: 6px;">
+            {{ item.employee.lastname + ', ' + item.employee.firstname }}
+          </td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.unit.name }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">
+            {{ date.format(item.trip_at, 'fullDate') }}
+          </td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.trip_location.location }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.materials }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.km }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.trip_no }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ getMoneyText(item.per_trip) }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
+            {{ getMoneyText(item.trip_no * item.per_trip) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <TripsFormDialog
     v-model:is-dialog-visible="isDialogVisible"

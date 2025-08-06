@@ -131,32 +131,6 @@ const {
           <v-divider class="my-5"></v-divider>
         </template>
 
-        <!-- PDF Export Container - wraps the table content only -->
-        <template #bottom>
-          <div style="display: none;" id="units-table">
-            <h2 class="text-center mb-4">UNITS REPORT</h2>
-            <table class="w-100" style="border-collapse: collapse;">
-              <thead>
-                <tr>
-                  <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key"
-                      style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
-                    {{ header.title }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in unitsStore.unitsTable" :key="item.id">
-                  <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">{{ item.name }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px;">{{ item.description }}</td>
-                  <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
-                    {{ date.format(item.created_at, 'fullDateTime') }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </template>
-
         <template #item.name="{ item }">
           <span class="font-weight-bold"> {{ item.name }} </span>
         </template>
@@ -183,6 +157,30 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <!-- PDF Export Container - hidden table para sa PDF generation -->
+  <div style="display: none;" id="units-table">
+    <h2 class="text-center mb-4">UNITS REPORT</h2>
+    <table class="w-100" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key"
+              style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+            {{ header.title }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in unitsStore.unitsTable" :key="item.id">
+          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">{{ item.name }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.description }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
+            {{ date.format(item.created_at, 'fullDateTime') }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <UnitsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
