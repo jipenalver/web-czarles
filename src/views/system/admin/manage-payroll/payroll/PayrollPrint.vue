@@ -5,11 +5,11 @@ import {
   // useNetSalaryCalculation,
 } from './overallTotal'
 import {
-  safeCurrencyFormat,
   getHolidayTypeName,
   formatTripDate,
   getMonthDateRange,
 } from './helpers'
+import { getMoneyText } from '@/utils/helpers/others'
 import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './usePayrollPrint'
@@ -232,10 +232,10 @@ const monthlyTrippingsTotal = computed(() => {
 //   return netSalaryCalculation.value
 // })
 
-// Use imported safeCurrencyFormat from helpers.ts
+// Use imported getMoneyText from others.ts
 
 // Alias to avoid naming conflict with imported function
-// const safeCurrencyFormatRaw = safeCurrencyFormat
+// const getMoneyTextRaw = getMoneyText
 
 // Function to recalculate total earnings - trigger useOverallEarningsTotal calculation
 function recalculateEarnings() {
@@ -490,10 +490,10 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           </td>
           <td class="pa-2">
             <span v-if="props.employeeData?.is_field_staff">
-              @ {{ safeCurrencyFormat((employeeDailyRate ?? 0) / 8, formatCurrency) }}/hr
+              @ {{ getMoneyText((employeeDailyRate ?? 0) / 8) }}/hr
             </span>
             <span v-else>
-              @ {{ safeCurrencyFormat(employeeDailyRate ?? 0, formatCurrency) }}
+              @ {{ getMoneyText(employeeDailyRate ?? 0) }}
             </span>
           </td>
           <td class="pa-2">
@@ -505,7 +505,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
             </span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
-            {{ safeCurrencyFormat(regularWorkTotal, formatCurrency) }}
+            {{ getMoneyText(regularWorkTotal) }}
           </td>
         </tr>
 
@@ -526,13 +526,13 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
               </td>
-              <td class="pa-2">@{{ safeCurrencyFormat(trip.per_trip ?? 0, formatCurrency) }}</td>
+              <td class="pa-2">@{{ getMoneyText(trip.per_trip ?? 0) }}</td>
               <td class="pa-2">x {{ trip.trip_no ?? 1 }}</td>
               <td
                 class="text-grey-darken-1 border-b-thin border-s-sm text-end pa-2 total-cell"
                 data-total="trip"
               >
-                {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
+                {{ getMoneyText((trip.per_trip ?? 0) * (trip.trip_no ?? 1)) }}
               </td>
             </tr>
           </template>
@@ -553,15 +553,15 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
               </td>
               <td class="pa-2">
                 <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">
-                  @ {{ safeCurrencyFormat(dailyRate ?? 0, formatCurrency) }}
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
-                  @ {{ safeCurrencyFormat(dailyRate ?? 0, formatCurrency) }}
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
-                  @ {{ safeCurrencyFormat(dailyRate ?? 0, formatCurrency) }}
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
-                <span v-else> @ {{ safeCurrencyFormat(dailyRate ?? 0, formatCurrency) }} </span>
+                <span v-else> @ {{ getMoneyText(dailyRate ?? 0) }} </span>
               </td>
               <td class="pa-2">
                 <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">x 200%</span>
@@ -575,12 +575,12 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
                 {{
                   holiday.type && holiday.type.toLowerCase().includes('rh')
-                    ? safeCurrencyFormat(dailyRate * 2, formatCurrency)
+                    ? getMoneyText(dailyRate * 2)
                     : holiday.type && holiday.type.toLowerCase().includes('snh')
-                      ? safeCurrencyFormat(dailyRate * 1.5, formatCurrency)
+                      ? getMoneyText(dailyRate * 1.5)
                       : holiday.type && holiday.type.toLowerCase().includes('swh')
-                        ? safeCurrencyFormat(dailyRate * 1.3, formatCurrency)
-                        : safeCurrencyFormat(dailyRate, formatCurrency)
+                        ? getMoneyText(dailyRate * 1.3)
+                        : getMoneyText(dailyRate)
                 }}
               </td>
             </tr>
@@ -596,11 +596,11 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ safeCurrencyFormat(overallOvertime, formatCurrency) }} / hour</td>
+          <td class="pa-2">{{ getMoneyText(overallOvertime) }} / hour</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             <!-- overtime pay: daily rate / 8 * 1.25 * overtime hours -->
             {{
-              safeCurrencyFormat((employeeDailyRate / 8) * 1.25 * overallOvertime, formatCurrency)
+              getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime)
             }}
           </td>
         </tr>
@@ -614,7 +614,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
             <td class="pa-2"></td>
             <td class="pa-2">-</td>
             <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="benefit">
-              {{ safeCurrencyFormat(benefit.amount ?? 0, formatCurrency) }}
+              {{ getMoneyText(benefit.amount ?? 0) }}
             </td>
           </tr>
         </template>
@@ -623,13 +623,13 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
           <td class="pa-2">
-            {{ safeCurrencyFormat(monthlyTrippingsTotal, formatCurrency) }}/month
+            {{ getMoneyText(monthlyTrippingsTotal) }}/month
           </td>
           <td
             class="border-b-thin border-s-sm text-end pa-2 total-cell"
             data-total="monthly-trippings"
           >
-            {{ safeCurrencyFormat(monthlyTrippingsTotal, formatCurrency) }}
+            {{ getMoneyText(monthlyTrippingsTotal) }}
           </td>
         </tr>
 
@@ -639,7 +639,7 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
           <td class="text-caption font-weight-bold text-end pa-2"></td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overall">
-            {{ safeCurrencyFormat(displayTotalEarnings, formatCurrency) }}
+            {{ getMoneyText(displayTotalEarnings) }}
           </td>
         </tr>
         <PayrollDeductions

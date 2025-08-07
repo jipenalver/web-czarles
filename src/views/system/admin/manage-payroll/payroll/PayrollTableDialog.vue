@@ -7,7 +7,8 @@ import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
-import { getYearMonthString, safeCurrencyFormat } from './helpers'
+import { getYearMonthString } from './helpers'
+import { getMoneyText } from '@/utils/helpers/others'
 import { ref } from 'vue'
 
 const props = defineProps<{
@@ -171,27 +172,27 @@ const calculateFieldStaffNetPay = (item: TableData) => {
           <template #item.basic_salary="{ item }">
             <div class="d-flex align-center ga-2">
               <span v-if="isCurrentEmployeeFieldStaff"
-                >₱{{ safeCurrencyFormat(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8), (n: number) => n.toFixed(2)) }}
+                >{{ getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8)) }}
                 <span class="text-caption text-grey">({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span>
                 </span
               >
               <span v-else
-                >₱{{ safeCurrencyFormat(item.basic_salary, (n: number) => n.toFixed(2)) }}</span
+                >{{ getMoneyText(item.basic_salary) }}</span
               >
             </div>
           </template>
           <template #item.gross_pay="{ item }">
-            ₱{{ safeCurrencyFormat(item.gross_pay, (n: number) => n.toFixed(2)) }}
+            {{ getMoneyText(item.gross_pay) }}
           </template>
           <template #item.deductions="{ item }">
-            ₱{{ safeCurrencyFormat(item.deductions, (n: number) => n.toFixed(2)) }}
+            {{ getMoneyText(item.deductions) }}
           </template>
           <template #item.net_pay="{ item }">
             <span v-if="isCurrentEmployeeFieldStaff">
-              ₱{{ safeCurrencyFormat(calculateFieldStaffNetPay(item), (n: number) => n.toFixed(2)) }}
+              {{ getMoneyText(calculateFieldStaffNetPay(item)) }}
             </span>
             <span v-else>
-              ₱{{ safeCurrencyFormat(item.net_pay, (n: number) => n.toFixed(2)) }}
+              {{ getMoneyText(item.net_pay) }}
             </span>
           </template>
         </v-data-table>
