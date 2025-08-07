@@ -25,9 +25,11 @@ export function useUnitsPDF() {
       // If in dark mode, temporarily switch to light mode for printing
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly update localStorage and trigger theme change
           localStorage.setItem('theme', 'light')
@@ -38,7 +40,7 @@ export function useUnitsPDF() {
         }
 
         // Wait a moment for theme to apply
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
 
       // Get the units table element
@@ -60,18 +62,20 @@ export function useUnitsPDF() {
 
       // Apply styles para sa PDF generation
       unitsTableElement.style.transform = 'scale(1)'
-      unitsTableElement.style.transformOrigin = 'top left'
+      unitsTableElement.style.transformOrigin = 'top center'
       unitsTableElement.style.position = 'relative'
       unitsTableElement.style.width = '100%'
       unitsTableElement.style.backgroundColor = 'white'
       unitsTableElement.style.display = 'block'
+      unitsTableElement.style.fontSize = '11px' // Smaller font for portrait fit
+
 
       // Generate filename based on filters
       const filename = generateFilename(filters)
 
       // Generate PDF with landscape orientation and full width/height
       await html2pdf(unitsTableElement, {
-        margin: [0.3, 0.3, 0.3, 0.3], // Small margins for full utilization
+        margin: [0.4, 0.3, 0.4, 0.3], // Adjusted margins para sa portrait
         filename: `${filename}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
@@ -83,7 +87,7 @@ export function useUnitsPDF() {
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'landscape', // Landscape orientation
+          orientation: 'portrait', // Portrait orientation
         },
       })
 
@@ -93,9 +97,11 @@ export function useUnitsPDF() {
       // Restore original theme only if we changed it (was in dark mode)
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly restore dark theme
           localStorage.setItem('theme', 'dark')
@@ -112,7 +118,6 @@ export function useUnitsPDF() {
         formMessage: 'PDF successfully generated!',
         formStatus: 200,
       }
-
     } catch (error) {
       console.error('Error generating PDF:', error)
       formAction.value = {
