@@ -1,10 +1,12 @@
 import { type TripLocation, useTripLocationsStore } from '@/stores/tripLocations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useTripLocationsPDF } from './pdf/locationsPDF'
 import { ref } from 'vue'
 
 export function useTripLocationsTable() {
   const tripLocationsStore = useTripLocationsStore()
+  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useTripLocationsPDF()
 
   // States
   const tableOptions = ref({
@@ -77,6 +79,10 @@ export function useTripLocationsTable() {
     tableOptions.value.isLoading = false
   }
 
+  const onExportPDFHandler = async () => {
+    await onExportPDF(tableFilters.value)
+  }
+
   // Expose State and Actions
   return {
     tableOptions,
@@ -91,6 +97,9 @@ export function useTripLocationsTable() {
     onConfirmDelete,
     onSearchItems,
     onLoadItems,
+    onExportPDFHandler,
+    isPrinting,
+    pdfFormAction,
     tripLocationsStore,
   }
 }

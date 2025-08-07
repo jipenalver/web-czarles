@@ -4,6 +4,7 @@ import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type Trip, useTripsStore } from '@/stores/trips'
 import { useEmployeesStore } from '@/stores/employees'
+import { useTripsPDF } from './pdf/tripsPDF'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -12,6 +13,7 @@ export function useTripsTable() {
 
   const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
+  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useTripsPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -137,6 +139,10 @@ export function useTripsTable() {
     generateCSV(filename, csvData())
   }
 
+  const onExportPDFHandler = async () => {
+    await onExportPDF(tableFilters.value)
+  }
+
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
     if (tripsStore.tripsCSV.length === 0)
@@ -160,6 +166,9 @@ export function useTripsTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
+    onExportPDFHandler,
+    isPrinting,
+    pdfFormAction,
     tripsStore,
     employeesStore,
   }

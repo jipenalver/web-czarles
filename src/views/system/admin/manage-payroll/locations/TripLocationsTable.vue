@@ -4,6 +4,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useTripLocationsTable } from './tripLocationsTable'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -47,6 +48,9 @@ const {
   onConfirmDelete,
   onSearchItems,
   onLoadItems,
+  onExportPDFHandler,
+  isPrinting,
+  pdfFormAction,
   tripLocationsStore,
 } = useTripLocationsTable()
 </script>
@@ -57,6 +61,20 @@ const {
     :form-message="formAction.formMessage"
     :form-status="formAction.formStatus"
   ></AppAlert>
+
+  <AppAlert
+    v-model:is-alert-visible="pdfFormAction.formAlert"
+    :form-message="pdfFormAction.formMessage"
+    :form-status="pdfFormAction.formStatus"
+  ></AppAlert>
+
+  <!-- Loading dialog para sa PDF generation -->
+  <LoadingDialog
+    v-model:is-visible="isPrinting"
+    title="Generating PDF..."
+    subtitle="Please wait while we prepare your report"
+    description="This may take a few moments"
+  ></LoadingDialog>
 
   <v-card>
     <v-card-text>
@@ -75,6 +93,20 @@ const {
       >
         <template #top>
           <v-row dense>
+            <v-col cols="12" sm="1">
+              <v-menu>
+                <template v-slot:activator="{ props }">
+                  <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item @click="onExportPDFHandler">
+                    <v-list-item-title>Export to PDF</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-col>
+
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="4">
@@ -125,6 +157,30 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <!-- PDF Export Container - hidden table para sa PDF generation -->
+  <div style="display: none;" id="trip-locations-table">
+    <h2 class="text-center mb-4">TRIP LOCATIONS REPORT</h2>
+    <table class="w-100" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key"
+              style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
+            {{ header.title }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in tripLocationsStore.tripLocationsTable" :key="item.id">
+          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">{{ item.location }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.description }}</td>
+          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
+            {{ date.format(item.created_at, 'fullDateTime') }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <TripLocationsFormDialog
     v-model:is-dialog-visible="isDialogVisible"

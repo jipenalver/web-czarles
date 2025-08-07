@@ -4,6 +4,7 @@ import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
+import { useCashAdvancesPDF } from './pdf/cashAdvancesPDF'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -12,6 +13,7 @@ export function useCashAdvancesTable() {
 
   const cashAdvancesStore = useCashAdvancesStore()
   const employeesStore = useEmployeesStore()
+  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useCashAdvancesPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -127,6 +129,10 @@ export function useCashAdvancesTable() {
     generateCSV(filename, csvData())
   }
 
+  const onExportPDFHandler = async () => {
+    await onExportPDF(tableFilters.value)
+  }
+
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
     if (cashAdvancesStore.cashAdvancesCSV.length === 0)
@@ -150,6 +156,9 @@ export function useCashAdvancesTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
+    onExportPDFHandler,
+    isPrinting,
+    pdfFormAction,
     cashAdvancesStore,
     employeesStore,
   }

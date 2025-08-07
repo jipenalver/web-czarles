@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { type Holiday, type HolidayTableFilter } from '@/stores/holidays'
+import { itemHolidayTypes } from '@/utils/helpers/constants'
 import { useHolidaysFormDialog } from './holidaysFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -88,13 +89,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
               <v-select
                 v-model="formData.type"
                 label="Type of Holiday"
-                :items="[
-                  'Regular Holiday',
-                  'Special (Non-working) Holiday',
-                  'Special (Working) Holiday',
-                  'Local Holiday',
-                  'Company Holiday',
-                ]"
+                :items="itemHolidayTypes"
                 :rules="[requiredValidator]"
               ></v-select>
             </v-col>

@@ -1,10 +1,12 @@
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { type Unit, useUnitsStore } from '@/stores/units'
+import { useUnitsPDF } from './pdf/unitsPDF'
 import { ref } from 'vue'
 
 export function useUnitsTable() {
   const unitsStore = useUnitsStore()
+  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useUnitsPDF()
 
   // States
   const tableOptions = ref({
@@ -74,6 +76,10 @@ export function useUnitsTable() {
     tableOptions.value.isLoading = false
   }
 
+  const onExportPDFHandler = async () => {
+    await onExportPDF(tableFilters.value)
+  }
+
   // Expose State and Actions
   return {
     tableOptions,
@@ -88,6 +94,9 @@ export function useUnitsTable() {
     onConfirmDelete,
     onSearchItems,
     onLoadItems,
+    onExportPDFHandler,
+    isPrinting,
+    pdfFormAction,
     unitsStore,
   }
 }

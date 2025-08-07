@@ -13,6 +13,7 @@ import { useAttendanceTable } from './attendanceTable'
 import { useEmployeesStore } from '@/stores/employees'
 import { getTime } from '@/utils/helpers/dates'
 import { useDisplay } from 'vuetify'
+import { computed } from 'vue'
 
 const props = defineProps<{
   componentView: 'attendance' | 'leave' | 'overtime'
@@ -26,8 +27,21 @@ const employeesStore = useEmployeesStore()
 
 const { isViewDialogVisible, viewType, onView, hasAttendanceImage } = useAttendanceTable(props)
 
-const isFieldStaff = (employeeId: number) =>
-  employeesStore.getEmployeesById(employeeId)?.is_field_staff
+// Computed property para sa current employee data
+const currentEmployee = computed(() => {
+  return employeesStore.employees.find(emp => emp.id === props.itemData.employee_id)
+})
+
+// Computed property para check kung field staff
+const isCurrentEmployeeFieldStaff = computed(() => {
+  return currentEmployee.value?.is_field_staff || false
+})
+
+// Function para check kung field staff based sa employee ID
+const isFieldStaff = (employeeId: number) => {
+  const employee = employeesStore.employees.find(emp => emp.id === employeeId)
+  return employee?.is_field_staff || false
+}
 </script>
 
 <template>
@@ -169,11 +183,7 @@ const isFieldStaff = (employeeId: number) =>
         >
           <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
           <v-chip class="font-weight-black" color="default" size="small">
-            {{
-              employeesStore.getEmployeesById(props.itemData.employee_id as number)?.is_field_staff
-                ? 'Yes'
-                : 'No'
-            }}
+            {{ isCurrentEmployeeFieldStaff ? 'Yes' : 'No' }}
           </v-chip>
         </v-col>
 
