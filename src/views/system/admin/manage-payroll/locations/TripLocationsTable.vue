@@ -160,26 +160,29 @@ const {
 
   <!-- PDF Export Container - hidden table para sa PDF generation -->
   <div style="display: none;" id="trip-locations-table">
-    <h2 class="text-center mb-4">TRIP LOCATIONS REPORT</h2>
-    <table class="w-100" style="border-collapse: collapse;">
-      <thead>
-        <tr>
-          <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key"
-              style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f5f5f5;">
-            {{ header.title }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in tripLocationsStore.tripLocationsTable" :key="item.id">
-          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">{{ item.location }}</td>
-          <td style="border: 1px solid #ddd; padding: 6px;">{{ item.description }}</td>
-          <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold;">
-            {{ date.format(item.created_at, 'fullDateTime') }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <h2 style="margin: 0; font-size: 18px; font-weight: bold;">TRIP LOCATIONS REPORT</h2>
+    </div>
+    <div style="width: 100%; display: flex; justify-content: center;">
+      <table style="border-collapse: collapse; font-size: 11px; font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0 auto;">
+        <thead>
+          <tr>
+            <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key" style="border: 1px solid #ddd; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5;">
+              {{ header.title }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in tripLocationsStore.tripLocationsTable" :key="item.id">
+            <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold; background-color: #f5f5f5;">{{ item.location }}</td>
+            <td style="border: 1px solid #ddd; padding: 6px; background-color: #f5f5f5;">{{ item.description }}</td>
+            <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold; background-color: #f5f5f5;">
+              {{ date.format(item.created_at, 'fullDateTime') }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <TripLocationsFormDialog
