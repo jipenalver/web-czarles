@@ -55,38 +55,42 @@ export function useTripsPDF() {
         transformOrigin: tripsTableElement.style.transformOrigin || '',
         position: tripsTableElement.style.position || '',
         width: tripsTableElement.style.width || '',
+        maxWidth: tripsTableElement.style.maxWidth || '',
         backgroundColor: tripsTableElement.style.backgroundColor || '',
         display: tripsTableElement.style.display || '',
+        fontSize: tripsTableElement.style.fontSize || '',
       }
 
-      // Apply styles para sa PDF generation
+      // Apply styles para sa PDF generation - optimized para sa portrait
       tripsTableElement.style.transform = 'scale(1)'
-      tripsTableElement.style.transformOrigin = 'top left'
+      tripsTableElement.style.transformOrigin = 'top center'
       tripsTableElement.style.position = 'relative'
       tripsTableElement.style.width = '100%'
+      tripsTableElement.style.maxWidth = '210mm' // A4 width
       tripsTableElement.style.backgroundColor = 'white'
       tripsTableElement.style.display = 'block'
+      tripsTableElement.style.fontSize = '11px' // Smaller font for portrait fit
 
       // Generate filename based on filters
       const filename = generateFilename(filters)
 
-      // Generate PDF with landscape orientation and full width/height
+      // Generate PDF with portrait orientation para sa better readability
       await html2pdf(tripsTableElement, {
-        margin: [0.3, 0.3, 0.3, 0.3], // Small margins for full utilization
+        margin: [0.4, 0.3, 0.4, 0.3], // Adjusted margins para sa portrait
         filename: `${filename}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
-          scale: 2,
+          scale: 1.5, // Reduced scale para sa portrait fit
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
-  /*         width: 1680, // Landscape width
-          height: 1190, // Landscape height */
+         /*  width: 794, // Portrait width (A4)
+          height: 1123, // Portrait height (A4) */
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'landscape', // Landscape orientation
+          orientation: 'portrait', // Changed to portrait orientation
         },
       })
 
