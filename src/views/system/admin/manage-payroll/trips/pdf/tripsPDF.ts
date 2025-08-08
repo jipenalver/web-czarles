@@ -1,5 +1,5 @@
-import { getDateISO } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { getDateISO } from '@/utils/helpers/dates'
 import html2pdf from 'html2pdf.js'
 import { ref } from 'vue'
 
@@ -11,24 +11,26 @@ interface TripsFilters {
 export function useTripsPDF() {
   // States
   const formAction = ref({ ...formActionDefault })
-  const isPrinting = ref(false)
+  const isLoadingPDF = ref(false)
 
   // Actions
-  const onExportPDF = async (filters: TripsFilters) => {
+  const onExport = async (filters: TripsFilters) => {
     // Set printing state to true para ma-show ang loading overlay
-    isPrinting.value = true
+    isLoadingPDF.value = true
 
     try {
       // Check if currently in dark mode from localStorage
       const currentTheme = localStorage.getItem('theme') || 'light'
       const isDarkMode = currentTheme === 'dark'
-      
+
       // If in dark mode, temporarily switch to light mode for printing
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly update localStorage and trigger theme change
           localStorage.setItem('theme', 'light')
@@ -37,9 +39,9 @@ export function useTripsPDF() {
             vApp.setAttribute('data-theme', 'light')
           }
         }
-        
+
         // Wait a moment for theme to apply
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
 
       // Get the trips table element
@@ -84,7 +86,7 @@ export function useTripsPDF() {
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
-         /*  width: 794, // Portrait width (A4)
+          /*  width: 794, // Portrait width (A4)
           height: 1123, // Portrait height (A4) */
         },
         jsPDF: {
@@ -100,9 +102,11 @@ export function useTripsPDF() {
       // Restore original theme only if we changed it (was in dark mode)
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly restore dark theme
           localStorage.setItem('theme', 'dark')
@@ -119,7 +123,6 @@ export function useTripsPDF() {
         formMessage: 'PDF successfully generated!',
         formStatus: 200,
       }
-
     } catch (error) {
       console.error('Error generating PDF:', error)
       formAction.value = {
@@ -130,18 +133,18 @@ export function useTripsPDF() {
       }
     } finally {
       // Reset printing state
-      isPrinting.value = false
+      isLoadingPDF.value = false
     }
   }
 
   const generateFilename = (filters: TripsFilters) => {
     const baseDate = getDateISO(new Date())
     let filename = `${baseDate}-trips-report`
-    
+
     if (filters.employee_id) {
       filename += '-employee-specific'
     }
-    
+
     if (filters.trip_at && filters.trip_at.length > 0) {
       const startDate = getDateISO(filters.trip_at[0])
       filename += `-${startDate}`
@@ -150,14 +153,14 @@ export function useTripsPDF() {
         filename += `-to-${endDate}`
       }
     }
-    
+
     return filename
   }
 
   // Expose State and Actions
   return {
     formAction,
-    isPrinting,
-    onExportPDF,
+    isLoadingPDF,
+    onExport,
   }
 }
