@@ -27,17 +27,18 @@ const getEmployeeName = (id: number) => {
     <h2 class="report-title">CASH ADVANCES REPORT</h2>
     <table class="pdf-table">
       <thead>
-        <tr v-if="tableFilters.employee_id">
+        <tr v-if="props.tableFilters.employee_id">
           <th colspan="4" class="pdf-th">
             Employee:
-            {{ getEmployeeName(tableFilters.employee_id) }}
+            {{ getEmployeeName(props.tableFilters.employee_id) }}
           </th>
         </tr>
         <tr>
           <th
             v-for="header in props.tableHeaders.filter(
               (h) =>
-                h.key !== 'actions' && (tableFilters.employee_id ? h.key !== 'employee' : true),
+                h.key !== 'actions' &&
+                (props.tableFilters.employee_id ? h.key !== 'employee' : true),
             )"
             :key="header.key"
             class="pdf-th"
@@ -47,8 +48,8 @@ const getEmployeeName = (id: number) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in cashAdvancesStore.cashAdvancesTable" :key="item.id">
-          <td v-if="!tableFilters.employee_id" class="pdf-td">
+        <tr v-for="item in cashAdvancesStore.cashAdvancesCSV" :key="item.id">
+          <td v-if="!props.tableFilters.employee_id" class="pdf-td">
             {{ item.employee.lastname + ', ' + item.employee.firstname }}
           </td>
           <td class="pdf-td pdf-td--bold">
