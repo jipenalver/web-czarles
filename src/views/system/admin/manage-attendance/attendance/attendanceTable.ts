@@ -127,7 +127,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
 
     onLoadItems(tableOptions.value)
 
-    await attendancesStore.getAttendancesCSV(tableOptions.value, tableFilters.value)
+    await attendancesStore.getAttendancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -138,7 +138,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
 
     onLoadItems(tableOptions.value)
 
-    await attendancesStore.getAttendancesCSV(tableOptions.value, tableFilters.value)
+    await attendancesStore.getAttendancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -174,7 +174,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
           : []),
       ].join(',')
 
-      const csvRows = attendancesStore.attendancesCSV.map((item) => {
+      const csvRows = attendancesStore.attendancesExport.map((item) => {
         let csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),
@@ -222,8 +222,8 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (attendancesStore.attendancesCSV.length === 0)
-      await attendancesStore.getAttendancesCSV(tableOptions.value, tableFilters.value)
+    if (attendancesStore.attendancesExport.length === 0)
+      await attendancesStore.getAttendancesExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions

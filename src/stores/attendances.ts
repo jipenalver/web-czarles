@@ -37,6 +37,7 @@ export type AttendanceImage = {
   image_path: string
   image_type: string
   created_at: string
+  coordinates: string
 }
 
 export type AttendanceTableFilter = {
@@ -52,14 +53,14 @@ export const useAttendancesStore = defineStore('attendances', () => {
   const attendances = ref<Attendance[]>([])
   const attendancesTable = ref<Attendance[]>([])
   const attendancesTableTotal = ref(0)
-  const attendancesCSV = ref<Attendance[]>([])
+  const attendancesExport = ref<Attendance[]>([])
 
   // Reset State
   function $reset() {
     attendances.value = []
     attendancesTable.value = []
     attendancesTableTotal.value = 0
-    attendancesCSV.value = []
+    attendancesExport.value = []
   }
 
   // Actions
@@ -72,7 +73,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendances.value = data as Attendance[]
   }
 
-  async function getAttendancesCSV(
+  async function getAttendancesExport(
     tableOptions: TableOptions,
     tableFilters: AttendanceTableFilter,
   ) {
@@ -84,7 +85,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { data } = await query
 
-    attendancesCSV.value = data as Attendance[]
+    attendancesExport.value = data as Attendance[]
   }
 
   async function getAttendancesTable(
@@ -166,10 +167,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendances,
     attendancesTable,
     attendancesTableTotal,
-    attendancesCSV,
+    attendancesExport,
     $reset,
     getAttendances,
-    getAttendancesCSV,
+    getAttendancesExport,
     getAttendancesTable,
     addAttendance,
     updateAttendance,
