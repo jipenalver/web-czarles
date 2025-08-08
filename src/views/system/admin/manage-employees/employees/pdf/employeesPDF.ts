@@ -14,7 +14,7 @@ export function useEmployeesPDF() {
   const isLoadingPDF = ref(false)
 
   // Actions
-  const onExportPDF = async (
+  const onExport = async (
     filters: EmployeesFilters,
     componentView: 'employees' | 'benefits' | 'payroll',
   ) => {
@@ -158,6 +158,6 @@ export function useEmployeesPDF() {
   return {
     formAction,
     isLoadingPDF,
-    onExportPDF,
+    onExport,
   }
 }

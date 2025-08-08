@@ -21,7 +21,7 @@ export function useEmployeesTable(
   const designationsStore = useDesignationsStore()
   const benefitsStore = useBenefitsStore()
 
-  const { isLoadingPDF, formAction: formActionPDF, onExportPDF } = useEmployeesPDF()
+  const { isLoadingPDF, formAction: formActionPDF, onExport } = useEmployeesPDF()
 
   // States
   const tableOptions = ref({
@@ -210,8 +210,8 @@ export function useEmployeesTable(
     generateCSV(filename, csvData())
   }
 
-  const onExportPDFHandler = async () => {
-    await onExportPDF(tableFilters.value, props.componentView)
+  const onExportPDF = async () => {
+    await onExport(tableFilters.value, props.componentView)
   }
 
   onMounted(async () => {
@@ -241,7 +241,7 @@ export function useEmployeesTable(
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    onExportPDFHandler,
+    onExportPDF,
     employeesStore,
     designationsStore,
     isLoadingPDF,

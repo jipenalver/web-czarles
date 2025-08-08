@@ -77,7 +77,7 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  onExportPDFHandler,
+  onExportPDF,
   employeesStore,
   designationsStore,
   isLoadingPDF,
@@ -134,7 +134,7 @@ const {
                   <v-list-item @click="onExportCSV">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="onExportPDFHandler">
+                  <v-list-item @click="onExportPDF">
                     <v-list-item-title>Export to PDF</v-list-item-title>
                   </v-list-item>
                 </v-list>
