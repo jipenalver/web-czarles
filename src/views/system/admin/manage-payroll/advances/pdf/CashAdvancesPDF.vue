@@ -48,7 +48,7 @@ const getEmployeeName = (id: number) => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in cashAdvancesStore.cashAdvancesCSV" :key="item.id">
+        <tr v-for="item in cashAdvancesStore.cashAdvancesExport" :key="item.id">
           <td v-if="!props.tableFilters.employee_id" class="pdf-td">
             {{ item.employee.lastname + ', ' + item.employee.firstname }}
           </td>

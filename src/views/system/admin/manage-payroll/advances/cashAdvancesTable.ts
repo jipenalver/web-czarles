@@ -80,7 +80,7 @@ export function useCashAdvancesTable() {
 
     onLoadItems(tableOptions.value)
 
-    await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -89,7 +89,7 @@ export function useCashAdvancesTable() {
 
     onLoadItems(tableOptions.value)
 
-    await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -110,7 +110,7 @@ export function useCashAdvancesTable() {
 
       const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
 
-      const csvRows = cashAdvancesStore.cashAdvancesCSV.map((item) => {
+      const csvRows = cashAdvancesStore.cashAdvancesExport.map((item) => {
         const csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),
@@ -136,8 +136,8 @@ export function useCashAdvancesTable() {
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (cashAdvancesStore.cashAdvancesCSV.length === 0)
-      await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    if (cashAdvancesStore.cashAdvancesExport.length === 0)
+      await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions

@@ -29,14 +29,14 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
   const cashAdvances = ref<CashAdvance[]>([])
   const cashAdvancesTable = ref<CashAdvance[]>([])
   const cashAdvancesTableTotal = ref(0)
-  const cashAdvancesCSV = ref<CashAdvance[]>([])
+  const cashAdvancesExport = ref<CashAdvance[]>([])
 
   // Reset State
   function $reset() {
     cashAdvances.value = []
     cashAdvancesTable.value = []
     cashAdvancesTableTotal.value = 0
-    cashAdvancesCSV.value = []
+    cashAdvancesExport.value = []
   }
 
   // Actions
@@ -49,7 +49,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     cashAdvances.value = data as CashAdvance[]
   }
 
-  async function getCashAdvancesCSV(
+  async function getCashAdvancesExport(
     tableOptions: TableOptions,
     tableFilters: CashAdvanceTableFilter,
   ) {
@@ -64,7 +64,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
     const { data } = await query
 
-    cashAdvancesCSV.value = data as CashAdvance[]
+    cashAdvancesExport.value = data as CashAdvance[]
   }
 
   async function getCashAdvancesTable(
@@ -138,10 +138,10 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     cashAdvances,
     cashAdvancesTable,
     cashAdvancesTableTotal,
-    cashAdvancesCSV,
+    cashAdvancesExport,
     $reset,
     getCashAdvances,
-    getCashAdvancesCSV,
+    getCashAdvancesExport,
     getCashAdvancesTable,
     addCashAdvance,
     updateCashAdvance,
