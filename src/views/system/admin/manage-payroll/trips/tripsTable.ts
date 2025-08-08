@@ -13,7 +13,8 @@ export function useTripsTable() {
 
   const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
-  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useTripsPDF()
+
+  const { isLoadingPDF, formAction: formActionPDF, onExport } = useTripsPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -139,8 +140,8 @@ export function useTripsTable() {
     generateCSV(filename, csvData())
   }
 
-  const onExportPDFHandler = async () => {
-    await onExportPDF(tableFilters.value)
+  const onExportPDF = async () => {
+    await onExport(tableFilters.value)
   }
 
   onMounted(async () => {
@@ -166,10 +167,10 @@ export function useTripsTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    onExportPDFHandler,
-    isPrinting,
-    pdfFormAction,
+    onExportPDF,
     tripsStore,
     employeesStore,
+    isLoadingPDF,
+    formActionPDF,
   }
 }
