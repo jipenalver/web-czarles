@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
+import AppAlert from '@/components/common/AppAlert.vue'
 import { getMoneyText } from '@/utils/helpers/others'
 import TripsFormDialog from './TripsFormDialog.vue'
 import { useTripsTable } from './tripsTable'
@@ -28,11 +28,11 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  onExportPDFHandler,
-  isPrinting,
-  pdfFormAction,
+  onExportPDF,
   tripsStore,
   employeesStore,
+  isLoadingPDF,
+  formActionPDF,
 } = useTripsTable()
 </script>
 
@@ -44,14 +44,14 @@ const {
   ></AppAlert>
 
   <AppAlert
-    v-model:is-alert-visible="pdfFormAction.formAlert"
-    :form-message="pdfFormAction.formMessage"
-    :form-status="pdfFormAction.formStatus"
+    v-model:is-alert-visible="formActionPDF.formAlert"
+    :form-message="formActionPDF.formMessage"
+    :form-status="formActionPDF.formStatus"
   ></AppAlert>
 
   <!-- Loading dialog para sa PDF generation -->
   <LoadingDialog
-    v-model:is-visible="isPrinting"
+    v-model:is-visible="isLoadingPDF"
     title="Generating PDF..."
     subtitle="Please wait while we prepare your report"
     description="This may take a few moments"
@@ -84,7 +84,7 @@ const {
                   <v-list-item @click="onExportCSV">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="onExportPDFHandler">
+                  <v-list-item @click="onExportPDF">
                     <v-list-item-title>Export to PDF</v-list-item-title>
                   </v-list-item>
                 </v-list>
