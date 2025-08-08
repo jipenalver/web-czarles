@@ -75,13 +75,9 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function getEmployeesById(id: number) {
-    // Ensure employees data is loaded
-    if (employees.value.length === 0) {
-      await getEmployees()
-    }
-    const found = employees.value.find((employee) => employee.id === id)
-   //console.log('getEmployeesById called with id:', id, 'Result:', found)
-    return found
+    if (employees.value.length === 0) await getEmployees()
+
+    return employees.value.find((employee) => employee.id === id)
   }
 
   async function getEmployeesCSV(tableOptions: TableOptions, tableFilters: EmployeeTableFilter) {
