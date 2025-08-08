@@ -13,7 +13,8 @@ export function useCashAdvancesTable() {
 
   const cashAdvancesStore = useCashAdvancesStore()
   const employeesStore = useEmployeesStore()
-  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useCashAdvancesPDF()
+
+  const { isLoadingPDF, formAction: formActionPDF, onExport } = useCashAdvancesPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -129,8 +130,8 @@ export function useCashAdvancesTable() {
     generateCSV(filename, csvData())
   }
 
-  const onExportPDFHandler = async () => {
-    await onExportPDF(tableFilters.value)
+  const onExportPDF = async () => {
+    await onExport(tableFilters.value)
   }
 
   onMounted(async () => {
@@ -156,10 +157,10 @@ export function useCashAdvancesTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    onExportPDFHandler,
-    isPrinting,
-    pdfFormAction,
+    onExportPDF,
     cashAdvancesStore,
     employeesStore,
+    isLoadingPDF,
+    formActionPDF,
   }
 }
