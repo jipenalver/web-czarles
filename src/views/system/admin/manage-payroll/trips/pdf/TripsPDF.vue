@@ -51,7 +51,7 @@ const getEmployeeName = (id: number) => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in tripsStore.tripsCSV" :key="item.id">
+          <tr v-for="item in tripsStore.tripsExport" :key="item.id">
             <td v-if="!props.tableFilters.employee_id" class="pdf-td">
               <div class="employee-name-cell">
                 {{ item.employee.lastname + ', ' + item.employee.firstname }}
@@ -79,7 +79,7 @@ const getEmployeeName = (id: number) => {
             </td>
           </tr>
           <!-- Summary row para sa total -->
-          <tr v-if="tripsStore.tripsCSV.length > 0" class="pdf-summary-row">
+          <tr v-if="tripsStore.tripsExport.length > 0" class="pdf-summary-row">
             <td
               :colspan="props.tableFilters.employee_id ? 7 : 8"
               class="pdf-td pdf-td--summary-label"
@@ -89,7 +89,10 @@ const getEmployeeName = (id: number) => {
             <td class="pdf-td pdf-td--summary-total">
               {{
                 getMoneyText(
-                  tripsStore.tripsCSV.reduce((sum, item) => sum + item.trip_no * item.per_trip, 0),
+                  tripsStore.tripsExport.reduce(
+                    (sum, item) => sum + item.trip_no * item.per_trip,
+                    0,
+                  ),
                 )
               }}
             </td>

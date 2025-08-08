@@ -85,7 +85,7 @@ export function useTripsTable() {
 
     onLoadItems(tableOptions.value)
 
-    await tripsStore.getTripsCSV(tableOptions.value, tableFilters.value)
+    await tripsStore.getTripsExport(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -94,7 +94,7 @@ export function useTripsTable() {
 
     onLoadItems(tableOptions.value)
 
-    await tripsStore.getTripsCSV(tableOptions.value, tableFilters.value)
+    await tripsStore.getTripsExport(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -115,7 +115,7 @@ export function useTripsTable() {
 
       const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
 
-      const csvRows = tripsStore.tripsCSV.map((item) => {
+      const csvRows = tripsStore.tripsExport.map((item) => {
         const csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),
@@ -146,8 +146,8 @@ export function useTripsTable() {
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (tripsStore.tripsCSV.length === 0)
-      await tripsStore.getTripsCSV(tableOptions.value, tableFilters.value)
+    if (tripsStore.tripsExport.length === 0)
+      await tripsStore.getTripsExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
