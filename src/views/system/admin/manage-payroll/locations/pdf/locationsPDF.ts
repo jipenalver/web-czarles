@@ -69,21 +69,23 @@ export function useTripLocationsPDF() {
       // Generate filename based on filters
       const filename = generateFilename(filters)
 
-      // Generate PDF with landscape orientation and full width/height
+      // Generate PDF with portrait orientation for print
       await html2pdf(tripLocationsTableElement, {
-        margin: [0.3, 0.3, 0.3, 0.3], // Small margins for full utilization
+        margin: [0.4, 0.3, 0.4, 0.3], // Adjusted margins for portrait
         filename: `${filename}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
-          scale: 2,
+          scale: 1.5,
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
+         /*  width: 794, // Portrait width (A4)
+          height: 1123, // Portrait height (A4) */
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'landscape', // Landscape orientation
+          orientation: 'portrait', // Portrait orientation
         },
       })
 
