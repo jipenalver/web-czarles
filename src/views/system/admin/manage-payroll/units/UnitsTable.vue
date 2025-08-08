@@ -2,7 +2,6 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import UnitsFormDialog from './UnitsFormDialog.vue'
 import { useUnitsTable } from './unitsTable'
 import { useDisplay } from 'vuetify'
@@ -48,9 +47,6 @@ const {
   onConfirmDelete,
   onSearchItems,
   onLoadItems,
-  onExportPDFHandler,
-  isPrinting,
-  pdfFormAction,
   unitsStore,
 } = useUnitsTable()
 </script>
@@ -61,20 +57,6 @@ const {
     :form-message="formAction.formMessage"
     :form-status="formAction.formStatus"
   ></AppAlert>
-
-  <AppAlert
-    v-model:is-alert-visible="pdfFormAction.formAlert"
-    :form-message="pdfFormAction.formMessage"
-    :form-status="pdfFormAction.formStatus"
-  ></AppAlert>
-
-  <!-- Loading dialog para sa PDF generation -->
-  <LoadingDialog
-    v-model:is-visible="isPrinting"
-    title="Generating PDF..."
-    subtitle="Please wait while we prepare your report"
-    description="This may take a few moments"
-  ></LoadingDialog>
 
   <v-card>
     <v-card-text>
@@ -93,20 +75,6 @@ const {
       >
         <template #top>
           <v-row dense>
-            <v-col cols="12" sm="1">
-              <v-menu>
-                <template v-slot:activator="{ props }">
-                  <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
-                </template>
-
-                <v-list>
-                  <v-list-item @click="onExportPDFHandler">
-                    <v-list-item-title>Export to PDF</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-col>
-
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="4">
@@ -157,33 +125,6 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
-
-  <!-- PDF Export Container - hidden table para sa PDF generation -->
-  <div style="display: none;" id="units-table">
-    <div style="text-align: center; margin-bottom: 20px;">
-      <h2 style="margin: 0; font-size: 18px; font-weight: bold;">UNITS REPORT</h2>
-    </div>
-    <div style="width: 100%; display: flex; justify-content: center;">
-      <table style="border-collapse: collapse; font-size: 11px; font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0 auto;">
-        <thead>
-          <tr>
-            <th v-for="header in tableHeaders.filter(h => h.key !== 'actions')" :key="header.key" style="border: 1px solid #ddd; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5;">
-              {{ header.title }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in unitsStore.unitsTable" :key="item.id">
-            <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold; background-color: #f5f5f5;">{{ item.name }}</td>
-            <td style="border: 1px solid #ddd; padding: 6px; background-color: #f5f5f5;">{{ item.description }}</td>
-            <td style="border: 1px solid #ddd; padding: 6px; font-weight: bold; background-color: #f5f5f5;">
-              {{ date.format(item.created_at, 'fullDateTime') }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
   <UnitsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
