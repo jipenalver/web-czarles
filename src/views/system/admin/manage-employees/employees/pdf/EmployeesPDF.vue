@@ -48,7 +48,7 @@ const employeesStore = useEmployeesStore()
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in employeesStore.employeesCSV" :key="item.id" class="pdf-tr">
+        <tr v-for="item in employeesStore.employeesExport" :key="item.id" class="pdf-tr">
           <td class="pdf-td pdf-td--bold">{{ item.lastname }}, {{ item.firstname }}</td>
           <td class="pdf-td">{{ item.phone }}</td>
           <td class="pdf-td">{{ item.email }}</td>

@@ -96,7 +96,7 @@ export function useEmployeesTable(
   const onFilterItems = async () => {
     onLoadItems(tableOptions.value)
 
-    await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+    await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
   }
 
   const onSearchItems = async () => {
@@ -107,7 +107,7 @@ export function useEmployeesTable(
     ) {
       onLoadItems(tableOptions.value)
 
-      await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+      await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
     }
   }
 
@@ -154,7 +154,7 @@ export function useEmployeesTable(
         ...(props.componentView === 'payroll' ? [] : []),
       ].join(',')
 
-      const csvRows = employeesStore.employeesCSV.map((item) => {
+      const csvRows = employeesStore.employeesExport.map((item) => {
         let csvData = [
           prepareCSV(item.lastname),
           prepareCSV(item.firstname),
@@ -215,8 +215,8 @@ export function useEmployeesTable(
   }
 
   onMounted(async () => {
-    if (employeesStore.employeesCSV.length === 0)
-      await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+    if (employeesStore.employeesExport.length === 0)
+      await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
