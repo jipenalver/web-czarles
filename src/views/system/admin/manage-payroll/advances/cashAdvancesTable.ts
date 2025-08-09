@@ -3,8 +3,8 @@ import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { useEmployeesStore } from '@/stores/employees'
 import { useCashAdvancesPDF } from './pdf/cashAdvancesPDF'
+import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -13,7 +13,8 @@ export function useCashAdvancesTable() {
 
   const cashAdvancesStore = useCashAdvancesStore()
   const employeesStore = useEmployeesStore()
-  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useCashAdvancesPDF()
+
+  const { isLoadingPDF, formAction: formActionPDF, onExport } = useCashAdvancesPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -79,7 +80,7 @@ export function useCashAdvancesTable() {
 
     onLoadItems(tableOptions.value)
 
-    await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -88,7 +89,7 @@ export function useCashAdvancesTable() {
 
     onLoadItems(tableOptions.value)
 
-    await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
@@ -109,7 +110,7 @@ export function useCashAdvancesTable() {
 
       const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
 
-      const csvRows = cashAdvancesStore.cashAdvancesCSV.map((item) => {
+      const csvRows = cashAdvancesStore.cashAdvancesExport.map((item) => {
         const csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),
@@ -129,14 +130,14 @@ export function useCashAdvancesTable() {
     generateCSV(filename, csvData())
   }
 
-  const onExportPDFHandler = async () => {
-    await onExportPDF(tableFilters.value)
+  const onExportPDF = async () => {
+    await onExport(tableFilters.value)
   }
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (cashAdvancesStore.cashAdvancesCSV.length === 0)
-      await cashAdvancesStore.getCashAdvancesCSV(tableOptions.value, tableFilters.value)
+    if (cashAdvancesStore.cashAdvancesExport.length === 0)
+      await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
@@ -156,10 +157,10 @@ export function useCashAdvancesTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    onExportPDFHandler,
-    isPrinting,
-    pdfFormAction,
+    onExportPDF,
     cashAdvancesStore,
     employeesStore,
+    isLoadingPDF,
+    formActionPDF,
   }
 }
