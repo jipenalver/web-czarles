@@ -159,8 +159,8 @@ const {
               </v-switch>
             </v-col>
 
-            <template v-if="formData.overtime_hours">
-              <v-col cols="12" sm="6">
+            <template v-if="isOvertimeApplied">
+              <v-col cols="12" sm="4">
                 <v-text-field
                   v-model="formData.overtime_in"
                   label="Overtime In"
@@ -169,7 +169,7 @@ const {
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="4">
                 <v-text-field
                   v-model="formData.overtime_out"
                   label="Overtime Out"
@@ -178,7 +178,7 @@ const {
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="4">
                 <v-text-field
                   v-model="formData.overtime_hours"
                   label="Overtime Hours"
