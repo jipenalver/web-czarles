@@ -38,14 +38,14 @@ export const useTripsStore = defineStore('trips', () => {
   const trips = ref<Trip[]>([])
   const tripsTable = ref<Trip[]>([])
   const tripsTableTotal = ref(0)
-  const tripsCSV = ref<Trip[]>([])
+  const tripsExport = ref<Trip[]>([])
 
   // Reset State
   function $reset() {
     trips.value = []
     tripsTable.value = []
     tripsTableTotal.value = 0
-    tripsCSV.value = []
+    tripsExport.value = []
   }
 
   // Actions
@@ -58,7 +58,7 @@ export const useTripsStore = defineStore('trips', () => {
     trips.value = data as Trip[]
   }
 
-  async function getTripsCSV(tableOptions: TableOptions, tableFilters: TripTableFilter) {
+  async function getTripsExport(tableOptions: TableOptions, tableFilters: TripTableFilter) {
     const { column, order } = tablePagination(tableOptions, 'trip_at', false)
 
     let query = supabase.from('trips').select(selectQuery).order(column, { ascending: order })
@@ -67,7 +67,7 @@ export const useTripsStore = defineStore('trips', () => {
 
     const { data } = await query
 
-    tripsCSV.value = data as Trip[]
+    tripsExport.value = data as Trip[]
   }
 
   async function getTripsTable(tableOptions: TableOptions, tableFilters: TripTableFilter) {
@@ -136,10 +136,10 @@ export const useTripsStore = defineStore('trips', () => {
     trips,
     tripsTable,
     tripsTableTotal,
-    tripsCSV,
+    tripsExport,
     $reset,
     getTrips,
-    getTripsCSV,
+    getTripsExport,
     getTripsTable,
     addTrip,
     updateTrip,

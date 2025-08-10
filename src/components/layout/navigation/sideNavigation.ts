@@ -25,7 +25,7 @@ export const adminItemsNav3: SubNavigation[] = [
   ['Overtime Application', 'mdi-clock-plus', '', '/hrms/attendance/overtime'],
 ]
 export const adminItemsNav4: SubNavigation[] = [
-  ['Trips', 'mdi-highway', '', '/hrms/payroll/trips'],
+  ['Trips & Utilizations', 'mdi-highway', '', '/hrms/payroll/trips'],
   ['Cash Advance', 'mdi-cash-refund', '', '/hrms/payroll/advance'],
   ['Payroll', 'mdi-account-cash', '', '/hrms/payroll/list'],
 ]

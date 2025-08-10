@@ -1,5 +1,5 @@
-import { getDateISO } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { getDateISO } from '@/utils/helpers/dates'
 import html2pdf from 'html2pdf.js'
 import { ref } from 'vue'
 
@@ -11,12 +11,12 @@ interface CashAdvancesFilters {
 export function useCashAdvancesPDF() {
   // States
   const formAction = ref({ ...formActionDefault })
-  const isPrinting = ref(false)
+  const isLoadingPDF = ref(false)
 
   // Actions
-  const onExportPDF = async (filters: CashAdvancesFilters) => {
+  const onExport = async (filters: CashAdvancesFilters) => {
     // Set printing state to true para ma-show ang loading overlay
-    isPrinting.value = true
+    isLoadingPDF.value = true
 
     try {
       // Check if currently in dark mode from localStorage
@@ -26,9 +26,11 @@ export function useCashAdvancesPDF() {
       // If in dark mode, temporarily switch to light mode for printing
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly update localStorage and trigger theme change
           localStorage.setItem('theme', 'light')
@@ -39,7 +41,7 @@ export function useCashAdvancesPDF() {
         }
 
         // Wait a moment for theme to apply
-        await new Promise(resolve => setTimeout(resolve, 100))
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
 
       // Get the cash advances table element
@@ -80,7 +82,7 @@ export function useCashAdvancesPDF() {
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
-  /*         width: 1680, // Landscape width
+          /*         width: 1680, // Landscape width
           height: 1190, // Landscape height */
         },
         jsPDF: {
@@ -96,9 +98,11 @@ export function useCashAdvancesPDF() {
       // Restore original theme only if we changed it (was in dark mode)
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly restore dark theme
           localStorage.setItem('theme', 'dark')
@@ -115,7 +119,6 @@ export function useCashAdvancesPDF() {
         formMessage: 'PDF successfully generated!',
         formStatus: 200,
       }
-
     } catch (error) {
       console.error('Error generating PDF:', error)
       formAction.value = {
@@ -126,7 +129,7 @@ export function useCashAdvancesPDF() {
       }
     } finally {
       // Reset printing state
-      isPrinting.value = false
+      isLoadingPDF.value = false
     }
   }
 
@@ -153,7 +156,7 @@ export function useCashAdvancesPDF() {
   // Expose State and Actions
   return {
     formAction,
-    isPrinting,
-    onExportPDF,
+    isLoadingPDF,
+    onExport,
   }
 }

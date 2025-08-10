@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
   description: 'This may take a few moments',
   progressSize: 80,
   progressWidth: 6,
-  progressColor: 'primary'
+  progressColor: 'primary',
 })
 
 const emit = defineEmits<{
@@ -27,7 +27,7 @@ const emit = defineEmits<{
 // Computed para sa v-model behavior
 const dialogVisible = computed({
   get: () => props.isVisible,
-  set: (value: boolean) => emit('update:isVisible', value)
+  set: (value: boolean) => emit('update:isVisible', value),
 })
 </script>
 
@@ -37,17 +37,20 @@ const dialogVisible = computed({
     <v-card class="d-flex align-center justify-center fill-height">
       <v-card class="pa-16 text-center" width="100%" height="100%" elevation="0">
         <v-card-text class="d-flex flex-column align-center justify-center fill-height">
-          <v-progress-circular 
-            indeterminate 
-            :size="progressSize" 
+          <v-progress-circular
+            indeterminate
+            :size="progressSize"
             :width="progressWidth"
-            :color="progressColor" 
+            :color="progressColor"
             class="mb-6"
           ></v-progress-circular>
+
           <div class="text-h4 mb-4 font-weight-bold">{{ title }}</div>
+
           <div class="text-h6 text-medium-emphasis mb-2">
             {{ subtitle }}
           </div>
+
           <div class="text-body-2 text-medium-emphasis">
             {{ description }}
           </div>

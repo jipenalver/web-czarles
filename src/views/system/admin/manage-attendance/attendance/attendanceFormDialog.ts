@@ -73,20 +73,19 @@ export function useAttendanceFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
+    const baseDate = getDate(formData.value.date)
+
+    const prepareTimeField = (timeValue: string, baseDate: string): string | null => {
+      if (!timeValue || timeValue.trim() === '') return null
+      return `${baseDate} ${timeValue}`
+    }
+
     const { date, ...newFormData } = {
       ...formData.value,
-      am_time_in: formData.value.am_time_in
-        ? getDate(formData.value.date) + ' ' + formData.value.am_time_in
-        : null,
-      am_time_out: formData.value.am_time_out
-        ? getDate(formData.value.date) + ' ' + formData.value.am_time_out
-        : null,
-      pm_time_in: formData.value.pm_time_in
-        ? getDate(formData.value.date) + ' ' + formData.value.pm_time_in
-        : null,
-      pm_time_out: formData.value.pm_time_out
-        ? getDate(formData.value.date) + ' ' + formData.value.pm_time_out
-        : null,
+      am_time_in: prepareTimeField(formData.value.am_time_in as string, baseDate as string),
+      am_time_out: prepareTimeField(formData.value.am_time_out as string, baseDate as string),
+      pm_time_in: prepareTimeField(formData.value.pm_time_in as string, baseDate as string),
+      pm_time_out: prepareTimeField(formData.value.pm_time_out as string, baseDate as string),
       is_am_in_rectified: formCheckBox.value.isRectifyAMTimeIn ? true : undefined,
       is_am_out_rectified: formCheckBox.value.isRectifyAMTimeOut ? true : undefined,
       is_pm_in_rectified: formCheckBox.value.isRectifyPMTimeIn ? true : undefined,

@@ -5,7 +5,7 @@ import { generateCSV, prepareCSV } from '@/utils/helpers/others'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useDesignationsStore } from '@/stores/designations'
 import { useBenefitsStore } from '@/stores/benefits'
-import { useEmployeesPDF } from './pdf/employeePDF'
+import { useEmployeesPDF } from './pdf/employeesPDF'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -20,7 +20,8 @@ export function useEmployeesTable(
   const employeesStore = useEmployeesStore()
   const designationsStore = useDesignationsStore()
   const benefitsStore = useBenefitsStore()
-  const { onExportPDF, isPrinting, formAction: pdfFormAction } = useEmployeesPDF()
+
+  const { isLoadingPDF, formAction: formActionPDF, onExport } = useEmployeesPDF()
 
   // States
   const tableOptions = ref({
@@ -95,7 +96,7 @@ export function useEmployeesTable(
   const onFilterItems = async () => {
     onLoadItems(tableOptions.value)
 
-    await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+    await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
   }
 
   const onSearchItems = async () => {
@@ -106,7 +107,7 @@ export function useEmployeesTable(
     ) {
       onLoadItems(tableOptions.value)
 
-      await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+      await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
     }
   }
 
@@ -153,7 +154,7 @@ export function useEmployeesTable(
         ...(props.componentView === 'payroll' ? [] : []),
       ].join(',')
 
-      const csvRows = employeesStore.employeesCSV.map((item) => {
+      const csvRows = employeesStore.employeesExport.map((item) => {
         let csvData = [
           prepareCSV(item.lastname),
           prepareCSV(item.firstname),
@@ -209,13 +210,13 @@ export function useEmployeesTable(
     generateCSV(filename, csvData())
   }
 
-  const onExportPDFHandler = async () => {
-    await onExportPDF(tableFilters.value, props.componentView)
+  const onExportPDF = async () => {
+    await onExport(tableFilters.value, props.componentView)
   }
 
   onMounted(async () => {
-    if (employeesStore.employeesCSV.length === 0)
-      await employeesStore.getEmployeesCSV(tableOptions.value, tableFilters.value)
+    if (employeesStore.employeesExport.length === 0)
+      await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
@@ -240,10 +241,10 @@ export function useEmployeesTable(
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    onExportPDFHandler,
-    isPrinting,
-    pdfFormAction,
+    onExportPDF,
     employeesStore,
     designationsStore,
+    isLoadingPDF,
+    formActionPDF,
   }
 }

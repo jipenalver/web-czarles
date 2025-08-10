@@ -53,14 +53,14 @@ export const useEmployeesStore = defineStore('employees', () => {
   const employees = ref<Employee[]>([])
   const employeesTable = ref<Employee[]>([])
   const employeesTableTotal = ref(0)
-  const employeesCSV = ref<Employee[]>([])
+  const employeesExport = ref<Employee[]>([])
 
   // Reset State
   function $reset() {
     employees.value = []
     employeesTable.value = []
     employeesTableTotal.value = 0
-    employeesCSV.value = []
+    employeesExport.value = []
   }
 
   // Actions
@@ -75,16 +75,12 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function getEmployeesById(id: number) {
-    // Ensure employees data is loaded
-    if (employees.value.length === 0) {
-      await getEmployees()
-    }
-    const found = employees.value.find((employee) => employee.id === id)
-   //console.log('getEmployeesById called with id:', id, 'Result:', found)
-    return found
+    if (employees.value.length === 0) await getEmployees()
+
+    return employees.value.find((employee) => employee.id === id)
   }
 
-  async function getEmployeesCSV(tableOptions: TableOptions, tableFilters: EmployeeTableFilter) {
+  async function getEmployeesExport(tableOptions: TableOptions, tableFilters: EmployeeTableFilter) {
     const { column, order } = tablePagination(tableOptions, 'lastname', false)
 
     let query = supabase.from('employees').select(selectQuery).order(column, { ascending: order })
@@ -93,7 +89,7 @@ export const useEmployeesStore = defineStore('employees', () => {
 
     const { data } = await query
 
-    employeesCSV.value = data as Employee[]
+    employeesExport.value = data as Employee[]
   }
 
   async function getEmployeesTable(
@@ -169,10 +165,10 @@ export const useEmployeesStore = defineStore('employees', () => {
     employees,
     employeesTable,
     employeesTableTotal,
-    employeesCSV,
+    employeesExport,
     $reset,
     getEmployees,
-    getEmployeesCSV,
+    getEmployeesExport,
     getEmployeesById,
     getEmployeesTable,
     addEmployee,

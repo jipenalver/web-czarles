@@ -1,31 +1,29 @@
 import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { generateCSV, getMoneyText, prepareCSV } from '@/utils/helpers/others'
+import { type Utilization, useUtilizationsStore } from '@/stores/utilizations'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { type Trip, useTripsStore } from '@/stores/trips'
 import { useEmployeesStore } from '@/stores/employees'
-import { useTripsPDF } from './pdf/tripsPDF'
+// import { useTripsPDF } from './pdf/tripsPDF' // PULIHI RANI MARDE
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
-export function useTripsTable() {
+export function useUtilizationsTable() {
   const date = useDate()
 
-  const tripsStore = useTripsStore()
+  const utilizationsStore = useUtilizationsStore()
   const employeesStore = useEmployeesStore()
 
-  const { isLoadingPDF, formAction: formActionPDF, onExport } = useTripsPDF()
+  // const { isLoadingPDF, formAction: formActionPDF, onExport } = useTripsPDF() // PULIHI RANI MARDE
 
   // States
   const baseHeaders: TableHeader[] = [
     { title: 'Employee', key: 'employee', sortable: false, align: 'start' },
     { title: 'Unit', key: 'unit', sortable: false, align: 'start' },
-    { title: 'Date', key: 'trip_at', align: 'start' },
-    { title: 'Location-Destination', key: 'trip_location', sortable: false, align: 'start' },
-    { title: 'Materials Loaded', key: 'materials', align: 'start' },
-    { title: 'KM', key: 'km', align: 'start' },
-    { title: 'No. of Trips', key: 'trip_no', align: 'start' },
-    { title: 'Per Trip', key: 'per_trip', align: 'start' },
+    { title: 'Date', key: 'utilization_at', align: 'start' },
+    { title: 'Location', key: 'trip_location', sortable: false, align: 'start' },
+    { title: 'Hours', key: 'hours', align: 'start' },
+    { title: 'Per Hour', key: 'per_hour', align: 'start' },
     { title: 'Amount', key: 'amount', sortable: false, align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
@@ -38,12 +36,12 @@ export function useTripsTable() {
   })
   const tableFilters = ref({
     employee_id: null,
-    trip_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    utilization_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
-  const itemData = ref<Trip | null>(null)
+  const itemData = ref<Utilization | null>(null)
   const formAction = ref({ ...formActionDefault })
 
   // Actions
@@ -52,7 +50,7 @@ export function useTripsTable() {
     isDialogVisible.value = true
   }
 
-  const onUpdate = (item: Trip) => {
+  const onUpdate = (item: Utilization) => {
     itemData.value = item
     isDialogVisible.value = true
   }
@@ -65,13 +63,13 @@ export function useTripsTable() {
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    const { data, error } = await tripsStore.deleteTrip(deleteId.value)
+    const { data, error } = await utilizationsStore.deleteUtilization(deleteId.value)
 
     if (error) {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Trip.'
+      formAction.value.formMessage = 'Successfully Deleted Utilization.'
 
       await onLoadItems(tableOptions.value)
     }
@@ -81,11 +79,11 @@ export function useTripsTable() {
   }
 
   const onFilterDate = async (isCleared = false) => {
-    if (isCleared) tableFilters.value.trip_at = null
+    if (isCleared) tableFilters.value.utilization_at = null
 
     onLoadItems(tableOptions.value)
 
-    await tripsStore.getTripsExport(tableOptions.value, tableFilters.value)
+    await utilizationsStore.getUtilizationsExport(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -94,13 +92,13 @@ export function useTripsTable() {
 
     onLoadItems(tableOptions.value)
 
-    await tripsStore.getTripsExport(tableOptions.value, tableFilters.value)
+    await utilizationsStore.getUtilizationsExport(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
     tableOptions.value.isLoading = true
 
-    await tripsStore.getTripsTable({ page, itemsPerPage, sortBy }, tableFilters.value)
+    await utilizationsStore.getUtilizationsTable({ page, itemsPerPage, sortBy }, tableFilters.value)
 
     tableOptions.value.isLoading = false
   }
@@ -115,20 +113,18 @@ export function useTripsTable() {
 
       const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
 
-      const csvRows = tripsStore.tripsExport.map((item) => {
+      const csvRows = utilizationsStore.utilizationsExport.map((item) => {
         const csvData = [
           prepareCSV(item.employee.lastname),
           prepareCSV(item.employee.firstname),
           prepareCSV(item.employee.middlename),
 
           prepareCSV(item.unit.name),
-          item.trip_at ? prepareCSV(date.format(item.trip_at, 'fullDate')) : '',
+          item.utilization_at ? prepareCSV(date.format(item.utilization_at, 'fullDate')) : '',
           prepareCSV(item.trip_location.location),
-          prepareCSV(item.materials),
-          prepareCSV(item.km.toString()),
-          prepareCSV(item.trip_no.toString()),
-          prepareCSV(getMoneyText(item.per_trip)),
-          prepareCSV(getMoneyText(item.trip_no * item.per_trip)),
+          prepareCSV(item.hours.toString()),
+          prepareCSV(getMoneyText(item.per_hour)),
+          prepareCSV(getMoneyText(item.hours * item.per_hour)),
         ]
 
         return csvData.join(',')
@@ -140,14 +136,14 @@ export function useTripsTable() {
     generateCSV(filename, csvData())
   }
 
-  const onExportPDF = async () => {
-    await onExport(tableFilters.value)
-  }
+  // const onExportPDF = async () => {
+  //   await onExport(tableFilters.value) // PULIHI RANI MARDE
+  // }
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (tripsStore.tripsExport.length === 0)
-      await tripsStore.getTripsExport(tableOptions.value, tableFilters.value)
+    if (utilizationsStore.utilizationsExport.length === 0)
+      await utilizationsStore.getUtilizationsExport(tableOptions.value, tableFilters.value)
   })
 
   // Expose State and Actions
@@ -167,10 +163,10 @@ export function useTripsTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    onExportPDF,
-    tripsStore,
+    // onExportPDF, // PULIHI RANI MARDE
+    utilizationsStore,
     employeesStore,
-    isLoadingPDF,
-    formActionPDF,
+    // isLoadingPDF, // PULIHI RANI MARDE
+    // formActionPDF, // PULIHI RANI MARDE
   }
 }

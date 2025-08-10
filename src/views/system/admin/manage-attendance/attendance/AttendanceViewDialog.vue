@@ -86,6 +86,13 @@ const { formAction, imageType, imageData, onDownload, onDialogClose } = useAtten
               }}
             </span>
           </v-col>
+
+          <v-col cols="12" class="d-flex justify-space-between align-center">
+            <strong>Coordinates:</strong>
+            <span class="text-body-2">
+              {{ imageData?.coordinates }}
+            </span>
+          </v-col>
         </v-row>
       </v-card-text>
 

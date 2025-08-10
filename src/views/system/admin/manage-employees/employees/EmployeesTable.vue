@@ -2,15 +2,15 @@
 import AddonsDeductionsFormDialog from '../addons-deductions/AddonsDeductionsFormDialog.vue'
 import PayrollTableDialog from '../../manage-payroll/payroll/PayrollTableDialog.vue'
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import EmployeesExpandedRow from './EmployeesExpandedRow.vue'
 import EmployeesFormDialog from './EmployeesFormDialog.vue'
 import RatesFormDialog from '../rates/RatesFormDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import LoadingDialog from '@/components/common/LoadingDialog.vue'
-import { getRandomCode, getIDNumber, getMoneyText } from '@/utils/helpers/others'
-import { getYearsOfService } from '@/utils/helpers/dates'
+import { getRandomCode } from '@/utils/helpers/others'
 import { useEmployeesTable } from './employeesTable'
+import EmployeesPDF from './pdf/EmployeesPDF.vue'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -77,11 +77,11 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  onExportPDFHandler,
-  isPrinting,
-  pdfFormAction,
+  onExportPDF,
   employeesStore,
   designationsStore,
+  isLoadingPDF,
+  formActionPDF,
 } = useEmployeesTable(props, tableHeaders)
 </script>
 
@@ -93,14 +93,14 @@ const {
   ></AppAlert>
 
   <AppAlert
-    v-model:is-alert-visible="pdfFormAction.formAlert"
-    :form-message="pdfFormAction.formMessage"
-    :form-status="pdfFormAction.formStatus"
+    v-model:is-alert-visible="formActionPDF.formAlert"
+    :form-message="formActionPDF.formMessage"
+    :form-status="formActionPDF.formStatus"
   ></AppAlert>
 
   <!-- Loading dialog para sa PDF generation -->
   <LoadingDialog
-    v-model:is-visible="isPrinting"
+    v-model:is-visible="isLoadingPDF"
     title="Generating PDF..."
     subtitle="Please wait while we prepare your report"
     description="This may take a few moments"
@@ -130,11 +130,11 @@ const {
                   <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
                 </template>
 
-                <v-list>
-                  <v-list-item @click="onExportCSV">
+                <v-list slim>
+                  <v-list-item @click="onExportCSV" prepend-icon="mdi-file-delimited">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="onExportPDFHandler">
+                  <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf-box">
                     <v-list-item-title>Export to PDF</v-list-item-title>
                   </v-list-item>
                 </v-list>
@@ -261,472 +261,7 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- PDF Export Container - hidden table para sa PDF generation -->
-  <div style="display: none" id="employees-table">
-    <h2
-      class="text-center mb-4"
-      style="font-size: 14px; margin-bottom: 8px; page-break-after: avoid; font-weight: bold"
-    >
-      {{ props.componentView.toUpperCase() }} EMPLOYEES REPORT
-    </h2>
-    <table
-      class="w-100"
-      style="
-        border-collapse: collapse;
-        font-size: 7px;
-        width: 100%;
-        page-break-inside: auto;
-        table-layout: fixed;
-      "
-    >
-      <thead style="page-break-inside: avoid; page-break-after: auto">
-        <tr>
-          <th
-            v-for="header in tableHeaders.filter((h) => h.key !== 'actions')"
-            :key="header.key"
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 8%;
-            "
-          >
-            {{ header.title }}
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 6%;
-            "
-          >
-            ID No.
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 8%;
-            "
-          >
-            Birthdate
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Address
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Years of Service
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Contract Status
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Field Staff
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 6%;
-            "
-          >
-            TIN No.
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 6%;
-            "
-          >
-            SSS No.
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            PhilHealth No.
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Pag-IBIG No.
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Area Origin
-          </th>
-          <th
-            style="
-              border: 1px solid #ddd;
-              padding: 2px;
-              text-align: left;
-              background-color: #f5f5f5;
-              font-size: 7px;
-              font-weight: bold;
-              width: 12%;
-            "
-          >
-            Area Assignment
-          </th>
-          <template v-if="props.componentView === 'benefits' || props.componentView === 'payroll'">
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 2px;
-                text-align: left;
-                background-color: #f5f5f5;
-                font-size: 7px;
-                font-weight: bold;
-                width: 12%;
-              "
-            >
-              Daily Rate
-            </th>
-            <th
-              style="
-                border: 1px solid #ddd;
-                padding: 2px;
-                text-align: left;
-                background-color: #f5f5f5;
-                font-size: 7px;
-                font-weight: bold;
-                width: 12%;
-              "
-            >
-              Accident Insurance
-            </th>
-          </template>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="item in employeesStore.employeesTable"
-          :key="item.id"
-          style="page-break-inside: avoid"
-        >
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-weight: bold;
-              font-size: 7px;
-              width: 8%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.lastname }}, {{ item.firstname }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 8%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.phone }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 8%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.email }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 8%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.designation.designation }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-weight: bold;
-              font-size: 7px;
-              width: 8%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ date.format(item.hired_at, 'fullDate') }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-weight: bold;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ getIDNumber(item.hired_at, item.id) }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 8%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.birthdate ? date.format(item.birthdate, 'fullDate') : 'n/a' }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 12%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.address }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-weight: bold;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ getYearsOfService(item.hired_at) }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.is_permanent ? 'Permanent' : 'Contractual' }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 5%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.is_field_staff ? 'Yes' : 'No' }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.tin_no }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.sss_no }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.philhealth_no }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.pagibig_no }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.area_origin ? item.area_origin.area : 'n/a' }}
-          </td>
-          <td
-            style="
-              border: 1px solid #ddd;
-              padding: 1px;
-              font-size: 7px;
-              width: 6%;
-              word-wrap: break-word;
-              overflow-wrap: break-word;
-            "
-          >
-            {{ item.area_assignment ? item.area_assignment.area : 'n/a' }}
-          </td>
-          <template v-if="props.componentView === 'benefits' || props.componentView === 'payroll'">
-            <td
-              style="
-                border: 1px solid #ddd;
-                padding: 1px;
-                font-weight: bold;
-                font-size: 7px;
-                width: 6%;
-                word-wrap: break-word;
-                overflow-wrap: break-word;
-              "
-            >
-              {{ item.daily_rate ? getMoneyText(item.daily_rate) : 'n/a' }}
-            </td>
-            <td
-              style="
-                border: 1px solid #ddd;
-                padding: 1px;
-                font-size: 7px;
-                width: 6%;
-                word-wrap: break-word;
-                overflow-wrap: break-word;
-              "
-            >
-              {{ item.is_insured ? 'Yes' : 'No' }}
-            </td>
-          </template>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <EmployeesPDF :component-view="props.componentView" :table-headers="tableHeaders"></EmployeesPDF>
 
   <EmployeesFormDialog
     v-model:is-dialog-visible="isDialogVisible"
