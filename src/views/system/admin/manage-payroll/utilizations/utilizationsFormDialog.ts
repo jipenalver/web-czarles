@@ -3,12 +3,14 @@ import {
   type UtilizationTableFilter,
   useUtilizationsStore,
 } from '@/stores/utilizations'
+import { getOvertimeHoursDecimal, getWorkHoursDecimal } from '@/utils/helpers/attendance'
+import { getDateISO, getDateTimeISO } from '@/utils/helpers/dates'
 import { useTripLocationsStore } from '@/stores/tripLocations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useUnitsStore } from '@/stores/units'
-import { onMounted, ref, watch } from 'vue'
 
 export function useUtilizationsFormDialog(
   props: {
@@ -99,6 +101,43 @@ export function useUtilizationsFormDialog(
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
     if (unitsStore.units.length === 0) await unitsStore.getUnits()
     if (tripLocationsStore.tripLocations.length === 0) await tripLocationsStore.getTripLocations()
+  })
+
+  const computedWorkHours = computed(() => {
+    const { employee_id, am_time_in, am_time_out, pm_time_in, pm_time_out, utilization_at } =
+      formData.value
+
+    const employee = employeesStore.employees.find((emp) => emp.id === employee_id)
+    const isFieldStaff = employee?.is_field_staff || false
+
+    const baseDate = getDateISO(utilization_at as string)
+
+    return getWorkHoursDecimal(
+      getDateTimeISO(`${baseDate} ${am_time_in}`),
+      getDateTimeISO(`${baseDate} ${am_time_out}`),
+      getDateTimeISO(`${baseDate} ${pm_time_in}`),
+      getDateTimeISO(`${baseDate} ${pm_time_out}`),
+      isFieldStaff,
+    )
+  })
+
+  const computedOvertimeHours = computed(() => {
+    if (!isOvertimeApplied.value) return undefined
+
+    const { overtime_in, overtime_out } = formData.value
+
+    const baseDate = getDateISO(formData.value.utilization_at as string)
+
+    return getOvertimeHoursDecimal(
+      getDateTimeISO(`${baseDate} ${overtime_in}`),
+      getDateTimeISO(`${baseDate} ${overtime_out}`),
+    )
+  })
+
+  watch(computedWorkHours, (newHours) => (formData.value.hours = newHours), { immediate: true })
+
+  watch(computedOvertimeHours, (newHours) => (formData.value.overtime_hours = newHours), {
+    immediate: true,
   })
 
   // Expose State and Actions
