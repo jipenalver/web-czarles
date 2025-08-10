@@ -16,7 +16,7 @@ import {
 } from './currentMonth'
 import { fetchHolidaysByDateString } from './computation/holidays'
 import { fetchFilteredTrips } from './computation/trips'
-import { getTotalMinutesForMonth } from './computation/attendace'
+import { getTotalMinutesForMonth } from './computation/attendance'
 
 // Table row type para sa payroll data
 export interface TableData {
@@ -74,18 +74,23 @@ export function usePayrollTableDialog(
 
     try {
       // Fetch actual data para sa specific month ug employee
-      const [trips, holidays, employeeData, employeeDeductionsResult, cashAdvances] = await Promise.all([
-        fetchFilteredTrips(dateString, employeeId),
-        fetchHolidaysByDateString(dateString, employeeId.toString()),
-        employeesStore.getEmployeesById(employeeId),
-        fetchEmployeeDeductions(employeeId),
-        fetchCashAdvances(cashAdvanceDateString, employeeId),
-      ])
+      const [trips, holidays, employeeData, employeeDeductionsResult, cashAdvances] =
+        await Promise.all([
+          fetchFilteredTrips(dateString, employeeId),
+          fetchHolidaysByDateString(dateString, employeeId.toString()),
+          employeesStore.getEmployeesById(employeeId),
+          fetchEmployeeDeductions(employeeId),
+          fetchCashAdvances(cashAdvanceDateString, employeeId),
+        ])
 
       // Calculate total attendance minutes for the month
       const filterDateString = `${dateString}-01` // Format: "YYYY-MM-01"
       const isFieldStaff = employeeData?.is_field_staff || false
-      const attendanceMinutes = await getTotalMinutesForMonth(filterDateString, employeeId, isFieldStaff)
+      const attendanceMinutes = await getTotalMinutesForMonth(
+        filterDateString,
+        employeeId,
+        isFieldStaff,
+      )
 
       // Console log the attendance minutes result
       // console.log(`📊 ATTENDANCE MINUTES for ${monthName} ${year}:`, {
