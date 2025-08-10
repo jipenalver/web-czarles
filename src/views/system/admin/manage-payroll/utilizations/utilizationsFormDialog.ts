@@ -3,8 +3,8 @@ import {
   type UtilizationTableFilter,
   useUtilizationsStore,
 } from '@/stores/utilizations'
+import { getDate, getDateISO, getDateTimeISO, prepareDateTime } from '@/utils/helpers/dates'
 import { getOvertimeHoursDecimal, getWorkHoursDecimal } from '@/utils/helpers/attendance'
-import { getDateISO, getDateTimeISO } from '@/utils/helpers/dates'
 import { useTripLocationsStore } from '@/stores/tripLocations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -61,9 +61,26 @@ export function useUtilizationsFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
+    const baseDate = getDate(formData.value.utilization_at as string)
+
+    const prepareTimeField = (timeValue: string, baseDate: string): string | null => {
+      if (!timeValue || timeValue.trim() === '') return null
+      return prepareDateTime(`${baseDate} ${timeValue}`)
+    }
+
+    const newFormData = {
+      ...formData.value,
+      am_time_in: prepareTimeField(formData.value.am_time_in as string, baseDate as string),
+      am_time_out: prepareTimeField(formData.value.am_time_out as string, baseDate as string),
+      pm_time_in: prepareTimeField(formData.value.pm_time_in as string, baseDate as string),
+      pm_time_out: prepareTimeField(formData.value.pm_time_out as string, baseDate as string),
+      overtime_in: prepareTimeField(formData.value.overtime_in as string, baseDate as string),
+      overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string),
+    }
+
     const { data, error } = isUpdate.value
-      ? await utilizationsStore.updateUtilization(formData.value)
-      : await utilizationsStore.addUtilization(formData.value)
+      ? await utilizationsStore.updateUtilization(newFormData)
+      : await utilizationsStore.addUtilization(newFormData)
 
     if (error) {
       formAction.value = {
