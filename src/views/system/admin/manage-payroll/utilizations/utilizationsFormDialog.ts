@@ -3,7 +3,13 @@ import {
   type UtilizationTableFilter,
   useUtilizationsStore,
 } from '@/stores/utilizations'
-import { getDate, getDateISO, getDateTimeISO, prepareDateTime } from '@/utils/helpers/dates'
+import {
+  getDate,
+  getDateISO,
+  getDateTimeISO,
+  getTime24Hour,
+  prepareDateTime,
+} from '@/utils/helpers/dates'
 import { getOvertimeHoursDecimal, getWorkHoursDecimal } from '@/utils/helpers/attendance'
 import { useTripLocationsStore } from '@/stores/tripLocations'
 import { formActionDefault } from '@/utils/helpers/constants'
@@ -52,7 +58,17 @@ export function useUtilizationsFormDialog(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
-      formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+      formData.value = props.itemData
+        ? {
+            ...props.itemData,
+            am_time_in: getTime24Hour(props.itemData.am_time_in) as string,
+            am_time_out: getTime24Hour(props.itemData.am_time_out) as string,
+            pm_time_in: getTime24Hour(props.itemData.pm_time_in) as string,
+            pm_time_out: getTime24Hour(props.itemData.pm_time_out) as string,
+            overtime_in: getTime24Hour(props.itemData.overtime_in) as string,
+            overtime_out: getTime24Hour(props.itemData.overtime_out) as string,
+          }
+        : { ...formDataDefault }
       isOvertimeApplied.value = formData.value.overtime_hours ? true : false
     },
   )
