@@ -135,7 +135,7 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
   async function addUtilization(formData: Partial<Utilization>) {
     const preparedData = prepareFormDates(formData, ['utilization_at'])
 
-    return await supabase.from('trips').insert(preparedData).select()
+    return await supabase.from('utilizations').insert(preparedData).select()
   }
 
   async function updateUtilization(formData: Partial<Utilization>) {
