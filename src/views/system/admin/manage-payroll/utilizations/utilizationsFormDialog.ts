@@ -38,17 +38,20 @@ export function useUtilizationsFormDialog(
     overtime_out: '',
     hours: undefined,
     per_hour: undefined,
+    overtime_hours: undefined,
   }
   const formData = ref<Partial<Utilization>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
+  const isOvertimeApplied = ref(false)
 
   watch(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+      isOvertimeApplied.value = formData.value.overtime_hours ? true : false
     },
   )
 
@@ -104,6 +107,7 @@ export function useUtilizationsFormDialog(
     formAction,
     refVForm,
     isUpdate,
+    isOvertimeApplied,
     onFormSubmit,
     onFormReset,
     employeesStore,

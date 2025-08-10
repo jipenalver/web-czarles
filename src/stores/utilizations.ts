@@ -25,6 +25,7 @@ export type Utilization = {
   overtime_out: string | null
   hours: number
   per_hour: number
+  overtime_hours: number
   employee_id: number | null
   employee: Employee
 }
