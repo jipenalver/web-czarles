@@ -172,7 +172,7 @@ const isFieldStaff = computed(() => {
         >
           <span class="text-body-2 font-weight-bold me-2">Is Field Staff?:</span>
           <v-chip class="font-weight-black" color="default" size="small">
-            {{ isFieldStaff ? 'Yes' : 'No' }}
+            {{ isFieldStaff ? 'Field Staff' : 'Office Staff' }}
           </v-chip>
         </v-col>
 
