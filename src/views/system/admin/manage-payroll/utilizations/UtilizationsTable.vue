@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UtilizationsExpandedRow from './UtilizationsExpandedRow.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useUtilizationsTable } from './utilizationsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -152,6 +153,26 @@ const {
               <v-tooltip activator="parent" location="top">Delete Utilization</v-tooltip>
             </v-btn>
           </div>
+        </template>
+
+        <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+          <v-btn
+            class="text-none"
+            size="small"
+            variant="text"
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            @click="toggleExpand(internalItem)"
+            border
+            slim
+          ></v-btn>
+        </template>
+
+        <template #expanded-row="{ columns, item }">
+          <UtilizationsExpandedRow
+            :columns-length="columns.length"
+            :item-data="item"
+          ></UtilizationsExpandedRow>
         </template>
       </v-data-table-server>
     </v-card-text>
