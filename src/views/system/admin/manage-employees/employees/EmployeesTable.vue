@@ -134,7 +134,7 @@ const {
                   <v-list-item @click="onExportCSV" prepend-icon="mdi-file-delimited">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf">
+                  <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf-box">
                     <v-list-item-title>Export to PDF</v-list-item-title>
                   </v-list-item>
                 </v-list>
