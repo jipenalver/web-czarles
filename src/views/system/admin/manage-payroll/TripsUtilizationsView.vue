@@ -17,6 +17,11 @@ const tabsItems = [
     value: 'trips',
   },
   {
+    icon: 'mdi-fuel',
+    text: 'Utilizations',
+    value: 'utilizations',
+  },
+  {
     icon: 'mdi-dump-truck',
     text: 'Units',
     value: 'units',
@@ -41,9 +46,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Payroll Management', 'Trips']"
+          :header-items="['Payroll Management', 'Trips & Utilizations']"
           header-icon="mdi-highway"
-          headline="Manage employee's trips."
+          headline="Manage employee's trips and fuel utilizations."
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
@@ -65,6 +70,8 @@ const isDrawerVisible = ref(xs.value ? false : true)
           <v-tabs-window-item value="trips">
             <TripsTable></TripsTable>
           </v-tabs-window-item>
+
+          <v-tabs-window-item value="utilizations"> </v-tabs-window-item>
 
           <v-tabs-window-item value="units">
             <UnitsTable></UnitsTable>
