@@ -81,23 +81,18 @@ const getTotalMinutes = (
   pmTimeOut: string | null = null,
   isField = false,
 ) => {
+  console.log('getTotalMinutes', { amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField })
+
   let totalMinutes = 0
 
   if (isField) {
-    // Field staff: Calculate total time worked and apply penalty if under 8 hours
+    // Field staff: Calculate total time worked
     const amMinutes = getFieldMinutes(amTimeIn, amTimeOut)
     const pmMinutes = getFieldMinutes(pmTimeIn, pmTimeOut)
     const actualMinutes = amMinutes + pmMinutes
 
-    // Apply 8-hour requirement with penalty
-    const expectedMinutes = 8 * 60 // 8 hours = 480 minutes
-    if (actualMinutes < expectedMinutes) {
-      const shortage = expectedMinutes - actualMinutes
-      // Apply penalty: deduct the shortage from actual time worked
-      totalMinutes = Math.max(0, actualMinutes - shortage)
-    }
-    // If 8 hours or more, cap at 8 hours
-    else totalMinutes = Math.min(actualMinutes, expectedMinutes)
+    // ✅ Fix: Just return actual minutes worked, cap at 8 hours
+    totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
     // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
     const amMinutes = getOfficeMinutes(amTimeIn, amTimeOut, 8, 12) // 8am-12pm
