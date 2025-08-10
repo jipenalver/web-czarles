@@ -64,14 +64,17 @@ export function useOvertimeFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
+    const baseDate = getDate(formData.value.date)
+
+    const prepareTimeField = (timeValue: string, baseDate: string): string | null => {
+      if (!timeValue || timeValue.trim() === '') return null
+      return `${baseDate} ${timeValue}`
+    }
+
     const { date, ...newFormData } = {
       ...formData.value,
-      overtime_in: formData.value.overtime_in
-        ? getDate(formData.value.date) + ' ' + formData.value.overtime_in
-        : null,
-      overtime_out: formData.value.overtime_out
-        ? getDate(formData.value.date) + ' ' + formData.value.overtime_out
-        : null,
+      overtime_in: prepareTimeField(formData.value.overtime_in as string, baseDate as string),
+      overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string),
       is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn ? true : undefined,
       is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut ? true : undefined,
     }

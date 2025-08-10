@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import CashAdvancesFormDialog from './CashAdvancesFormDialog.vue'
+import UtilizationsExpandedRow from './UtilizationsExpandedRow.vue'
+import UtilizationsFormDialog from './UtilizationsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import LoadingDialog from '@/components/common/LoadingDialog.vue'
-import { useCashAdvancesTable } from './cashAdvancesTable'
+import { useUtilizationsTable } from './utilizationsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
-import CashAdvancesPDF from './pdf/CashAdvancesPDF.vue'
 import { getMoneyText } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -28,12 +27,12 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  onExportPDF,
-  cashAdvancesStore,
+  // onExportPDF,
+  utilizationsStore,
   employeesStore,
-  isLoadingPDF,
-  formActionPDF,
-} = useCashAdvancesTable()
+  // isLoadingPDF,
+  // formActionPDF,
+} = useUtilizationsTable()
 </script>
 
 <template>
@@ -42,20 +41,6 @@ const {
     :form-message="formAction.formMessage"
     :form-status="formAction.formStatus"
   ></AppAlert>
-
-  <AppAlert
-    v-model:is-alert-visible="formActionPDF.formAlert"
-    :form-message="formActionPDF.formMessage"
-    :form-status="formActionPDF.formStatus"
-  ></AppAlert>
-
-  <!-- Loading dialog para sa PDF generation -->
-  <LoadingDialog
-    v-model:is-visible="isLoadingPDF"
-    title="Generating PDF..."
-    subtitle="Please wait while we prepare your report"
-    description="This may take a few moments"
-  ></LoadingDialog>
 
   <v-card>
     <v-card-text>
@@ -66,8 +51,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="cashAdvancesStore.cashAdvancesTable"
-        :items-length="cashAdvancesStore.cashAdvancesTableTotal"
+        :items="utilizationsStore.utilizationsTable"
+        :items-length="utilizationsStore.utilizationsTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
@@ -84,9 +69,9 @@ const {
                   <v-list-item @click="onExportCSV" prepend-icon="mdi-file-delimited">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf-box">
+                  <!-- <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf-box">
                     <v-list-item-title>Export to PDF</v-list-item-title>
-                  </v-list-item>
+                  </v-list-item> -->
                 </v-list>
               </v-menu>
             </v-col>
@@ -108,11 +93,11 @@ const {
 
             <v-col cols="12" sm="3">
               <v-date-input
-                v-model="tableFilters.request_at"
+                v-model="tableFilters.utilization_at"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
                 density="compact"
-                label="Request Date"
+                label="Utilization Date"
                 multiple="range"
                 clearable
                 @click:clear="onFilterDate(true)"
@@ -122,7 +107,7 @@ const {
 
             <v-col cols="12" sm="3">
               <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
-                Add Cash Advance
+                Add Utilization
               </v-btn>
             </v-col>
           </v-row>
@@ -136,15 +121,27 @@ const {
           </span>
         </template>
 
-        <template #item.amount="{ item }">
-          <span class="font-weight-black">
-            {{ getMoneyText(item.amount) }}
+        <template #item.unit="{ item }">
+          {{ item.unit.name }}
+        </template>
+
+        <template #item.utilization_at="{ item }">
+          <span class="font-weight-bold">
+            {{ date.format(item.utilization_at, 'fullDate') }}
           </span>
         </template>
 
-        <template #item.request_at="{ item }">
-          <span class="font-weight-bold">
-            {{ date.format(item.request_at, 'fullDateTime') }}
+        <template #item.trip_location="{ item }">
+          {{ item.trip_location.location }}
+        </template>
+
+        <template #item.per_hour="{ item }">
+          {{ getMoneyText(item.per_hour) }}
+        </template>
+
+        <template #item.amount="{ item }">
+          <span class="font-weight-black">
+            {{ getMoneyText(item.hours * item.per_hour) }}
           </span>
         </template>
 
@@ -152,32 +149,50 @@ const {
           <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Cash Advance</v-tooltip>
+              <v-tooltip activator="parent" location="top">Edit Utilization</v-tooltip>
             </v-btn>
 
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Cash Advance</v-tooltip>
+              <v-tooltip activator="parent" location="top">Delete Utilization</v-tooltip>
             </v-btn>
           </div>
+        </template>
+
+        <template #item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
+          <v-btn
+            class="text-none"
+            size="small"
+            variant="text"
+            :append-icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            :text="isExpanded(internalItem) ? 'Collapse' : 'More Info'"
+            @click="toggleExpand(internalItem)"
+            border
+            slim
+          ></v-btn>
+        </template>
+
+        <template #expanded-row="{ columns, item }">
+          <UtilizationsExpandedRow
+            :columns-length="columns.length"
+            :item-data="item"
+          ></UtilizationsExpandedRow>
         </template>
       </v-data-table-server>
     </v-card-text>
   </v-card>
 
-  <CashAdvancesPDF :table-headers="tableHeaders" :table-filters="tableFilters" />
-
-  <CashAdvancesFormDialog
+  <UtilizationsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></CashAdvancesFormDialog>
+  ></UtilizationsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this cash advance?"
+    text="Are you sure you want to delete this fuel utilization?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>
