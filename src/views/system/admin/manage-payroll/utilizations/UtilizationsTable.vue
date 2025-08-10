@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UtilizationsExpandedRow from './UtilizationsExpandedRow.vue'
+import UtilizationsFormDialog from './UtilizationsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useUtilizationsTable } from './utilizationsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -14,9 +15,9 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -180,6 +181,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <UtilizationsFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></UtilizationsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
