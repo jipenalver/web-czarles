@@ -5,7 +5,6 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
-import { ref } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -23,14 +22,13 @@ const {
   formAction,
   refVForm,
   isUpdate,
+  isOvertimeApplied,
   onFormSubmit,
   onFormReset,
   employeesStore,
   unitsStore,
   tripLocationsStore,
 } = useUtilizationsFormDialog(props, emit)
-
-const isOvertimeApplied = ref(false)
 </script>
 
 <template>
@@ -135,7 +133,7 @@ const isOvertimeApplied = ref(false)
               <v-text-field
                 v-model="formData.hours"
                 label="No. of Hours"
-                type="number"
+                readonly
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
@@ -161,12 +159,13 @@ const isOvertimeApplied = ref(false)
               </v-switch>
             </v-col>
 
-            <template v-if="isOvertimeApplied">
+            <template v-if="formData.overtime_hours">
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="formData.overtime_in"
                   label="Overtime In"
                   type="time"
+                  :rules="[requiredValidator]"
                 ></v-text-field>
               </v-col>
 
@@ -175,6 +174,17 @@ const isOvertimeApplied = ref(false)
                   v-model="formData.overtime_out"
                   label="Overtime Out"
                   type="time"
+                  :rules="[requiredValidator]"
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="formData.overtime_hours"
+                  label="Overtime Hours"
+                  type="number"
+                  readonly
+                  :rules="[requiredValidator]"
                 ></v-text-field>
               </v-col>
             </template>
