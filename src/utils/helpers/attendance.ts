@@ -81,8 +81,6 @@ const getTotalMinutes = (
   pmTimeOut: string | null = null,
   isField = false,
 ) => {
-  console.log('getTotalMinutes', { amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField })
-
   let totalMinutes = 0
 
   if (isField) {
@@ -91,7 +89,7 @@ const getTotalMinutes = (
     const pmMinutes = getFieldMinutes(pmTimeIn, pmTimeOut)
     const actualMinutes = amMinutes + pmMinutes
 
-    // ✅ Fix: Just return actual minutes worked, cap at 8 hours
+    // Return actual minutes worked, cap at 8 hours
     totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
     // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
