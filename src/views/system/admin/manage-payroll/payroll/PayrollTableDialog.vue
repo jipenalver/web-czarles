@@ -171,29 +171,29 @@ const calculateFieldStaffNetPay = (item: TableData) => {
           </template>
           <template #item.basic_salary="{ item }">
             <div class="d-flex align-center ga-2">
-              <span v-if="isCurrentEmployeeFieldStaff"
-                >₱{{ getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8)) }}
-                <span class="text-caption text-grey">({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span>
-                </span
-              >
-              <span v-else
-                >₱{{ getMoneyText(item.basic_salary) }}</span
-              >
+                <span v-if="isCurrentEmployeeFieldStaff"
+                  >{{ getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8)) }}
+                  <span class="text-caption text-grey">({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span>
+                  </span
+                >
+                <span v-else
+                  >{{ getMoneyText(item.basic_salary) }}</span
+                >
             </div>
           </template>
           <template #item.gross_pay="{ item }">
-            ₱{{ getMoneyText(item.gross_pay) }}
+              {{ getMoneyText(item.gross_pay) }}
           </template>
           <template #item.deductions="{ item }">
-            ₱{{ getMoneyText(item.deductions) }}
+              {{ getMoneyText(item.deductions) }}
           </template>
           <template #item.net_pay="{ item }">
-            <span v-if="isCurrentEmployeeFieldStaff">
-              ₱{{ getMoneyText(calculateFieldStaffNetPay(item)) }}
-            </span>
-            <span v-else>
-              ₱{{ getMoneyText(item.net_pay) }}
-            </span>
+              <span v-if="isCurrentEmployeeFieldStaff">
+                {{ getMoneyText(calculateFieldStaffNetPay(item)) }}
+              </span>
+              <span v-else>
+                {{ getMoneyText(item.net_pay) }}
+              </span>
           </template>
         </v-data-table>
 
