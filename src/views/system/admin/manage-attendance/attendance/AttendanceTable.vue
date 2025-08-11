@@ -77,8 +77,8 @@ const {
                   <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
                 </template>
 
-                <v-list>
-                  <v-list-item @click="onExportCSV">
+                <v-list slim>
+                  <v-list-item @click="onExportCSV" prepend-icon="mdi-file-delimited">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
                 </v-list>

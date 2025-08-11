@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import UtilizationsTable from './utilizations/UtilizationsTable.vue'
 import TripLocationsTable from './locations/TripLocationsTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -15,6 +16,11 @@ const tabsItems = [
     icon: 'mdi-highway',
     text: 'Trips',
     value: 'trips',
+  },
+  {
+    icon: 'mdi-fuel',
+    text: 'Utilizations',
+    value: 'utilizations',
   },
   {
     icon: 'mdi-dump-truck',
@@ -41,9 +47,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Payroll Management', 'Trips']"
+          :header-items="['Payroll Management', 'Trips & Utilizations']"
           header-icon="mdi-highway"
-          headline="Manage employee's trips."
+          headline="Manage employee's trips and fuel utilizations."
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
@@ -64,6 +70,10 @@ const isDrawerVisible = ref(xs.value ? false : true)
         <v-tabs-window v-model="tabWindow">
           <v-tabs-window-item value="trips">
             <TripsTable></TripsTable>
+          </v-tabs-window-item>
+
+          <v-tabs-window-item value="utilizations">
+            <UtilizationsTable></UtilizationsTable>
           </v-tabs-window-item>
 
           <v-tabs-window-item value="units">

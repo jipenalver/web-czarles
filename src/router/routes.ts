@@ -10,7 +10,7 @@ import RatesBenefitsView from '@/views/system/admin/manage-employees/RatesBenefi
 import AttendanceView from '@/views/system/admin/manage-attendance/AttendanceView.vue'
 import LeaveView from '@/views/system/admin/manage-attendance/LeaveView.vue'
 import OvertimeView from '@/views/system/admin/manage-attendance/OvertimeView.vue'
-import TripsView from '@/views/system/admin/manage-payroll/TripsView.vue'
+import TripsUtilizationsView from '@/views/system/admin/manage-payroll/TripsUtilizationsView.vue'
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
@@ -96,7 +96,7 @@ export const routes = [
   {
     path: '/hrms/payroll/trips',
     name: 'hrms-payroll-trips',
-    component: TripsView,
+    component: TripsUtilizationsView,
     meta: { requiresAuth: true },
   },
   {

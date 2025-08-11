@@ -55,8 +55,8 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
     const startMinutes = timeToMinutes(timeIn)
     const endMinutes = timeToMinutes(timeOut)
 
-    /*  console.log('[getFieldMinutes] Time converted to minutes:', { 
-      startMinutes, 
+    /*  console.log('[getFieldMinutes] Time converted to minutes:', {
+      startMinutes,
       endMinutes,
       startTime: `${Math.floor(startMinutes / 60)}:${(startMinutes % 60).toString().padStart(2, '0')}`,
       endTime: `${Math.floor(endMinutes / 60)}:${(endMinutes % 60).toString().padStart(2, '0')}`
@@ -168,18 +168,8 @@ export const getTotalMinutes = (
 
     // console.log('[getTotalMinutes] Field staff - amMinutes:', amMinutes, 'pmMinutes:', pmMinutes, 'actualMinutes:', actualMinutes)
 
-    // Apply 8-hour requirement with penalty
-    const expectedMinutes = 8 * 60 // 8 hours = 480 minutes
-    if (actualMinutes < expectedMinutes) {
-      const shortage = expectedMinutes - actualMinutes
-      // Apply penalty: deduct the shortage from actual time worked
-      totalMinutes = Math.max(0, actualMinutes - shortage)
-      // console.log('[getTotalMinutes] Field staff shortage:', shortage, 'totalMinutes:', totalMinutes)
-    } else {
-      // If 8 hours or more, cap at 8 hours
-      totalMinutes = Math.min(actualMinutes, expectedMinutes)
-      // console.log('[getTotalMinutes] Field staff actualMinutes >= expected:', actualMinutes, 'totalMinutes:', totalMinutes)
-    }
+    // Return actual minutes worked, cap at 8 hours
+    totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
     // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
     const amMinutes = getOfficeMinutes(amTimeIn, amTimeOut, 8, 12) // 8am-12pm
@@ -249,8 +239,6 @@ export const getTotalMinutesForMonth = async (
   }
 }
 
-
-
 export const getPaidLeaveDaysForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
@@ -275,16 +263,17 @@ export const getPaidLeaveDaysForMonth = async (
       console.log(`[getPaidLeaveDaysForMonth] Checking attendance record:`, {
         am_time_in: attendance.am_time_in,
         is_leave_with_pay: attendance.is_leave_with_pay,
-        has_leave_data: attendance.is_leave_with_pay !== undefined && attendance.is_leave_with_pay !== null
+        has_leave_data:
+          attendance.is_leave_with_pay !== undefined && attendance.is_leave_with_pay !== null,
       })
-      
+
       if (attendance.is_leave_with_pay === true) {
         paidLeaveDaysCounter++
         // Use am_time_in as day indicator para sa paid leave
         console.log(`[getPaidLeaveDaysForMonth] Paid leave day found:`, {
           day_indicator: attendance.am_time_in,
           leave_type: attendance.leave_type,
-          leave_reason: attendance.leave_reason
+          leave_reason: attendance.leave_reason,
         })
       }
     })
