@@ -375,7 +375,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
               </td>
-              <td class="pa-2">@{{ getMoneyText(trip.per_trip ?? 0) }}</td>
+              <td class="pa-2">@ {{ getMoneyText(trip.per_trip ?? 0) }}</td>
               <td class="pa-2">x {{ trip.trip_no ?? 1 }}</td>
               <td
                 class="text-grey-darken-1 border-b-thin border-s-sm text-end pa-2 total-cell"

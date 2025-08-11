@@ -4,7 +4,7 @@ import { type Utilization, useUtilizationsStore } from '@/stores/utilizations'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
-// import { useTripsPDF } from './pdf/tripsPDF' // PULIHI RANI MARDE
+import { useUtilizationPDF } from './pdf/utilizationPDF'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -14,7 +14,7 @@ export function useUtilizationsTable() {
   const utilizationsStore = useUtilizationsStore()
   const employeesStore = useEmployeesStore()
 
-  // const { isLoadingPDF, formAction: formActionPDF, onExport } = useTripsPDF() // PULIHI RANI MARDE
+  const { isLoadingPDF, formAction: formActionPDF, onExport } = useUtilizationPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -158,9 +158,9 @@ export function useUtilizationsTable() {
     generateCSV(filename, csvData())
   }
 
-  // const onExportPDF = async () => {
-  //   await onExport(tableFilters.value) // PULIHI RANI MARDE
-  // }
+  const onExportPDF = async () => {
+    await onExport(tableFilters.value)
+  }
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
@@ -185,10 +185,10 @@ export function useUtilizationsTable() {
     onFilterItems,
     onLoadItems,
     onExportCSV,
-    // onExportPDF, // PULIHI RANI MARDE
+    onExportPDF,
     utilizationsStore,
     employeesStore,
-    // isLoadingPDF, // PULIHI RANI MARDE
-    // formActionPDF, // PULIHI RANI MARDE
+    isLoadingPDF,
+    formActionPDF,
   }
 }
