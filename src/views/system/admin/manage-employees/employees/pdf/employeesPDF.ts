@@ -77,21 +77,21 @@ export function useEmployeesPDF() {
 
       // Generate PDF with portrait orientation and automatic page breaks
       await html2pdf(employeesTableElement, {
-        margin: [0.3, 0.3, 0.3, 0.3], // Smaller margins for more compact layout
+        margin: [2.5, 2.5, 2.5, 2.5], // Minimal margins to maximize content area
         filename: `${filename}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
+        image: { type: 'jpeg', quality: 0.9 },
         html2canvas: {
-          scale: 1.8, // Increased scale for better readability despite small font
+          scale: 1.2, // Smaller scale to fit wide table in portrait
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
-          width: 800, // Adjusted width for portrait
-          height: 1100, // Adjusted height for portrait
+          width:750, // Use full table width
+         
         },
         jsPDF: {
-          unit: 'in',
+         
           format: 'a4',
-          orientation: 'portrait', // Portrait orientation
+          orientation: 'portrait', // Keep portrait orientation
         },
       })
 

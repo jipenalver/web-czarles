@@ -17,24 +17,24 @@ const employeesStore = useEmployeesStore()
 
 <template>
   <!-- PDF Export Container - hidden table para sa PDF generation -->
-  <div style="display: none" id="employees-table">
-    <h2 class="report-title">{{ props.componentView.toUpperCase() }} EMPLOYEES REPORT</h2>
-    <table class="pdf-table">
+  <div style="/* display: none */" id="employees-table">
+    <h2 class="report-title ">{{ props.componentView.toUpperCase() }} EMPLOYEES REPORT</h2>
+    <table class="pdf-table pa-2">
       <thead class="pdf-thead">
         <tr>
           <th
             v-for="header in props.tableHeaders.filter((h) => h.key !== 'actions')"
             :key="header.key"
-            class="pdf-th"
+            class="pdf-th pdf-th--wide"
           >
             {{ header.title }}
           </th>
-          <th class="pdf-th pdf-th--narrow">ID No.</th>
-          <th class="pdf-th">Birthdate</th>
+          <th class="pdf-th pdf-th--narrow justify-center align-center">ID No.</th>
+          <th class="pdf-th justify-center align-center">Birthdate</th>
           <th class="pdf-th pdf-th--wide">Address</th>
           <th class="pdf-th pdf-th--wide">Years of Service</th>
           <th class="pdf-th pdf-th--wide">Contract Status</th>
-          <th class="pdf-th pdf-th--wide">Field Staff</th>
+          <th class="pdf-th pdf-th--narrow">Field Staff</th>
           <th class="pdf-th pdf-th--narrow">TIN No.</th>
           <th class="pdf-th pdf-th--narrow">SSS No.</th>
           <th class="pdf-th pdf-th--wide">PhilHealth No.</th>
@@ -42,14 +42,14 @@ const employeesStore = useEmployeesStore()
           <th class="pdf-th pdf-th--wide">Area Origin</th>
           <th class="pdf-th pdf-th--wide">Area Assignment</th>
           <template v-if="props.componentView === 'benefits' || props.componentView === 'payroll'">
-            <th class="pdf-th pdf-th--wide">Daily Rate</th>
-            <th class="pdf-th pdf-th--wide">Accident Insurance</th>
+            <th class="pdf-th pdf-th--narrow">Daily Rate</th>
+            <th class="pdf-th pdf-th--narrow">Acc. Ins.</th>
           </template>
         </tr>
       </thead>
       <tbody>
         <tr v-for="item in employeesStore.employeesExport" :key="item.id" class="pdf-tr">
-          <td class="pdf-td pdf-td--bold">{{ item.lastname }}, {{ item.firstname }}</td>
+          <td class="pdf-td pdf-td--bold ">{{ item.lastname }}, {{ item.firstname }}</td>
           <td class="pdf-td">{{ item.phone }}</td>
           <td class="pdf-td">{{ item.email }}</td>
           <td class="pdf-td">{{ item.designation.designation }}</td>
@@ -86,7 +86,7 @@ const employeesStore = useEmployeesStore()
             <td class="pdf-td pdf-td--bold pdf-td--narrow">
               {{ item.daily_rate ? getMoneyText(item.daily_rate) : 'n/a' }}
             </td>
-            <td class="pdf-td pdf-td--narrow">
+            <td class="pdf-td pdf-td--narrow ">
               {{ item.is_insured ? 'Yes' : 'No' }}
             </td>
           </template>
@@ -120,8 +120,8 @@ const employeesStore = useEmployeesStore()
 
 .pdf-th {
   border: 1px solid #ddd;
-  padding: 2px;
-  text-align: left;
+  padding: 0px;
+  text-align: center;
   background-color: #f5f5f5;
   font-size: 7px;
   font-weight: bold;
@@ -147,6 +147,7 @@ const employeesStore = useEmployeesStore()
   word-wrap: break-word;
   overflow-wrap: break-word;
   width: 8%;
+  text-align: center;
 }
 
 .pdf-td--bold {
