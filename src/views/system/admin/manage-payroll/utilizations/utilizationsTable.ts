@@ -1,4 +1,4 @@
-import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
+import { getDateISO, getFirstAndLastDateOfMonth, getTime } from '@/utils/helpers/dates'
 import { generateCSV, getMoneyText, prepareCSV } from '@/utils/helpers/others'
 import { type Utilization, useUtilizationsStore } from '@/stores/utilizations'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
@@ -111,7 +111,20 @@ export function useUtilizationsTable() {
         .filter(({ title }) => !['Actions', 'Employee'].includes(title))
         .map(({ title }) => title)
 
-      const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
+      const csvHeaders = [
+        'Lastname',
+        'Firstname',
+        'Middlename',
+        ...defaultHeaders,
+        'Overtime Hours',
+        'Overtime Amount',
+        'AM - Time In',
+        'AM - Time Out',
+        'PM - Time In',
+        'PM - Time Out',
+        'Overtime In',
+        'Overtime Out',
+      ].join(',')
 
       const csvRows = utilizationsStore.utilizationsExport.map((item) => {
         const csvData = [
@@ -125,6 +138,15 @@ export function useUtilizationsTable() {
           prepareCSV(item.hours.toString()),
           prepareCSV(getMoneyText(item.per_hour)),
           prepareCSV(getMoneyText(item.hours * item.per_hour)),
+          item.overtime_hours ? item.overtime_hours.toString() : '',
+          prepareCSV(getMoneyText(item.overtime_hours * item.per_hour)),
+
+          item.am_time_in ? getTime(item.am_time_in) : '',
+          item.am_time_out ? getTime(item.am_time_out) : '',
+          item.pm_time_in ? getTime(item.pm_time_in) : '',
+          item.pm_time_out ? getTime(item.pm_time_out) : '',
+          item.overtime_in ? getTime(item.overtime_in) : '',
+          item.overtime_out ? getTime(item.overtime_out) : '',
         ]
 
         return csvData.join(',')
