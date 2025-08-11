@@ -56,6 +56,7 @@ const {
         @update:options="onLoadItems"
         :hide-default-header="mobile"
         :mobile="mobile"
+        show-expand
       >
         <template #top>
           <v-row dense>
@@ -135,13 +136,17 @@ const {
           {{ item.trip_location.location }}
         </template>
 
+        <template #item.hours="{ item }">
+          {{ item.hours }} {{ item.overtime_hours ? `(+${item.overtime_hours})` : '' }}
+        </template>
+
         <template #item.per_hour="{ item }">
           {{ getMoneyText(item.per_hour) }}
         </template>
 
         <template #item.amount="{ item }">
           <span class="font-weight-black">
-            {{ getMoneyText(item.hours * item.per_hour) }}
+            {{ getMoneyText((item.hours + item.overtime_hours) * item.per_hour) }}
           </span>
         </template>
 

@@ -2,7 +2,7 @@
 
 import { computed, type Ref, ref, watch } from 'vue'
 import { getEmployeeAttendanceById } from './computation/computation'
-import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth } from './computation/attendace'
+import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth } from './computation/attendance'
 import { useEmployeesStore } from '@/stores/employees'
 
 export interface PayrollData {
@@ -154,11 +154,14 @@ export function usePayrollComputation(
         // Get employee info to check if field staff
         const emp = await employeesStore.getEmployeesById(employeeId)
         const isFieldStaff = emp?.is_field_staff || undefined
-        
+
         // Get paid leave days para sa month
         const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId)
-        console.log(`[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`, paidLeaveDays)
-        
+        console.log(
+          `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
+          paidLeaveDays,
+        )
+
         if (isFieldStaff) {
           // For field staff, use getTotalMinutesForMonth to calculate actual work hours for the entire month
           let totalWorkMinutes = 0
@@ -171,7 +174,7 @@ export function usePayrollComputation(
             totalWorkMinutes = await getTotalMinutesForMonth(
               dateStringForCalculation, // filterDateString format: "YYYY-MM-01"
               employeeId,
-              true // isField = true
+              true, // isField = true
             )
           }
 
@@ -184,19 +187,22 @@ export function usePayrollComputation(
           let employeePresentDays = 0
           attendances.forEach((attendance) => {
             const hasAnyData =
-              attendance.am_time_in || attendance.am_time_out ||
-              attendance.pm_time_in || attendance.pm_time_out
+              attendance.am_time_in ||
+              attendance.am_time_out ||
+              attendance.pm_time_in ||
+              attendance.pm_time_out
             if (hasAnyData) employeePresentDays++
           })
-          
+
           // Add paid leave days to present days para field staff
           employeePresentDays += paidLeaveDays
-          console.log(`[computeRegularWorkTotal] Field staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`)
+          console.log(
+            `[computeRegularWorkTotal] Field staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
+          )
 
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
           monthLateDeduction.value = 0 // Field staff don't have late deductions
-
         } else {
           // For office staff, use existing logic
           const allAmTimeIn = attendances.map((a) => a.am_time_in)
@@ -236,10 +242,12 @@ export function usePayrollComputation(
               employeePresentDays++
             }
           })
-          
+
           // Add paid leave days to present days para office staff
           employeePresentDays += paidLeaveDays
-          console.log(`[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`)
+          console.log(
+            `[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
+          )
 
           // Calculate absent days: total working days minus present days (including paid leave)
           const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
