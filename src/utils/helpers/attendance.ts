@@ -1,7 +1,17 @@
+// 👉 Strip timezone information and parse as local time
+const parseLocalTime = (timeString: string | Date) => {
+  if (typeof timeString === 'string') {
+    // Remove timezone offset (+00:00, +08:00, etc.)
+    const localTimeString = timeString.replace(/[+\-]\d{2}:?\d{0,2}$/, '')
+    return new Date(localTimeString)
+  }
+  return new Date(timeString)
+}
+
 // 👉 Get Field minutes worked (handles overnight shifts)
 const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | null) => {
-  const checkIn = new Date(timeIn as string)
-  const checkOut = new Date(timeOut as string)
+  const checkIn = parseLocalTime(timeIn as string)
+  const checkOut = parseLocalTime(timeOut as string)
 
   if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) return 0
 
@@ -24,16 +34,6 @@ const getOfficeMinutes = (
   sessionStart: number,
   sessionEnd: number,
 ) => {
-  // Strip timezone information and parse as local time
-  const parseLocalTime = (timeString: string | Date) => {
-    if (typeof timeString === 'string') {
-      // Remove timezone offset (+00:00, +08:00, etc.)
-      const localTimeString = timeString.replace(/[+\-]\d{2}:?\d{0,2}$/, '')
-      return new Date(localTimeString)
-    }
-    return new Date(timeString)
-  }
-
   const checkIn = parseLocalTime(timeIn as string)
   const checkOut = parseLocalTime(timeOut as string)
 
@@ -73,6 +73,51 @@ const getOfficeMinutes = (
   return Math.max(0, Math.floor(diffMs / (1000 * 60)))
 }
 
+// 👉 Get Office minutes with allowance
+const getOfficeMinutesWithAllowance = (
+  timeIn: string | Date | null,
+  timeOut: string | Date | null,
+  sessionStart: number,
+  sessionEnd: number,
+  lateAllowanceMinutes = 0,
+  earlyDepartureAllowanceMinutes = 0,
+) => {
+  const baseMinutes = getOfficeMinutes(timeIn, timeOut, sessionStart, sessionEnd)
+  let totalAllowance = 0
+
+  // Late arrival allowance
+  if (lateAllowanceMinutes > 0 && timeIn) {
+    const checkIn = parseLocalTime(timeIn)
+    const sessionStartTime = new Date(
+      checkIn.getFullYear(),
+      checkIn.getMonth(),
+      checkIn.getDate(),
+      sessionStart,
+    )
+    const lateMinutes = Math.max(0, (checkIn.getTime() - sessionStartTime.getTime()) / (1000 * 60))
+
+    if (lateMinutes > 0 && lateMinutes <= lateAllowanceMinutes)
+      totalAllowance += Math.min(lateMinutes, lateAllowanceMinutes)
+  }
+
+  // Early departure allowance
+  if (earlyDepartureAllowanceMinutes > 0 && timeOut) {
+    const checkOut = parseLocalTime(timeOut)
+    const sessionEndTime = new Date(
+      checkOut.getFullYear(),
+      checkOut.getMonth(),
+      checkOut.getDate(),
+      sessionEnd,
+    )
+    const earlyMinutes = Math.max(0, (sessionEndTime.getTime() - checkOut.getTime()) / (1000 * 60))
+
+    if (earlyMinutes > 0 && earlyMinutes <= earlyDepartureAllowanceMinutes)
+      totalAllowance += Math.min(earlyMinutes, earlyDepartureAllowanceMinutes)
+  }
+
+  return baseMinutes + totalAllowance
+}
+
 // 👉 Get total minutes worked (AM + PM)
 const getTotalMinutes = (
   amTimeIn: string | null,
@@ -93,8 +138,17 @@ const getTotalMinutes = (
     totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
     // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
-    const amMinutes = getOfficeMinutes(amTimeIn, amTimeOut, 8, 12) // 8am-12pm
-    const pmMinutes = getOfficeMinutes(pmTimeIn, pmTimeOut, 13, 17) // 1pm-5pm
+    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10) // 8:10am-12pm
+
+    let pmMinutes = 0
+    // Use actual attendance date, not current date
+    const attendanceDate = amTimeIn ? new Date(amTimeIn) : new Date(pmTimeIn!)
+    const dayOfWeek = attendanceDate.getDay()
+
+    if (dayOfWeek === 5 || dayOfWeek === 6)
+      pmMinutes = getOfficeMinutesWithAllowance(pmTimeIn, pmTimeOut, 13, 17, 0, 30) // 1pm-4:30pm
+    else pmMinutes = getOfficeMinutes(pmTimeIn, pmTimeOut, 13, 17) // 1pm-5pm
+
     totalMinutes = amMinutes + pmMinutes
   }
 
