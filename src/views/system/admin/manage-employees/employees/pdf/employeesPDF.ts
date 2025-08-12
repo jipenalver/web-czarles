@@ -79,9 +79,9 @@ export function useEmployeesPDF() {
       await html2pdf(employeesTableElement, {
         margin: [2.5, 2.5, 2.5, 2.5], // Minimal margins to maximize content area
         filename: `${filename}.pdf`,
-        image: { type: 'jpeg', quality: 0.9 },
+        image: { type: 'jpeg', quality: 2 },
         html2canvas: {
-          scale: 1.2, // Smaller scale to fit wide table in portrait
+          scale: 2, // Smaller scale to fit wide table in portrait
           useCORS: true,
           allowTaint: true,
           letterRendering: true,

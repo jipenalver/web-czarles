@@ -17,7 +17,7 @@ const employeesStore = useEmployeesStore()
 
 <template>
   <!-- PDF Export Container - hidden table para sa PDF generation -->
-  <div style="/* display: none */" id="employees-table">
+  <div style="display: none" id="employees-table">
     <h2 class="report-title ">{{ props.componentView.toUpperCase() }} EMPLOYEES REPORT</h2>
     <table class="pdf-table pa-2">
       <thead class="pdf-thead">
