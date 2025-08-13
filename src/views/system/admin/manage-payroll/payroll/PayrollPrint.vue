@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import {
   useOverallEarningsTotal,
-  // useEarningsBreakdown,
-  // useNetSalaryCalculation,
 } from './overallTotal'
 import {
   getHolidayTypeName,
@@ -13,7 +11,6 @@ import { getMoneyText } from '@/utils/helpers/others'
 import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './usePayrollPrint'
-// import logoCzarles from '@/assets/logos/logo-czarles.png'
 import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './MiniPayrollPrint.vue'
 import { fetchEmployeeDeductions } from './computation/benefits'
@@ -23,37 +20,32 @@ import { useTripsStore } from '@/stores/trips'
 import { fetchHolidaysByDateString } from './computation/holidays'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import { fetchFilteredTrips } from './computation/trips'
-// Props
+
 const props = defineProps<{
   employeeData: Employee | null
   payrollData: PayrollData
   tableData: TableData
 }>()
 
-// Expose functions para ma-access sa parent component
 defineExpose({
   initializePayrollCalculations,
   recalculateEarnings,
   reloadAllFunctions,
-  // Individual reload functions
   loadTrips,
   fetchEmployeeHolidays,
   updateOverallOvertime,
   updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
 })
-// Pinia store for employees
-// const employeesStore = useEmployeesStore()
+
 const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 
-// Use fetchEmployeeDeductions from cashAdvance.ts
 async function updateEmployeeDeductions(employeeId: number | undefined) {
   const result = await fetchEmployeeDeductions(employeeId)
   employeeDeductions.value = result.deductions
   employeeNonDeductions.value = result.nonDeductions
 }
 
-// Watch for employeeId changes to fetch deductions
 watch(
   () => props.employeeData?.id,
   (id) => {
@@ -62,14 +54,10 @@ watch(
   { immediate: true },
 )
 
-// ...existing code...
-
-// Month date range for display in "Days Regular Work for"
 const monthDateRange = computed(() => {
   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
 })
 
-// Constants
 const monthNames = [
   'January',
   'February',
@@ -85,7 +73,6 @@ const monthNames = [
   'December',
 ]
 
-// Reactive references
 const isTripsLoading = ref(false)
 const isHolidaysLoading = ref(false)
 const holidays = ref<Holiday[]>([])
@@ -93,7 +80,6 @@ const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
-// Computed properties for employee information
 const fullName = computed(() => {
   if (!props.employeeData) return 'N/A'
   const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
@@ -108,7 +94,6 @@ const address = computed(() => {
   return props.employeeData?.address || 'N/A'
 })
 
-// Date formatting computeds
 const formattedDate = computed(() => {
   const monthIndex = monthNames.indexOf(props.payrollData.month)
   const date = new Date(props.payrollData.year, monthIndex)
@@ -125,20 +110,11 @@ const holidayDateString = computed(() => {
   return `${props.payrollData.year}-${month}`
 })
 
-// Payroll calculation computeds
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
-
-// Check if field staff to determine if late deduction should be shown
 const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
-
-// Check if employee is field staff
 const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
-
-// Effective work days (present days based on attendance)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)
-
-// Total hours worked for field staff (calculated from regularWorkTotal and hourly rate)
 const totalHoursWorked = computed(() => {
   if (props.employeeData?.is_field_staff && employeeDailyRate.value > 0) {
     const hourlyRate = employeeDailyRate.value / 8
@@ -147,7 +123,6 @@ const totalHoursWorked = computed(() => {
   return 0
 })
 
-// Composables
 const payrollPrint = usePayrollPrint(
   {
     employeeData: props.employeeData,
@@ -159,26 +134,17 @@ const payrollPrint = usePayrollPrint(
   filterDateString,
 )
 
-// const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
-
-// Destructure values from payrollPrint composable
 const {
-  // workDays,
   codaAllowance,
-  // totalGrossSalary,
-  // totalDeductions,
-  // netSalary,
   formatCurrency,
   employeeDailyRate,
   regularWorkTotal,
-  // absentDays,
   presentDays,
   lateDeduction,
   monthLateDeduction,
   computeOverallOvertimeCalculation,
 } = payrollPrint
 
-// Use helpers for payroll calculations
 const overallEarningsTotal = useOverallEarningsTotal(
   regularWorkTotal,
   computed(() => tripsStore.trips),
@@ -191,146 +157,67 @@ const overallEarningsTotal = useOverallEarningsTotal(
   isFieldStaff,
 )
 
-//debuging porpuses
-// const earningsBreakdown = useEarningsBreakdown(
-//   regularWorkTotal,
-//   computed(() => tripsStore.trips),
-//   holidays,
-//   dailyRate,
-//   employeeDailyRate,
-//   overallOvertime,
-//   codaAllowance,
-// )
-
-// const netSalaryCalculation = useNetSalaryCalculation(
-//   overallEarningsTotal,
-//   showLateDeduction,
-//   lateDeduction,
-//   employeeDeductions,
-// )
-
-// Additional computed values para better display sa useOverallEarningsTotal results
 const displayTotalEarnings = computed(() => {
-  // Ensure na ma-trigger ang useOverallEarningsTotal computation
   return overallEarningsTotal.value || 0
 })
 
-// Computed para sa monthly trippings total - para ma-avoid ang TypeScript errors sa template
 const monthlyTrippingsTotal = computed(() => {
   return tripsStore.trips.reduce((sum, trip) => {
     return sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1)
   }, 0)
 })
 
-// const displayEarningsBreakdown = computed(() => {
-//   // Display breakdown gikan sa earningsBreakdown composable
-//   return earningsBreakdown.value
-// })
-
-// const displayNetSalary = computed(() => {
-//   // Display net salary calculation results
-//   return netSalaryCalculation.value
-// })
-
-// Use imported getMoneyText from others.ts
-
-// Alias to avoid naming conflict with imported function
-// const getMoneyTextRaw = getMoneyText
-
-// Function to recalculate total earnings - trigger useOverallEarningsTotal calculation
 function recalculateEarnings() {
-  // This triggers the computed value recalculation para sa useOverallEarningsTotal
   reactiveTotalEarnings.value = overallEarningsTotal.value
-
-  // Log para makita kung na-trigger ang calculation
-  /* console.log('[PayrollPrint] Overall earnings recalculated:', overallEarningsTotal.value) */
 }
 
-// Function to initialize and trigger useOverallEarningsTotal on mount
 async function initializePayrollCalculations() {
   try {
-    // console.log('[PayrollPrint] Starting payroll calculations initialization...')
-
-    // Reset loading states
     isTripsLoading.value = true
     isHolidaysLoading.value = true
-
-    // Reset data arrays para fresh start
     holidays.value = []
     overallOvertime.value = 0
     employeeDeductions.value = []
     employeeNonDeductions.value = []
-
-    // Load employee deductions first
     if (props.employeeData?.id) {
       await updateEmployeeDeductions(props.employeeData.id)
     }
-
-    // Load all required data simultaneously
     await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime()])
-
-    // Force trigger ang useOverallEarningsTotal computation after all data is loaded
     recalculateEarnings()
-
-    console.log('[PayrollPrint] Payroll calculations initialized successfully')
-    console.log('[PayrollPrint] Final totals:', {
-      isFieldStaff: isFieldStaff.value,
-      regularWork: regularWorkTotal.value,
-      totalHoursWorked: isFieldStaff.value ? totalHoursWorked.value : 'N/A (Office Staff)',
-      trips: tripsStore.trips?.length || 0,
-      holidays: holidays.value?.length || 0,
-      overtime: overallOvertime.value,
-      totalEarnings: overallEarningsTotal.value
-    })
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
-    // Reset loading states on error
     isTripsLoading.value = false
     isHolidaysLoading.value = false
   }
 }
 
-// Comprehensive reload function para sa lahat ng functions
 async function reloadAllFunctions() {
   try {
-    // console.log('[PayrollPrint] Reloading all payroll functions - comprehensive reload...')
-
-    // Clear all existing data
     tripsStore.trips = []
     holidays.value = []
     overallOvertime.value = 0
     employeeDeductions.value = []
     employeeNonDeductions.value = []
     reactiveTotalEarnings.value = 0
-
-    // Reset loading states
     isTripsLoading.value = true
     isHolidaysLoading.value = true
-
-    // Re-initialize everything from scratch
     await initializePayrollCalculations()
-
-    // console.log('[PayrollPrint] All functions reloaded successfully')
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
   }
 }
 
-// Holiday fetching function
 async function fetchEmployeeHolidays() {
   if (!props.employeeData?.id) {
     holidays.value = []
     isHolidaysLoading.value = false
     return
   }
-
   try {
-    //  console.log('[PayrollPrint] Fetching holidays for employee:', props.employeeData.id)
     holidays.value = await fetchHolidaysByDateString(
       holidayDateString.value,
       String(props.employeeData.id),
     )
-    //  console.log('[PayrollPrint] Holidays fetched:', holidays.value?.length || 0)
   } catch (error) {
     console.error('Error fetching holidays:', error)
     holidays.value = []
@@ -339,20 +226,15 @@ async function fetchEmployeeHolidays() {
   }
 }
 
-// Trip loading function
 async function loadTrips() {
   if (!props.employeeData?.id) {
     isTripsLoading.value = false
     return
   }
-
-  //console.log('[PayrollPrint] Loading trips for employee:', props.employeeData.id, 'with date:', filterDateString.value)
   isTripsLoading.value = true
-
   try {
     const fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
     tripsStore.trips = fetchedTrips
-   // console.log('[PayrollPrint] Trips loaded:', tripsStore.trips?.length || 0, 'trips:', fetchedTrips)
   } catch (error) {
     console.error('[PayrollPrint] Error loading trips:', error)
     tripsStore.trips = []
@@ -361,25 +243,19 @@ async function loadTrips() {
   }
 }
 
-// Overtime calculation function
 async function updateOverallOvertime() {
   try {
-    // console.log('[PayrollPrint] Calculating overtime for employee:', props.employeeData?.id)
     overallOvertime.value = await computeOverallOvertimeCalculation()
-    // console.log('[PayrollPrint] Overtime calculated:', overallOvertime.value)
   } catch (error) {
     console.error('Error calculating overtime:', error)
     overallOvertime.value = 0
   }
 }
 
-// Enhanced mounted hook - properly trigger useOverallEarningsTotal
 onMounted(async () => {
-  // Call ang initialization function na mag-trigger sa useOverallEarningsTotal
   await initializePayrollCalculations()
 })
 
-// Watch for changes in all earning components - trigger useOverallEarningsTotal recalculation
 watch(
   [
     regularWorkTotal,
@@ -389,16 +265,14 @@ watch(
     employeeDailyRate,
     dailyRate,
     codaAllowance,
-    employeeNonDeductions, // Include non-deductions in watch para ma-trigger ang useOverallEarningsTotal
+    employeeNonDeductions,
   ],
   () => {
-    // Trigger ang useOverallEarningsTotal computation whenever may changes
     recalculateEarnings()
   },
   { deep: true, immediate: true },
 )
 
-// Enhanced watchers for better reactivity - re-trigger useOverallEarningsTotal calculations
 watch(
   [
     () => props.employeeData?.id,
@@ -407,13 +281,11 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    // Re-initialize all calculations including useOverallEarningsTotal when key data changes
     await initializePayrollCalculations()
   },
   { deep: true },
 )
 
-// Individual watchers for specific data changes
 watch([filterDateString, () => props.employeeData?.id], async () => {
   await loadTrips()
 })
@@ -421,28 +293,10 @@ watch([filterDateString, () => props.employeeData?.id], async () => {
 watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
-
-// Additional watcher para monitor ang useOverallEarningsTotal changes
-// watch(
-//   () => overallEarningsTotal.value,
-//   (newTotal, oldTotal) => {
-//     console.log('[PayrollPrint] useOverallEarningsTotal updated:', { oldTotal, newTotal })
-//     // Update ang reactive total earnings
-//     reactiveTotalEarnings.value = newTotal
-//   },
-//   { immediate: true },
-// )
-
-// // Debug logging (uncomment for debugging)
-console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| employeeId:', props.employeeData?.id, '| trips:', tripsStore.trips)
-//console.log('[PayrollPrint] Overall Earnings Total (useOverallEarningsTotal):', overallEarningsTotal.value)
-// console.log('[PayrollPrint] Earnings Breakdown:', earningsBreakdown.value)
-// console.log('[PayrollPrint] Net Salary Calculation:', netSalaryCalculation.value)
 </script>
 
 <template>
   <v-container fluid class="pa-4 payroll-main-content">
-    <!-- Header Section -->
     <v-row dense no-gutters>
       <v-col cols="12" sm="9" class="d-flex justify-center align-center">
         <v-img src="/image-header-title.png"></v-img>
@@ -452,7 +306,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
       </v-col>
     </v-row>
 
-    <!-- Employee Information Table -->
     <v-table class="mt-6 text-body-2" density="compact">
       <tbody>
         <tr>
@@ -470,7 +323,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
       </tbody>
     </v-table>
 
-    <!-- Payroll Details Table -->
     <v-table class="mt-3 text-body-2 border" density="compact">
       <tbody>
         <tr>
@@ -509,7 +361,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           </td>
         </tr>
 
-        <!-- Unified Loading State for Trips and Holidays -->
         <tr v-if="isTripsLoading || isHolidaysLoading">
           <td class="text-center pa-2" colspan="5">
             <v-progress-circular indeterminate color="primary" size="32" class="mx-auto mb-2" />
@@ -517,16 +368,14 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           </td>
         </tr>
 
-        <!-- Show trips and holidays only when both are loaded -->
         <template v-else>
-          <!-- Trips Rows -->
           <template v-if="tripsStore.trips && tripsStore.trips.length > 0">
             <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
               </td>
-              <td class="pa-2">@{{ getMoneyText(trip.per_trip ?? 0) }}</td>
+              <td class="pa-2">@ {{ getMoneyText(trip.per_trip ?? 0) }}</td>
               <td class="pa-2">x {{ trip.trip_no ?? 1 }}</td>
               <td
                 class="text-grey-darken-1 border-b-thin border-s-sm text-end pa-2 total-cell"
@@ -544,7 +393,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
             </tr>
           </template>
 
-          <!-- Holidays Rows -->
           <template v-if="holidays.length > 0">
             <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
               <td class="pa-2">-</td>
@@ -592,20 +440,17 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           </template>
         </template>
 
-        <!-- Overtime -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
           <td class="pa-2">{{ getMoneyText(overallOvertime) }} / hour</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
-            <!-- overtime pay: daily rate / 8 * 1.25 * overtime hours -->
             {{
               getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime)
             }}
           </td>
         </tr>
 
-        <!-- Non-deductions (benefits) before Monthly Trippings -->
         <template v-if="employeeNonDeductions.length > 0">
           <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id">
             <td class="border-b-thin text-center pa-2" colspan="2">
@@ -618,7 +463,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
             </td>
           </tr>
         </template>
-        <!-- Monthly trippings -->
         <tr>
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
@@ -633,7 +477,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
           </td>
         </tr>
 
-        <!-- Salary Calculation Rows -->
         <tr>
           <td class="pa-2" colspan="2"></td>
           <td class="text-caption font-weight-bold pa-2">Gross Salary</td>
@@ -655,7 +498,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
       </tbody>
     </v-table>
 
-    <!-- Signatures Section -->
     <v-row dense no-gutters>
       <v-col cols="12" sm="3" class="d-flex justify-center align-center">
         <v-table class="mt-3 text-caption border" density="compact">
@@ -678,7 +520,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
       <v-col cols="12" sm="9" class="d-flex justify-center align-center"></v-col>
     </v-row>
 
-    <!-- Mini Payroll Print Section - Hidden by default, only visible during printing -->
     <div id="mini-payroll-section" class="mini-payroll-hidden">
       <MiniPayrollPrint
         :employeeData="employeeData"
@@ -690,7 +531,6 @@ console.log('[PayrollPrint] filterDateString:', filterDateString.value, '| emplo
 </template>
 
 <style scoped>
-/* Hide mini payroll section by default */
 .mini-payroll-hidden {
   display: none;
 }

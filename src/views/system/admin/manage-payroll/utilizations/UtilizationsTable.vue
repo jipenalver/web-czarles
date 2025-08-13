@@ -2,8 +2,10 @@
 import UtilizationsExpandedRow from './UtilizationsExpandedRow.vue'
 import UtilizationsFormDialog from './UtilizationsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { useUtilizationsTable } from './utilizationsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
+import UtilizationPDF from './pdf/UtilizationPDF.vue'
 import { getMoneyText } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -27,11 +29,11 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  // onExportPDF,
+  onExportPDF,
   utilizationsStore,
   employeesStore,
-  // isLoadingPDF,
-  // formActionPDF,
+  isLoadingPDF,
+  formActionPDF,
 } = useUtilizationsTable()
 </script>
 
@@ -41,6 +43,20 @@ const {
     :form-message="formAction.formMessage"
     :form-status="formAction.formStatus"
   ></AppAlert>
+
+  <AppAlert
+    v-model:is-alert-visible="formActionPDF.formAlert"
+    :form-message="formActionPDF.formMessage"
+    :form-status="formActionPDF.formStatus"
+  ></AppAlert>
+
+  <!-- Loading dialog para sa PDF generation -->
+  <LoadingDialog
+    v-model:is-visible="isLoadingPDF"
+    title="Generating PDF..."
+    subtitle="Please wait while we prepare your report"
+    description="This may take a few moments"
+  ></LoadingDialog>
 
   <v-card>
     <v-card-text>
@@ -70,9 +86,9 @@ const {
                   <v-list-item @click="onExportCSV" prepend-icon="mdi-file-delimited">
                     <v-list-item-title>Export to CSV</v-list-item-title>
                   </v-list-item>
-                  <!-- <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf-box">
+                  <v-list-item @click="onExportPDF" prepend-icon="mdi-file-pdf-box">
                     <v-list-item-title>Export to PDF</v-list-item-title>
-                  </v-list-item> -->
+                  </v-list-item>
                 </v-list>
               </v-menu>
             </v-col>
@@ -186,6 +202,8 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <UtilizationPDF :table-filters="tableFilters" />
 
   <UtilizationsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
