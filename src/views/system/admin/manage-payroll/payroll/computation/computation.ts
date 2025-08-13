@@ -15,6 +15,7 @@ export async function getEmployeeAttendanceById(
   is_leave_with_pay?: boolean
   leave_type?: string
   leave_reason?: string
+  attendance_date?: string // Add attendance date to track the actual date
  
 }> | null> {
   // query sa attendance records for the given employee ug month
@@ -48,6 +49,7 @@ export async function getEmployeeAttendanceById(
         is_leave_with_pay: row.is_leave_with_pay,
         leave_type: row.leave_type,
         leave_reason: row.leave_reason,
+        attendance_date: row.am_time_in ? row.am_time_in.split('T')[0] : null, // Extract date from timestamp
        
       }))
     : null

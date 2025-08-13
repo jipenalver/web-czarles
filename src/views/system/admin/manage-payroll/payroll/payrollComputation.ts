@@ -82,6 +82,24 @@ export function usePayrollComputation(
     return diffMinutes
   }
 
+  // Helper function to compute undertime minutes (early time-out)
+  function getUndertimeMinutes(expectedOut: string, actualOut: string): number {
+    if (!actualOut) return 0 // No time-out recorded
+    const today = new Date().toISOString().split('T')[0]
+    const expectedDate = new Date(`${today}T${expectedOut}:00`)
+    const actualDate = new Date(`${today}T${actualOut}:00`)
+    const diffMs = expectedDate.getTime() - actualDate.getTime()
+    const diffMinutes = Math.max(0, Math.floor(diffMs / 60000))
+    return diffMinutes
+  }
+
+  // Helper function to check if a date is Friday or Saturday
+  function isFridayOrSaturday(dateString: string): boolean {
+    const date = new Date(dateString)
+    const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+    return dayOfWeek === 5 || dayOfWeek === 6 // Friday or Saturday
+  }
+
   // Basic calculations
   const codaAllowance = computed(() => tableData.value?.coda_allowance || 0)
   const totalGrossSalary = computed(() => grossSalary.value + codaAllowance.value)
@@ -123,12 +141,22 @@ export function usePayrollComputation(
 
   // monthLateDeduction for total late minutes in the month
   const monthLateDeduction = ref<number>(0)
+  
+  // monthUndertimeDeduction for total undertime minutes in the month
+  const monthUndertimeDeduction = ref<number>(0)
 
   // Late deduction formula: (dailyrate / 8 hours / 60 minutes) * total late minutes
   const lateDeduction = computed(() => {
     //compute ang deduction base sa total late minutes
     const perMinuteRate = (dailyRate.value || 0) / 8 / 60
     return perMinuteRate * (monthLateDeduction.value || 0)
+  })
+
+  // Undertime deduction formula: (dailyrate / 8 hours / 60 minutes) * total undertime minutes
+  const undertimeDeduction = computed(() => {
+    //compute ang deduction base sa total undertime minutes
+    const perMinuteRate = (dailyRate.value || 0) / 8 / 60
+    return perMinuteRate * (monthUndertimeDeduction.value || 0)
   })
 
   // Regular work total (future-proof for deductions, etc.)
@@ -203,23 +231,64 @@ export function usePayrollComputation(
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
           monthLateDeduction.value = 0 // Field staff don't have late deductions
+          monthUndertimeDeduction.value = 0 // Field staff don't have undertime deductions
         } else {
-          // For office staff, use existing logic
+          // For office staff, use existing logic with Friday/Saturday special rules
           const allAmTimeIn = attendances.map((a) => a.am_time_in)
           const allPmTimeIn = attendances.map((a) => a.pm_time_in)
+          const allAmTimeOut = attendances.map((a) => a.am_time_out)
+          const allPmTimeOut = attendances.map((a) => a.pm_time_out)
 
           // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
           let totalLateAM = 0
           let totalLatePM = 0
-          allAmTimeIn.forEach((am) => {
-            const lateMinutes = am ? getExcessMinutes('08:00', am) : 0
-            totalLateAM += lateMinutes
+          let totalUndertimeAM = 0
+          let totalUndertimePM = 0
+
+          attendances.forEach((attendance, index) => {
+            const attendanceDate = attendance.attendance_date
+            const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
+
+            // Determine time rules based on day of week
+            const amStartTime = isFriSat ? '08:12' : '08:00'
+            const pmStartTime = isFriSat ? '13:00' : '13:00' // PM start time remains the same
+            const amEndTime = isFriSat ? '12:00' : '12:00' // AM end time remains the same
+            const pmEndTime = isFriSat ? '16:30' : '17:00' // PM end time changes for Fri/Sat
+
+            // Calculate late minutes
+            if (attendance.am_time_in) {
+              const lateMinutes = getExcessMinutes(amStartTime, attendance.am_time_in)
+              totalLateAM += lateMinutes
+            }
+            if (attendance.pm_time_in) {
+              const lateMinutes = getExcessMinutes(pmStartTime, attendance.pm_time_in)
+              totalLatePM += lateMinutes
+            }
+
+            // Calculate undertime minutes
+            if (attendance.am_time_out) {
+              const undertimeMinutes = getUndertimeMinutes(amEndTime, attendance.am_time_out)
+              if (undertimeMinutes > 0) {
+                console.warn(`[UNDERTIME AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amEndTime}, Actual: ${attendance.am_time_out}, Undertime: ${undertimeMinutes} minutes`)
+              }
+              totalUndertimeAM += undertimeMinutes
+            }
+            if (attendance.pm_time_out) {
+              const undertimeMinutes = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
+              if (undertimeMinutes > 0) {
+                console.warn(`[UNDERTIME PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmEndTime}, Actual: ${attendance.pm_time_out}, Undertime: ${undertimeMinutes} minutes`)
+              }
+              totalUndertimePM += undertimeMinutes
+            }
           })
-          allPmTimeIn.forEach((pm) => {
-            const lateMinutes = pm ? getExcessMinutes('13:00', pm) : 0
-            totalLatePM += lateMinutes
-          })
+
           monthLateDeduction.value = totalLateAM + totalLatePM
+          monthUndertimeDeduction.value = totalUndertimeAM + totalUndertimePM
+
+          // Log total undertime summary
+          if (monthUndertimeDeduction.value > 0) {
+            console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
+          }
 
           // Check attendance data for present/absent days calculation
           let employeePresentDays = 0
@@ -266,6 +335,7 @@ export function usePayrollComputation(
         }
       } else {
         monthLateDeduction.value = 0
+        monthUndertimeDeduction.value = 0
         presentDays.value = 0
         absentDays.value = workDays.value // All days considered absent kung wala attendance records
         regularWorkTotal.value = 0
@@ -273,6 +343,7 @@ export function usePayrollComputation(
     } else {
       // No employee ID or date string, use fallback calculation
       monthLateDeduction.value = 0
+      monthUndertimeDeduction.value = 0
       presentDays.value = 0
       absentDays.value = workDays.value // All days considered absent if no attendance records
       const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
@@ -356,7 +427,9 @@ export function usePayrollComputation(
 
     // Deductions
     monthLateDeduction,
+    monthUndertimeDeduction,
     lateDeduction,
+    undertimeDeduction,
     sssDeduction,
     philhealthDeduction,
     pagibigDeduction,
