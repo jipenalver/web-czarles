@@ -157,10 +157,10 @@ export function usePayrollComputation(
 
         // Get paid leave days para sa month
         const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId)
-        console.log(
+       /*  console.log(
           `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
           paidLeaveDays,
-        )
+        ) */
 
         if (isFieldStaff) {
           // For field staff, use getTotalMinutesForMonth to calculate actual work hours for the entire month
@@ -196,9 +196,9 @@ export function usePayrollComputation(
 
           // Add paid leave days to present days para field staff
           employeePresentDays += paidLeaveDays
-          console.log(
+         /*  console.log(
             `[computeRegularWorkTotal] Field staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
-          )
+          ) */
 
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
@@ -245,9 +245,9 @@ export function usePayrollComputation(
 
           // Add paid leave days to present days para office staff
           employeePresentDays += paidLeaveDays
-          console.log(
+         /*  console.log(
             `[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
-          )
+          ) */
 
           // Calculate absent days: total working days minus present days (including paid leave)
           const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
