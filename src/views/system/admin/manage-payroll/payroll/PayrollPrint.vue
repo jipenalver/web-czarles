@@ -142,6 +142,8 @@ const {
   presentDays,
   lateDeduction,
   monthLateDeduction,
+  monthUndertimeDeduction,
+  undertimeDeduction,
   computeOverallOvertimeCalculation,
 } = payrollPrint
 
@@ -488,12 +490,14 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
         <PayrollDeductions
           :showLateDeduction="showLateDeduction"
           :monthLateDeduction="monthLateDeduction"
+          :monthUndertimeDeduction="monthUndertimeDeduction"
           :formatCurrency="formatCurrency"
           :employeeId="props.employeeData?.id"
           :employeeDeductions="employeeDeductions"
           :filterDateString="filterDateString"
           :overallEarningsTotal="overallEarningsTotal"
           :lateDeduction="lateDeduction"
+          :undertimeDeduction="undertimeDeduction"
         />
       </tbody>
     </v-table>

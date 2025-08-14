@@ -242,10 +242,19 @@ export function usePayrollTableDialog(
 
       // Get late deduction from payroll computation
       lateDeduction.value = payrollComp.lateDeduction.value
+      
+      // Get undertime deduction from payroll computation
+      const undertimeDeduction = ref(payrollComp.undertimeDeduction.value)
 
       /* console.log(`Late deduction for ${monthName} ${year}:`, {
         fromPayrollComp: payrollComp.lateDeduction.value,
         assignedTo: lateDeduction.value
+      }) */
+
+      /* console.log(`Undertime deduction for ${monthName} ${year}:`, {
+        fromPayrollComp: payrollComp.undertimeDeduction.value,
+        assignedTo: undertimeDeduction.value,
+        monthUndertimeMinutes: payrollComp.monthUndertimeDeduction.value
       }) */
 
       // Calculate basic salary - para sa field staff, gamiton ang regularWorkTotal instead of dailyRate * presentDays
@@ -292,6 +301,7 @@ export function usePayrollTableDialog(
         ref(lateDeduction.value),
         employeeDeductionsRef,
         cashAdvance,
+        undertimeDeduction,
       )
 
       /*  console.log(`Net salary calculation for ${monthName} ${year}:`, {
@@ -332,6 +342,7 @@ export function usePayrollTableDialog(
         },
         deductionsBreakdown: {
           lateDeduction: lateDeduction.value,
+          undertimeDeduction: undertimeDeduction.value,
           employeeDeductions: employeeDeductionsRef.value?.length || 0,
           cashAdvance: cashAdvance.value,
           totalDeductions: netSalaryCalc.value.totalDeductions

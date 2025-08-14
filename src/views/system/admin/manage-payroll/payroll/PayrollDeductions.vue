@@ -9,12 +9,14 @@ import type { CashAdvance } from '@/stores/cashAdvances'
 const props = defineProps<{
   showLateDeduction: boolean
   monthLateDeduction: number | undefined
+  monthUndertimeDeduction: number | undefined
   formatCurrency: (value: number) => string
   employeeId: number | undefined
   employeeDeductions: EmployeeDeduction[]
   filterDateString?: string
   overallEarningsTotal: number
   lateDeduction: number
+  undertimeDeduction: number
 }>()
 
 const cashAdvances = ref<CashAdvance[]>([])
@@ -38,6 +40,28 @@ const totalCashAdvance = computed(() =>
   cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0),
 )
 
+// Console warn for late deduction
+watch(
+  () => props.lateDeduction,
+  (newLateDeduction) => {
+    if (newLateDeduction > 0) {
+      console.warn(`[LATE DEDUCTION] Employee ${props.employeeId} - Late deduction: ₱${newLateDeduction.toFixed(2)} (${props.monthLateDeduction || 0} minutes)`)
+    }
+  },
+  { immediate: true }
+)
+
+// Console warn for undertime deduction
+watch(
+  () => props.undertimeDeduction,
+  (newUndertimeDeduction) => {
+    if (newUndertimeDeduction > 0) {
+      console.warn(`[UNDERTIME DEDUCTION] Employee ${props.employeeId} - Undertime deduction: ₱${newUndertimeDeduction.toFixed(2)} (${props.monthUndertimeDeduction || 0} minutes)`)
+    }
+  },
+  { immediate: true }
+)
+
 // Setup netSalaryCalculation using useNetSalaryCalculation composable
 const netSalaryCalculation = useNetSalaryCalculation(
   computed(() => props.overallEarningsTotal),
@@ -45,6 +69,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
   computed(() => props.lateDeduction),
   computed(() => props.employeeDeductions),
   totalCashAdvance,
+  computed(() => props.undertimeDeduction),
 )
 
 // ...existing code...
@@ -73,6 +98,27 @@ const netSalaryCalculation = useNetSalaryCalculation(
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(netSalaryCalculation.deductions.late, formatCurrency) }}
+            </span>
+          </div>
+        </template>
+        <!-- Undertime Deduction -->
+        <template v-if="showLateDeduction">
+          <div class="d-flex align-center justify-space-between pa-0 ma-0">
+            <div class="d-flex align-center">
+              <span class="text-caption text-disabled" style="font-size: 12px">Undertime Deduction</span>
+              <span
+                class="text-caption font-weight-bold text-end text-disabled ms-1"
+                v-if="monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0"
+                style="font-size: 12px"
+              >
+                ({{ monthUndertimeDeduction }} min.)
+              </span>
+            </div>
+            <span
+              class="border-b-thin border-s-sm text-end pa-0 text-disabled"
+              style="font-size: 12px; min-width: 70px"
+            >
+              {{ safeCurrencyFormat(netSalaryCalculation.deductions.undertime, formatCurrency) }}
             </span>
           </div>
         </template>
