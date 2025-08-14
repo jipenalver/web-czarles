@@ -44,9 +44,9 @@ const totalCashAdvance = computed(() =>
 watch(
   () => props.lateDeduction,
   (newLateDeduction) => {
-    if (newLateDeduction > 0) {
+   /*  if (newLateDeduction > 0) {
       console.warn(`[LATE DEDUCTION] Employee ${props.employeeId} - Late deduction: ₱${newLateDeduction.toFixed(2)} (${props.monthLateDeduction || 0} minutes)`)
-    }
+    } */
   },
   { immediate: true }
 )
@@ -55,9 +55,9 @@ watch(
 watch(
   () => props.undertimeDeduction,
   (newUndertimeDeduction) => {
-    if (newUndertimeDeduction > 0) {
+   /*  if (newUndertimeDeduction > 0) {
       console.warn(`[UNDERTIME DEDUCTION] Employee ${props.employeeId} - Undertime deduction: ₱${newUndertimeDeduction.toFixed(2)} (${props.monthUndertimeDeduction || 0} minutes)`)
-    }
+    } */
   },
   { immediate: true }
 )

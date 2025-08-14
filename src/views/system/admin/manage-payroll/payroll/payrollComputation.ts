@@ -141,7 +141,7 @@ export function usePayrollComputation(
 
   // monthLateDeduction for total late minutes in the month
   const monthLateDeduction = ref<number>(0)
-  
+
   // monthUndertimeDeduction for total undertime minutes in the month
   const monthUndertimeDeduction = ref<number>(0)
 
@@ -185,7 +185,7 @@ export function usePayrollComputation(
 
         // Get paid leave days para sa month
         const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId)
-       /*  console.log(
+        /*  console.log(
           `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
           paidLeaveDays,
         ) */
@@ -224,7 +224,7 @@ export function usePayrollComputation(
 
           // Add paid leave days to present days para field staff
           employeePresentDays += paidLeaveDays
-         /*  console.log(
+          /*  console.log(
             `[computeRegularWorkTotal] Field staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
           ) */
 
@@ -259,25 +259,28 @@ export function usePayrollComputation(
             if (attendance.am_time_in) {
               const lateMinutes = getExcessMinutes(amStartTime, attendance.am_time_in)
               totalLateAM += lateMinutes
+
+              //console.error(`[LATE AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amStartTime}, Actual: ${attendance.am_time_in}, Late: ${lateMinutes} minutes`)
             }
             if (attendance.pm_time_in) {
               const lateMinutes = getExcessMinutes(pmStartTime, attendance.pm_time_in)
               totalLatePM += lateMinutes
+              //console.error(`[LATE PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmStartTime}, Actual: ${attendance.pm_time_in}, Late: ${lateMinutes} minutes`)
             }
 
             // Calculate undertime minutes
             if (attendance.am_time_out) {
               const undertimeMinutes = getUndertimeMinutes(amEndTime, attendance.am_time_out)
-              if (undertimeMinutes > 0) {
+              /*  if (undertimeMinutes > 0) {
                 console.warn(`[UNDERTIME AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amEndTime}, Actual: ${attendance.am_time_out}, Undertime: ${undertimeMinutes} minutes`)
-              }
+              } */
               totalUndertimeAM += undertimeMinutes
             }
             if (attendance.pm_time_out) {
               const undertimeMinutes = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
-              if (undertimeMinutes > 0) {
+              /*  if (undertimeMinutes > 0) {
                 console.warn(`[UNDERTIME PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmEndTime}, Actual: ${attendance.pm_time_out}, Undertime: ${undertimeMinutes} minutes`)
-              }
+              } */
               totalUndertimePM += undertimeMinutes
             }
           })
@@ -286,9 +289,9 @@ export function usePayrollComputation(
           monthUndertimeDeduction.value = totalUndertimeAM + totalUndertimePM
 
           // Log total undertime summary
-          if (monthUndertimeDeduction.value > 0) {
+          /* if (monthUndertimeDeduction.value > 0) {
             console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
-          }
+          } */
 
           // Check attendance data for present/absent days calculation
           let employeePresentDays = 0
@@ -314,7 +317,7 @@ export function usePayrollComputation(
 
           // Add paid leave days to present days para office staff
           employeePresentDays += paidLeaveDays
-         /*  console.log(
+          /*  console.log(
             `[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
           ) */
 
