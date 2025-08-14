@@ -1,9 +1,7 @@
-// Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
-
-import { computed, type Ref, ref, watch } from 'vue'
 import { getEmployeeAttendanceById, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
 import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { useEmployeesStore } from '@/stores/employees'
+import { computed, type Ref, ref, watch } from 'vue'
 
 export interface PayrollData {
   month: string
@@ -191,7 +189,7 @@ export function usePayrollComputation(
             const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
 
             // Determine time rules based on day of week
-            const amStartTime = isFriSat ? '08:12' : '08:00'
+            const amStartTime = isFriSat ? '08:12' : '08:12'
             const pmStartTime = isFriSat ? '13:00' : '13:00' // PM start time remains the same
             const amEndTime = isFriSat ? '12:00' : '12:00' // AM end time remains the same
             const pmEndTime = isFriSat ? '16:30' : '17:00' // PM end time changes for Fri/Sat
