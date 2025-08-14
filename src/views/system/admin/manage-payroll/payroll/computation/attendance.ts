@@ -288,3 +288,10 @@ export const getPaidLeaveDaysForMonth = async (
     return 0
   }
 }
+
+// Helper function to check if a date is Friday or Saturday
+export function isFridayOrSaturday(dateString: string): boolean {
+  const date = new Date(dateString)
+  const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+  return dayOfWeek === 5 || dayOfWeek === 6 // Friday or Saturday
+}

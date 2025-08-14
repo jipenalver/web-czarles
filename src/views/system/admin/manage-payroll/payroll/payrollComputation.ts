@@ -1,8 +1,8 @@
 // Async function para kuhaon ang am_time_in ug pm_time_in gikan sa attendance DB
 
 import { computed, type Ref, ref, watch } from 'vue'
-import { getEmployeeAttendanceById } from './computation/computation'
-import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth } from './computation/attendance'
+import { getEmployeeAttendanceById, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
+import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { useEmployeesStore } from '@/stores/employees'
 
 export interface PayrollData {
@@ -36,69 +36,12 @@ export function usePayrollComputation(
   // Initialize employees store
   const employeesStore = useEmployeesStore()
 
-  // Helper function to compute overtime hours between two time strings (HH:MM)
-  function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
-    if (!overtimeIn || !overtimeOut) return 0
-    // parse time strings to Date objects (use today as date)
-    const today = new Date().toISOString().split('T')[0]
-    const inDate = new Date(`${today}T${overtimeIn}:00`)
-    const outDate = new Date(`${today}T${overtimeOut}:00`)
-    const diffMs = outDate.getTime() - inDate.getTime()
-    const diffHours = diffMs / (1000 * 60 * 60)
-    return diffHours > 0 ? diffHours : 0
-  }
-
   // Async function to compute overall overtime for the month for an employee
-  async function computeOverallOvertimeCalculation() {
-    let usedDateString = dateString
-    if (!usedDateString && typeof window !== 'undefined') {
-      usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
-    }
-    if (employeeId && usedDateString) {
-      const attendances = await getEmployeeAttendanceById(employeeId, usedDateString)
-      if (Array.isArray(attendances) && attendances.length > 0) {
-        // sum all overtime hours for the month
-        let totalOvertime = 0
-        attendances.forEach((a) => {
-          totalOvertime += computeOvertimeHours(a.overtime_in, a.overtime_out)
-        })
-
-        return totalOvertime
-      }
-    }
-
-    return 0
+  async function computeOverallOvertimeCalculationForEmployee() {
+    return await computeOverallOvertimeCalculation(employeeId, dateString)
   }
   // const employeesStore = useEmployeesStore()
   // const attendancesStore = useAttendancesStore()
-
-  // Helper function to compute excess minutes (late)
-  function getExcessMinutes(defaultOut: string, actualOut: string): number {
-    const today = new Date().toISOString().split('T')[0]
-    const defaultDate = new Date(`${today}T${defaultOut}:00`)
-    const actualDate = new Date(`${today}T${actualOut}:00`)
-    const diffMs = actualDate.getTime() - defaultDate.getTime()
-    const diffMinutes = Math.max(0, Math.floor(diffMs / 60000))
-    return diffMinutes
-  }
-
-  // Helper function to compute undertime minutes (early time-out)
-  function getUndertimeMinutes(expectedOut: string, actualOut: string): number {
-    if (!actualOut) return 0 // No time-out recorded
-    const today = new Date().toISOString().split('T')[0]
-    const expectedDate = new Date(`${today}T${expectedOut}:00`)
-    const actualDate = new Date(`${today}T${actualOut}:00`)
-    const diffMs = expectedDate.getTime() - actualDate.getTime()
-    const diffMinutes = Math.max(0, Math.floor(diffMs / 60000))
-    return diffMinutes
-  }
-
-  // Helper function to check if a date is Friday or Saturday
-  function isFridayOrSaturday(dateString: string): boolean {
-    const date = new Date(dateString)
-    const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
-    return dayOfWeek === 5 || dayOfWeek === 6 // Friday or Saturday
-  }
 
   // Basic calculations
   const codaAllowance = computed(() => tableData.value?.coda_allowance || 0)
@@ -160,8 +103,6 @@ export function usePayrollComputation(
   })
 
   // Regular work total (future-proof for deductions, etc.)
-  // Gamiton ang getEmployeeById ug i-filter by employeeId (props.employeeData?.id)
-  // Async computed for regular work total using attendance DB
   const regularWorkTotal = ref<number>(0)
   const absentDays = ref<number>(0)
   const presentDays = ref<number>(0)
@@ -412,7 +353,7 @@ export function usePayrollComputation(
 
   return {
     // Overtime calculation utility
-    computeOverallOvertimeCalculation,
+    computeOverallOvertimeCalculation: computeOverallOvertimeCalculationForEmployee,
     // Basic
     workDays,
     codaAllowance,
