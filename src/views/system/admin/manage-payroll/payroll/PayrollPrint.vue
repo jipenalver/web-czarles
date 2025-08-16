@@ -517,8 +517,5 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   }
 }
 
-/* Alternative: Apply thick border when a printing class is added to the body */
-:global(body.printing) .thick-border {
-  border: 3px solid !important;
-}
+
 </style>
