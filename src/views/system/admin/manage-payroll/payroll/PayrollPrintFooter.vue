@@ -5,7 +5,9 @@ const props = defineProps<{ dateString?: string }>()
 
 const effectiveDate = computed(() => {
   // Prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
-  const source = props.dateString ?? (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
+  const source =
+    props.dateString ??
+    (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
   if (!source) return '—'
   // source may be 'YYYY-MM' or 'YYYY-MM-DD'
   const ds = source.length === 7 ? `${source}-01` : source
@@ -48,7 +50,18 @@ const effectiveDate = computed(() => {
         </div>
       </v-table>
     </v-col>
-    <v-col cols="8" sm="9" class="d-flex justify-start align-start">asd</v-col>
+    <v-col cols="8" sm="9" class="d-flex justify-start align-start text-caption"
+      ><v-row>
+        <v-col cols="10">
+          RECEIVED from C'ZARLES CONSTRUCTION & SUPPLY the amount of PESOS:
+        </v-col>
+        <v-col cols="2 text-end">
+            {price}
+        </v-col>
+        <v-divider></v-divider>
+      </v-row>
+    </v-col>
+ 
   </v-row>
 </template>
 
