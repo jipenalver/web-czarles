@@ -59,6 +59,23 @@ const effectiveDate = computed(() => {
             {price}
         </v-col>
         <v-divider></v-divider>
+        <v-col cols="12">
+          <div class="text-start">in full payment of the amount described above.</div>
+        </v-col>
+        <v-row class="mx-5">
+          <v-col cols="4">
+            <div class="text-start" style="text-decoration:underline">NINA MIKAELAA ABANERO</div>
+            <div class="mx-10">Prepared By</div>
+          </v-col>
+          <v-col cols="4">
+            <div class="text-center" style="text-decoration:underline">CESAR T. PALMA JR.</div>
+             <div class="mx-10 text-center">Approved</div>
+          </v-col>
+           <v-col cols="4">
+            <div class="text-end">BY: ________________________</div>
+             <div class="mx-4 text-end">Signature Over Printed Name</div>
+          </v-col>
+        </v-row>
       </v-row>
     </v-col>
  
