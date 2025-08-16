@@ -107,6 +107,8 @@ export function usePayrollPrintDialog(
     }
 
     try {
+      // Add printing class to body for CSS styling
+      document.body.classList.add('printing')
 
       // Apply transformations para sa PDF generation
       if (miniPayrollSection) {
@@ -154,6 +156,9 @@ export function usePayrollPrintDialog(
         formStatus: 500,
       }
     } finally {
+      // Remove printing class from body
+      document.body.classList.remove('printing')
+      
       // Reset all styles to original values
       if (miniPayrollSection && originalStyles.miniPayroll) {
         Object.assign(miniPayrollSection.style, originalStyles.miniPayroll)

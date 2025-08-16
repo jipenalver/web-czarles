@@ -303,7 +303,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
       </v-col>
     </v-row>
 
-    <v-table class="mt-6 text-body-2" density="compact">
+    <v-table class="mt-6 text-body-2 thick-border" density="compact">
       <tbody>
         <tr>
           <td class="text-caption pa-2" style="width: auto">PAID TO</td>
@@ -320,7 +320,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
       </tbody>
     </v-table>
 
-    <v-table class="mt-3 text-body-2 border" density="compact">
+    <v-table class="mt-3 text-body-2 border thick-border" density="compact">
       <tbody>
         <tr>
           <td class="text-caption text-center border-b-sm pa-2" colspan="4">PARTICULARS</td>
@@ -506,4 +506,19 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   display: none;
 }
 
+.thick-border {
+  border: 1px solid !important;
+}
+
+/* Apply thick border only when printing */
+@media print {
+  .thick-border {
+    border: 3px solid !important;
+  }
+}
+
+/* Alternative: Apply thick border when a printing class is added to the body */
+:global(body.printing) .thick-border {
+  border: 3px solid !important;
+}
 </style>
