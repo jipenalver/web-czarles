@@ -60,7 +60,16 @@ export function usePayrollTableDialog(
     // Create full date string for cash advances (YYYY-MM-DD format)
     const cashAdvanceDateString = `${dateString}-01`
 
+    /*   console.log(`STARTING payroll generation for ${monthName} ${year}:`, {
+      employeeId,
+      employeeName: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+      dateString,
+      cashAdvanceDateString,
+      monthIndex
+    }) */
+
     if (!employeeId) {
+      console.warn(`No employee ID provided for ${monthName} ${year}`)
       return {
         month: monthName,
         basic_salary: 0,
@@ -83,6 +92,36 @@ export function usePayrollTableDialog(
           fetchCashAdvances(cashAdvanceDateString, employeeId),
         ])
 
+      /*   console.log(`Data fetching results for ${monthName} ${year}:`, {
+        employeeId,
+        employeeData: employeeData ? {
+          id: employeeData.id,
+          firstname: employeeData.firstname,
+          lastname: employeeData.lastname,
+          daily_rate: employeeData.daily_rate,
+          is_field_staff: employeeData.is_field_staff,
+          hired_at: employeeData.hired_at
+        } : 'NULL',
+        trips: {
+          count: trips?.length || 0,
+          data: trips || 'NULL'
+        },
+        holidays: {
+          count: holidays?.length || 0,
+          data: holidays || 'NULL'
+        },
+        cashAdvances: {
+          count: cashAdvances?.length || 0,
+          total: cashAdvances?.reduce((sum, advance) => sum + (Number(advance.amount) || 0), 0) || 0,
+          data: cashAdvances || 'NULL'
+        },
+        employeeDeductions: {
+          deductionsCount: employeeDeductionsResult.deductions?.length || 0,
+          nonDeductionsCount: employeeDeductionsResult.nonDeductions?.length || 0,
+          result: employeeDeductionsResult
+        }
+      }) */
+
       // Calculate total attendance minutes for the month
       const filterDateString = `${dateString}-01` // Format: "YYYY-MM-01"
       const isFieldStaff = employeeData?.is_field_staff || false
@@ -93,15 +132,15 @@ export function usePayrollTableDialog(
       )
 
       // Console log the attendance minutes result
-      // console.log(`📊 ATTENDANCE MINUTES for ${monthName} ${year}:`, {
-      //   employeeId,
-      //   employeeName: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
-      //   isFieldStaff,
-      //   filterDateString,
-      //   attendanceMinutes,
-      //   hoursWorked: (attendanceMinutes / 60).toFixed(2),
-      //   daysWorked: (attendanceMinutes / 480).toFixed(2), // Assuming 8 hours per day
-      // })
+      /*   console.log(`ATTENDANCE MINUTES for ${monthName} ${year}:`, {
+        employeeId,
+        employeeName: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
+        isFieldStaff,
+        filterDateString,
+        attendanceMinutes,
+        hoursWorked: (attendanceMinutes / 60).toFixed(2),
+        daysWorked: (attendanceMinutes / 480).toFixed(2), // Assuming 8 hours per day
+      }) */
 
       // Setup reactive refs para sa computation
       const regularWorkTotal = ref(0)
@@ -144,8 +183,21 @@ export function usePayrollTableDialog(
         ref(cashAdvanceDateString), // pass filterDateString as reactive reference
       )
 
+      // Wait for payrollComputation to finish its initial computation
+      await payrollComp.computeRegularWorkTotal()
+
+      /* console.log(`After payrollComputation.computeRegularWorkTotal() for ${monthName} ${year}:`, {
+        regularWorkTotal: payrollComp.regularWorkTotal.value,
+        presentDays: payrollComp.presentDays.value,
+        absentDays: payrollComp.absentDays.value,
+        workDays: payrollComp.workDays.value,
+        isFieldStaff: payrollComp.isFieldStaff.value,
+        employeeDailyRate: payrollComp.employeeDailyRate.value,
+        lateDeduction: payrollComp.lateDeduction.value
+      }) */
+
       // Calculate basic salary using employee daily rate ug work days
-      /* console.log(`Basic salary calculation for ${monthName} ${year}:`, {
+      /*  console.log(`Basic salary calculation for ${monthName} ${year}:`, {
         isFieldStaff: payrollComp.isFieldStaff.value,
         employeeDailyRate: payrollComp.employeeDailyRate.value,
         workDays: payrollComp.workDays.value,
@@ -156,17 +208,54 @@ export function usePayrollTableDialog(
           ? 'Field Staff: Uses regularWorkTotal (actual hours worked)'
           : 'Office Staff: employeeDailyRate * presentDays',
         employeeId,
+        employeeData: employeeData ? {
+          id: employeeData.id,
+          firstname: employeeData.firstname,
+          lastname: employeeData.lastname,
+          daily_rate: employeeData.daily_rate,
+          is_field_staff: employeeData.is_field_staff
+        } : null,
+        trips: trips?.length || 0,
+        holidays: holidays?.length || 0,
+        cashAdvances: cashAdvances?.length || 0,
+        deductionsCount: employeeDeductionsResult.deductions?.length || 0,
+        attendanceMinutes
       }) */
 
       // Set regular work total - note: payroll computation has watch that auto-computes this
       regularWorkTotal.value = payrollComp.regularWorkTotal.value
 
+      /*  console.log(` Regular work total assignment for ${monthName} ${year}:`, {
+        fromPayrollComp: payrollComp.regularWorkTotal.value,
+        assignedTo: regularWorkTotal.value,
+        isEqual: payrollComp.regularWorkTotal.value === regularWorkTotal.value
+      }) */
+
       // Compute overtime hours for the month
       const overtimeHours = await payrollComp.computeOverallOvertimeCalculation()
       overallOvertime.value = overtimeHours
 
+      /* console.log(`Overtime calculation for ${monthName} ${year}:`, {
+        overtimeHours,
+        overallOvertimeValue: overallOvertime.value
+      }) */
+
       // Get late deduction from payroll computation
       lateDeduction.value = payrollComp.lateDeduction.value
+      
+      // Get undertime deduction from payroll computation
+      const undertimeDeduction = ref(payrollComp.undertimeDeduction.value)
+
+      /* console.log(`Late deduction for ${monthName} ${year}:`, {
+        fromPayrollComp: payrollComp.lateDeduction.value,
+        assignedTo: lateDeduction.value
+      }) */
+
+      /* console.log(`Undertime deduction for ${monthName} ${year}:`, {
+        fromPayrollComp: payrollComp.undertimeDeduction.value,
+        assignedTo: undertimeDeduction.value,
+        monthUndertimeMinutes: payrollComp.monthUndertimeDeduction.value
+      }) */
 
       // Calculate basic salary - para sa field staff, gamiton ang regularWorkTotal instead of dailyRate * presentDays
       let basicSalary: number
@@ -191,6 +280,20 @@ export function usePayrollTableDialog(
         nonDeductions,
       )
 
+      /* console.log(`Overall earnings calculation for ${monthName} ${year}:`, {
+        inputs: {
+          regularWorkTotal: regularWorkTotal.value,
+          tripsCount: tripsRef.value?.length || 0,
+          holidaysCount: holidaysRef.value?.length || 0,
+          dailyRate: dailyRate.value,
+          employeeDailyRate: employeeDailyRate.value,
+          overallOvertime: overallOvertime.value,
+          codaAllowance: codaAllowance.value,
+          nonDeductionsCount: nonDeductions.value?.length || 0
+        },
+        result: overallEarningsTotal.value
+      }) */
+
       // Compute net salary using overallTotal composable
       const netSalaryCalc = useNetSalaryCalculation(
         overallEarningsTotal,
@@ -198,13 +301,27 @@ export function usePayrollTableDialog(
         ref(lateDeduction.value),
         employeeDeductionsRef,
         cashAdvance,
+        undertimeDeduction,
       )
 
+      /*  console.log(`Net salary calculation for ${monthName} ${year}:`, {
+        inputs: {
+          overallEarningsTotal: overallEarningsTotal.value,
+          showLateDeduction: showLateDeduction.value,
+          lateDeduction: lateDeduction.value,
+          employeeDeductionsCount: employeeDeductionsRef.value?.length || 0,
+          cashAdvance: cashAdvance.value
+        },
+        result: netSalaryCalc.value,
+        totalDeductions: netSalaryCalc.value?.totalDeductions || 0
+      }) */
+
       // Calculate net pay: basic salary + gross pay - deductions
-      const netPay = basicSalary + overallEarningsTotal.value - netSalaryCalc.value.totalDeductions
+      const netPay =
+        /* basicSalary + */ overallEarningsTotal.value - netSalaryCalc.value.totalDeductions
 
       // Debug log para sa net pay calculation
-      /*  console.log(`Net pay calculation for ${monthName} ${year}:`, {
+      /*   console.log(`Net pay calculation for ${monthName} ${year}:`, {
         isFieldStaff: payrollComp.isFieldStaff.value,
         basicSalary,
         grossPay: overallEarningsTotal.value,
@@ -215,6 +332,21 @@ export function usePayrollTableDialog(
         workDays: payrollComp.workDays.value,
         regularWorkTotal: payrollComp.regularWorkTotal.value,
         formula: `${basicSalary} + ${overallEarningsTotal.value} - ${netSalaryCalc.value.totalDeductions} = ${netPay}`,
+        overallEarningsBreakdown: {
+          regularWorkTotal: regularWorkTotal.value,
+          trips: tripsRef.value?.length || 0,
+          holidays: holidaysRef.value?.length || 0,
+          overallOvertime: overallOvertime.value,
+          codaAllowance: codaAllowance.value,
+          nonDeductions: nonDeductions.value?.length || 0
+        },
+        deductionsBreakdown: {
+          lateDeduction: lateDeduction.value,
+          undertimeDeduction: undertimeDeduction.value,
+          employeeDeductions: employeeDeductionsRef.value?.length || 0,
+          cashAdvance: cashAdvance.value,
+          totalDeductions: netSalaryCalc.value.totalDeductions
+        }
       }) */
 
       return {
@@ -349,6 +481,7 @@ export function usePayrollTableDialog(
         generatePayrollData(monthIndex),
       )
       tableData.value = await Promise.all(payrollPromises)
+      /* console.log('Payroll data loaded:', tableData.value) */
     } catch (error) {
       console.error('Error loading payroll data:', error)
       tableData.value = []

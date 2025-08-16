@@ -116,7 +116,8 @@ function onView(item: TableData) {
 const calculateFieldStaffNetPay = (item: TableData) => {
   const netPay = item.net_pay || 0
   const attendanceCalculation = ((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8)
-  return netPay + attendanceCalculation
+  //console.error(`[PAYROLL CALCULATION] Employee ${props.itemData?.id} - Month: ${item.month}, Net Pay: ${netPay}, Attendance Calculation: ${attendanceCalculation}`)
+  return netPay /* + attendanceCalculation */
 }
 </script>
 

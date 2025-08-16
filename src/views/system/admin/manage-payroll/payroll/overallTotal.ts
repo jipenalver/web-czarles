@@ -139,6 +139,7 @@ export function useNetSalaryCalculation(
   lateDeduction: Ref<number>,
   employeeDeductions?: Ref<EmployeeDeduction[]>,
   cashAdvance?: Ref<number>,
+  undertimeDeduction?: Ref<number>,
 ): ComputedRef<{
   grossSalary: number
   deductions: Record<string, number>
@@ -152,6 +153,7 @@ export function useNetSalaryCalculation(
     // Fixed deductions
     const deductions = {
       late: showLateDeduction.value ? Number(lateDeduction.value) || 0 : 0,
+      undertime: showLateDeduction.value && undertimeDeduction ? Number(undertimeDeduction.value) || 0 : 0,
       cashAdvance: cashAdvance ? Number(cashAdvance.value) || 0 : 0,
     }
 

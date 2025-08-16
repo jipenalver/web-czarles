@@ -260,31 +260,38 @@ export const getPaidLeaveDaysForMonth = async (
     // Simple iteration: if is_leave_with_pay is true, count it and use am_time_in as day indicator
     attendances.forEach((attendance) => {
       // Console log para check kung may data ang is_leave_with_pay
-      console.log(`[getPaidLeaveDaysForMonth] Checking attendance record:`, {
+     /*  console.log(`[getPaidLeaveDaysForMonth] Checking attendance record:`, {
         am_time_in: attendance.am_time_in,
         is_leave_with_pay: attendance.is_leave_with_pay,
         has_leave_data:
           attendance.is_leave_with_pay !== undefined && attendance.is_leave_with_pay !== null,
-      })
+      }) */
 
       if (attendance.is_leave_with_pay === true) {
         paidLeaveDaysCounter++
         // Use am_time_in as day indicator para sa paid leave
-        console.log(`[getPaidLeaveDaysForMonth] Paid leave day found:`, {
+       /*  console.log(`[getPaidLeaveDaysForMonth] Paid leave day found:`, {
           day_indicator: attendance.am_time_in,
           leave_type: attendance.leave_type,
           leave_reason: attendance.leave_reason,
-        })
+        }) */
       }
     })
 
-    console.log(
+    /* console.log(
       `[getPaidLeaveDaysForMonth] Total paid leave days for employee ${employeeId} in month ${dateStringForQuery}:`,
       paidLeaveDaysCounter,
-    )
+    ) */
     return paidLeaveDaysCounter
   } catch (error) {
     console.error('Error sa getPaidLeaveDaysForMonth:', error)
     return 0
   }
+}
+
+// Helper function to check if a date is Friday or Saturday
+export function isFridayOrSaturday(dateString: string): boolean {
+  const date = new Date(dateString)
+  const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+  return dayOfWeek === 5 || dayOfWeek === 6 // Friday or Saturday
 }
