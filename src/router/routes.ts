@@ -14,9 +14,18 @@ import TripsUtilizationsView from '@/views/system/admin/manage-payroll/TripsUtil
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
+import HeroView from '@/views/system/hero/HeroView.vue'
+import path from 'path'
 
 export const routes = [
   // Landing
+  {
+    path: '/hero',
+    name: 'hero',
+    component: HeroView,
+    meta: { requiresAuth: false, isDefault: true },
+  },
+
   {
     path: '/',
     name: 'login',
