@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import TopProfileNavigation from './navigation/TopProfileNavigation.vue'
 import headerCzarles from '@/assets/images/image-header-title.png'
+import FooterNavigation from './navigation/FooterNavigation.vue'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
-import { useAuthUserStore } from '@/stores/authUser'
 import imageBg from '@/assets/images/image-bg.jpg'
-import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
+import { ref } from 'vue'
 
 const props = defineProps<{
   isWithAppBarIcon?: boolean
@@ -13,11 +12,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['isDrawerVisible', 'theme'])
 
-const { mobile, smAndUp } = useDisplay()
+const { smAndUp } = useDisplay()
 
-const authUserStore = useAuthUserStore()
-
-const isLoggedIn = ref(false)
 const theme = ref(localStorage.getItem('theme') ?? 'light')
 
 function onToggleTheme() {
@@ -25,10 +21,6 @@ function onToggleTheme() {
   localStorage.setItem('theme', theme.value)
   emit('theme', theme.value)
 }
-
-onMounted(async () => {
-  isLoggedIn.value = await authUserStore.isAuthenticated()
-})
 </script>
 
 <template>
@@ -50,10 +42,6 @@ onMounted(async () => {
           </RouterLink>
         </v-app-bar-title>
 
-        <template v-if="!isLoggedIn && smAndUp">
-          <v-btn class="me-2" prepend-icon="mdi-login" rounded="lg" to="/login"> Sign In </v-btn>
-        </template>
-
         <v-btn
           class="me-2"
           :icon="theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
@@ -61,10 +49,6 @@ onMounted(async () => {
           @click="onToggleTheme"
           slim
         ></v-btn>
-
-        <template v-if="isLoggedIn">
-          <TopProfileNavigation></TopProfileNavigation>
-        </template>
       </v-app-bar>
 
       <slot name="navigation"></slot>
@@ -75,11 +59,7 @@ onMounted(async () => {
         </v-img>
       </v-main>
 
-      <v-footer class="d-flex" :class="mobile ? 'justify-center' : 'justify-between'" border app>
-        <div class="font-weight-bold text-center">
-          Copyright © 2025 | Czarles Construction and Supplies
-        </div>
-      </v-footer>
+      <FooterNavigation></FooterNavigation>
     </v-app>
   </v-responsive>
 </template>

@@ -1,3 +1,4 @@
+// System
 import LoginView from '@/views/auth/login/LoginView.vue'
 // import RegisterView from '@/views/auth/register/RegisterView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
@@ -14,11 +15,35 @@ import TripsUtilizationsView from '@/views/system/admin/manage-payroll/TripsUtil
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
+// Website
+import HomeView from '@/views/landing/HomeView.vue'
+import PrivacyPolicyView from '@/views/landing/legal/PrivacyPolicyView.vue'
+import TermsAgreementsView from '@/views/landing/legal/TermsAgreementsView.vue'
 
 export const routes = [
   // Landing
   {
     path: '/',
+    name: 'home',
+    component: HomeView,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/privacy-policy',
+    name: 'privacy-policy',
+    component: PrivacyPolicyView,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/terms-agreements',
+    name: 'terms-agreements',
+    component: TermsAgreementsView,
+    meta: { requiresAuth: false },
+  },
+
+  // Auth
+  {
+    path: '/login',
     name: 'login',
     component: LoginView,
     meta: { requiresAuth: false },

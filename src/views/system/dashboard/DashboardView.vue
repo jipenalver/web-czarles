@@ -3,6 +3,7 @@ import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import UserCountWidget from './partials/UserCountWidget.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import WelcomeWidget from './partials/WelcomeWidget.vue'
+import BirthdayComponent from './birthday/BirthtdayWidget.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -26,6 +27,10 @@ const isDrawerVisible = ref(xs.value ? false : true)
 
           <v-col cols="12" lg="3">
             <UserCountWidget></UserCountWidget>
+          </v-col>
+          <v-col cols="12" lg="3"> Percent of Projects </v-col>
+          <v-col cols="12" lg="9">
+            <BirthdayComponent></BirthdayComponent>
           </v-col>
         </v-row>
       </v-container>
