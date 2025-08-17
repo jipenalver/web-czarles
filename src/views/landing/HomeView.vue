@@ -6,7 +6,9 @@ import AppLayout from '@/components/layout/AppLayout.vue'
   <AppLayout>
     <template #content>
       <v-container class="pa-0" fluid>
-        <v-row> </v-row>
+        <v-row>
+          <!-- Birahi dri Marde -->
+        </v-row>
       </v-container>
     </template>
   </AppLayout>
