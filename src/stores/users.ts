@@ -16,7 +16,7 @@ export type AdminUser = {
   phone: string
   password: string
   is_admin: boolean
-  avatar: string | null
+  avatar: string
 }
 
 export const useUsersStore = defineStore('users', () => {
