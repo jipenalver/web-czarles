@@ -1,3 +1,4 @@
+// System
 import LoginView from '@/views/auth/login/LoginView.vue'
 // import RegisterView from '@/views/auth/register/RegisterView.vue'
 import ForbiddenView from '@/views/errors/ForbiddenView.vue'
@@ -14,20 +15,19 @@ import TripsUtilizationsView from '@/views/system/admin/manage-payroll/TripsUtil
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
-import HeroView from '@/views/system/hero/HeroView.vue'
-import path from 'path'
+// Website
+import HomeView from '@/views/landing/HomeView.vue'
 
 export const routes = [
   // Landing
   {
-    path: '/hero',
-    name: 'hero',
-    component: HeroView,
+    path: '/',
+    name: 'home',
+    component: HomeView,
     meta: { requiresAuth: false, isDefault: true },
   },
-
   {
-    path: '/',
+    path: '/login',
     name: 'login',
     component: LoginView,
     meta: { requiresAuth: false },
