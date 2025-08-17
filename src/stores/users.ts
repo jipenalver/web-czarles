@@ -16,6 +16,7 @@ export type AdminUser = {
   phone: string
   password: string
   is_admin: boolean
+  avatar: string | null
 }
 
 export const useUsersStore = defineStore('users', () => {
@@ -52,6 +53,7 @@ export const useUsersStore = defineStore('users', () => {
         phone: user_metadata.phone,
         password: user_metadata.password,
         is_admin: user_metadata.is_admin,
+        avatar: user_metadata.avatar,
       }
     })
     usersTableTotal.value = total
