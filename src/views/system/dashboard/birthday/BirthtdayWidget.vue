@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useDate } from 'vuetify'
 import { useEmployeesStore, type EmployeeTableFilter } from '@/stores/employees'
 import { type TableHeader } from '@/utils/helpers/tables'
+import profileDefault from '@/assets/misc/profile-default.jpg'
 
 const employeesStore = useEmployeesStore()
 const date = useDate()
@@ -27,10 +28,13 @@ onMounted(async () => {
   if (employeesStore.employeesExport.length === 0) await loadEmployees()
 })
 
-watch(() => tableFilters.value.search, async () => {
-  // refresh export when searching
-  await loadEmployees()
-})
+watch(
+  () => tableFilters.value.search,
+  async () => {
+    // refresh export when searching
+    await loadEmployees()
+  },
+)
 
 function getAge(birthdate?: string) {
   if (!birthdate) return ''
@@ -46,6 +50,21 @@ function getAge(birthdate?: string) {
   }
 }
 
+function getAvatar(emp: any) {
+  return emp?.avatar ?? profileDefault
+}
+
+function isToday(emp: any) {
+  if (!emp?.birthdate) return false
+  try {
+    const b = new Date(emp.birthdate)
+    const now = new Date()
+    return b.getMonth() === now.getMonth() && b.getDate() === now.getDate()
+  } catch (e) {
+    return false
+  }
+}
+
 const currentMonth = new Date().getMonth()
 
 const birthdays = computed(() => {
@@ -58,23 +77,9 @@ const birthdays = computed(() => {
 
 <template>
   <v-card>
-    <v-card-title>
-      Birthdays This Month
-    </v-card-title>
+    <v-card-title> Birthdays This Month </v-card-title>
 
     <v-card-text>
-      <v-row>
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="tableFilters.search"
-            density="compact"
-            prepend-inner-icon="mdi-magnify"
-            placeholder="Search by name or email"
-            clearable
-          ></v-text-field>
-        </v-col>
-      </v-row>
-
       <v-data-table-server
         v-model:items-per-page="tableOptions.itemsPerPage"
         v-model:page="tableOptions.page"
@@ -84,14 +89,20 @@ const birthdays = computed(() => {
         :items="birthdays"
         :items-length="birthdays.length"
         :hide-default-header="false"
-        show-expand
       >
         <template #item.lastname="{ item }">
-          <span class="font-weight-bold">{{ item.lastname }}, {{ item.firstname }}</span>
+          <div :class="['d-flex align-center', isToday(item) ? 'bg-primary text-white rounded px-3 py-2' : '']">
+            <v-avatar :size="isToday(item) ? 44 : 36" class="me-3" :image="getAvatar(item)" color="primary"></v-avatar>
+            <span class="font-weight-bold">{{ item.lastname }}, {{ item.firstname }}</span>
+            <v-chip v-if="isToday(item)" small color="pink" text-color="white" class="ms-2">Today</v-chip>
+          </div>
         </template>
 
         <template #item.birthdate="{ item }">
-          <span>{{ item.birthdate ? date.format(item.birthdate, 'fullDate') : '' }}</span>
+          <span class="d-flex align-center">
+            <span>{{ item.birthdate ? date.format(item.birthdate, 'fullDate') : '' }}</span>
+            <v-icon v-if="isToday(item)" class="ms-2">mdi-cake</v-icon>
+          </span>
         </template>
 
         <template #item.age="{ item }">
