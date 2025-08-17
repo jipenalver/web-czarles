@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useDate } from 'vuetify'
 import { useEmployeesStore, type EmployeeTableFilter } from '@/stores/employees'
 import { type TableHeader } from '@/utils/helpers/tables'
-import profileDefault from '@/assets/misc/profile-default.jpg'
+import { loadEmployees, getAge, getAvatar, isToday } from './birthdayWidget'
 
 const employeesStore = useEmployeesStore()
 const date = useDate()
@@ -18,52 +18,17 @@ const tableHeaders: TableHeader[] = [
 ]
 
 // Load employees export which we will filter locally for birthdays
-const loadEmployees = async () => {
-  tableOptions.value.isLoading = true
-  await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
-  tableOptions.value.isLoading = false
-}
-
 onMounted(async () => {
-  if (employeesStore.employeesExport.length === 0) await loadEmployees()
+  if (employeesStore.employeesExport.length === 0) await loadEmployees(employeesStore, tableOptions, tableFilters)
 })
 
 watch(
   () => tableFilters.value.search,
   async () => {
     // refresh export when searching
-    await loadEmployees()
+    await loadEmployees(employeesStore, tableOptions, tableFilters)
   },
 )
-
-function getAge(birthdate?: string) {
-  if (!birthdate) return ''
-  try {
-    const b = new Date(birthdate)
-    const now = new Date()
-    let age = now.getFullYear() - b.getFullYear()
-    const m = now.getMonth() - b.getMonth()
-    if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--
-    return age >= 0 ? age.toString() : ''
-  } catch (e) {
-    return ''
-  }
-}
-
-function getAvatar(emp: any) {
-  return emp?.avatar ?? profileDefault
-}
-
-function isToday(emp: any) {
-  if (!emp?.birthdate) return false
-  try {
-    const b = new Date(emp.birthdate)
-    const now = new Date()
-    return b.getMonth() === now.getMonth() && b.getDate() === now.getDate()
-  } catch (e) {
-    return false
-  }
-}
 
 const currentMonth = new Date().getMonth()
 
@@ -94,7 +59,7 @@ const birthdays = computed(() => {
           <div :class="['d-flex align-center', isToday(item) ? 'bg-primary text-white rounded px-3 py-2' : '']">
             <v-avatar :size="isToday(item) ? 44 : 36" class="me-3" :image="getAvatar(item)" color="primary"></v-avatar>
             <span class="font-weight-bold">{{ item.lastname }}, {{ item.firstname }}</span>
-            <v-chip v-if="isToday(item)" small color="pink" text-color="white" class="ms-2">Today</v-chip>
+           <!--  <v-chip v-if="isToday(item)" small color="yellow" text-color="white" class="ms-2">Today</v-chip> -->
           </div>
         </template>
 
