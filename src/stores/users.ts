@@ -71,6 +71,28 @@ export const useUsersStore = defineStore('users', () => {
     usersTableTotal.value = total
   }
 
+  // Fetch a single user by id, map it and add to the users state if not present
+  async function getUsersId(id: string) {
+    if (!id) return null
+    try {
+      const { data } = await supabaseAdmin.auth.admin.getUserById(id)
+      // data may contain a `user` property
+      const user = (data as { user?: User })?.user
+      if (!user) return null
+
+      const mapped = userMap(user)
+      // avoid duplicates
+      if (!users.value.find((u) => u.id === mapped.id)) {
+        users.value.push(mapped)
+      }
+
+      return mapped
+    } catch (e) {
+      // swallow errors and return null so callers can fallback
+      return null
+    }
+  }
+
   async function addUser(formData: Partial<AdminUser>) {
     const { email, password, ...userMetadata } = formData
 
@@ -102,6 +124,7 @@ export const useUsersStore = defineStore('users', () => {
     $reset,
     getUsers,
     getUsersTable,
+    getUsersId,
     addUser,
     updateUser,
     deleteUser,

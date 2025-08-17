@@ -2,10 +2,12 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useDate } from 'vuetify'
 import { useEmployeesStore, type EmployeeTableFilter } from '@/stores/employees'
+import { useUsersStore } from '@/stores/users'
 import { type TableHeader } from '@/utils/helpers/tables'
 import { loadEmployees, getAge, getAvatar, isToday } from './birthdayWidget'
 
 const employeesStore = useEmployeesStore()
+const usersStore = useUsersStore()
 const date = useDate()
 
 const tableOptions = ref({ page: 1, itemsPerPage: 1000, sortBy: [], isLoading: false })
@@ -19,14 +21,14 @@ const tableHeaders: TableHeader[] = [
 
 // Load employees export which we will filter locally for birthdays
 onMounted(async () => {
-  if (employeesStore.employeesExport.length === 0) await loadEmployees(employeesStore, tableOptions, tableFilters)
+  if (employeesStore.employeesExport.length === 0) await loadEmployees(employeesStore, tableOptions, tableFilters, usersStore)
 })
 
 watch(
   () => tableFilters.value.search,
   async () => {
     // refresh export when searching
-    await loadEmployees(employeesStore, tableOptions, tableFilters)
+    await loadEmployees(employeesStore, tableOptions, tableFilters, usersStore)
   },
 )
 
@@ -57,9 +59,9 @@ const birthdays = computed(() => {
       >
         <template #item.lastname="{ item }">
           <div :class="['d-flex align-center', isToday(item) ? 'bg-primary text-white rounded px-3 py-2' : '']">
-            <v-avatar :size="isToday(item) ? 44 : 36" class="me-3" :image="getAvatar(item)" color="primary"></v-avatar>
+            <v-avatar :size="isToday(item) ? 44 : 36" class="me-3" :image="getAvatar(item, usersStore.users)" color="primary"></v-avatar>
             <span class="font-weight-bold">{{ item.lastname }}, {{ item.firstname }}</span>
-           <!--  <v-chip v-if="isToday(item)" small color="yellow" text-color="white" class="ms-2">Today</v-chip> -->
+            <v-chip v-if="isToday(item)" small color="pink" text-color="white" class="ms-2">Today</v-chip>
           </div>
         </template>
 
