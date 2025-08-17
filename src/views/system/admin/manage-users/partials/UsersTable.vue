@@ -6,6 +6,7 @@ import UsersFormDialog from './UsersFormDialog.vue'
 import { useUsersTable } from './usersTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
+import { getAvatarText } from '@/utils/helpers/others'
 
 const date = useDate()
 const { mobile } = useDisplay()
@@ -108,7 +109,22 @@ const {
         </template>
 
         <template #item.lastname="{ item }">
-          <span class="font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
+          <div class="d-flex align-center my-5">
+            <v-avatar v-if="item?.avatar" :image="item.avatar" color="primary" size="large">
+            </v-avatar>
+
+            <v-avatar v-else color="primary" size="large">
+              <span class="text-h5">
+                {{
+                  getAvatarText(
+                    authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+                  )
+                }}
+              </span>
+            </v-avatar>
+
+            <span class="ms-2 font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
+          </div>
         </template>
 
         <template #item.user_role="{ item }">
