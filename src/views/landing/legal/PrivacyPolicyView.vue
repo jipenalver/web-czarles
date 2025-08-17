@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import AppLayout from '@/components/layout/AppLayout.vue'
+import LandingLayout from '@/components/landing/LandingLayout.vue'
 </script>
 
 <template>
-  <AppLayout>
+  <LandingLayout>
     <template #content>
       <v-container class="pa-0" fluid>
         <v-row>
@@ -11,5 +11,5 @@ import AppLayout from '@/components/layout/AppLayout.vue'
         </v-row>
       </v-container>
     </template>
-  </AppLayout>
+  </LandingLayout>
 </template>
