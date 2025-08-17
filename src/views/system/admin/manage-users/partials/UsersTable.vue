@@ -13,14 +13,14 @@ const { mobile } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
-    title: 'Email',
-    key: 'email',
+    title: 'Fullname',
+    key: 'lastname',
     sortable: false,
     align: 'start',
   },
   {
-    title: 'Fullname',
-    key: 'lastname',
+    title: 'Email',
+    key: 'email',
     sortable: false,
     align: 'start',
   },
@@ -109,17 +109,13 @@ const {
         </template>
 
         <template #item.lastname="{ item }">
-          <div class="d-flex align-center my-5">
+          <div class="d-flex align-center my-5" :class="mobile ? 'justify-end' : 'justify-start'">
             <v-avatar v-if="item?.avatar" :image="item.avatar" color="primary" size="large">
             </v-avatar>
 
             <v-avatar v-else color="primary" size="large">
               <span class="text-h5">
-                {{
-                  getAvatarText(
-                    authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
-                  )
-                }}
+                {{ getAvatarText(item.firstname + ' ' + item.lastname) }}
               </span>
             </v-avatar>
 
