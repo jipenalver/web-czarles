@@ -3,7 +3,7 @@ import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import UserCountWidget from './partials/UserCountWidget.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import WelcomeWidget from './partials/WelcomeWidget.vue'
-import BirthdayComponent from './birthday/BirthdayComponent.vue'
+import BirthdayComponent from './birthday/BirthtdayWidget.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
