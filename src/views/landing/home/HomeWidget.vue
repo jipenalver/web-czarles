@@ -53,7 +53,7 @@
       <v-row align="center" justify="center">
         <v-col cols="12" md="12" lg="12">
           <v-card class="stats-card mx-auto" elevation="6" color="rgba(255,255,255,0.04)">
-            <div class="stats-grid pa-6 d-flex align-center justify-space-between">
+            <div :class="['stats-grid','pa-6','d-flex','align-center','justify-space-between',{ 'stats-grid--stacked': smAndDown }]">
               <div
                 v-for="stat in statistics"
                 :key="stat.label"
@@ -75,6 +75,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useDisplay } from 'vuetify'
 
 
 // Statistics data
@@ -113,61 +114,74 @@ const viewProjects = () => {
   console.log('View projects clicked')
   // Example: router.push('/projects')
 }
+
+// Vuetify breakpoint composable (reactive)
+const { smAndDown } = useDisplay()
 </script>
 
 <style scoped>
-/* Custom styles for better responsiveness and visual appeal */
+/* Minimal styles focused on stats grid and small helpers */
 .gap-4 {
   gap: 1rem;
 }
 
-@media (max-width: 600px) {
-  .gap-4 {
-    gap: 0.5rem;
-  }
-}
-</style>
-
-<style scoped>
 .stats-card {
   border-radius: 16px;
-  overflow: visible; /* allow reflection to show */
+  overflow: visible;
   position: relative;
-  padding:3rem;
-}
-
-.stats-card::after {
-  /* Chromium reflection */
-  -webkit-box-reflect: below 1px linear-gradient(transparent, rgba(255,255,255,0.02));
-  content: '';
+  padding: 3rem;
 }
 
 .stats-grid {
   display: flex;
   gap: 1rem;
+  align-items: center;
+}
+
+.stats-grid--stacked {
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.stats-grid--stacked .stat-item {
+  padding: 0.5rem 0;
 }
 
 .stat-item {
   flex: 1 1 0;
   min-width: 0;
+  text-align: center;
 }
 
-/* Fallback reflection for non-WebKit browsers using a pseudo element */
-@supports not (-webkit-box-reflect: below 0px) {
-  .stats-card::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -100%;
-    height: 100%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-    transform: scaleY(-1);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.0));
-    pointer-events: none;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
+/* Small mobile adjustments for spacing and typography */
+@media (max-width: 600px) {
+  .gap-4 { gap: 0.5rem; }
+  .stats-card { padding: 1.25rem !important; }
+
+  .stat-item .text-h3 { font-size: 1.4rem !important; }
+  .stat-item .text-body-1 { font-size: 0.9rem !important; }
+  .stat-item .text-md-body-2,
+  .stat-item .text-grey { font-size: 0.8rem !important; }
+
+  .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .py-3 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+
+  /* Hero title and description adjustments for small screens */
+  .hero-parallax-content .text-center h1 {
+    font-size: 1.6rem !important;
+    line-height: 1.15 !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .hero-parallax-content .text-center p {
+    font-size: 0.95rem !important;
+    max-width: 100% !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 }
-
 </style>
