@@ -51,7 +51,7 @@ onMounted(async () => {
         </v-app-bar-title>
 
         <template v-if="!isLoggedIn && smAndUp">
-          <v-btn class="me-2" prepend-icon="mdi-login" rounded="lg" to="/login"> Sign In </v-btn>
+          <v-btn class="me-2" prepend-icon="mdi-login" rounded="lg" to="/"> Landing Page </v-btn>
         </template>
 
         <v-btn
