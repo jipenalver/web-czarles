@@ -85,12 +85,26 @@ function onToggleTheme() {
       <slot name="navigation" />
 
       <v-main>
-        <v-img :src="imageBg" height="100%" cover>
+        <v-parallax :src="imageBg" height="100%" class="d-flex align-center justify-center">
           <slot name="content" />
-        </v-img>
+        </v-parallax>
       </v-main>
 
       <FooterNavigation />
     </v-app>
   </v-responsive>
 </template>
+
+<style scoped>
+.landing-parallax::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+
+</style>
