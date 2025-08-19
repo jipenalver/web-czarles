@@ -173,10 +173,10 @@ export function usePayrollComputation(
           monthUndertimeDeduction.value = 0 // Field staff don't have undertime deductions
         } else {
           // For office staff, use existing logic with Friday/Saturday special rules
-          const allAmTimeIn = attendances.map((a) => a.am_time_in)
+          /* const allAmTimeIn = attendances.map((a) => a.am_time_in)
           const allPmTimeIn = attendances.map((a) => a.pm_time_in)
           const allAmTimeOut = attendances.map((a) => a.am_time_out)
-          const allPmTimeOut = attendances.map((a) => a.pm_time_out)
+          const allPmTimeOut = attendances.map((a) => a.pm_time_out) */
 
           // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
           let totalLateAM = 0
@@ -184,7 +184,7 @@ export function usePayrollComputation(
           let totalUndertimeAM = 0
           let totalUndertimePM = 0
 
-          attendances.forEach((attendance, index) => {
+          attendances.forEach((attendance, /* index */) => {
             const attendanceDate = attendance.attendance_date
             const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
 

@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useDate } from 'vuetify'
 import { useEmployeesStore, type EmployeeTableFilter } from '@/stores/employees'
-import { useUsersStore } from '@/stores/users'
-import { type TableHeader } from '@/utils/helpers/tables'
 import { loadEmployees, getAge, getAvatar, isToday } from './birthdayWidget'
+import { type TableHeader } from '@/utils/helpers/tables'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useUsersStore } from '@/stores/users'
+import { useDate } from 'vuetify'
 
 const employeesStore = useEmployeesStore()
 const usersStore = useUsersStore()
 const date = useDate()
+
+// slot names (use variables to avoid parser issues with bracketed string literals)
+const slotItemLastname = 'item.lastname'
+const slotItemBirthdate = 'item.birthdate'
+const slotItemAge = 'item.age'
 
 const tableOptions = ref({ page: 1, itemsPerPage: 1000, sortBy: [], isLoading: false })
 const tableFilters = ref<EmployeeTableFilter>({ search: '', designation_id: null })
@@ -21,7 +26,8 @@ const tableHeaders: TableHeader[] = [
 
 // Load employees export which we will filter locally for birthdays
 onMounted(async () => {
-  if (employeesStore.employeesExport.length === 0) await loadEmployees(employeesStore, tableOptions, tableFilters, usersStore)
+  if (employeesStore.employeesExport.length === 0)
+    await loadEmployees(employeesStore, tableOptions, tableFilters, usersStore)
 })
 
 watch(
@@ -57,22 +63,29 @@ const birthdays = computed(() => {
         :items-length="birthdays.length"
         :hide-default-header="false"
       >
-        <template #item.lastname="{ item }">
-          <div :class="['d-flex align-center', isToday(item) ? 'bg-primary text-white rounded px-3 py-2' : '']">
-            <v-avatar :size="isToday(item) ? 44 : 36" class="me-3" :image="getAvatar(item, usersStore.users)" color="primary"></v-avatar>
+  <template v-slot:[slotItemLastname]="{ item }">
+          <div :class="['d-flex align-center', isToday(item) ? 'my-2' : '']">
+            <v-avatar
+              :size="isToday(item) ? 44 : 36"
+              class="me-3"
+              :image="getAvatar(item, usersStore.users)"
+              color="primary"
+            ></v-avatar>
             <span class="font-weight-bold">{{ item.lastname }}, {{ item.firstname }}</span>
-            <v-chip v-if="isToday(item)" small color="pink" text-color="white" class="ms-2">Today</v-chip>
+            <v-chip v-if="isToday(item)" small color="pink" text-color="white" class="ms-2"
+              >Today</v-chip
+            >
           </div>
         </template>
 
-        <template #item.birthdate="{ item }">
+  <template v-slot:[slotItemBirthdate]="{ item }">
           <span class="d-flex align-center">
             <span>{{ item.birthdate ? date.format(item.birthdate, 'fullDate') : '' }}</span>
             <v-icon v-if="isToday(item)" class="ms-2">mdi-cake</v-icon>
           </span>
         </template>
 
-        <template #item.age="{ item }">
+  <template v-slot:[slotItemAge]="{ item }">
           <span class="font-weight-bold">{{ getAge(item.birthdate) }}</span>
         </template>
 

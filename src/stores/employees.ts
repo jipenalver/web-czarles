@@ -13,6 +13,8 @@ export type Employee = {
   id: number
   created_at: string
   deleted_at: string | null
+  // optional avatar url stored on employee record
+  avatar?: string
   firstname: string
   middlename: string
   lastname: string
