@@ -57,6 +57,7 @@ function onToggleTheme() {
               background-color="transparent"
               style="min-width:320px; max-width:500px; pointer-events:auto;"
             >
+               <v-tab href="#home">Home</v-tab>
               <v-tab href="#about">About Us</v-tab>
               <v-tab href="#company">Company</v-tab>
               <v-tab href="#contact">Contact us</v-tab>

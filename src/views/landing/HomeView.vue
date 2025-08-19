@@ -6,8 +6,9 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
   <LandingLayout>
     <template #content>
       <v-container class="pa-0" fluid>
-        <v-row>
-          <!-- Birahi dri Marde -->
+        <v-row class="pa-5">
+        
+      
         </v-row>
       </v-container>
     </template>
