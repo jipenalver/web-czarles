@@ -60,8 +60,8 @@
                 class="stat-item text-center"
               >
                 <div class="text-h3 text-md-h2 font-weight-bold text-primary mb-2">{{ stat.number }}</div>
-                <div class="text-body-1 text-md-h6 font-weight-medium text-grey-darken-2 mb-1">{{ stat.label }}</div>
-                <div class="text-caption text-md-body-2 text-grey">{{ stat.description }}</div>
+                <div class="text-body-1 text-md-h6 font-weight-medium text-primary mb-1">{{ stat.label }}</div>
+                <div class="text-primary text-md-body-2 text-grey">{{ stat.description }}</div>
               </div>
             </div>
           </v-card>
@@ -86,8 +86,8 @@ const statistics = ref([
   },
   {
     number: '15',
-    label: 'YEARS EXPERIENCE',
-    description: ''
+    label: 'YEARS',
+    description: ' EXPERIENCEs'
   },
   {
     number: '98',

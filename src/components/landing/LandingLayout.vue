@@ -17,7 +17,6 @@ const { smAndUp } = useDisplay()
 const theme = ref(localStorage.getItem('theme') ?? 'light')
 const tab = ref<number | null>(null)
 
-
 function onToggleTheme() {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
   localStorage.setItem('theme', theme.value)
@@ -38,26 +37,34 @@ function onToggleTheme() {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <v-img v-if="theme === 'light' && smAndUp" max-width="265" :src="headerCzarles"/>
-            <v-img v-else max-width="75" :src="logoCzarles"/>
+            <v-img v-if="theme === 'light' && smAndUp" max-width="265" :src="headerCzarles" />
+            <v-img v-else max-width="75" :src="logoCzarles" />
           </RouterLink>
         </v-app-bar-title>
 
- 
-
         <template v-if="smAndUp">
-          <!-- Center the tabs visually on the app-bar by using an absolutely positioned wrapper
-               The wrapper disables pointer-events so it doesn't block other app-bar elements,
-               while the v-tabs itself re-enables pointer-events to remain interactive. -->
-          <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:100%; max-width:500px; display:flex; justify-content:center; pointer-events:none;">
+         
+          <div
+            style="
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              width: 100%;
+              max-width: 500px;
+              display: flex;
+              justify-content: center;
+              pointer-events: none;
+            "
+          >
             <v-tabs
               v-model="tab"
               class="text-caption"
               grow
               background-color="transparent"
-              style="min-width:320px; max-width:500px; pointer-events:auto;"
+              style="min-width: 320px; max-width: 500px; pointer-events: auto"
             >
-               <v-tab href="#home">Home</v-tab>
+              <v-tab href="#home">Home</v-tab>
               <v-tab href="#about">About Us</v-tab>
               <v-tab href="#company">Company</v-tab>
               <v-tab href="#contact">Contact us</v-tab>
@@ -85,9 +92,10 @@ function onToggleTheme() {
       <slot name="navigation" />
 
       <v-main>
-        <v-parallax :src="imageBg" height="100%" class="d-flex align-center justify-center">
+        <div class="d-flex align-center justify-center landing-parallax" style="height: 100%;">
+          <div class="landing-bg" :style="{ backgroundImage: 'url(' + imageBg + ')' }"></div>
           <slot name="content" />
-        </v-parallax>
+        </div>
       </v-main>
 
       <FooterNavigation />
@@ -103,8 +111,47 @@ function onToggleTheme() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
   z-index: 0;
 }
 
+.landing-parallax {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  will-change: transform;
+  transform-origin: center center;
+  animation: landing-zoom 25s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* keep content above the background */
+.landing-parallax > *:not(.landing-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes landing-zoom {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-bg {
+    animation: none;
+  }
+}
 </style>
