@@ -4,11 +4,12 @@ import FooterNavigation from './navigation/FooterNavigation.vue'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
 import imageBg from '@/assets/images/image-bg.jpg'
 import { useDisplay } from 'vuetify'
-import { ref, watch } from 'vue'
+import { ref, watch, computed, useSlots } from 'vue'
 import { useRoute } from 'vue-router'
 
 const props = defineProps<{
   isWithAppBarIcon?: boolean
+  hideBg?: boolean
 }>()
 
 const emit = defineEmits(['isDrawerVisible', 'theme'])
@@ -18,6 +19,8 @@ const { smAndUp } = useDisplay()
 const theme = ref(localStorage.getItem('theme') ?? 'light')
 const route = useRoute()
 const tab = ref<string | null>(route.path)
+const slots = useSlots()
+const showHeader = computed(() => route.path !== '/' && !!slots.hero)
 const isDrawerVisible = ref(false)
 
 // keep the tab in sync when the route changes (so active tab follows navigation)
@@ -141,9 +144,28 @@ function onToggleTheme() {
 
       <slot name="navigation" />
 
+      <!-- optional page hero/header slot; only show when route is not '/' and the slot is provided -->
+      <template v-if="showHeader">
+        <v-sheet
+          height="220"
+          elevation="0"
+          class="d-flex align-center justify-center"
+          :style="{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${imageBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            marginTop: '64px',
+          }"
+        >
+          <slot name="hero" />
+        </v-sheet>
+      </template>
+
       <v-main>
         <div class="d-flex align-center justify-center landing-parallax" style="height: 100%;">
-          <div class="landing-bg" :style="{ backgroundImage: 'url(' + imageBg + ')' }"></div>
+          <template v-if="!props.hideBg">
+            <div class="landing-bg" :style="{ backgroundImage: 'url(' + imageBg + ')' }"></div>
+          </template>
           <slot name="content" />
         </div>
       </v-main>

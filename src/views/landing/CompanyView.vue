@@ -3,7 +3,19 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
 </script>
 
 <template>
-  <LandingLayout>
+  <LandingLayout :hideBg="true">
+    <template #hero>
+      <div class="text-center white--text" style="max-width:900px;">
+        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2">Company</h1>
+        <p class="mb-4 text-body-1">We are a leading company with a strong commitment to quality and service.</p>
+
+        <div class="text-caption">
+          <RouterLink to="/" class="orange--text">Home</RouterLink>
+          <span class="mx-2">/</span>
+          <span>Company</span>
+        </div>
+      </div>
+    </template>
     <template #content>
       <v-container class="pa-5">
         <v-row>
