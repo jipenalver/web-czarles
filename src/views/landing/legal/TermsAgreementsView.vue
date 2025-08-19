@@ -1,15 +1,10 @@
-<script setup lang="ts">
-import LandingLayout from '@/components/landing/LandingLayout.vue'
-</script>
 
 <template>
-  <LandingLayout>
-    <template #content>
+  
       <v-container class="pa-0" fluid>
         <v-row>
-          <!-- Birahi dri Elro -->
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure consequuntur nihil ipsam nemo perferendis eos alias in, officiis ducimus esse laborum beatae accusamus porro optio facilis, quis atque blanditiis molestias.
         </v-row>
       </v-container>
-    </template>
-  </LandingLayout>
+
 </template>

@@ -2,7 +2,6 @@
 import headerCzarles from '@/assets/images/image-header-title.png'
 import FooterNavigation from './navigation/FooterNavigation.vue'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
-import imageBg from '@/assets/images/image-bg.jpg'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -51,7 +50,7 @@ function onToggleTheme() {
               top: 50%;
               transform: translate(-50%, -50%);
               width: 100%;
-              max-width: 500px;
+              max-width: 850x;
               display: flex;
               justify-content: center;
               pointer-events: none;
@@ -62,12 +61,13 @@ function onToggleTheme() {
               class="text-caption"
               grow
               background-color="transparent"
-              style="min-width: 320px; max-width: 500px; pointer-events: auto"
+              style="min-width: 320px; max-width: 850px; pointer-events: auto"
             >
               <v-tab href="#home">Home</v-tab>
               <v-tab href="#about">About Us</v-tab>
               <v-tab href="#company">Company</v-tab>
               <v-tab href="#contact">Contact us</v-tab>
+              <v-tab href="#terms">Terms of Service</v-tab>
             </v-tabs>
           </div>
         </template>
@@ -92,10 +92,7 @@ function onToggleTheme() {
       <slot name="navigation" />
 
       <v-main>
-        <div class="d-flex align-center justify-center landing-parallax" style="height: 100%;">
-          <div class="landing-bg" :style="{ backgroundImage: 'url(' + imageBg + ')' }"></div>
-          <slot name="content" />
-        </div>
+        <slot name="content" />
       </v-main>
 
       <FooterNavigation />
@@ -103,55 +100,4 @@ function onToggleTheme() {
   </v-responsive>
 </template>
 
-<style scoped>
-.landing-parallax::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-}
-
-.landing-parallax {
-  position: relative;
-  overflow: hidden;
-}
-
-.landing-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  will-change: transform;
-  transform-origin: center center;
-  animation: landing-zoom 25s ease-in-out infinite;
-  z-index: 0;
-}
-
-/* keep content above the background */
-.landing-parallax > *:not(.landing-bg) {
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes landing-zoom {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.25);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landing-bg {
-    animation: none;
-  }
-}
-</style>
+<!-- styles moved to HomeView.vue -->
