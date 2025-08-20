@@ -36,45 +36,10 @@ const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 const cashAdvances = ref<CashAdvance[]>([])
 
-// formattedPeriod: use persisted from/to dates (MM.DD.YYYY - MM.DD.YYYY) when available,
-// otherwise fall back to the original 21st-20th monthly period logic.
-const formattedPeriod = computed(() => {
-  try {
-    if (typeof window !== 'undefined') {
-      const from = localStorage.getItem('czarles_payroll_fromDate')
-      const to = localStorage.getItem('czarles_payroll_toDate')
-      if (from && to) {
-        const start = new Date(from)
-        const end = new Date(to)
-        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-          const fmt = (d: Date) => {
-            const m = String(d.getMonth() + 1).padStart(2, '0')
-            const day = String(d.getDate()).padStart(2, '0')
-            const y = d.getFullYear()
-            return `${m}.${day}.${y}`
-          }
-          return `${fmt(start)}-${fmt(end)}`
-        }
-      }
-    }
-  } catch {
-    // ignore and fallback
-  }
-
-  // original fallback: 21st of month to 20th of next month
-  const monthIndex = monthNames.indexOf(props.payrollData.month)
-  const startDate = new Date(props.payrollData.year, monthIndex, 21)
-  const endDate = new Date(props.payrollData.year, monthIndex + 1, 20)
-
-  const formatDate = (date: Date) => {
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${month}.${day}.${year}`
-  }
-
-  return `${formatDate(startDate)}-${formatDate(endDate)}`
-})
+// Month date range for display
+// const monthDateRange = computed(() => {
+//   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
+// })
 
 // Constants
 const monthNames = [
@@ -92,8 +57,21 @@ const monthNames = [
   'December',
 ]
 
-// Duplicate formattedPeriod removed — the persisted/localStorage-aware `formattedPeriod`
-// defined earlier in this file will be used instead.
+// Date formatting computeds
+const formattedPeriod = computed(() => {
+  const monthIndex = monthNames.indexOf(props.payrollData.month)
+  const startDate = new Date(props.payrollData.year, monthIndex, 21)
+  const endDate = new Date(props.payrollData.year, monthIndex + 1, 20)
+
+  const formatDate = (date: Date) => {
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const year = date.getFullYear()
+    return `${month}.${day}.${year}`
+  }
+
+  return `${formatDate(startDate)}-${formatDate(endDate)}`
+})
 
 const filterDateString = computed(() => {
   const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
@@ -356,7 +334,7 @@ const specialHolidays = computed(() => {
 <template>
   <v-container fluid class="pa-4" style="max-width: 400px">
     <!-- Header -->
-    <v-card class="border pa-3 mb-3">
+    <v-card class="thick-border pa-3 mb-3">
       <v-card-title class="text-center text-h6 font-weight-bold pa-2"> PAYSLIP </v-card-title>
 
       <!-- Employee Basic Info -->
@@ -586,5 +564,21 @@ const specialHolidays = computed(() => {
 
 .border-b-sm {
   border-bottom: 1px solid #000;
+}
+
+/* copied from PayrollPrintFooter: consistent thick border used for print/pdf */
+.thick-border {
+  border: 1px solid;
+}
+
+@media print {
+  .thick-border {
+    border: 1px solid !important;
+  }
+}
+
+/* Programmatic hook: add .pdf-print-active to a parent during html2pdf run */
+.pdf-print-active .thick-border {
+  border: 1px solid !important;
 }
 </style>

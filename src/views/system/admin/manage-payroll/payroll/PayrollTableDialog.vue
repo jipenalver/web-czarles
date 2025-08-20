@@ -269,7 +269,7 @@ const calculateFieldStaffNetPay = (item: TableData) => {
           <v-select
             v-model="dayFrom"
             :items="dayOptions"
-            :label="`From Day (Month ${tableFilters.year || ''})`"
+            :label="`From Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
             placeholder="Previous Month"
             clearable
             clear-icon="mdi-close"
