@@ -114,22 +114,22 @@ const effectiveDate = computed(() => {
         <v-col cols="2" class="text-end">
           {{ formattedPrice }}
         </v-col>
-        <v-divider></v-divider>
-        <v-col cols="12">
+        <v-divider class="mx-4"></v-divider>
+        <v-col cols="12" >
           <div class="text-start">in full payment of the amount described above.</div>
         </v-col>
         <v-row class="mx-5">
           <v-col cols="4">
-            <div class="text-start" style="text-decoration:underline">NINA MIKAELAA ABANERO</div>
-            <div class="mx-10">Prepared By</div>
+            <div class="text-center" style="text-decoration:underline">NINA MIKAELAA ABANERO</div>
+            <div class="mx-10 text-center">Prepared By</div>
           </v-col>
           <v-col cols="4">
             <div class="text-center" style="text-decoration:underline">CESAR T. PALMA JR.</div>
              <div class="mx-10 text-center">Approved</div>
           </v-col>
            <v-col cols="4">
-            <div class="text-end">BY: ________________________</div>
-             <div class="mx-4 text-end">Signature Over Printed Name</div>
+            <div class="text-start">BY: ________________________</div>
+             <div>Signature Over Printed Name</div>
           </v-col>
         </v-row>
       </v-row>
@@ -141,7 +141,7 @@ const effectiveDate = computed(() => {
 <style>
 .compact-table {
   line-height: 0.8 !important;
-  font-size: 0.75rem;
+  font-size: 0.30rem;
   border-collapse: collapse;
 }
 
@@ -152,12 +152,12 @@ const effectiveDate = computed(() => {
 
 @media print {
   .thick-border {
-    border: 3px solid !important;
+    border: 1px solid !important;
   }
 }
 
 /* Programmatic hook: add .pdf-print-active to a parent during html2pdf run */
 .pdf-print-active .thick-border {
-  border: 3px solid !important;
+  border: 1px solid !important;
 }
 </style>

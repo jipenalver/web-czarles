@@ -106,8 +106,8 @@ const address = computed(() => {
 })
 
 const formattedDate = computed(() => {
-  const monthIndex = monthNames.indexOf(props.payrollData.month)
-  const date = new Date(props.payrollData.year, monthIndex)
+  // Use the current system date for the printed pay slip date
+  const date = new Date()
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 })
 
