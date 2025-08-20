@@ -385,6 +385,10 @@ export function usePayrollTableDialog(
     attendance_at: null,
   })
   const tableData = ref<TableData[]>([])
+  // Simple cache tracker to prevent unnecessary refetches
+  const lastLoaded = ref<{ employeeId: number | null; year: number | null; monthsKey: string | null }>(
+    { employeeId: null, year: null, monthsKey: null },
+  )
   const formAction = ref({ ...formActionDefault })
   const isPrintDialogVisible = ref(false)
 
@@ -478,14 +482,31 @@ export function usePayrollTableDialog(
   const loadPayrollData = async (): Promise<void> => {
     tableOptions.value.isLoading = true
     try {
+      // Guard: if data already loaded for this employee/year/months, skip refetch
+      const employeeId = props.itemData?.id ?? null
+      const monthsKey = availableMonths.value.join(',')
+      if (
+        tableData.value.length > 0 &&
+        lastLoaded.value.employeeId === employeeId &&
+        lastLoaded.value.year === tableFilters.value.year &&
+        lastLoaded.value.monthsKey === monthsKey
+      ) {
+        // already loaded, avoid refetch
+        tableOptions.value.isLoading = false
+        return
+      }
       const payrollPromises = availableMonths.value.map((monthIndex) =>
         generatePayrollData(monthIndex),
       )
       tableData.value = await Promise.all(payrollPromises)
+      // Update cache marker so subsequent opens/changes don't refetch unnecessarily
+      lastLoaded.value = { employeeId: props.itemData?.id ?? null, year: tableFilters.value.year, monthsKey }
       /* console.log('Payroll data loaded:', tableData.value) */
     } catch (error) {
       console.error('Error loading payroll data:', error)
       tableData.value = []
+      // clear cache on error to allow retry
+      lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
     } finally {
       tableOptions.value.isLoading = false
     }
@@ -539,6 +560,17 @@ export function usePayrollTableDialog(
         const employeeStartingYear = startingYear.value
         // Update year filter to most recent available year or current year
         tableFilters.value.year = Math.max(employeeStartingYear, currentYear.value)
+      }
+    },
+  )
+
+  // Clear cached payroll data when the selected employee changes
+  watch(
+    () => props.itemData?.id,
+    (newId, oldId) => {
+      if (newId !== oldId) {
+        tableData.value = []
+        lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
       }
     },
   )
