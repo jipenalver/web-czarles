@@ -269,13 +269,13 @@ const calculateFieldStaffNetPay = (item: TableData) => {
           <v-select
             v-model="dayFrom"
             :items="dayOptions"
-            :label="`From Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
-            placeholder="Select day"
+            :label="`From Day (Month ${tableFilters.year || ''})`"
+            placeholder="Previous Month"
             clearable
             clear-icon="mdi-close"
             dense
             hide-details="auto"
-            style="min-width: 140px"
+            style="min-width: 240px"
           ></v-select>
 
           <v-select
@@ -283,12 +283,12 @@ const calculateFieldStaffNetPay = (item: TableData) => {
             v-model="dayTo"
             :items="dayOptionsTo"
             :label="`To Day (${chosenMonth ? (chosenMonth === monthNames[11] ? monthNames[0] + ' (next year)' : monthNames[(monthNames.indexOf(chosenMonth) + 1) % 12]) : 'next month'})`"
-            placeholder="Select day"
+            placeholder="Current Month"
             clearable
             clear-icon="mdi-close"
             dense
             hide-details="auto"
-            style="min-width: 140px"
+            style="min-width: 240px"
           ></v-select>
 
           <v-select
