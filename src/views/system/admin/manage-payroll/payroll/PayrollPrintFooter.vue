@@ -1,7 +1,46 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { getMoneyText } from '@/utils/helpers/others'
 
 const props = defineProps<{ dateString?: string; price?: string | number }>()
+
+// reactive price that listens to realtime updates
+const livePrice = ref<string | number | null>(props.price ?? null)
+
+const onPriceUpdate = (ev: Event) => {
+  try {
+    // CustomEvent detail with { price }
+    const detail = (ev as CustomEvent)?.detail
+    if (detail && typeof detail.price !== 'undefined') livePrice.value = detail.price
+  } catch {
+    // ignore
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    // prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
+  const stored = localStorage.getItem('czarles_payroll_price')
+  if (livePrice.value === null && stored !== null) livePrice.value = stored
+    window.addEventListener('czarles_payroll_price_update', onPriceUpdate as EventListener)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('czarles_payroll_price_update', onPriceUpdate as EventListener)
+  }
+})
+
+const formattedPrice = computed(() => {
+  const val = livePrice.value ?? props.price
+  if (val === null || typeof val === 'undefined' || val === '') return '—'
+  try {
+    return getMoneyText(val as string | number)
+  } catch {
+    return String(val)
+  }
+})
 
 const effectiveDate = computed(() => {
   // Prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
@@ -73,7 +112,7 @@ const effectiveDate = computed(() => {
           RECEIVED from C'ZARLES CONSTRUCTION & SUPPLY the amount of PESOS:
         </v-col>
         <v-col cols="2" class="text-end">
-          {{ props.price ?? '—' }}
+          {{ formattedPrice }}
         </v-col>
         <v-divider></v-divider>
         <v-col cols="12">

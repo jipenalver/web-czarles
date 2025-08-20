@@ -72,6 +72,25 @@ const netSalaryCalculation = useNetSalaryCalculation(
   computed(() => props.undertimeDeduction),
 )
 
+// Publish net salary in realtime for other components (e.g. print footer)
+watch(
+  () => netSalaryCalculation.value.netSalary,
+  (newNet) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const priceValue = typeof newNet === 'number' ? newNet : Number(newNet)
+        // store as string for persistence
+        localStorage.setItem('czarles_payroll_price', String(priceValue))
+        // dispatch a custom event so same-window listeners receive updates in realtime
+        window.dispatchEvent(new CustomEvent('czarles_payroll_price_update', { detail: { price: priceValue } }))
+      } catch {
+        // noop
+      }
+    }
+  },
+  { immediate: true },
+)
+
 // ...existing code...
 </script>
 <template>
