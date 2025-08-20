@@ -128,6 +128,14 @@ function getMonthYearAsDateString(year: number, monthName: string): string {
   return `${year}-${month}-01`
 }
 
+// Helper: return last day (number) for a given year + month name
+function getLastDayOfMonth(year: number, monthName: string): number {
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const idx = monthIndex >= 0 ? monthIndex : 0
+  // JS Date: day 0 of next month gives last day of current month
+  return new Date(Number(year), idx + 1, 0).getDate()
+}
+
 // Wrapper function para sa onView, para ma-save ug ma-console.log ang month ug date string
 function onView(item: TableData) {
   chosenMonth.value = item.month
@@ -135,8 +143,15 @@ function onView(item: TableData) {
   if (dayFrom.value === null || dayFrom.value === undefined) {
     dayFrom.value = 1
   }
+  // If user didn't provide To day, default to last day of the chosen month
   if (dayTo.value === null || dayTo.value === undefined) {
-    dayTo.value = daysInNextMonth.value
+    try {
+      const tf = tableFilters.value as { year?: number } | undefined
+      const year = (tf && typeof tf.year === 'number' ? tf.year : new Date().getFullYear())
+      dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
+    } catch {
+      dayTo.value = daysInNextMonth.value
+    }
   }
   // isave nato ang month na gipili, then i-console.log para sa debugging
   const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
