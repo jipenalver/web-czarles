@@ -282,8 +282,14 @@ const calculateFieldStaffNetPay = (item: TableData) => {
             class="me-4"
             v-model="dayTo"
             :items="dayOptionsTo"
-            :label="`To Day (${chosenMonth ? (chosenMonth === monthNames[11] ? monthNames[0] + ' (next year)' : monthNames[(monthNames.indexOf(chosenMonth) + 1) % 12]) : 'next month'})`"
-            placeholder="Current Month"
+            :label="`To Day (${chosenMonth ? (() => {
+              const currentIndex = monthNames.indexOf(chosenMonth);
+              if (currentIndex === -1) return 'next month';
+              const nextIndex = (currentIndex + 1) % 12;
+              const isNextYear = currentIndex === 11;
+              return monthNames[nextIndex] + (isNextYear ? ' (next year)' : '');
+            })() : 'next month'})`"
+            placeholder="Next Month"
             clearable
             clear-icon="mdi-close"
             dense
