@@ -94,6 +94,10 @@ const todaysBirthdays = computed(() => {
               <div class="text-caption">
                 {{ getZodiacSign(person.birthdate) }} • {{ getAgeMilestone(getAge(person.birthdate)) }}
               </div>
+              <div>
+                Serving since <strong>{{ person.serving_since ?? (person.hired_at ? new Date(person.hired_at).getFullYear() : '') }}</strong>
+                <span v-if="person.years_served !== undefined"> • {{ person.years_served }} year{{ person.years_served === 1 ? '' : 's' }}</span>
+              </div>
             </div>
           </div>
         </div>

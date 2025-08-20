@@ -40,6 +40,10 @@ export type Employee = {
   employee_deductions: (EmployeeDeduction & {
     employee_benefit: Benefit
   })[]
+
+  // Computed optional helpers
+  years_served?: number
+  serving_since?: string
 }
 
 export type EmployeeTableFilter = {
@@ -91,7 +95,12 @@ export const useEmployeesStore = defineStore('employees', () => {
 
     const { data } = await query
 
-    employeesExport.value = data as Employee[]
+    // Populate export and add computed serving fields
+    employeesExport.value = (data as Employee[]).map((item) => ({
+      ...item,
+      years_served: computeYearsServed(item.hired_at),
+      serving_since: item.hired_at ? new Date(item.hired_at).getFullYear().toString() : undefined,
+    })) as Employee[]
   }
 
   async function getEmployeesTable(
@@ -160,6 +169,21 @@ export const useEmployeesStore = defineStore('employees', () => {
       .update({ deleted_at: prepareDateTime(new Date()) })
       .eq('id', id)
       .select()
+  }
+
+  // Helper: compute full years between hired_at and today
+  function computeYearsServed(hiredAt?: string) {
+    if (!hiredAt) return undefined
+    try {
+      const hired = new Date(hiredAt)
+      const now = new Date()
+      let years = now.getFullYear() - hired.getFullYear()
+      const m = now.getMonth() - hired.getMonth()
+      if (m < 0 || (m === 0 && now.getDate() < hired.getDate())) years--
+      return years >= 0 ? years : 0
+    } catch {
+      return undefined
+    }
   }
 
   // Expose States and Actions
