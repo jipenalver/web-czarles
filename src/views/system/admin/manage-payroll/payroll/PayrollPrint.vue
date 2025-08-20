@@ -14,7 +14,7 @@ import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
 import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
 import type { EmployeeDeduction } from '@/stores/benefits'
-import { fetchFilteredTrips } from './computation/trips'
+import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -265,7 +265,26 @@ async function loadTrips() {
   }
   isTripsLoading.value = true
   try {
-    const fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
+    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
+    let fromDate: string | null = null
+    let toDate: string | null = null
+    try {
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate')
+        toDate = localStorage.getItem('czarles_payroll_toDate')
+      }
+    } catch {
+      fromDate = null
+      toDate = null
+    }
+
+    let fetchedTrips
+    if (fromDate && toDate) {
+      fetchedTrips = await fetchTripsByRange(fromDate, toDate, props.employeeData.id)
+    } else {
+      fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
+    }
+
     tripsStore.trips = fetchedTrips
   } catch (error) {
     console.error('[PayrollPrint] Error loading trips:', error)
