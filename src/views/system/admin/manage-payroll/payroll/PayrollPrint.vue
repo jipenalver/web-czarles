@@ -12,7 +12,7 @@ import { fetchEmployeeDeductions } from './computation/benefits'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-import { fetchHolidaysByDateString } from './computation/holidays'
+import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import { fetchFilteredTrips } from './computation/trips'
 
@@ -227,10 +227,29 @@ async function fetchEmployeeHolidays() {
     return
   }
   try {
-    holidays.value = await fetchHolidaysByDateString(
-      holidayDateString.value,
-      String(props.employeeData.id),
-    )
+    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
+    let fromDate: string | null = null
+    let toDate: string | null = null
+    try {
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate')
+        toDate = localStorage.getItem('czarles_payroll_toDate')
+      }
+    } catch {
+      fromDate = null
+      toDate = null
+    }
+
+    if (fromDate && toDate) {
+      // Use range-based fetch
+      holidays.value = await fetchHolidaysByRange(fromDate, toDate, String(props.employeeData.id))
+    } else {
+      // Fallback to month-based fetch
+      holidays.value = await fetchHolidaysByDateString(
+        holidayDateString.value,
+        String(props.employeeData.id),
+      )
+    }
   } catch (error) {
     console.error('Error fetching holidays:', error)
     holidays.value = []

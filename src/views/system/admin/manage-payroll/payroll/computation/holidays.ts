@@ -51,3 +51,47 @@ export async function fetchHolidaysByDateString(
   /*  console.log('Matched Holidays:', matchedHolidays) */
   return matchedHolidays
 }
+
+// New: fetch holidays using an explicit from/to date range (YYYY-MM-DD)
+export async function fetchHolidaysByRange(
+  fromDate: string,
+  toDate: string,
+  employeeId?: string,
+): Promise<Holiday[]> {
+  // Query holidays between fromDate and toDate (inclusive)
+  const { data: holidays, error: holidaysError } = await supabase
+    .from('holidays')
+    .select()
+    .gte('holiday_at', fromDate)
+    .lte('holiday_at', toDate)
+
+  if (holidaysError || !holidays) {
+    return []
+  }
+
+  if (!employeeId) {
+    return holidays as Holiday[]
+  }
+
+  // Fetch attendances for the employee within the date range
+  const { data: attendances, error: attendancesError } = await supabase
+    .from('attendances')
+    .select('am_time_in')
+    .gte('am_time_in', fromDate)
+    .lte('am_time_in', toDate)
+    .eq('employee_id', employeeId)
+
+  if (attendancesError || !attendances) return []
+
+  const attendanceDates = new Set(
+    attendances
+      .map((a: { am_time_in: string | null }) => a.am_time_in?.slice(0, 10))
+      .filter(Boolean),
+  )
+
+  const matchedHolidays = (holidays as Holiday[]).filter((h) =>
+    attendanceDates.has(h.holiday_at.slice(0, 10)),
+  )
+
+  return matchedHolidays
+}
