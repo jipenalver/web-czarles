@@ -36,10 +36,45 @@ const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 const cashAdvances = ref<CashAdvance[]>([])
 
-// Month date range for display
-// const monthDateRange = computed(() => {
-//   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
-// })
+// formattedPeriod: use persisted from/to dates (MM.DD.YYYY - MM.DD.YYYY) when available,
+// otherwise fall back to the original 21st-20th monthly period logic.
+const formattedPeriod = computed(() => {
+  try {
+    if (typeof window !== 'undefined') {
+      const from = localStorage.getItem('czarles_payroll_fromDate')
+      const to = localStorage.getItem('czarles_payroll_toDate')
+      if (from && to) {
+        const start = new Date(from)
+        const end = new Date(to)
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          const fmt = (d: Date) => {
+            const m = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            const y = d.getFullYear()
+            return `${m}.${day}.${y}`
+          }
+          return `${fmt(start)}-${fmt(end)}`
+        }
+      }
+    }
+  } catch {
+    // ignore and fallback
+  }
+
+  // original fallback: 21st of month to 20th of next month
+  const monthIndex = monthNames.indexOf(props.payrollData.month)
+  const startDate = new Date(props.payrollData.year, monthIndex, 21)
+  const endDate = new Date(props.payrollData.year, monthIndex + 1, 20)
+
+  const formatDate = (date: Date) => {
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const year = date.getFullYear()
+    return `${month}.${day}.${year}`
+  }
+
+  return `${formatDate(startDate)}-${formatDate(endDate)}`
+})
 
 // Constants
 const monthNames = [
@@ -57,21 +92,8 @@ const monthNames = [
   'December',
 ]
 
-// Date formatting computeds
-const formattedPeriod = computed(() => {
-  const monthIndex = monthNames.indexOf(props.payrollData.month)
-  const startDate = new Date(props.payrollData.year, monthIndex, 21)
-  const endDate = new Date(props.payrollData.year, monthIndex + 1, 20)
-
-  const formatDate = (date: Date) => {
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${month}.${day}.${year}`
-  }
-
-  return `${formatDate(startDate)}-${formatDate(endDate)}`
-})
+// Duplicate formattedPeriod removed — the persisted/localStorage-aware `formattedPeriod`
+// defined earlier in this file will be used instead.
 
 const filterDateString = computed(() => {
   const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')

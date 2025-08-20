@@ -50,6 +50,22 @@ watch(
 )
 
 const monthDateRange = computed(() => {
+  try {
+    if (typeof window !== 'undefined') {
+      const from = localStorage.getItem('czarles_payroll_fromDate')
+      const to = localStorage.getItem('czarles_payroll_toDate')
+      if (from && to) {
+        const start = new Date(from)
+        const end = new Date(to)
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+          return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
+        }
+      }
+    }
+  } catch {
+    /* ignore and fallback */
+  }
   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
 })
 
@@ -140,6 +156,7 @@ const {
   monthUndertimeDeduction,
   undertimeDeduction,
   computeOverallOvertimeCalculation,
+  netSalary,
 } = payrollPrint
 
 const overallEarningsTotal = useOverallEarningsTotal(
@@ -488,7 +505,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
       </tbody>
     </v-table>
 
-   <PayrollPrintFooter></PayrollPrintFooter>
+  <PayrollPrintFooter :price="getMoneyText(netSalary)"></PayrollPrintFooter>
 
     <div id="mini-payroll-section" class="mini-payroll-hidden">
       <MiniPayrollPrint

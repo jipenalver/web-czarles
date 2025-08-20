@@ -44,7 +44,7 @@ export async function getEmployeeAttendanceById(
   }
 
   // debug
-   console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
+   //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
 
   const { data, error } = await supabase
     .from('attendances')

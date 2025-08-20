@@ -1,19 +1,36 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps<{ dateString?: string }>()
+const props = defineProps<{ dateString?: string; price?: string | number }>()
 
 const effectiveDate = computed(() => {
   // Prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
-  const source =
-    props.dateString ??
-    (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
-  if (!source) return '—'
-  // source may be 'YYYY-MM' or 'YYYY-MM-DD'
-  const ds = source.length === 7 ? `${source}-01` : source
-  const d = new Date(ds)
-  if (isNaN(d.getTime())) return source
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
+  try {
+    // Prefer an explicit from/to range saved in localStorage
+    if (typeof window !== 'undefined') {
+      const from = localStorage.getItem('czarles_payroll_fromDate')
+      const to = localStorage.getItem('czarles_payroll_toDate')
+      if (from && to) {
+        const start = new Date(from)
+        const end = new Date(to)
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          return `${start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })} - ${end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}`
+        }
+      }
+    }
+
+    const source =
+      props.dateString ??
+      (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
+    if (!source) return '—'
+    // source may be 'YYYY-MM' or 'YYYY-MM-DD'
+    const ds = source.length === 7 ? `${source}-01` : source
+    const d = new Date(ds)
+    if (isNaN(d.getTime())) return source
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
+  } catch {
+    return '—'
+  }
 })
 </script>
 
@@ -55,8 +72,8 @@ const effectiveDate = computed(() => {
         <v-col cols="10">
           RECEIVED from C'ZARLES CONSTRUCTION & SUPPLY the amount of PESOS:
         </v-col>
-        <v-col cols="2 text-end">
-            {price}
+        <v-col cols="2" class="text-end">
+          {{ props.price ?? '—' }}
         </v-col>
         <v-divider></v-divider>
         <v-col cols="12">
