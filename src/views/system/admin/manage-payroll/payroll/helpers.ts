@@ -144,3 +144,69 @@ export const getLastDateOfMonth = (dateString: string): string => {
     return `${year}-${String(month + 1).padStart(2, '0')}-01`
   }
 }
+
+/**
+ * Build full YYYY-MM-DD range for the provided year + monthName using dayFrom/dayTo (inclusive).
+ * If toDay <= fromDay, the end date is interpreted as the next month (handles year rollover).
+ */
+export function getDateRangeForMonth(year: number | undefined, monthName: string, fromDay?: number | null, toDay?: number | null) {
+  const y = year || new Date().getFullYear()
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ]
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const month = monthIndex >= 0 ? monthIndex : 0
+
+  // start month/year
+  const startYear = Number(y)
+  const startMonth = month // 0-based
+
+  const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate()
+  const from = fromDay && fromDay > 0 ? Math.min(Math.max(1, fromDay), daysInStartMonth) : 1
+
+  // Decide end month/year: if toDay > from => same month; if toDay <= from => next month
+  let endYear = startYear
+  let endMonth = startMonth
+  if (toDay === undefined || toDay === null) {
+    // default to last day of start month
+    endMonth = startMonth
+  } else if ((toDay || 0) > from) {
+    endMonth = startMonth
+  } else {
+    // next month (handle year rollover)
+    if (startMonth === 11) {
+      endMonth = 0
+      endYear = startYear + 1
+    } else {
+      endMonth = startMonth + 1
+    }
+  }
+
+  const daysInEndMonth = new Date(endYear, endMonth + 1, 0).getDate()
+  const toRaw = toDay && toDay > 0 ? toDay : daysInEndMonth
+  const to = Math.min(Math.max(1, toRaw), daysInEndMonth)
+
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  const fromDate = `${startYear}-${pad(startMonth + 1)}-${pad(from)}`
+  const toDate = `${endYear}-${pad(endMonth + 1)}-${pad(to)}`
+
+  // compute inclusive days difference using UTC to avoid timezone issues
+  const s = new Date(`${fromDate}T00:00:00Z`).getTime()
+  const e = new Date(`${toDate}T00:00:00Z`).getTime()
+  const msPerDay = 24 * 60 * 60 * 1000
+  const totalDays = Math.floor((e - s) / msPerDay) + 1
+
+  return { fromDate, toDate, totalDays }
+}

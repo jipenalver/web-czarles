@@ -7,9 +7,9 @@ import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
-import { getYearMonthString } from './helpers'
+import { getYearMonthString, getDateRangeForMonth } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
   isDialogVisible: boolean
@@ -72,6 +72,39 @@ const {
 // Variable para isave ang month na gipili sa client
 const chosenMonth = ref<string>('')
 
+// Day-only selectors (month is selected via the table rows)
+const dayFrom = ref<number | null>(null)
+const dayTo = ref<number | null>(null)
+
+// Compute days in the currently chosen month (chosenMonth set when clicking a month row)
+const daysInSelectedMonth = computed(() => {
+  const tf = tableFilters.value as Record<string, unknown> | undefined
+  const maybeYear = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+  const monthName = chosenMonth.value || ''
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const idx = monthIndex >= 0 ? monthIndex : 0
+  return new Date(Number(maybeYear), idx + 1, 0).getDate()
+})
+
+const dayOptions = computed(() => Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1))
+
+// (Day-only selects — month is selected via the table rows)
+
+// When year changes, ensure the from/to stay within that year (clear if not)
+watch(
+  () => {
+    const tf = tableFilters.value as Record<string, unknown> | undefined
+    return tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : undefined
+  },
+  (newYear) => {
+    if (!newYear) return
+    // clear day selections if they are incompatible with new year + chosenMonth
+    dayFrom.value = null
+    dayTo.value = null
+  },
+  { immediate: true }
+)
+
 // Helper function: convert year + month name to YYYY-MM-DD
 function getMonthYearAsDateString(year: number, monthName: string): string {
   // Pangitaon ang month index (0-based)
@@ -88,6 +121,10 @@ function onView(item: TableData) {
   // I-format ang dateString to YYYY-MM before saving to localStorage
   const yearMonth = getYearMonthString(dateString)
   localStorage.setItem('czarles_payroll_dateString', yearMonth)
+
+  // Compute and log the selected date range (day inputs use the clicked month + selected year)
+  const range = getDateRangeForMonth(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value)
+  console.log('[PAYROLL] Selected date range for view:', { range, chosenMonth: chosenMonth.value })
 
   // Enhanced console log para sa field staff debugging
   // if (isCurrentEmployeeFieldStaff.value) {
@@ -119,6 +156,12 @@ const calculateFieldStaffNetPay = (item: TableData) => {
   //console.error(`[PAYROLL CALCULATION] Employee ${props.itemData?.id} - Month: ${item.month}, Net Pay: ${netPay}, Attendance Calculation: ${attendanceCalculation}`)
   return netPay /* + attendanceCalculation */
 }
+
+/**
+ * Compute a date range for the given year + monthName using optional from/to day numbers.
+ * Returns { fromDate, toDate, totalDays } where dates are YYYY-MM-DD and totalDays is inclusive.
+ */
+// (moved getDateRangeForMonth to shared helpers.ts)
 </script>
 
 <template>
@@ -141,6 +184,19 @@ const calculateFieldStaffNetPay = (item: TableData) => {
     >
       <template #append>
         <div class="d-flex ga-3 align-center">
+            <v-select
+            v-model="dayFrom"
+            :items="dayOptions"
+            label="From Day"
+            style="min-width: 120px"
+          ></v-select>
+            <v-select
+            class="me-4"
+            v-model="dayTo"
+            :items="dayOptions"
+            label="To Day"
+            style="min-width: 120px"
+          ></v-select>
           <v-select
             v-model="tableFilters.year"
             label="Year"

@@ -66,8 +66,8 @@ export function usePayrollTableDialog(
       dateString,
       cashAdvanceDateString,
       monthIndex
-    }) */
-
+    })
+ */
     if (!employeeId) {
       console.warn(`No employee ID provided for ${monthName} ${year}`)
       return {
@@ -380,8 +380,9 @@ export function usePayrollTableDialog(
     isLoading: false,
   })
 
-  const tableFilters = ref<{ year: number }>({
+  const tableFilters = ref<{ year: number; attendance_at?: Date[] | null }>({
     year: getCurrentYearInPhilippines(), // Start with current year, will be updated when employee data loads
+    attendance_at: null,
   })
   const tableData = ref<TableData[]>([])
   const formAction = ref({ ...formActionDefault })
@@ -580,6 +581,14 @@ export function usePayrollTableDialog(
     isPrintDialogVisible.value = true
   }
 
+  // Action: filter by date (attendance_at) - simple handler to clear or reload payroll data
+  const onFilterDate = async (isCleared = false) => {
+    if (isCleared) tableFilters.value.attendance_at = null
+
+    // For payroll, changing attendance date may affect attendance-based calculations; reload data
+    await loadPayrollData()
+  }
+
   // Action: close dialog
   const onDialogClose = (): void => {
     formAction.value = { ...formActionDefault }
@@ -601,7 +610,8 @@ export function usePayrollTableDialog(
     availableYears,
     availableMonths,
     isCurrentEmployeeFieldStaff,
-    onView,
+  onFilterDate,
+  onView,
     onDialogClose,
   }
 }
