@@ -36,7 +36,14 @@ export function usePayrollComputation(
 
   // Async function to compute overall overtime for the month for an employee
   async function computeOverallOvertimeCalculationForEmployee() {
-    return await computeOverallOvertimeCalculation(employeeId, dateString)
+    // Read persisted from/to dates if available
+    let fromDate: string | undefined = undefined
+    let toDate: string | undefined = undefined
+    if (typeof window !== 'undefined') {
+      fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
+      toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
+    }
+    return await computeOverallOvertimeCalculation(employeeId, dateString, fromDate, toDate)
   }
   // const employeesStore = useEmployeesStore()
   // const attendancesStore = useAttendancesStore()
@@ -113,10 +120,19 @@ export function usePayrollComputation(
     let usedDateString = dateString
     if (!usedDateString && typeof window !== 'undefined') {
       usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
+      //console.log(`[computeRegularWorkTotal] Using dateString: ${usedDateString}`)
     }
 
     if (employeeId && usedDateString) {
-      const attendances = await getEmployeeAttendanceById(employeeId, usedDateString)
+      // Read persisted from/to dates if available
+      let fromDate: string | undefined = undefined
+      let toDate: string | undefined = undefined
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
+        toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
+      }
+      
+      const attendances = await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
       if (Array.isArray(attendances) && attendances.length > 0) {
         // Get employee info to check if field staff
         const emp = await employeesStore.getEmployeesById(employeeId)

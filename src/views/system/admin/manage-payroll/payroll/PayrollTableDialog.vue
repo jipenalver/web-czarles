@@ -88,6 +88,21 @@ const daysInSelectedMonth = computed(() => {
 
 const dayOptions = computed(() => Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1))
 
+// Day options for the next month (To Day should reference next month)
+const daysInNextMonth = computed(() => {
+  const tf = tableFilters.value as Record<string, unknown> | undefined
+  const maybeYear = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+  const monthName = chosenMonth.value || ''
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const startIdx = monthIndex >= 0 ? monthIndex : 0
+  const nextIdx = startIdx === 11 ? 0 : startIdx + 1
+  let nextYear = Number(maybeYear)
+  if (startIdx === 11) nextYear = Number(maybeYear) + 1
+  return new Date(nextYear, nextIdx + 1, 0).getDate()
+})
+
+const dayOptionsTo = computed(() => Array.from({ length: daysInNextMonth.value }, (_, i) => i + 1))
+
 // (Day-only selects — month is selected via the table rows)
 
 // When year changes, ensure the from/to stay within that year (clear if not)
@@ -116,6 +131,13 @@ function getMonthYearAsDateString(year: number, monthName: string): string {
 // Wrapper function para sa onView, para ma-save ug ma-console.log ang month ug date string
 function onView(item: TableData) {
   chosenMonth.value = item.month
+  // default From = 1, To = end of next month when not explicitly chosen
+  if (dayFrom.value === null || dayFrom.value === undefined) {
+    dayFrom.value = 1
+  }
+  if (dayTo.value === null || dayTo.value === undefined) {
+    dayTo.value = daysInNextMonth.value
+  }
   // isave nato ang month na gipili, then i-console.log para sa debugging
   const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
   // I-format ang dateString to YYYY-MM before saving to localStorage
@@ -125,6 +147,15 @@ function onView(item: TableData) {
   // Compute and log the selected date range (day inputs use the clicked month + selected year)
   const range = getDateRangeForMonth(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value)
   console.log('[PAYROLL] Selected date range for view:', { range, chosenMonth: chosenMonth.value })
+  // Persist selected range for other components (payroll computation / print)
+  try {
+    if (typeof window !== 'undefined' && range) {
+      localStorage.setItem('czarles_payroll_fromDate', range.fromDate)
+      localStorage.setItem('czarles_payroll_toDate', range.toDate)
+    }
+  } catch {
+    // ignore storage errors
+  }
 
   // Enhanced console log para sa field staff debugging
   // if (isCurrentEmployeeFieldStaff.value) {
@@ -148,6 +179,42 @@ function onView(item: TableData) {
   // Pass dateString as prop to composable logic (if needed)
   baseOnView({ ...item, dateString })
 }
+
+// Persist selected from/to days to localStorage when changed (or clear when null)
+watch(
+  () => [dayFrom.value, dayTo.value],
+  ([newFrom, newTo]) => {
+    const tf = tableFilters.value as Record<string, unknown> | undefined
+    const year = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+
+    // If both cleared, remove persisted values
+    if ((newFrom === null || newFrom === undefined) && (newTo === null || newTo === undefined)) {
+      try {
+        localStorage.removeItem('czarles_payroll_fromDate')
+        localStorage.removeItem('czarles_payroll_toDate')
+      } catch {
+        /* ignore */
+      }
+      return
+    }
+
+    // Build range using helpers and persist
+    const from = newFrom ?? 1
+    const to = newTo ?? daysInNextMonth.value
+    const range = getDateRangeForMonth(year, chosenMonth.value, from, to)
+    try {
+      if (range) {
+        localStorage.setItem('czarles_payroll_fromDate', range.fromDate)
+        localStorage.setItem('czarles_payroll_toDate', range.toDate)
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  },
+  { immediate: true }
+)
+
+
 
 // Compute the sum of net_pay + attendance calculation for field staff
 const calculateFieldStaffNetPay = (item: TableData) => {
@@ -182,25 +249,39 @@ const calculateFieldStaffNetPay = (item: TableData) => {
       :title="`Payslip ${tableFilters.year}`"
       :subtitle="`${props.itemData?.firstname} ${props.itemData?.lastname}${isCurrentEmployeeFieldStaff ? ' • 🏃 Field Staff' : ' • 🏢 Office Staff'}`"
     >
-      <template #append>
+          <template #append>
         <div class="d-flex ga-3 align-center">
-            <v-select
+          <v-select
             v-model="dayFrom"
             :items="dayOptions"
-            label="From Day"
-            style="min-width: 120px"
+            :label="`From Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
+            placeholder="Select day"
+            clearable
+            clear-icon="mdi-close"
+            dense
+            hide-details="auto"
+            style="min-width: 140px"
           ></v-select>
-            <v-select
+
+          <v-select
             class="me-4"
             v-model="dayTo"
-            :items="dayOptions"
-            label="To Day"
-            style="min-width: 120px"
+            :items="dayOptionsTo"
+            :label="`To Day (${chosenMonth ? (chosenMonth === monthNames[11] ? monthNames[0] + ' (next year)' : monthNames[(monthNames.indexOf(chosenMonth) + 1) % 12]) : 'next month'})`"
+            placeholder="Select day"
+            clearable
+            clear-icon="mdi-close"
+            dense
+            hide-details="auto"
+            style="min-width: 140px"
           ></v-select>
+
           <v-select
             v-model="tableFilters.year"
             label="Year"
             :items="availableYears"
+            dense
+            hide-details="auto"
             style="min-width: 120px"
           ></v-select>
         </div>
