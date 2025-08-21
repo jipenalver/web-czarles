@@ -83,7 +83,8 @@ const chosenMonth = ref<string>('')
 const dayFrom = ref<number | null>(null)
 const dayTo = ref<number | null>(null)
 // If true, 'To Day' refers to the next month (cross-month). If false, the day selectors are disabled.
-const crossMonthEnabled = ref<boolean>(true)
+// Default changed to false so the checkbox is not checked by default
+const crossMonthEnabled = ref<boolean>(false)
 
 // Compute days in the currently chosen month (chosenMonth set when clicking a month row)
 const daysInSelectedMonth = computed(() => {
@@ -245,6 +246,17 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
     >
       <template #append>
         <div class="d-flex ga-3 align-center">
+            <v-checkbox
+              v-model="crossMonthEnabled"
+              class="ms-2"
+              label="Cross-month"
+              dense
+              hide-details
+              :true-value="true"
+              :false-value="false"
+              @change="onCrossMonthChange"
+            ></v-checkbox>
+          
           <v-select
             v-model="dayFrom"
             :items="dayOptions"
@@ -282,16 +294,7 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             style="min-width: 240px"
           ></v-select>
 
-          <v-checkbox
-            v-model="crossMonthEnabled"
-            class="ms-2"
-            label="Cross-month"
-            dense
-            hide-details
-            :true-value="true"
-            :false-value="false"
-            @change="onCrossMonthChange"
-          ></v-checkbox>
+        
 
           <v-select
             v-model="tableFilters.year"
