@@ -7,7 +7,14 @@ import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
-import { getYearMonthString, getDateRangeForMonth, getDateRangeForMonthNoCross } from './helpers'
+import {
+  getDateRangeForMonth,
+  getDateRangeForMonthNoCross,
+  getLastDayOfMonth,
+  onCrossMonthChange as onCrossMonthChangeHelper,
+  calculateFieldStaffNetPay as calculateFieldStaffNetPayHelper,
+  onView as onViewHelper,
+} from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
 import { ref, computed, watch } from 'vue'
 
@@ -81,19 +88,23 @@ const crossMonthEnabled = ref<boolean>(true)
 // Compute days in the currently chosen month (chosenMonth set when clicking a month row)
 const daysInSelectedMonth = computed(() => {
   const tf = tableFilters.value as Record<string, unknown> | undefined
-  const maybeYear = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+  const maybeYear =
+    tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
   const monthName = chosenMonth.value || ''
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const idx = monthIndex >= 0 ? monthIndex : 0
   return new Date(Number(maybeYear), idx + 1, 0).getDate()
 })
 
-const dayOptions = computed(() => Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1))
+const dayOptions = computed(() =>
+  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
+)
 
 // Day options for the next month (To Day should reference next month)
 const daysInNextMonth = computed(() => {
   const tf = tableFilters.value as Record<string, unknown> | undefined
-  const maybeYear = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+  const maybeYear =
+    tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
   const monthName = chosenMonth.value || ''
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const startIdx = monthIndex >= 0 ? monthIndex : 0
@@ -119,7 +130,7 @@ watch(
     dayFrom.value = null
     dayTo.value = null
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // When cross-month is toggled off, clear and remove persisted values; when enabled, set sensible defaults
@@ -141,97 +152,27 @@ watch(
       /* ignore storage errors */
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
-// Typed handler for checkbox change to avoid implicit `any` in template
+// Typed handler for checkbox change (delegates to helper)
 function onCrossMonthChange(val: boolean) {
-  if (!val) {
-    dayFrom.value = null
-    dayTo.value = null
-  }
+  // helper expects refs for dayFrom/dayTo
+  onCrossMonthChangeHelper(val, dayFrom, dayTo)
 }
 
-// Helper function: convert year + month name to YYYY-MM-DD
-function getMonthYearAsDateString(year: number, monthName: string): string {
-  // Pangitaon ang month index (0-based)
-  const monthIndex = monthNames.findIndex((m) => m === monthName)
-  const month = (monthIndex + 1).toString().padStart(2, '0')
-  return `${year}-${month}-01`
-}
-
-// Helper: return last day (number) for a given year + month name
-function getLastDayOfMonth(year: number, monthName: string): number {
-  const monthIndex = monthNames.findIndex((m) => m === monthName)
-  const idx = monthIndex >= 0 ? monthIndex : 0
-  // JS Date: day 0 of next month gives last day of current month
-  return new Date(Number(year), idx + 1, 0).getDate()
-}
-
-// Wrapper function para sa onView, para ma-save ug ma-console.log ang month ug date string
+// onView: delegate complex behavior to helper while keeping the component API
 function onView(item: TableData) {
-  chosenMonth.value = item.month
-  // default From = 1, To = end of next month when not explicitly chosen
-  if (dayFrom.value === null || dayFrom.value === undefined) {
-    dayFrom.value = 1
-  }
-  // If user didn't provide To day, default to last day of the chosen month
-  if (dayTo.value === null || dayTo.value === undefined) {
-    try {
-      const tf = tableFilters.value as { year?: number } | undefined
-      const year = (tf && typeof tf.year === 'number' ? tf.year : new Date().getFullYear())
-      // If cross-month is enabled, default To to last day of next month; otherwise last day of chosen month
-      if (crossMonthEnabled.value) {
-        dayTo.value = daysInNextMonth.value
-      } else {
-        dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
-      }
-    } catch {
-      dayTo.value = daysInNextMonth.value
-    }
-  }
-  // isave nato ang month na gipili, then i-console.log para sa debugging
-  const dateString = getMonthYearAsDateString(tableFilters.value.year, chosenMonth.value)
-  // I-format ang dateString to YYYY-MM before saving to localStorage
-  const yearMonth = getYearMonthString(dateString)
-  localStorage.setItem('czarles_payroll_dateString', yearMonth)
-
-  // Compute and log the selected date range (day inputs use the clicked month + selected year)
-  const range = (crossMonthEnabled.value
-    ? getDateRangeForMonth(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value)
-    : getDateRangeForMonthNoCross(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value))
-  console.log('[PAYROLL] Selected date range for view:', { range, chosenMonth: chosenMonth.value })
-  // Persist selected range for other components (payroll computation / print)
-  try {
-    if (typeof window !== 'undefined' && range) {
-      localStorage.setItem('czarles_payroll_fromDate', range.fromDate)
-      localStorage.setItem('czarles_payroll_toDate', range.toDate)
-    }
-  } catch {
-    // ignore storage errors
-  }
-
-  // Enhanced console log para sa field staff debugging
-  // if (isCurrentEmployeeFieldStaff.value) {
-  //   console.log(`🏃 FIELD STAFF - Month clicked: ${chosenMonth.value}`, {
-  //     employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
-  //     employeeId: props.itemData?.id,
-  //     month: chosenMonth.value,
-  //     year: tableFilters.value.year,
-  //     dateString,
-  //     yearMonth,
-  //     basicSalary: item.basic_salary,
-  //   })
-  // } else {
-  //   console.log(`🏢 OFFICE STAFF - Month clicked: ${chosenMonth.value}`, {
-  //     employee: `${props.itemData?.firstname} ${props.itemData?.lastname}`,
-  //     dateString,
-  //     basicSalary: item.basic_salary,
-  //   })
-  // }
-
-  // Pass dateString as prop to composable logic (if needed)
-  baseOnView({ ...item, dateString })
+  onViewHelper({
+    item,
+    chosenMonth,
+    dayFrom,
+    dayTo,
+    crossMonthEnabled,
+    tableFilters: { value: tableFilters.value as Record<string, unknown> | undefined },
+    daysInNextMonth: { value: daysInNextMonth.value },
+    baseOnView,
+  })
 }
 
 // Persist selected from/to days to localStorage when changed (or clear when null)
@@ -239,7 +180,8 @@ watch(
   () => [dayFrom.value, dayTo.value],
   ([newFrom, newTo]) => {
     const tf = tableFilters.value as Record<string, unknown> | undefined
-    const year = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+    const year =
+      tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
 
     // If both cleared, remove persisted values
     if ((newFrom === null || newFrom === undefined) && (newTo === null || newTo === undefined)) {
@@ -254,11 +196,13 @@ watch(
 
     // Build range using helpers and persist
     const from = newFrom ?? 1
-  // If cross-month is enabled, 'to' defaults to next month's last day; otherwise last day of chosen month
-  const to = newTo ?? (crossMonthEnabled.value ? daysInNextMonth.value : getLastDayOfMonth(year, chosenMonth.value))
-    const range = (crossMonthEnabled.value
+    // If cross-month is enabled, 'to' defaults to next month's last day; otherwise last day of chosen month
+    const to =
+      newTo ??
+      (crossMonthEnabled.value ? daysInNextMonth.value : getLastDayOfMonth(year, chosenMonth.value))
+    const range = crossMonthEnabled.value
       ? getDateRangeForMonth(year, chosenMonth.value, from, to)
-      : getDateRangeForMonthNoCross(year, chosenMonth.value, from, to))
+      : getDateRangeForMonthNoCross(year, chosenMonth.value, from, to)
     try {
       if (range) {
         localStorage.setItem('czarles_payroll_fromDate', range.fromDate)
@@ -268,18 +212,11 @@ watch(
       /* ignore storage errors */
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
-
-
-// Compute the sum of net_pay + attendance calculation for field staff
-const calculateFieldStaffNetPay = (item: TableData) => {
-  const netPay = item.net_pay || 0
-  //const attendanceCalculation = ((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8)
-  //console.error(`[PAYROLL CALCULATION] Employee ${props.itemData?.id} - Month: ${item.month}, Net Pay: ${netPay}, Attendance Calculation: ${attendanceCalculation}`)
-  return netPay /* + attendanceCalculation */
-}
+// Compute the sum of net_pay + attendance calculation for field staff (delegates to helper)
+const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPayHelper(item)
 
 /**
  * Compute a date range for the given year + monthName using optional from/to day numbers.
@@ -306,7 +243,7 @@ const calculateFieldStaffNetPay = (item: TableData) => {
       :title="`Payslip ${tableFilters.year}`"
       :subtitle="`${props.itemData?.firstname} ${props.itemData?.lastname}${isCurrentEmployeeFieldStaff ? ' • 🏃 Field Staff' : ' • 🏢 Office Staff'}`"
     >
-          <template #append>
+      <template #append>
         <div class="d-flex ga-3 align-center">
           <v-select
             v-model="dayFrom"
@@ -325,13 +262,17 @@ const calculateFieldStaffNetPay = (item: TableData) => {
             class="me-4"
             v-model="dayTo"
             :items="dayOptionsTo"
-            :label="`To Day (${chosenMonth ? (() => {
-              const currentIndex = monthNames.indexOf(chosenMonth);
-              if (currentIndex === -1) return 'next month';
-              const nextIndex = (currentIndex + 1) % 12;
-              const isNextYear = currentIndex === 11;
-              return monthNames[nextIndex] + (isNextYear ? ' (next year)' : '');
-            })() : 'next month'})`"
+            :label="`To Day (${
+              chosenMonth
+                ? (() => {
+                    const currentIndex = monthNames.indexOf(chosenMonth)
+                    if (currentIndex === -1) return 'next month'
+                    const nextIndex = (currentIndex + 1) % 12
+                    const isNextYear = currentIndex === 11
+                    return monthNames[nextIndex] + (isNextYear ? ' (next year)' : '')
+                  })()
+                : 'next month'
+            })`"
             placeholder="Next Month"
             clearable
             clear-icon="mdi-close"
@@ -385,33 +326,32 @@ const calculateFieldStaffNetPay = (item: TableData) => {
           </template>
           <template #item.basic_salary="{ item }">
             <div class="d-flex align-center ga-2">
-                <span v-if="isCurrentEmployeeFieldStaff"
-                  >{{ getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8)) }}
-                  <span class="text-caption text-grey">({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span>
-                  </span
+              <span v-if="isCurrentEmployeeFieldStaff"
+                >{{
+                  getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8))
+                }}
+                <span class="text-caption text-grey"
+                  >({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span
                 >
-                <span v-else
-                  >{{ getMoneyText(item.basic_salary) }}</span
-                >
+              </span>
+              <span v-else>{{ getMoneyText(item.basic_salary) }}</span>
             </div>
           </template>
           <template #item.gross_pay="{ item }">
-              {{ getMoneyText(item.gross_pay) }}
+            {{ getMoneyText(item.gross_pay) }}
           </template>
           <template #item.deductions="{ item }">
-              {{ getMoneyText(item.deductions) }}
+            {{ getMoneyText(item.deductions) }}
           </template>
           <template #item.net_pay="{ item }">
-              <span v-if="isCurrentEmployeeFieldStaff">
-                {{ getMoneyText(calculateFieldStaffNetPay(item)) }}
-              </span>
-              <span v-else>
-                {{ getMoneyText(item.net_pay) }}
-              </span>
+            <span v-if="isCurrentEmployeeFieldStaff">
+              {{ getMoneyText(calculateFieldStaffNetPay(item)) }}
+            </span>
+            <span v-else>
+              {{ getMoneyText(item.net_pay) }}
+            </span>
           </template>
         </v-data-table>
-
-
       </v-card-text>
 
       <v-divider></v-divider>

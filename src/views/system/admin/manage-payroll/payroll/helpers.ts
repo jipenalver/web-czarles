@@ -1,3 +1,7 @@
+// --- Payroll dialog helpers (moved from PayrollPrintDialog.vue)
+import { nextTick } from 'vue'
+import type { Ref } from 'vue'
+import type { TableData } from './payrollTableDialog'
 export function safeCurrencyFormat(
   amount: number | string | null | undefined,
   formatCurrency: (n: number) => string,
@@ -133,13 +137,65 @@ export const getLastDateOfMonth = (dateString: string): string => {
   }
 }
 
+// --- Helpers moved from PayrollTableDialog.vue ---
+
+/**
+ * Convert year + month name to YYYY-MM-01 string
+ */
+export function getMonthYearAsDateString(year: number, monthName: string): string {
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const month = (monthIndex + 1).toString().padStart(2, '0')
+  return `${year}-${month}-01`
+}
+
+/**
+ * Return last day (number) for a given year + month name
+ */
+export function getLastDayOfMonth(year: number, monthName: string): number {
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const idx = monthIndex >= 0 ? monthIndex : 0
+  return new Date(Number(year), idx + 1, 0).getDate()
+}
+
+/**
+ * Simple change handler for cross-month checkbox. Clears day refs when disabled.
+ */
+export function onCrossMonthChange(
+  val: boolean,
+  dayFrom: Ref<number | null>,
+  dayTo: Ref<number | null>,
+) {
+  if (!val) {
+    dayFrom.value = null
+    dayTo.value = null
+  }
+}
+
+/**
+ * Compute the sum of net_pay + (optional) attendance calculation for field staff.
+ * Kept simple and pure: only depends on the provided table row item.
+ */
+export const calculateFieldStaffNetPay = (item: {
+  net_pay?: number
+  attendanceMinutes?: number
+  employeeDailyRate?: number
+}) => {
+  const netPay = item.net_pay || 0
+  return netPay
+}
+
 /**
  * Build full YYYY-MM-DD range for the provided year + monthName using dayFrom/dayTo (inclusive).
  * NOTE: In the payroll UI the "To Day" selector references the next month, so when a toDay
  * is provided we interpret it as a day in the next month (handling year rollover). If toDay
  * is not provided, the end date defaults to the last day of the start month.
  */
-export function getDateRangeForMonth(year: number | undefined, monthName: string, fromDay?: number | null, toDay?: number | null) {
+export function getDateRangeForMonth(
+  year: number | undefined,
+  monthName: string,
+  fromDay?: number | null,
+  toDay?: number | null,
+) {
   const y = year || new Date().getFullYear()
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const month = monthIndex >= 0 ? monthIndex : 0
@@ -191,7 +247,12 @@ export function getDateRangeForMonth(year: number | undefined, monthName: string
  * same month (no cross-month). Useful when you want an end date that never
  * rolls into the next month.
  */
-export function getDateRangeForMonthNoCross(year: number | undefined, monthName: string, fromDay?: number | null, toDay?: number | null) {
+export function getDateRangeForMonthNoCross(
+  year: number | undefined,
+  monthName: string,
+  fromDay?: number | null,
+  toDay?: number | null,
+) {
   const y = year || new Date().getFullYear()
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const month = monthIndex >= 0 ? monthIndex : 0
@@ -224,10 +285,6 @@ export function getDateRangeForMonthNoCross(year: number | undefined, monthName:
 
   return { fromDate, toDate, totalDays }
 }
-
-// --- Payroll dialog helpers (moved from PayrollPrintDialog.vue)
-import { nextTick } from 'vue'
-import type { Ref } from 'vue'
 
 /**
  * Force-reload payroll functions inside the `PayrollPrint` component.
@@ -265,7 +322,10 @@ export async function reloadAllPayrollFunctions(
  * Manually refresh specific pieces of payroll data by calling methods on the
  * `PayrollPrint` component instance. The helper will set/clear the loading ref.
  */
-export async function manualRefreshPayroll(payrollPrintRef: Ref<unknown | null>, isReloadingData: Ref<boolean>) {
+export async function manualRefreshPayroll(
+  payrollPrintRef: Ref<unknown | null>,
+  isReloadingData: Ref<boolean>,
+) {
   if (!payrollPrintRef.value) return
   try {
     isReloadingData.value = true
@@ -293,4 +353,87 @@ export async function manualRefreshPayroll(payrollPrintRef: Ref<unknown | null>,
   } finally {
     isReloadingData.value = false
   }
+}
+
+/**
+ * onView helper moved from component. Accepts refs and calls the provided baseOnView.
+ */
+export function onView(options: {
+  item: TableData
+  chosenMonth: { value: string }
+  dayFrom: { value: number | null }
+  dayTo: { value: number | null }
+  crossMonthEnabled: { value: boolean }
+  tableFilters?: { value?: Record<string, unknown> }
+  daysInNextMonth: { value: number }
+  baseOnView: (payload: TableData) => void
+}) {
+  const {
+    item,
+    chosenMonth,
+    dayFrom,
+    dayTo,
+    crossMonthEnabled,
+    tableFilters,
+    daysInNextMonth,
+    baseOnView,
+  } = options
+
+  chosenMonth.value = String(item.month)
+
+  if (dayFrom.value === null || dayFrom.value === undefined) {
+    dayFrom.value = 1
+  }
+
+  if (dayTo.value === null || dayTo.value === undefined) {
+    try {
+      const tf = tableFilters && tableFilters.value
+      const year =
+        tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+      if (crossMonthEnabled.value) {
+        dayTo.value = daysInNextMonth.value
+      } else {
+        dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
+      }
+    } catch {
+      dayTo.value = daysInNextMonth.value
+    }
+  }
+
+  const tfYear =
+    tableFilters && tableFilters.value && typeof tableFilters.value['year'] === 'number'
+      ? (tableFilters.value['year'] as number)
+      : new Date().getFullYear()
+  const dateString = getMonthYearAsDateString(tfYear, chosenMonth.value)
+  const yearMonth = getYearMonthString(dateString)
+  try {
+    localStorage.setItem('czarles_payroll_dateString', yearMonth)
+  } catch {
+    /* ignore */
+  }
+
+  const range = crossMonthEnabled.value
+    ? getDateRangeForMonth(
+        tableFilters?.value?.year as number | undefined,
+        chosenMonth.value,
+        dayFrom.value,
+        dayTo.value,
+      )
+    : getDateRangeForMonthNoCross(
+        tableFilters?.value?.year as number | undefined,
+        chosenMonth.value,
+        dayFrom.value,
+        dayTo.value,
+      )
+  console.log('[PAYROLL] Selected date range for view:', { range, chosenMonth: chosenMonth.value })
+  try {
+    if (typeof window !== 'undefined' && range) {
+      localStorage.setItem('czarles_payroll_fromDate', (range as { fromDate: string }).fromDate)
+      localStorage.setItem('czarles_payroll_toDate', (range as { toDate: string }).toDate)
+    }
+  } catch {
+    /* ignore */
+  }
+
+  baseOnView({ ...item, dateString })
 }
