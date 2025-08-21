@@ -21,20 +21,25 @@ const animatedProjects = ref(0)
 const animatedSatisfaction = ref(0)
 
 const animateCounters = () => {
-  const duration = 10000 
+  // much faster: 1 second total
+  const duration = 1000
   const steps = 30
-  const stepTime = duration / steps
+  const stepTime = Math.max(8, Math.floor(duration / steps))
 
   let currentStep = 0
   const timer = setInterval(() => {
     currentStep++
-    const progress = currentStep / steps
+    const progress = Math.min(1, currentStep / steps)
 
     animatedYears.value = Math.round(27 * progress)
     animatedProjects.value = Math.round(116 * progress)
     animatedSatisfaction.value = Math.round(98 * progress)
 
     if (currentStep >= steps) {
+      // ensure exact final values
+      animatedYears.value = 27
+      animatedProjects.value = 116
+      animatedSatisfaction.value = 98
       clearInterval(timer)
     }
   }, stepTime)
@@ -70,15 +75,13 @@ const commitments = [
 ]
 
 onMounted(() => {
-  setTimeout(() => {
-    isVisible.value = true
-  }, 10000)
 
-  // trigger animation sa counters after 1 second
-  setTimeout(() => {
-    countersVisible.value = true
-    animateCounters()
-  }, 10000)
+    isVisible.value = true
+
+
+  // trigger animation sa counters immediately
+  countersVisible.value = true
+  animateCounters()
 
   // attach orbit changes to user scroll (camera moves only when user scrolls)
   scrollController = attachOrbitToScroll((s) => (cameraOrbit.value = s), orbitA, orbitB)
