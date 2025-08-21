@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import LandingLayout from '@/components/landing/LandingLayout.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 // const companyStats = ref([
 //   { icon: 'mdi-calendar-check', value: '15+', label: 'Years of Excellence' },
@@ -32,39 +32,48 @@ const coreValues = ref([
   },
 ])
 
-const leadership = ref([
-  {
-    name: 'John Doe',
-    position: 'Chief Executive Officer',
-    image: '/src/assets/misc/illustration-john-light.png',
-    description: 'Leading with 20+ years of construction industry expertise.',
-  },
-  {
-    name: 'Daisy Smith',
-    position: 'Operations Director',
-    image: '/src/assets/misc/illustration-daisy-light.png',
-    description: 'Ensuring operational excellence and project delivery.',
-  },
-])
+// const leadership = ref([
+//   {
+//     name: 'John Doe',
+//     position: 'Chief Executive Officer',
+//     image: '/src/assets/misc/illustration-john-light.png',
+//     description: 'Leading with 20+ years of construction industry expertise.',
+//   },
+//   {
+//     name: 'Daisy Smith',
+//     position: 'Operations Director',
+//     image: '/src/assets/misc/illustration-daisy-light.png',
+//     description: 'Ensuring operational excellence and project delivery.',
+//   },
+// ])
+
+
+const isVisible = ref(false)
+
+onMounted(() => {
+  // trigger hero animation
+  setTimeout(() => {
+    isVisible.value = true
+  }, 300)
+})
+
+
 </script>
 
 <template>
   <LandingLayout :hideBg="true">
     <template #hero>
-      <div class="text-center white--text" style="max-width: 900px">
-        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2 text-white">About C'zarles</h1>
-        <p class="mb-4 text-h6 font-weight-light text-white">
-          Building Excellence. Delivering Dreams. Creating Lasting Value.
-        </p>
-        <p class="mb-6 text-body-1 opacity-90 text-white">
-          Transforming visions into reality with over 15 years of construction expertise
-        </p>
+      <div class="text-center white--text "  style="max-width: 900px">
+        <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
+          <h1 class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-slide-up">About C'zarles</h1>
+          <p class="mb-6 text-h6 text-white font-weight-light animate-slide-up delay-1">
+            Building Excellence. Delivering Dreams. Creating Lasting Value.
+          </p>
+        </div>
 
-        <div class="text-caption">
-          <RouterLink to="/" class="orange--text text-decoration-none text-white">
-            <v-icon size="small" class="mr-1">mdi-home</v-icon>
-            Home
-          </RouterLink>
+        <div class="text-caption text-white animate-slide-up delay-2">
+          <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
+          <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
           <span class="mx-2 text-white">/</span>
           <span class="text-white">Company</span>
         </div>
@@ -137,7 +146,7 @@ const leadership = ref([
                 </v-col>
                 <v-col cols="12" md="6">
                   <h3 class="text-h5 font-weight-bold mb-4 text-primary">
-                    <v-icon class="mr-2" color="secondary">mdi-heart-handshake</v-icon>
+                    <v-icon class="mr-2" color="secondary">mdi-handshake</v-icon>
                     Our Commitment
                   </h3>
                   <p class="text-body-1">
@@ -177,7 +186,7 @@ const leadership = ref([
       <!-- Leadership Section -->
       <v-container fluid class="py-12"  style="background: linear-gradient(135deg, #352c73 0%, #6159a9 100%)">
         <v-row justify="center">
-          <v-col cols="12" md="10" lg="4">
+         <!--  <v-col cols="12" md="10" lg="4">
             <div class="text-center mb-8 ">
               <h2 class="text-h4 font-weight-bold text-white mb-4">Leadership Team</h2>
               <p class="text-h6 font-weight-light  text-white">
@@ -203,9 +212,9 @@ const leadership = ref([
                 </v-card>
               </v-col>
             </v-row>
-          </v-col>
+          </v-col> -->
 
-          <v-col cols="12" md="8" lg="6" class="d-flex align-center">
+          <v-col cols="12" md="12" lg="12">
             <div class="text-center text-white">
               <h2 class="text-h4 font-weight-bold mb-4">Ready to Build Your Dream Project?</h2>
               <p class="text-h6 font-weight-light mb-6 opacity-90 px-5">
@@ -240,3 +249,43 @@ const leadership = ref([
     </template>
   </LandingLayout>
 </template>
+<style scoped>
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+.delay-1 {
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+.delay-2 {
+  animation-delay: 0.4s;
+  animation-fill-mode: both;
+}
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) }
+  to { opacity: 1; transform: translateY(0) }
+}
+.gradient-text {
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.orange-underline {
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  border-radius: 2px;
+  margin: 0.5rem auto 0 0;
+}
+.hover-orange:hover {
+  color: #ff6b35 !important;
+}
+</style>

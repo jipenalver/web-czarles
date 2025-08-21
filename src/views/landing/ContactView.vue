@@ -13,6 +13,8 @@ const email = ref('')
 const subject = ref('')
 const message = ref('')
 
+const isVisible = ref(false)
+
 function sendMessage() {
   // Minimal submit handler — adapt to your API later
   console.log('send message', {
@@ -28,6 +30,10 @@ function sendMessage() {
 }
 
 onMounted(() => {
+  // trigger hero animation
+  setTimeout(() => {
+    isVisible.value = true
+  }, 300)
   if (!mapRef.value) return
   const map = L.map(mapRef.value, { zoomControl: true, attributionControl: false }).setView(
     [lat, lng],
@@ -65,15 +71,17 @@ onMounted(() => {
   <LandingLayout :hideBg="true">
     <template #hero>
       <div class="text-center white--text" style="max-width: 900px">
-        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2">Contact</h1>
-        <p class="mb-4 text-body-1">
-          Get in touch with our team for inquiries, support, or partnerships.
-        </p>
-
-        <div class="text-caption">
-          <RouterLink to="/" class="orange--text">Home</RouterLink>
-          <span class="mx-2">/</span>
-          <span>Contact</span>
+        <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
+          <h1 class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-slide-up">Contact</h1>
+          <p class="mb-6 text-h6 text-white font-weight-light animate-slide-up delay-1">
+            Get in touch with our team for inquiries, support, or partnerships.
+          </p>
+          <div class="text-caption text-white animate-slide-up delay-2">
+            <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
+            <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
+            <v-icon size="small" class="mx-2">mdi-chevron-right</v-icon>
+            <span class="text-orange-lighten-2">Contact</span>
+          </div>
         </div>
       </div>
     </template>
@@ -237,5 +245,38 @@ onMounted(() => {
   color: rgba(0, 0, 0, 0.6);
   font-size: 16px; /* smaller social icons */
   line-height: 1;
+}
+
+/* Hero animations (match AboutView) */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+
+.delay-1 {
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+.delay-2 {
+  animation-delay: 0.4s;
+  animation-fill-mode: both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) }
+  to { opacity: 1; transform: translateY(0) }
+}
+
+.hover-orange:hover {
+  color: #ff6b35 !important;
 }
 </style>
