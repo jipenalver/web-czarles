@@ -27,17 +27,6 @@ const statistics = ref([
   },
 ])
 
-// Event handlers
-const requestQuote = () => {
-  console.log('Request quote clicked')
-  
-}
-
-const viewProjects = () => {
-  console.log('View projects clicked')
-  
-}
-
 // Vuetify breakpoint composable (reactive)
 const { smAndDown } = useDisplay()
 </script>
@@ -83,10 +72,10 @@ const { smAndDown } = useDisplay()
                             size="large"
                             class="px-8 py-3"
                             elevation="4"
-                            @click="requestQuote"
+                            to="/contact"
                           >
-                            <v-icon start>mdi-file-document-edit</v-icon>
-                            REQUEST QUOTE
+                            <v-icon start>mdi-file-phone</v-icon>
+                            Contact Us
                           </v-btn>
 
                           <v-btn
@@ -94,10 +83,10 @@ const { smAndDown } = useDisplay()
                             color="white"
                             size="large"
                             class="px-8 py-3"
-                            @click="viewProjects"
+                            to="/about"
                           >
-                            <v-icon start>mdi-eye</v-icon>
-                            VIEW PROJECTS
+                            <v-icon start>mdi-group</v-icon>
+                            About Us
                           </v-btn>
                         </div>
                       </div>

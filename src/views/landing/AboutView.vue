@@ -8,8 +8,7 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
       <div class="text-center white--text" style="max-width: 900px">
         <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2">About</h1>
         <p class="mb-4 text-body-1">
-          Esse dolorum voluptatem ullam est sint nemo et est ipsa porro placeat quibusdam quia
-          assumenda numquam molestias.
+          Welcome to C'ZARLES CONSTRUCTION & SUPPLY — your trusted partner for quality, safe, and reliable construction services.
         </p>
 
         <div class="text-caption">
@@ -25,21 +24,29 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
         <v-col cols="0" lg="2"></v-col>
         <v-col cols="12" md="6" lg="5">
           <div class="about-intro">
-            <h1 class="text-h3 sm:text-h5 lg:text-h2 font-weight-bold mb-6">
-              Built on Excellence, Driven by Vision
+            <h1 class="text-h3 sm:text-h5 lg:text-h2 font-weight-bold">
+              C'ZARLES CONSTRUCTION & SUPPLY
             </h1>
-            <p class="text-body-1 mb-4">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit sed eiusmod tempor incididunt
-              labore dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco
-              laboris nisi ut aliquip.
+            <span> (CCS) shall endeavor to </span>
+            <p class="text-body-2 grey--text text--darken-1 mt-6">
+              deliver quality, credible and safe Construction Operations with integrity to its
+              customers, and well-being of its employees. And to achieved this, CCS is committed to:
+              Plan thoroughly its activities and processes taking into consideration the needs of
+              its customers, employees, regulatory bodies and other
             </p>
 
             <p class="text-body-2 grey--text text--darken-1 mb-6">
-              Duis aute irure dolor in reprehenderit voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident sunt in culpa qui
-              officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus
-              error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa
-              quae ab illo inventore veritatis et quasi architecto beatae.
+              stakeholders and strive to satisfy their requirements;
+            </p>
+
+            <p class="text-body-2 grey--text text--darken-1 mb-6">
+              Execute its plan correctly for the first time, every time and all the time through the
+              efforts and cooperation of a well-trained professionals workforce;
+            </p>
+
+            <p class="text-body-2 grey--text text--darken-1 mb-6">
+              Consistently meet the objectives by identifying and addressing the risks and
+              maximizing the available opportunities.
             </p>
 
             <!-- metrics row para sa experience, projects, satisfaction -->
@@ -60,11 +67,11 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
               </v-col>
             </v-row>
 
-            <div class="mt-6">
+            <!-- <div class="mt-6">
               <v-btn variant="text" class="orange--text" to="/services"
                 >Explore Our Services →</v-btn
               >
-            </div>
+            </div> -->
           </div>
         </v-col>
 
@@ -102,10 +109,6 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
 
 <style scoped>
 @media (max-width: 600px) {
-
-
-
-
   /* Make the image card responsive */
   .about-row .v-card {
     width: 100% !important;
@@ -113,7 +116,5 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
     margin: 0.5rem auto !important;
     padding: 0.5rem;
   }
-
- 
 }
 </style>
