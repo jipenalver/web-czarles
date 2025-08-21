@@ -162,7 +162,7 @@ function onToggleTheme() {
       </template>
 
       <v-main>
-        <div class="d-flex align-center justify-center landing-parallax" style="height: 100%;">
+        <div class="landing-parallax" style="height: 100%;">
           <template v-if="!props.hideBg">
             <div class="landing-bg" :style="{ backgroundImage: 'url(' + imageBg + ')' }"></div>
           </template>
