@@ -6,12 +6,12 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
 // Statistics data
 const statistics = ref([
   {
-    number: '250',
+    number: '116',
     label: 'PROJECTS',
     description: 'COMPLETED',
   },
   {
-    number: '15',
+    number: '27',
     label: 'YEARS',
     description: ' EXPERIENCEs',
   },

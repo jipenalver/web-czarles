@@ -6,13 +6,14 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
   <LandingLayout :hideBg="true">
     <template #hero>
       <div class="text-center white--text" style="max-width: 900px">
-        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2">About</h1>
-        <p class="mb-4 text-body-1">
+        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2 text-white">About</h1>
+        <p class="mb-4 text-body-1 text-white">
           Welcome to C'ZARLES CONSTRUCTION & SUPPLY — your trusted partner for quality, safe, and reliable construction services.
         </p>
 
-        <div class="text-caption">
-          <RouterLink to="/" class="orange--text">Home</RouterLink>
+        <div class="text-caption text-white">
+          <v-icon size="small" class="mr-1">mdi-home</v-icon>
+          <RouterLink to="/" class="text-white text-decoration-none">Home</RouterLink>
           <span class="mx-2">/</span>
           <span>About</span>
         </div>
@@ -52,12 +53,12 @@ import LandingLayout from '@/components/landing/LandingLayout.vue'
             <!-- metrics row para sa experience, projects, satisfaction -->
             <v-row class="mt-6">
               <v-col cols="12" sm="4" class="text-center">
-                <div class="text-h4 orange--text font-weight-medium">25+</div>
+                <div class="text-h4 orange--text font-weight-medium">27+</div>
                 <div class="text-caption grey--text text--darken-1">YEARS EXPERIENCE</div>
               </v-col>
 
               <v-col cols="12" sm="4" class="text-center">
-                <div class="text-h4 orange--text font-weight-medium">500+</div>
+                <div class="text-h4 orange--text font-weight-medium">116+</div>
                 <div class="text-caption grey--text text--darken-1">PROJECTS COMPLETED</div>
               </v-col>
 

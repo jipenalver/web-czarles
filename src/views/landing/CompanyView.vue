@@ -52,21 +52,21 @@ const leadership = ref([
   <LandingLayout :hideBg="true">
     <template #hero>
       <div class="text-center white--text" style="max-width: 900px">
-        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2">About C'zarles</h1>
-        <p class="mb-4 text-h6 font-weight-light">
+        <h1 class="text-h3 lg:text-h2 font-weight-bold mb-2 text-white">About C'zarles</h1>
+        <p class="mb-4 text-h6 font-weight-light text-white">
           Building Excellence. Delivering Dreams. Creating Lasting Value.
         </p>
-        <p class="mb-6 text-body-1 opacity-90">
+        <p class="mb-6 text-body-1 opacity-90 text-white">
           Transforming visions into reality with over 15 years of construction expertise
         </p>
 
         <div class="text-caption">
-          <RouterLink to="/" class="orange--text text-decoration-none">
+          <RouterLink to="/" class="orange--text text-decoration-none text-white">
             <v-icon size="small" class="mr-1">mdi-home</v-icon>
             Home
           </RouterLink>
-          <span class="mx-2">/</span>
-          <span>Company</span>
+          <span class="mx-2 text-white">/</span>
+          <span class="text-white">Company</span>
         </div>
       </div>
     </template>
@@ -178,9 +178,9 @@ const leadership = ref([
       <v-container fluid class="py-12"  style="background: linear-gradient(135deg, #352c73 0%, #6159a9 100%)">
         <v-row justify="center">
           <v-col cols="12" md="10" lg="4">
-            <div class="text-center mb-8">
-              <h2 class="text-h4 font-weight-bold text-primary mb-4">Leadership Team</h2>
-              <p class="text-h6 font-weight-light text-medium-emphasis">
+            <div class="text-center mb-8 ">
+              <h2 class="text-h4 font-weight-bold text-white mb-4">Leadership Team</h2>
+              <p class="text-h6 font-weight-light  text-white">
                 Experienced professionals leading our vision forward
               </p>
             </div>
@@ -206,7 +206,7 @@ const leadership = ref([
           </v-col>
 
           <v-col cols="12" md="8" lg="6" class="d-flex align-center">
-            <div class="text-center white--text">
+            <div class="text-center text-white">
               <h2 class="text-h4 font-weight-bold mb-4">Ready to Build Your Dream Project?</h2>
               <p class="text-h6 font-weight-light mb-6 opacity-90 px-5">
                 Let's discuss how we can bring your vision to life with our expertise and commitment
@@ -227,9 +227,10 @@ const leadership = ref([
                   color="white"
                   size="large"
                   rounded="pill"
-                  prepend-icon="mdi-folder-multiple"
+                  prepend-icon="mdi-home"
+                  to="/about"
                 >
-                  View Our Portfolio
+                  About Us
                 </v-btn>
               </div>
             </div>

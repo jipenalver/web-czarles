@@ -109,7 +109,7 @@ onMounted(() => {
                   </div>
                   <div>
                     <div class="caption text-caption">Email</div>
-                    <div class="body-2 text-body-2">info@examplecompany.com</div>
+                    <div class="body-2 text-body-2">czarlesconst@yahoo.com</div>
                   </div>
                 </v-card>
               </v-col>
@@ -121,7 +121,7 @@ onMounted(() => {
                   </div>
                   <div>
                     <div class="caption text-caption">Call</div>
-                    <div class="body-2 text-body-2">+1 (212) 555-7890</div>
+                    <div class="body-2 text-body-2">+63 93 992 590 380</div>
                   </div>
                 </v-card>
               </v-col>
