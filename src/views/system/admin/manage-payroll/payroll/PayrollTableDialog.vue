@@ -7,7 +7,7 @@ import { type Employee } from '@/stores/employees'
 import { monthNames } from './currentMonth'
 import { useDisplay } from 'vuetify'
 
-import { getYearMonthString, getDateRangeForMonth } from './helpers'
+import { getYearMonthString, getDateRangeForMonth, getDateRangeForMonthNoCross } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
 import { ref, computed, watch } from 'vue'
 
@@ -75,6 +75,8 @@ const chosenMonth = ref<string>('')
 // Day-only selectors (month is selected via the table rows)
 const dayFrom = ref<number | null>(null)
 const dayTo = ref<number | null>(null)
+// If true, 'To Day' refers to the next month (cross-month). If false, the day selectors are disabled.
+const crossMonthEnabled = ref<boolean>(true)
 
 // Compute days in the currently chosen month (chosenMonth set when clicking a month row)
 const daysInSelectedMonth = computed(() => {
@@ -120,6 +122,36 @@ watch(
   { immediate: true }
 )
 
+// When cross-month is toggled off, clear and remove persisted values; when enabled, set sensible defaults
+watch(
+  () => crossMonthEnabled.value,
+  (enabled) => {
+    try {
+      if (!enabled) {
+        dayFrom.value = null
+        dayTo.value = null
+        localStorage.removeItem('czarles_payroll_fromDate')
+        localStorage.removeItem('czarles_payroll_toDate')
+      } else {
+        // default From = 1 if not set, default To = last day of next month (when enabled)
+        if (dayFrom.value === null || dayFrom.value === undefined) dayFrom.value = 1
+        if (dayTo.value === null || dayTo.value === undefined) dayTo.value = daysInNextMonth.value
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  },
+  { immediate: true }
+)
+
+// Typed handler for checkbox change to avoid implicit `any` in template
+function onCrossMonthChange(val: boolean) {
+  if (!val) {
+    dayFrom.value = null
+    dayTo.value = null
+  }
+}
+
 // Helper function: convert year + month name to YYYY-MM-DD
 function getMonthYearAsDateString(year: number, monthName: string): string {
   // Pangitaon ang month index (0-based)
@@ -148,7 +180,12 @@ function onView(item: TableData) {
     try {
       const tf = tableFilters.value as { year?: number } | undefined
       const year = (tf && typeof tf.year === 'number' ? tf.year : new Date().getFullYear())
-      dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
+      // If cross-month is enabled, default To to last day of next month; otherwise last day of chosen month
+      if (crossMonthEnabled.value) {
+        dayTo.value = daysInNextMonth.value
+      } else {
+        dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
+      }
     } catch {
       dayTo.value = daysInNextMonth.value
     }
@@ -160,7 +197,9 @@ function onView(item: TableData) {
   localStorage.setItem('czarles_payroll_dateString', yearMonth)
 
   // Compute and log the selected date range (day inputs use the clicked month + selected year)
-  const range = getDateRangeForMonth(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value)
+  const range = (crossMonthEnabled.value
+    ? getDateRangeForMonth(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value)
+    : getDateRangeForMonthNoCross(tableFilters.value?.year, chosenMonth.value, dayFrom.value, dayTo.value))
   console.log('[PAYROLL] Selected date range for view:', { range, chosenMonth: chosenMonth.value })
   // Persist selected range for other components (payroll computation / print)
   try {
@@ -215,8 +254,11 @@ watch(
 
     // Build range using helpers and persist
     const from = newFrom ?? 1
-    const to = newTo ?? daysInNextMonth.value
-    const range = getDateRangeForMonth(year, chosenMonth.value, from, to)
+  // If cross-month is enabled, 'to' defaults to next month's last day; otherwise last day of chosen month
+  const to = newTo ?? (crossMonthEnabled.value ? daysInNextMonth.value : getLastDayOfMonth(year, chosenMonth.value))
+    const range = (crossMonthEnabled.value
+      ? getDateRangeForMonth(year, chosenMonth.value, from, to)
+      : getDateRangeForMonthNoCross(year, chosenMonth.value, from, to))
     try {
       if (range) {
         localStorage.setItem('czarles_payroll_fromDate', range.fromDate)
@@ -275,6 +317,7 @@ const calculateFieldStaffNetPay = (item: TableData) => {
             clear-icon="mdi-close"
             dense
             hide-details="auto"
+            :disabled="!crossMonthEnabled"
             style="min-width: 240px"
           ></v-select>
 
@@ -294,8 +337,20 @@ const calculateFieldStaffNetPay = (item: TableData) => {
             clear-icon="mdi-close"
             dense
             hide-details="auto"
+            :disabled="!crossMonthEnabled"
             style="min-width: 240px"
           ></v-select>
+
+          <v-checkbox
+            v-model="crossMonthEnabled"
+            class="ms-2"
+            label="Cross-month"
+            dense
+            hide-details
+            :true-value="true"
+            :false-value="false"
+            @change="onCrossMonthChange"
+          ></v-checkbox>
 
           <v-select
             v-model="tableFilters.year"

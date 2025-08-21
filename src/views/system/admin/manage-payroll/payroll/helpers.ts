@@ -6,6 +6,22 @@ export function safeCurrencyFormat(
   return formatCurrency(numAmount)
 }
 
+// Global month names used throughout payroll helpers
+export const monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
 export function getHolidayTypeName(type: string | undefined): string {
   if (!type) return 'Unknown'
   const t = type.toLowerCase()
@@ -23,20 +39,6 @@ export function formatTripDate(date: string | Date): string {
 }
 
 export function getMonthDateRange(year: number, month: string): string {
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ]
   const monthIndex = monthNames.indexOf(month)
   if (monthIndex === -1) return ''
   const start = new Date(year, monthIndex, 1)
@@ -56,20 +58,6 @@ export const getYearMonthString = (dateStr: string): string => {
 
 // 👉 Get start and end date of a month as 'Month DD, YYYY'
 export const getMonthDateRangeNextMonth = (year: number, monthName: string): string => {
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ]
   const monthIndex = monthNames.indexOf(monthName)
   if (monthIndex === -1) return ''
   const start = new Date(year, monthIndex, 1)
@@ -147,24 +135,12 @@ export const getLastDateOfMonth = (dateString: string): string => {
 
 /**
  * Build full YYYY-MM-DD range for the provided year + monthName using dayFrom/dayTo (inclusive).
- * If toDay <= fromDay, the end date is interpreted as the next month (handles year rollover).
+ * NOTE: In the payroll UI the "To Day" selector references the next month, so when a toDay
+ * is provided we interpret it as a day in the next month (handling year rollover). If toDay
+ * is not provided, the end date defaults to the last day of the start month.
  */
 export function getDateRangeForMonth(year: number | undefined, monthName: string, fromDay?: number | null, toDay?: number | null) {
   const y = year || new Date().getFullYear()
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ]
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const month = monthIndex >= 0 ? monthIndex : 0
 
@@ -175,16 +151,15 @@ export function getDateRangeForMonth(year: number | undefined, monthName: string
   const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate()
   const from = fromDay && fromDay > 0 ? Math.min(Math.max(1, fromDay), daysInStartMonth) : 1
 
-  // Decide end month/year: if toDay > from => same month; if toDay <= from => next month
+  // end month/year: if toDay is provided, interpret it as a day in the NEXT month.
+  // If toDay is not provided, default to the last day of the start month.
   let endYear = startYear
   let endMonth = startMonth
   if (toDay === undefined || toDay === null) {
     // default to last day of start month
     endMonth = startMonth
-  } else if ((toDay || 0) > from) {
-    endMonth = startMonth
   } else {
-    // next month (handle year rollover)
+    // interpret toDay as day in the next month (handle year rollover)
     if (startMonth === 11) {
       endMonth = 0
       endYear = startYear + 1
@@ -209,4 +184,113 @@ export function getDateRangeForMonth(year: number | undefined, monthName: string
   const totalDays = Math.floor((e - s) / msPerDay) + 1
 
   return { fromDate, toDate, totalDays }
+}
+
+/**
+ * Like `getDateRangeForMonth` but the `toDay` is always interpreted inside the
+ * same month (no cross-month). Useful when you want an end date that never
+ * rolls into the next month.
+ */
+export function getDateRangeForMonthNoCross(year: number | undefined, monthName: string, fromDay?: number | null, toDay?: number | null) {
+  const y = year || new Date().getFullYear()
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const month = monthIndex >= 0 ? monthIndex : 0
+
+  // start month/year (0-based month)
+  const startYear = Number(y)
+  const startMonth = month
+
+  const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate()
+  const from = fromDay && fromDay > 0 ? Math.min(Math.max(1, fromDay), daysInStartMonth) : 1
+
+  // In this variant the end month/year is always the same as the start month/year
+  const endYear = startYear
+  const endMonth = startMonth
+
+  const daysInEndMonth = daysInStartMonth
+  const toRaw = toDay && toDay > 0 ? toDay : daysInEndMonth
+  const to = Math.min(Math.max(1, toRaw), daysInEndMonth)
+
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  const fromDate = `${startYear}-${pad(startMonth + 1)}-${pad(from)}`
+  const toDate = `${endYear}-${pad(endMonth + 1)}-${pad(to)}`
+
+  // compute inclusive days difference using UTC to avoid timezone issues
+  const s = new Date(`${fromDate}T00:00:00Z`).getTime()
+  const e = new Date(`${toDate}T00:00:00Z`).getTime()
+  const msPerDay = 24 * 60 * 60 * 1000
+  const totalDays = Math.floor((e - s) / msPerDay) + 1
+
+  return { fromDate, toDate, totalDays }
+}
+
+// --- Payroll dialog helpers (moved from PayrollPrintDialog.vue)
+import { nextTick } from 'vue'
+import type { Ref } from 'vue'
+
+/**
+ * Force-reload payroll functions inside the `PayrollPrint` component.
+ * Accepts refs from the calling component so this helper stays pure.
+ */
+export async function reloadAllPayrollFunctions(
+  payrollPrintRef: Ref<unknown | null>,
+  payrollPrintKey: Ref<number>,
+  isReloadingData: Ref<boolean>,
+) {
+  try {
+    // mark loading
+    isReloadingData.value = true
+
+    // Option 1: Force re-render of the PayrollPrint component by bumping the key
+    payrollPrintKey.value++
+
+    // Wait for next tick so the new instance is mounted
+    await nextTick()
+
+    // Option 2: if the component instance exposes a reload method, call it
+    const inst = payrollPrintRef.value as { reloadAllFunctions?: () => Promise<void> } | null
+    if (inst && typeof inst.reloadAllFunctions === 'function') {
+      await inst.reloadAllFunctions()
+    }
+  } catch (error) {
+    // keep logging behaviour similar to original
+    console.error('[PayrollPrintDialog] Error reloading payroll functions:', error)
+  } finally {
+    isReloadingData.value = false
+  }
+}
+
+/**
+ * Manually refresh specific pieces of payroll data by calling methods on the
+ * `PayrollPrint` component instance. The helper will set/clear the loading ref.
+ */
+export async function manualRefreshPayroll(payrollPrintRef: Ref<unknown | null>, isReloadingData: Ref<boolean>) {
+  if (!payrollPrintRef.value) return
+  try {
+    isReloadingData.value = true
+
+    // Call individual reload functions if present
+    const inst = payrollPrintRef.value as {
+      loadTrips?: () => Promise<void>
+      fetchEmployeeHolidays?: () => Promise<void>
+      updateOverallOvertime?: () => Promise<void>
+      updateEmployeeDeductions?: () => Promise<void>
+      recalculateEarnings?: () => void
+    } | null
+
+    await Promise.all([
+      inst?.loadTrips?.() ?? Promise.resolve(),
+      inst?.fetchEmployeeHolidays?.() ?? Promise.resolve(),
+      inst?.updateOverallOvertime?.() ?? Promise.resolve(),
+      inst?.updateEmployeeDeductions?.() ?? Promise.resolve(),
+    ])
+
+    // Force recalculation if available
+    inst?.recalculateEarnings?.()
+  } catch (error) {
+    console.error('[PayrollPrintDialog] Error during manual refresh:', error)
+  } finally {
+    isReloadingData.value = false
+  }
 }
