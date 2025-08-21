@@ -25,6 +25,26 @@ const icons = ['mdi-facebook', 'mdi-twitter', 'mdi-linkedin', 'mdi-instagram']
       magnis dis parturient montes, nascetur ridiculus mus.
     </div>
 
+    <!-- Footer Links -->
+    <div class="d-flex ga-4 flex-wrap justify-center">
+      <v-btn
+        to="/privacy-policy"
+        variant="text"
+        size="small"
+        class="text-caption"
+      >
+        Privacy Policy
+      </v-btn>
+      <v-btn
+        to="/terms-agreements"
+        variant="text"
+        size="small"
+        class="text-caption"
+      >
+        Terms of Service
+      </v-btn>
+    </div>
+
     <v-divider></v-divider>
 
     <div>

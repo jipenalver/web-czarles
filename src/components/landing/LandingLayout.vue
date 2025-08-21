@@ -73,14 +73,14 @@ function onToggleTheme() {
               class="text-caption"
               grow
               background-color="transparent"
-              style="min-width: 320px; max-width: 1000px; pointer-events: auto"
+              style="min-width: 320px; max-width: 600px; pointer-events: auto"
             >
               <v-tab :to="'/'" value="/">Home</v-tab>
               <v-tab :to="'/about'" value="/about">About Us</v-tab>
               <v-tab :to="'/company'" value="/company">Company</v-tab>
               <v-tab :to="'/contact'" value="/contact">Contact us</v-tab>
-              <v-tab :to="'/privacy-policy'" value="/privacy-policy">Privacy Policy</v-tab>
-              <v-tab :to="'/terms-agreements'" value="/terms-agreements">Terms of Service</v-tab>
+             <!--  <v-tab :to="'/privacy-policy'" value="/privacy-policy">Privacy Policy</v-tab>
+              <v-tab :to="'/terms-agreements'" value="/terms-agreements">Terms of Service</v-tab> -->
             </v-tabs>
           </div>
         </template>
