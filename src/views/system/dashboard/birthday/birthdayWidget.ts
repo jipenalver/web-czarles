@@ -27,7 +27,6 @@ export async function loadEmployees(
       // For employees without avatar, try to find a matching admin user and refresh by id
       for (const emp of emps) {
         const p = emp as Partial<Employee>
-        if (p.avatar) continue
 
         let found: AdminUser | undefined | null = null
         if (p.email) found = usersStore.users.find((u: AdminUser) => u.email === p.email)
@@ -38,7 +37,7 @@ export async function loadEmployees(
 
         if (found?.id) {
           // fetch latest user data and update the users store entry
-          await usersStore.getUsersId(found.id)
+          await usersStore.getUserById(found.id)
         }
       }
     } catch {
@@ -64,9 +63,6 @@ export function getAge(birthdate?: string) {
 }
 
 export function getAvatar(emp: Partial<Employee>, users?: AdminUser[]) {
-  // Prefer employee's own avatar if present
-  if (emp?.avatar) return emp.avatar
-
   // Try to find a matching admin user by email
   if (users && users.length) {
     try {
@@ -101,12 +97,12 @@ export function isToday(emp: Partial<Employee>) {
 
 export function getZodiacSign(birthdate?: string) {
   if (!birthdate) return '⭐ Unknown Sign'
-  
+
   try {
     const date = new Date(birthdate)
     const month = date.getMonth() + 1
     const day = date.getDate()
-    
+
     const signs = [
       { name: '♒ Aquarius', start: [1, 20], end: [2, 18] },
       { name: '♓ Pisces', start: [2, 19], end: [3, 20] },
@@ -119,13 +115,13 @@ export function getZodiacSign(birthdate?: string) {
       { name: '♎ Libra', start: [9, 23], end: [10, 22] },
       { name: '♏ Scorpio', start: [10, 23], end: [11, 21] },
       { name: '♐ Sagittarius', start: [11, 22], end: [12, 21] },
-      { name: '♑ Capricorn', start: [12, 22], end: [1, 19] }
+      { name: '♑ Capricorn', start: [12, 22], end: [1, 19] },
     ]
-    
+
     for (const sign of signs) {
       const [startMonth, startDay] = sign.start
       const [endMonth, endDay] = sign.end
-      
+
       if (startMonth === endMonth) {
         if (month === startMonth && day >= startDay && day <= endDay) {
           return sign.name
@@ -136,7 +132,7 @@ export function getZodiacSign(birthdate?: string) {
         }
       }
     }
-    
+
     return '⭐ Unknown Sign'
   } catch {
     return '⭐ Unknown Sign'
@@ -145,22 +141,22 @@ export function getZodiacSign(birthdate?: string) {
 
 export function getDaysUntilBirthday(birthdate?: string) {
   if (!birthdate) return 0
-  
+
   try {
     const today = new Date()
     const birthday = new Date(birthdate)
-    
+
     // Set birthday to current year
     birthday.setFullYear(today.getFullYear())
-    
+
     // If birthday already passed this year, set to next year
     if (birthday < today) {
       birthday.setFullYear(today.getFullYear() + 1)
     }
-    
+
     const diffTime = birthday.getTime() - today.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
+
     return diffDays
   } catch {
     return 0
@@ -170,7 +166,7 @@ export function getDaysUntilBirthday(birthdate?: string) {
 export function getAgeMilestone(age?: number | string) {
   const ageNum = typeof age === 'string' ? parseInt(age) : age
   if (!ageNum || ageNum < 0) return 'New Journey'
-  
+
   if (ageNum >= 18 && ageNum < 25) return 'Young Adult'
   if (ageNum >= 25 && ageNum < 30) return 'Quarter Century'
   if (ageNum >= 30 && ageNum < 40) return 'Thriving Thirties'
@@ -178,14 +174,14 @@ export function getAgeMilestone(age?: number | string) {
   if (ageNum >= 50 && ageNum < 60) return 'Fantastic Fifties'
   if (ageNum >= 60 && ageNum < 70) return 'Sensational Sixties'
   if (ageNum >= 70) return 'Golden Years'
-  
+
   return 'Growing Strong'
 }
 
 export function getBirthdayEmoji(age?: number | string) {
   const ageNum = typeof age === 'string' ? parseInt(age) : age
   if (!ageNum || ageNum < 0) return '🎈'
-  
+
   if (ageNum < 18) return '🧸'
   if (ageNum >= 18 && ageNum < 25) return '🌟'
   if (ageNum >= 25 && ageNum < 30) return '🚀'
@@ -194,6 +190,6 @@ export function getBirthdayEmoji(age?: number | string) {
   if (ageNum >= 50 && ageNum < 60) return '🏆'
   if (ageNum >= 60 && ageNum < 70) return '👑'
   if (ageNum >= 70) return '💎'
-  
+
   return '🎉'
 }
