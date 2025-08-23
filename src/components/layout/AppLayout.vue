@@ -50,10 +50,6 @@ onMounted(async () => {
           </RouterLink>
         </v-app-bar-title>
 
-        <template v-if="!isLoggedIn && smAndUp">
-          <v-btn class="me-2" prepend-icon="mdi-login" rounded="lg" to="/">GO BACK</v-btn>
-        </template>
-
         <v-btn
           class="me-2"
           :icon="theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
