@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['isDrawerVisible', 'theme'])
 
-const { smAndUp } = useDisplay()
+const { mobile } = useDisplay()
 
 const theme = ref(localStorage.getItem('theme') ?? 'light')
 const route = useRoute()
@@ -48,12 +48,20 @@ function onToggleTheme() {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <v-img v-if="theme === 'light' && smAndUp" max-width="265" :src="headerCzarles" />
-            <v-img v-else max-width="75" :src="logoCzarles" />
+            <v-img 
+              v-if="theme === 'light' && !mobile" 
+              max-width="265" 
+              :src="headerCzarles" 
+            />
+            <v-img 
+              v-else 
+              :max-width="mobile ? '60' : '75'" 
+              :src="logoCzarles" 
+            />
           </RouterLink>
         </v-app-bar-title>
 
-        <template v-if="smAndUp">
+        <template v-if="!mobile">
          
           <div
             style="
@@ -87,31 +95,40 @@ function onToggleTheme() {
 
         <v-spacer />
  <div class="d-flex align-center">
-          <template v-if="smAndUp">
-            <v-btn class="me-2" prepend-icon="mdi-login" rounded="lg" to="/login"> Sign In </v-btn>
+          <template v-if="!mobile">
+            <v-btn 
+              :class="mobile ? 'me-1' : 'me-2'" 
+              prepend-icon="mdi-login" 
+              rounded="lg" 
+              to="/login"
+              :size="mobile ? 'small' : 'default'"
+            > 
+              Sign In 
+            </v-btn>
           </template>
 
           <v-btn
-            class="me-2"
+            :class="mobile ? 'me-1' : 'me-2'"
             :icon="theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
             variant="elevated"
             @click="onToggleTheme"
-            size="sm"
+            :size="mobile ? 'small' : 'default'"
           />
         </div>
         <!-- Mobile navigation menu -->
-        <template v-if="!smAndUp">
+        <template v-if="mobile">
           <v-menu v-model="isDrawerVisible" location="bottom end" :theme="theme">
             <template v-slot:activator="{ props: menuProps }">
               <v-btn
                 icon="mdi-menu"
                 variant="text"
                 v-bind="menuProps"
-                class="me-2"
+                :class="mobile ? 'me-1' : 'me-2'"
+                :size="mobile ? 'small' : 'default'"
               />
             </template>
-            <v-card min-width="200">
-              <v-list>
+            <v-card :min-width="mobile ? '180' : '200'">
+              <v-list :density="mobile ? 'compact' : 'default'">
                 <v-list-item to="/" @click="() => (isDrawerVisible = false)">
                   <v-list-item-title>Home</v-list-item-title>
                 </v-list-item>

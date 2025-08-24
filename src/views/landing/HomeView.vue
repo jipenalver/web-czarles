@@ -28,7 +28,7 @@ const statistics = ref([
 ])
 
 // Vuetify breakpoint composable (reactive)
-const { smAndDown } = useDisplay()
+const { mobile } = useDisplay()
 </script>
 
 <template>
@@ -95,37 +95,48 @@ const { smAndDown } = useDisplay()
                 </v-container>
               </div>
 
-              <!-- Statistics Section: Single rounded card with mirror/reflection -->
+              <!-- Statistics Section: Responsive card layout -->
               <v-container class="py-16">
                 <v-row align="center" justify="center">
                   <v-col cols="12" md="12" lg="12">
-                    <v-card class="stats-card mx-auto" elevation="6" color="rgba(255,255,255,0.04)">
-                      <div
-                        :class="[
-                          'stats-grid',
-                          'pa-6',
-                          'd-flex',
-                          'align-center',
-                          'justify-space-between',
-                          { 'stats-grid--stacked': smAndDown },
-                        ]"
+                    <v-card 
+                      class="mx-auto rounded-xl" 
+                      elevation="6" 
+                      color="rgba(255,255,255,0.04)"
+                      :class="mobile ? 'pa-5' : 'pa-12'"
+                    >
+                      <v-row 
+                        :class="mobile ? 'flex-column' : 'flex-row'"
+                        class="align-center justify-space-between"
+                        no-gutters
                       >
-                        <div
+                        <v-col
                           v-for="stat in statistics"
                           :key="stat.label"
-                          class="stat-item text-center"
+                          :cols="mobile ? '12' : ''"
+                          class="text-center"
+                          :class="mobile ? 'py-3' : 'px-2'"
                         >
-                          <div class="text-h3 text-md-h2 font-weight-bold text-primary mb-2">
+                          <div 
+                            :class="mobile ? 'text-h4' : 'text-h2'" 
+                            class="font-weight-bold text-primary mb-2"
+                          >
                             {{ stat.number }}
                           </div>
-                          <div class="text-body-1 text-md-h6 font-weight-medium text-primary mb-1">
+                          <div 
+                            :class="mobile ? 'text-body-1' : 'text-h6'" 
+                            class="font-weight-medium text-primary mb-1"
+                          >
                             {{ stat.label }}
                           </div>
-                          <div class="text-primary text-md-body-2 text-grey">
+                          <div 
+                            :class="mobile ? 'text-caption' : 'text-body-2'" 
+                            class="text-grey"
+                          >
                             {{ stat.description }}
                           </div>
-                        </div>
-                      </div>
+                        </v-col>
+                      </v-row>
                     </v-card>
                   </v-col>
                 </v-row>
@@ -140,58 +151,15 @@ const { smAndDown } = useDisplay()
 </template>
 
 <style scoped>
-/* Minimal styles focused on stats grid and small helpers */
+/* Minimal helper for gap utility - can be replaced with Vuetify spacing classes */
 .gap-4 {
   gap: 1rem;
 }
 
-.stats-card {
-  border-radius: 16px;
-  overflow: visible;
-  position: relative;
-  padding: 3rem;
-}
-
-.stats-grid {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.stats-grid--stacked {
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: stretch;
-}
-
-.stats-grid--stacked .stat-item {
-  padding: 0.5rem 0;
-}
-
-.stat-item {
-  flex: 1 1 0;
-  min-width: 0;
-  text-align: center;
-}
-
-/* Small mobile adjustments for spacing and typography */
+/* Small mobile adjustments for action buttons */
 @media (max-width: 600px) {
   .gap-4 {
     gap: 0.5rem;
-  }
-  .stats-card {
-    padding: 1.25rem !important;
-  }
-
-  .stat-item .text-h3 {
-    font-size: 1.4rem !important;
-  }
-  .stat-item .text-body-1 {
-    font-size: 0.9rem !important;
-  }
-  .stat-item .text-md-body-2,
-  .stat-item .text-grey {
-    font-size: 0.8rem !important;
   }
 
   .px-8 {
