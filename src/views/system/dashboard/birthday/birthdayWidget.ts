@@ -1,6 +1,5 @@
 import { useEmployeesStore, type Employee, type EmployeeTableFilter } from '@/stores/employees'
 import { useUsersStore, type AdminUser } from '@/stores/users'
-import profileDefault from '@/assets/misc/profile-default.jpg'
 import type { TableOptions } from '@/utils/helpers/tables'
 import type { Ref } from 'vue'
 
@@ -60,28 +59,6 @@ export function getAge(birthdate?: string) {
   } catch {
     return ''
   }
-}
-
-export function getAvatar(emp: Partial<Employee>, users?: AdminUser[]) {
-  // Try to find a matching admin user by email
-  if (users && users.length) {
-    try {
-      if (emp?.email) {
-        const byEmail = users.find((u: AdminUser) => u.email === emp.email)
-        if (byEmail?.avatar) return byEmail.avatar
-      }
-
-      // Fallback to matching by name
-      const byName = users.find(
-        (u: AdminUser) => u.firstname === emp.firstname && u.lastname === emp.lastname,
-      )
-      if (byName?.avatar) return byName.avatar
-    } catch {
-      // ignore and fallback to default
-    }
-  }
-
-  return profileDefault
 }
 
 export function isToday(emp: Partial<Employee>) {

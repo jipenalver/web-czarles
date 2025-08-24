@@ -2,7 +2,6 @@
 import {
   loadEmployees,
   getAge,
-  getAvatar,
   isToday,
   getZodiacSign,
   getDaysUntilBirthday,
@@ -12,6 +11,7 @@ import {
 import { useEmployeesStore, type EmployeeTableFilter } from '@/stores/employees'
 import { getYearsOfService } from '@/utils/helpers/dates'
 import { type TableHeader } from '@/utils/helpers/tables'
+import { getAvatarText } from '@/utils/helpers/others'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useUsersStore } from '@/stores/users'
 import { useDate } from 'vuetify'
@@ -87,8 +87,10 @@ const todaysBirthdays = computed(() => {
         <div class="text-h6 font-weight-bold mb-2">🎊 TODAY'S BIRTHDAY STARS! 🎊</div>
         <div v-for="person in todaysBirthdays" :key="person.id" class="mb-2">
           <div class="d-flex align-center">
-            <v-avatar size="56" class="me-3 birthday-avatar">
-              <v-img :src="getAvatar(person, usersStore.users)" alt="Birthday person"></v-img>
+            <v-avatar size="56" class="me-3 birthday-avatar" color="primary">
+              <span class="text-h6 font-weight-bold white--text">
+                {{ getAvatarText(`${person.firstname} ${person.lastname}`) }}
+              </span>
             </v-avatar>
             <div>
               <div class="text-h6 font-weight-bold">
@@ -139,9 +141,11 @@ const todaysBirthdays = computed(() => {
               <v-avatar
                 :size="isToday(item) ? 56 : 44"
                 :class="['me-3', isToday(item) ? 'birthday-avatar animate-bounce' : '']"
-                :image="getAvatar(item, usersStore.users)"
-                color="primary"
+                :color="isToday(item) ? 'pink' : 'primary'"
               >
+                <span :class="['font-weight-bold', isToday(item) ? 'text-h6' : 'text-body-2']" class="white--text">
+                  {{ getAvatarText(`${item.firstname} ${item.lastname}`) }}
+                </span>
               </v-avatar>
               <div>
                 <div
