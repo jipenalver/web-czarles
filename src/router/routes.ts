@@ -18,7 +18,7 @@ import SettingsView from '@/views/system/settings/SettingsView.vue'
 // Website
 import HomeView from '@/views/landing/HomeView.vue'
 import PrivacyPolicyView from '@/views/landing/legal/PrivacyPolicyView.vue'
-import TermsAgreementsView from '@/views/landing/legal/TermsAgreementsView.vue'
+import TermsConditionsView from '@/views/landing/legal/TermsConditionsView.vue'
 import AboutView from '@/views/landing/AboutView.vue'
 import CompanyView from '@/views/landing/CompanyView.vue'
 import ContactView from '@/views/landing/ContactView.vue'
@@ -38,9 +38,9 @@ export const routes = [
     meta: { requiresAuth: false },
   },
   {
-    path: '/terms-agreements',
-    name: 'terms-agreements',
-    component: TermsAgreementsView,
+    path: '/terms-and-conditions',
+    name: 'terms-and-conditions',
+    component: TermsConditionsView,
     meta: { requiresAuth: false },
   },
   {
