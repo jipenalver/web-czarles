@@ -1,8 +1,43 @@
 <script setup lang="ts">
 import LandingLayout from '@/components/landing/LandingLayout.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 
 const isVisible = ref(false)
+const { mobile, mdAndDown, lgAndUp } = useDisplay()
+
+// Computed properties for responsive classes and sizes
+const heroTitleClass = computed(() => 
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+)
+
+const heroSubtitleClass = computed(() => 
+  mobile.value ? 'text-body-1' : 'text-h6'
+)
+
+const contentTitleClass = computed(() => 
+  mobile.value ? 'text-h5' : 'text-h4'
+)
+
+const sectionTitleClass = computed(() => 
+  mobile.value ? 'text-subtitle-1' : 'text-h6'
+)
+
+const bodyTextClass = computed(() => 
+  mobile.value ? 'text-body-2' : mdAndDown.value ? 'text-body-1' : 'text-body-1'
+)
+
+const listTextClass = computed(() => 
+  mobile.value ? 'text-caption' : mdAndDown.value ? 'text-body-2' : 'text-body-1'
+)
+
+const cardPadding = computed(() => 
+  mobile.value ? 'pa-4' : 'pa-8'
+)
+
+const containerPadding = computed(() => 
+  mobile.value ? 'py-8 px-2' : 'py-16 px-4'
+)
 
 onMounted(() => {
   isVisible.value = true
@@ -19,14 +54,12 @@ onMounted(() => {
       >
         <div class="hero-content">
           <h1
-            class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-hero-title"
-            :class="{ 'animate-hero-title-visible': isVisible }"
+            :class="[heroTitleClass, 'font-weight-bold mb-4 text-white animate-hero-title', { 'animate-hero-title-visible': isVisible }]"
           >
             Terms & Conditions
           </h1>
           <p
-            class="mb-6 text-h6 text-white font-weight-light animate-hero-subtitle"
-            :class="{ 'animate-hero-subtitle-visible': isVisible }"
+            :class="[heroSubtitleClass, 'mb-6 text-white font-weight-light animate-hero-subtitle', { 'animate-hero-subtitle-visible': isVisible }]"
           >
             Please read and understand our Terms & Conditions — they outline your rights,
             responsibilities, and how we collect and use data while using our services.
@@ -39,34 +72,34 @@ onMounted(() => {
         >
           <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
           <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
-          <span class="mx-2 text-white">/</span>
-          <span class="text-white">Terms & Conditions</span>
+          <v-icon size="small" class="mx-2">mdi-chevron-right</v-icon>
+          <span class="text-orange-lighten-2">Terms & Conditions</span>
         </div>
       </div>
     </template>
     <template #content>
-      <v-container class="py-12" fluid>
-        <v-row justify="center">
-          <v-col cols="12" lg="10" xl="8">
-            <v-card class="pa-8 ma-4" outlined>
-              <div class="terms-conditions-content">
-                <h2 class="text-h4 mb-6 text-primary">Terms and Conditions</h2>
+      <v-row :class="['d-flex align-center', containerPadding]">
+        <v-col cols="12" lg="1"></v-col>
+        <v-col cols="12" lg="10">
+          <v-card :class="[cardPadding, 'ma-2 ma-md-4']" outlined>
+            <div class="terms-conditions-content">
+              <h2 :class="[contentTitleClass, 'mb-6 text-primary']">Terms and Conditions</h2>
                 
-                <p class="mb-6 text-body-2">
+                <p :class="[bodyTextClass, 'mb-6']">
                   <strong>Last updated:</strong> August 25, 2025
                 </p>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">1. Acceptance of Terms</h3>
-                  <p class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">1. Acceptance of Terms</h3>
+                  <p :class="[bodyTextClass, 'mb-4']">
                     By downloading, installing, or using the Czarles Mobile App ("the App"), you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree to these Terms, do not use the App.
                   </p>
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">2. Description of Service</h3>
-                  <p class="mb-3">The Czarles Mobile App is an employee attendance management application that provides:</p>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">2. Description of Service</h3>
+                  <p :class="[bodyTextClass, 'mb-3']">The Czarles Mobile App is an employee attendance management application that provides:</p>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>Location-based attendance tracking using GPS</li>
                     <li>Time clock functionality for work hours</li>
                     <li>Image capture for attendance verification</li>
@@ -76,8 +109,8 @@ onMounted(() => {
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">3. User Accounts and Authentication</h3>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">3. User Accounts and Authentication</h3>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>Users must provide a valid phone number for account registration and authentication</li>
                     <li>You are responsible for maintaining the confidentiality of your account credentials</li>
                     <li>You must notify us immediately of any unauthorized use of your account</li>
@@ -86,9 +119,9 @@ onMounted(() => {
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">4. Acceptable Use</h3>
-                  <p class="mb-3">You agree to use the App only for legitimate attendance tracking purposes. You must NOT:</p>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">4. Acceptable Use</h3>
+                  <p :class="[bodyTextClass, 'mb-3']">You agree to use the App only for legitimate attendance tracking purposes. You must NOT:</p>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>Attempt to manipulate or falsify location data</li>
                     <li>Use fake GPS or location spoofing applications</li>
                     <li>Share your account credentials with others</li>
@@ -99,8 +132,8 @@ onMounted(() => {
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">5. Location Services and Data Collection</h3>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">5. Location Services and Data Collection</h3>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>The App requires access to your device's GPS location for attendance verification</li>
                     <li>Location data is collected only during attendance check-in/check-out processes</li>
                     <li>The App includes fake location detection to ensure data integrity</li>
@@ -109,8 +142,8 @@ onMounted(() => {
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">6. Camera and Image Capture</h3>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">6. Camera and Image Capture</h3>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>The App may require camera access for attendance verification photos</li>
                     <li>Images are captured and stored securely for attendance record purposes</li>
                     <li>You grant us the right to use captured images for attendance verification and record-keeping</li>
@@ -118,8 +151,8 @@ onMounted(() => {
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">7. Offline Functionality</h3>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">7. Offline Functionality</h3>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>The App can function offline and will sync data when connectivity is restored</li>
                     <li>You are responsible for ensuring data accuracy during offline use</li>
                     <li>Offline data will be automatically synchronized when internet connection is available</li>
@@ -127,8 +160,8 @@ onMounted(() => {
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h6 mb-3 font-weight-bold text-primary">8. Data Accuracy and Integrity</h3>
-                  <ul class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">8. Data Accuracy and Integrity</h3>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li>You are responsible for the accuracy of your attendance records</li>
                     <li>Any attempts to manipulate attendance data may result in account suspension</li>
                     <li>The App implements security measures to detect and prevent fraudulent activity</li>
@@ -264,8 +297,8 @@ onMounted(() => {
               </div>
             </v-card>
           </v-col>
+          <v-col cols="12" lg="1"></v-col>
         </v-row>
-      </v-container>
     </template>
   </LandingLayout>
 </template>
@@ -357,5 +390,10 @@ onMounted(() => {
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+.hover-orange:hover {
+  color: #ff6b35 !important;
+  transition: color 0.3s ease;
 }
 </style>
