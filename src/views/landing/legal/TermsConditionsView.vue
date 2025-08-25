@@ -32,7 +32,7 @@ const listTextClass = computed(() =>
 )
 
 const cardPadding = computed(() => 
-  mobile.value ? 'pa-4' : 'pa-8'
+  mobile.value ? 'pa-8' : 'pa-8'
 )
 
 const containerPadding = computed(() => 
