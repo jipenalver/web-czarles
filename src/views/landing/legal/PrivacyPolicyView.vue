@@ -1,8 +1,47 @@
 <script setup lang="ts">
 import LandingLayout from '@/components/landing/LandingLayout.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 
 const isVisible = ref(false)
+const { mobile, mdAndDown, lgAndUp } = useDisplay()
+
+// Computed properties for responsive classes and sizes
+const heroTitleClass = computed(() => 
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+)
+
+const heroSubtitleClass = computed(() => 
+  mobile.value ? 'text-body-1' : 'text-h6'
+)
+
+const contentTitleClass = computed(() => 
+  mobile.value ? 'text-h5' : 'text-h4'
+)
+
+const sectionTitleClass = computed(() => 
+  mobile.value ? 'text-h6' : 'text-h5'
+)
+
+const subsectionTitleClass = computed(() => 
+  mobile.value ? 'text-subtitle-1' : 'text-h6'
+)
+
+const bodyTextClass = computed(() => 
+  mobile.value ? 'text-body-2' : mdAndDown.value ? 'text-body-1' : 'text-body-1'
+)
+
+const listTextClass = computed(() => 
+  mobile.value ? 'text-caption' : mdAndDown.value ? 'text-body-2' : 'text-body-1'
+)
+
+const cardPadding = computed(() => 
+  mobile.value ? 'pa-8' : 'pa-8'
+)
+
+const containerPadding = computed(() => 
+  mobile.value ? 'py-8 px-2' : 'py-16 px-4'
+)
 
 onMounted(() => {
   isVisible.value = true
@@ -13,20 +52,18 @@ onMounted(() => {
   <LandingLayout :hideBg="true">
     <template #hero>
       <div
-        class="text-center white--text animate-hero-container"
+        class="text-center white--text animate-hero-container" 
         :class="{ 'animate-hero-container-visible': isVisible }"
         style="max-width: 900px"
       >
         <div class="hero-content">
           <h1
-            class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-hero-title"
-            :class="{ 'animate-hero-title-visible': isVisible }"
+            :class="[heroTitleClass, 'font-weight-bold mb-4 text-white animate-hero-title', { 'animate-hero-title-visible': isVisible }]"
           >
             Privacy Policy
           </h1>
           <p
-            class="mb-6 text-h6 text-white font-weight-light animate-hero-subtitle"
-            :class="{ 'animate-hero-subtitle-visible': isVisible }"
+            :class="[heroSubtitleClass, 'mb-6 text-white font-weight-light animate-hero-subtitle', { 'animate-hero-subtitle-visible': isVisible }]"
           >
             We respect your privacy. This Privacy Policy explains the personal information we
             collect, how we use and protect it, and your rights regarding your data.
@@ -39,32 +76,32 @@ onMounted(() => {
         >
           <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
           <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
-          <span class="mx-2 text-white">/</span>
-          <span class="text-white">Privacy Policy</span>
+          <v-icon size="small" class="mx-2">mdi-chevron-right</v-icon>
+          <span class="text-orange-lighten-2">Privacy Policy</span>
         </div>
       </div>
     </template>
     <template #content>
-      <v-container class="py-12" fluid>
-        <v-row justify="center">
-          <v-col cols="12" lg="10" xl="8">
-            <v-card class="pa-8 ma-4" outlined>
-              <div class="privacy-policy-content">
-                <h2 class="text-h4 mb-6 text-primary">Privacy Policy</h2>
+      <v-row :class="['d-flex align-center', containerPadding]">
+        <v-col cols="12" lg="1"></v-col>
+        <v-col cols="12" lg="10">
+          <v-card :class="[cardPadding, 'ma-2 ma-md-4']" outlined>
+            <div class="privacy-policy-content">
+              <h2 :class="[contentTitleClass, 'mb-6 text-primary']">Privacy Policy</h2>
 
                 <section class="mb-6">
-                  <h3 class="text-h5 mb-4 text-primary">Introduction</h3>
-                  <p class="mb-4">
+                  <h3 :class="[sectionTitleClass, 'mb-4 text-primary']">Introduction</h3>
+                  <p :class="[bodyTextClass, 'mb-4']">
                     Czarles ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our employee attendance management mobile application ("App"). Please read this Privacy Policy carefully.
                   </p>
                 </section>
 
                 <section class="mb-6">
-                  <h3 class="text-h5 mb-4 text-primary">Information We Collect</h3>
+                  <h3 :class="[sectionTitleClass, 'mb-4 text-primary']">Information We Collect</h3>
 
-                  <h4 class="text-h6 mb-3 font-weight-bold">Personal Information</h4>
-                  <p class="mb-3">We collect the following personal information:</p>
-                  <ul class="mb-4">
+                  <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Personal Information</h4>
+                  <p :class="[bodyTextClass, 'mb-3']">We collect the following personal information:</p>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li><strong>Phone Number:</strong> Used for authentication and account creation</li>
                     <li><strong>Employee Information:</strong> Name, employee ID, and job-related details as provided by your employer</li>
                     <li><strong>Location Data:</strong> Real-time GPS coordinates when clocking in/out for attendance verification</li>
@@ -72,16 +109,16 @@ onMounted(() => {
                     <li><strong>Attendance Records:</strong> Clock-in/out times, overtime hours, and attendance status</li>
                   </ul>
 
-                  <h4 class="text-h6 mb-3 font-weight-bold">Automatically Collected Information</h4>
-                  <ul class="mb-4">
+                  <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Automatically Collected Information</h4>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li><strong>Device Information:</strong> Device type, operating system, and app version</li>
                     <li><strong>Usage Data:</strong> App usage patterns, features accessed, and performance metrics</li>
                     <li><strong>Location Services:</strong> GPS coordinates and location accuracy data</li>
                     <li><strong>Camera Access:</strong> Image capture capabilities for attendance verification</li>
                   </ul>
 
-                  <h4 class="text-h6 mb-3 font-weight-bold">Technical Data</h4>
-                  <ul class="mb-4">
+                  <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Technical Data</h4>
+                  <ul :class="[listTextClass, 'mb-4']">
                     <li><strong>Network Information:</strong> Internet connectivity status for offline/online synchronization</li>
                     <li><strong>Device Storage:</strong> Local storage of attendance data for offline functionality</li>
                     <li><strong>Security Data:</strong> Fake location detection and security verification information</li>
@@ -300,8 +337,8 @@ onMounted(() => {
               </div>
             </v-card>
           </v-col>
+          <v-col cols="12" lg="1"></v-col>
         </v-row>
-      </v-container>
     </template>
   </LandingLayout>
 </template>
@@ -394,5 +431,10 @@ onMounted(() => {
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+.hover-orange:hover {
+  color: #ff6b35 !important;
+  transition: color 0.3s ease;
 }
 </style>
