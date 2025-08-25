@@ -1,28 +1,42 @@
 <script setup lang="ts">
 import LandingLayout from '@/components/landing/LandingLayout.vue'
-import { ref, onMounted} from 'vue'
+import { ref, onMounted } from 'vue'
 
 const isVisible = ref(false)
 
 onMounted(() => {
-
-    isVisible.value = true
-
+  isVisible.value = true
 })
 </script>
 
 <template>
   <LandingLayout :hideBg="true">
     <template #hero>
-      <div class="text-center white--text animate-hero-container" :class="{ 'animate-hero-container-visible': isVisible }" style="max-width: 900px">
+      <div
+        class="text-center white--text animate-hero-container"
+        :class="{ 'animate-hero-container-visible': isVisible }"
+        style="max-width: 900px"
+      >
         <div class="hero-content">
-          <h1 class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-hero-title" :class="{ 'animate-hero-title-visible': isVisible }">Terms & Agreements</h1>
-          <p class="mb-6 text-h6 text-white font-weight-light animate-hero-subtitle" :class="{ 'animate-hero-subtitle-visible': isVisible }">
-            Please read and understand our Terms & Agreements — they outline your rights, responsibilities, and how we collect and use data while using our services.
+          <h1
+            class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-hero-title"
+            :class="{ 'animate-hero-title-visible': isVisible }"
+          >
+            Terms & Agreements
+          </h1>
+          <p
+            class="mb-6 text-h6 text-white font-weight-light animate-hero-subtitle"
+            :class="{ 'animate-hero-subtitle-visible': isVisible }"
+          >
+            Please read and understand our Terms & Agreements — they outline your rights,
+            responsibilities, and how we collect and use data while using our services.
           </p>
         </div>
 
-        <div class="text-caption text-white animate-hero-breadcrumb" :class="{ 'animate-hero-breadcrumb-visible': isVisible }">
+        <div
+          class="text-caption text-white animate-hero-breadcrumb"
+          :class="{ 'animate-hero-breadcrumb-visible': isVisible }"
+        >
           <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
           <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
           <span class="mx-2 text-white">/</span>
@@ -92,20 +106,40 @@ onMounted(() => {
 
 /* visible state on the container triggers child animations with small delays */
 .animate-hero-container-visible {
-  animation: fadeIn .45s ease 0s forwards;
+  animation: fadeIn 0.45s ease 0s forwards;
 }
-.animate-hero-container-visible .hero-content h1 { animation: slideUp .48s ease .08s forwards; }
-.animate-hero-container-visible .hero-content p  { animation: slideUp .48s ease .18s forwards; }
-.animate-hero-container-visible .animate-hero-breadcrumb { animation: slideUp .48s ease .28s forwards; }
+.animate-hero-container-visible .hero-content h1 {
+  animation: slideUp 0.48s ease 0.08s forwards;
+}
+.animate-hero-container-visible .hero-content p {
+  animation: slideUp 0.48s ease 0.18s forwards;
+}
+.animate-hero-container-visible .animate-hero-breadcrumb {
+  animation: slideUp 0.48s ease 0.28s forwards;
+}
 
-@keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeIn  { to { opacity: 1; transform: none; } }
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-container,
   .animate-hero-container .hero-content h1,
   .animate-hero-container .hero-content p,
   .animate-hero-breadcrumb,
-  .animate-hero-container-visible { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .animate-hero-container-visible {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 </style>
