@@ -5,6 +5,8 @@ import { getTimeHHMM } from '../helpers'
 export async function getEmployeeAttendanceById(
   employeeId: number | string,
   dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
 ): Promise<Array<{
   am_time_in: string | null
   am_time_out: string | null
@@ -18,18 +20,38 @@ export async function getEmployeeAttendanceById(
   attendance_date?: string // Add attendance date to track the actual date
  
 }> | null> {
-  // query sa attendance records for the given employee ug month
-  const startOfMonth = `${dateString}-01T00:00:00.000Z`
-  const [year, month] = dateString.split('-')
-  const nextMonth = new Date(parseInt(year), parseInt(month), 1)
-  const endOfMonth = nextMonth.toISOString()
+  // query sa attendance records para sa given employee ug range
+  // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
+  let startISO: string
+  let endISO: string
+
+  if (fromDateISO && toDateISO) {
+    // normalize to start of fromDate and exclusive end of toDate (add one day)
+    const start = fromDateISO.includes('T') ? new Date(fromDateISO) : new Date(`${fromDateISO}T00:00:00.000Z`)
+    const endBase = toDateISO.includes('T') ? new Date(toDateISO) : new Date(`${toDateISO}T00:00:00.000Z`)
+    const end = new Date(endBase)
+    end.setDate(end.getDate() + 1)
+    startISO = start.toISOString()
+    endISO = new Date(end.getTime() - 1).toISOString()
+  } else {
+    // fallback to using dateString (format: YYYY-MM)
+    const startOfMonth = `${dateString}-01T00:00:00.000Z`
+    const [year, month] = dateString.split('-')
+    const nextMonth = new Date(parseInt(year), parseInt(month), 1)
+    const endOfMonth = nextMonth.toISOString()
+    startISO = startOfMonth
+    endISO = endOfMonth
+  }
+
+  // debug
+   //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
 
   const { data, error } = await supabase
     .from('attendances')
     .select('am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason')
     .eq('employee_id', employeeId)
-    .gte('am_time_in', startOfMonth) // Filter by am_time_in for the month
-    .lt('am_time_in', endOfMonth)
+    .gte('am_time_in', startISO) // Filter by am_time_in for the range
+    .lt('am_time_in', endISO)
     .order('created_at', { ascending: false })
   if (error) {
     console.error('getEmployeeAttendanceById error:', error)
@@ -77,13 +99,22 @@ export function computeOvertimeHours(overtimeIn: string | null, overtimeOut: str
 export async function computeOverallOvertimeCalculation(
   employeeId?: number,
   dateString?: string,
+  fromDateISO?: string,
+  toDateISO?: string,
 ): Promise<number> {
   let usedDateString = dateString
   if (!usedDateString && typeof window !== 'undefined') {
     usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
   }
+  // fallback for from/to if available in localStorage
+  let usedFrom = fromDateISO
+  let usedTo = toDateISO
+  if ((!usedFrom || !usedTo) && typeof window !== 'undefined') {
+    usedFrom = usedFrom || (localStorage.getItem('czarles_payroll_fromDate') as string | null) || undefined
+    usedTo = usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
+  }
   if (employeeId && usedDateString) {
-    const attendances = await getEmployeeAttendanceById(employeeId, usedDateString)
+    const attendances = await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
     if (Array.isArray(attendances) && attendances.length > 0) {
       // sum all overtime hours for the month
       let totalOvertime = 0

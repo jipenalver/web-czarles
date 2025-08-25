@@ -202,6 +202,7 @@ export const getTotalMinutesForMonth = async (
     // })
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
+      //para sa payrollPrintDialog
       /* console.log(
         `[getTotalMinutesForMonth] No attendance records found for employee ${employeeId} in ${dateStringForQuery}`,
       ) */
@@ -211,13 +212,13 @@ export const getTotalMinutesForMonth = async (
     let totalMonthMinutes = 0
 
     // Process each attendance record using getTotalMinutes
-    attendances.forEach((attendance /* index */) => {
-      // console.log(`[getTotalMinutesForMonth] Processing attendance ${index + 1}:`, {
-      //   am_time_in: attendance.am_time_in,
-      //   am_time_out: attendance.am_time_out,
-      //   pm_time_in: attendance.pm_time_in,
-      //   pm_time_out: attendance.pm_time_out
-      // })
+    attendances.forEach((attendance, /* index */) => {
+     /*  console.log(`[getTotalMinutesForMonth] Processing attendance ${index + 1}:`, {
+         am_time_in: attendance.am_time_in,
+         am_time_out: attendance.am_time_out,
+         pm_time_in: attendance.pm_time_in,
+         pm_time_out: attendance.pm_time_out
+       }) */
 
       const dailyMinutes = getTotalMinutes(
         attendance.am_time_in,
