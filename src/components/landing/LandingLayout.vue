@@ -24,9 +24,12 @@ const showHeader = computed(() => route.path !== '/' && !!slots.hero)
 const isDrawerVisible = ref(false)
 
 // keep the tab in sync when the route changes (so active tab follows navigation)
-watch(() => route.path, (p) => {
-  tab.value = p
-})
+watch(
+  () => route.path,
+  (p) => {
+    tab.value = p
+  },
+)
 
 function onToggleTheme() {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
@@ -48,21 +51,12 @@ function onToggleTheme() {
 
         <v-app-bar-title>
           <RouterLink to="/">
-            <v-img 
-              v-if="theme === 'light' && !mobile" 
-              max-width="265" 
-              :src="headerCzarles" 
-            />
-            <v-img 
-              v-else 
-              :max-width="mobile ? '60' : '75'" 
-              :src="logoCzarles" 
-            />
+            <v-img v-if="theme === 'light' && !mobile" max-width="265" :src="headerCzarles" />
+            <v-img v-else :max-width="mobile ? '60' : '75'" :src="logoCzarles" />
           </RouterLink>
         </v-app-bar-title>
 
         <template v-if="!mobile">
-         
           <div
             style="
               position: absolute;
@@ -87,23 +81,23 @@ function onToggleTheme() {
               <v-tab :to="'/about'" value="/about">About Us</v-tab>
               <v-tab :to="'/company'" value="/company">Company</v-tab>
               <v-tab :to="'/contact'" value="/contact">Contact us</v-tab>
-             <!--  <v-tab :to="'/privacy-policy'" value="/privacy-policy">Privacy Policy</v-tab>
-              <v-tab :to="'/terms-agreements'" value="/terms-agreements">Terms of Service</v-tab> -->
+              <!--  <v-tab :to="'/privacy-policy'" value="/privacy-policy">Privacy Policy</v-tab>
+              <v-tab :to="'/terms-and-conditions'" value="/terms-and-conditions">Terms & Conditions</v-tab> -->
             </v-tabs>
           </div>
         </template>
 
         <v-spacer />
- <div class="d-flex align-center">
+        <div class="d-flex align-center">
           <template v-if="!mobile">
-            <v-btn 
-              :class="mobile ? 'me-1' : 'me-2'" 
-              prepend-icon="mdi-login" 
-              rounded="lg" 
+            <v-btn
+              :class="mobile ? 'me-1' : 'me-2'"
+              prepend-icon="mdi-login"
+              rounded="lg"
               to="/login"
               :size="mobile ? 'small' : 'default'"
-            > 
-              Sign In 
+            >
+              Sign In
             </v-btn>
           </template>
 
@@ -144,8 +138,8 @@ function onToggleTheme() {
                 <v-list-item to="/privacy-policy" @click="() => (isDrawerVisible = false)">
                   <v-list-item-title>Privacy Policy</v-list-item-title>
                 </v-list-item>
-                <v-list-item to="/terms-agreements" @click="() => (isDrawerVisible = false)">
-                  <v-list-item-title>Terms of Service</v-list-item-title>
+                <v-list-item to="/terms-and-conditions" @click="() => (isDrawerVisible = false)">
+                  <v-list-item-title>Terms & Conditions</v-list-item-title>
                 </v-list-item>
                 <v-divider />
                 <v-list-item to="/login" @click="() => (isDrawerVisible = false)">
@@ -155,8 +149,6 @@ function onToggleTheme() {
             </v-card>
           </v-menu>
         </template>
-
-       
       </v-app-bar>
 
       <slot name="navigation" />
@@ -179,7 +171,7 @@ function onToggleTheme() {
       </template>
 
       <v-main>
-        <div class="landing-parallax" style="height: 100%;">
+        <div class="landing-parallax" style="height: 100%">
           <template v-if="!props.hideBg">
             <div class="landing-bg" :style="{ backgroundImage: 'url(' + imageBg + ')' }"></div>
           </template>
