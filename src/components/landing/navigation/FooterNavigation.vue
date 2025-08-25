@@ -27,7 +27,7 @@ const icons = ['mdi-facebook', 'mdi-twitter', 'mdi-linkedin', 'mdi-instagram']
       <v-btn to="/privacy-policy" variant="text" size="small" class="text-caption">
         Privacy Policy
       </v-btn>
-      <v-btn to="/terms-agreements" variant="text" size="small" class="text-caption">
+      <v-btn to="/terms-and-conditions" variant="text" size="small" class="text-caption">
         Terms & Conditions
       </v-btn>
     </div>

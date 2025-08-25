@@ -82,7 +82,7 @@ function onToggleTheme() {
               <v-tab :to="'/company'" value="/company">Company</v-tab>
               <v-tab :to="'/contact'" value="/contact">Contact us</v-tab>
               <!--  <v-tab :to="'/privacy-policy'" value="/privacy-policy">Privacy Policy</v-tab>
-              <v-tab :to="'/terms-agreements'" value="/terms-agreements">Terms & Conditions</v-tab> -->
+              <v-tab :to="'/terms-and-conditions'" value="/terms-and-conditions">Terms & Conditions</v-tab> -->
             </v-tabs>
           </div>
         </template>
@@ -138,7 +138,7 @@ function onToggleTheme() {
                 <v-list-item to="/privacy-policy" @click="() => (isDrawerVisible = false)">
                   <v-list-item-title>Privacy Policy</v-list-item-title>
                 </v-list-item>
-                <v-list-item to="/terms-agreements" @click="() => (isDrawerVisible = false)">
+                <v-list-item to="/terms-and-conditions" @click="() => (isDrawerVisible = false)">
                   <v-list-item-title>Terms & Conditions</v-list-item-title>
                 </v-list-item>
                 <v-divider />

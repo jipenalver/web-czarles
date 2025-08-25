@@ -22,13 +22,13 @@ onMounted(() => {
             class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-hero-title"
             :class="{ 'animate-hero-title-visible': isVisible }"
           >
-            Terms & Agreements
+            Terms & Conditions
           </h1>
           <p
             class="mb-6 text-h6 text-white font-weight-light animate-hero-subtitle"
             :class="{ 'animate-hero-subtitle-visible': isVisible }"
           >
-            Please read and understand our Terms & Agreements — they outline your rights,
+            Please read and understand our Terms & Conditions — they outline your rights,
             responsibilities, and how we collect and use data while using our services.
           </p>
         </div>
@@ -40,7 +40,7 @@ onMounted(() => {
           <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
           <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
           <span class="mx-2 text-white">/</span>
-          <span class="text-white">Terms & Agreements</span>
+          <span class="text-white">Terms & Conditions</span>
         </div>
       </div>
     </template>
