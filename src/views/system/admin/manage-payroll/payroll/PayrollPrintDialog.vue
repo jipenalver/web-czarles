@@ -4,7 +4,8 @@ import { usePayrollPrintDialog } from './payrollPrintDialog'
 import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch } from 'vue'
+import { reloadAllPayrollFunctions, manualRefreshPayroll } from './helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
 
@@ -38,56 +39,13 @@ const payrollPrintKey = ref(0)
 // Loading state para sa reload operations
 const isReloadingData = ref(false)
 
-// Function para reload all functions sa PayrollPrint component
-async function reloadAllPayrollFunctions() {
-  try {
-    console.log('[PayrollPrintDialog] Reloading all payroll functions...')
-    isReloadingData.value = true
-
-    // Option 1: Force re-render ng PayrollPrint component
-    payrollPrintKey.value++
-
-    // Wait for next tick para ma-ensure na na-mount na ang bagong component instance
-    await nextTick()
-
-    // Option 2: Kung naa na ang ref, directly call ang reload function
-    if (payrollPrintRef.value && payrollPrintRef.value.reloadAllFunctions) {
-      await payrollPrintRef.value.reloadAllFunctions()
-    }
-
-    console.log('[PayrollPrintDialog] Payroll functions reloaded successfully')
-  } catch (error) {
-    console.error('[PayrollPrintDialog] Error reloading payroll functions:', error)
-  } finally {
-    isReloadingData.value = false
-  }
+// Delegate reload and manual refresh helpers from shared helpers.ts
+async function reloadAllPayrollFunctionsLocal() {
+  await reloadAllPayrollFunctions(payrollPrintRef, payrollPrintKey, isReloadingData)
 }
 
-// Function para manual refresh kung needed
-async function manualRefreshPayroll() {
-  if (payrollPrintRef.value) {
-    try {
-      console.log('[PayrollPrintDialog] Manual refresh of payroll data...')
-      isReloadingData.value = true
-
-      // Call individual reload functions
-      await Promise.all([
-        payrollPrintRef.value.loadTrips?.(),
-        payrollPrintRef.value.fetchEmployeeHolidays?.(),
-        payrollPrintRef.value.updateOverallOvertime?.(),
-        payrollPrintRef.value.updateEmployeeDeductions?.()
-      ])
-
-      // Force recalculation
-      payrollPrintRef.value.recalculateEarnings?.()
-
-      console.log('[PayrollPrintDialog] Manual refresh completed')
-    } catch (error) {
-      console.error('[PayrollPrintDialog] Error during manual refresh:', error)
-    } finally {
-      isReloadingData.value = false
-    }
-  }
+async function manualRefreshPayrollLocal() {
+  await manualRefreshPayroll(payrollPrintRef, isReloadingData)
 }
 
 // Watch for dialog visibility changes para mag-reload kung nag-open
@@ -96,7 +54,7 @@ watch(
   async (isVisible) => {
     if (isVisible) {
       // Reload all functions when dialog opens
-      await reloadAllPayrollFunctions()
+      await reloadAllPayrollFunctionsLocal()
     }
   },
   { immediate: false }
@@ -112,7 +70,7 @@ watch(
   async () => {
     if (props.isDialogVisible) {
       // Reload functions kung nag-change ang critical data while dialog is open
-      await reloadAllPayrollFunctions()
+      await reloadAllPayrollFunctionsLocal()
     }
   },
   { deep: true }
@@ -159,7 +117,7 @@ watch(
         <v-btn
           variant="text"
           density="comfortable"
-          @click="manualRefreshPayroll"
+          @click="manualRefreshPayrollLocal"
           :disabled="isPrinting || isReloadingData"
           :loading="isReloadingData"
           icon

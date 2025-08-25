@@ -108,6 +108,35 @@ export function usePayrollPrintDialog(
 
     try {
 
+      // Inject a print-specific stylesheet to reduce font sizes for the generated PDF
+      const printStyleId = 'pdf-print-styles'
+      let styleEl = document.getElementById(printStyleId) as HTMLStyleElement | null
+      if (!styleEl) {
+        styleEl = document.createElement('style')
+        styleEl.id = printStyleId
+        // Make fonts much smaller for PDF output. Use !important to override component styles.
+        styleEl.innerHTML = `
+          /* Scoped to the element(s) we mark with .pdf-print-active */
+          .pdf-print-active, .pdf-print-active * {
+            font-size: 10px !important;
+            line-height: 1.1 !important;
+          }
+          .pdf-print-active table, .pdf-print-active th, .pdf-print-active td {
+            font-size: 9px !important;
+          }
+          /* Reduce heading sizes */
+          .pdf-print-active h1 { font-size: 14px !important; }
+          .pdf-print-active h2 { font-size: 12px !important; }
+          .pdf-print-active h3 { font-size: 11px !important; }
+        `
+        document.head.appendChild(styleEl)
+      }
+
+      // Add class to enable PDF-specific styles (components can target .pdf-print-active)
+      if (payrollElement) payrollElement.classList.add('pdf-print-active')
+      const vAppElm = document.querySelector('.v-application') as HTMLElement | null
+      if (vAppElm) vAppElm.classList.add('pdf-print-active')
+
       // Apply transformations para sa PDF generation
       if (miniPayrollSection) {
         miniPayrollSection.style.display = 'block'
@@ -121,7 +150,7 @@ export function usePayrollPrintDialog(
       }
 
       if (mainContainer) {
-        mainContainer.style.transform = 'scale(1.3)'
+        mainContainer.style.transform = 'scale(1.4)'
         mainContainer.style.transformOrigin = 'top center'
         mainContainer.style.position = 'absolute'
         mainContainer.style.left = '320px'
@@ -178,9 +207,17 @@ export function usePayrollPrintDialog(
           }
         }
       }
+  // Remove PDF-specific classes so UI returns to normal
+  if (payrollElement) payrollElement.classList.remove('pdf-print-active')
+  const vAppElm2 = document.querySelector('.v-application') as HTMLElement | null
+  if (vAppElm2) vAppElm2.classList.remove('pdf-print-active')
 
-      // Reset printing state
-      isPrinting.value = false
+  // Remove the injected print stylesheet
+  const injected = document.getElementById('pdf-print-styles')
+  if (injected && injected.parentNode) injected.parentNode.removeChild(injected)
+
+  // Reset printing state
+  isPrinting.value = false
     }
   }
 
