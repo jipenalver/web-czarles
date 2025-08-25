@@ -48,3 +48,33 @@ export async function fetchFilteredTrips(
   //console.log('[fetchFilteredTrips] fetched trips from supabase:', data?.length || 0, 'trips')
   return data as Trip[]
 }
+
+// New: fetch trips using explicit from/to date range (YYYY-MM-DD)
+export async function fetchTripsByRange(
+  fromDate: string,
+  toDate: string,
+  employeeId: number | undefined = undefined,
+): Promise<Trip[]> {
+  if (!employeeId) {
+    console.warn('[fetchTripsByRange] No employeeId provided, returning empty array')
+    return []
+  }
+
+  // Query trips between fromDate and toDate (inclusive)
+  const { data, error } = await supabase
+    .from('trips')
+    .select(
+      '*, employee:employee_id (id, firstname, lastname, middlename), unit:unit_id (*), trip_location:trip_location_id (*)',
+    )
+    .eq('employee_id', employeeId)
+    .gte('trip_at', fromDate)
+    .lte('trip_at', toDate)
+    .order('trip_at', { ascending: true })
+
+  if (error) {
+    console.error('[fetchTripsByRange] error:', error)
+    return []
+  }
+
+  return data as Trip[]
+}

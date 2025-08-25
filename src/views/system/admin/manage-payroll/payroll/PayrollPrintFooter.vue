@@ -1,19 +1,75 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { getMoneyText } from '@/utils/helpers/others'
 
-const props = defineProps<{ dateString?: string }>()
+const props = defineProps<{ dateString?: string; price?: string | number }>()
+
+// reactive price that listens to realtime updates
+const livePrice = ref<string | number | null>(props.price ?? null)
+
+const onPriceUpdate = (ev: Event) => {
+  try {
+    // CustomEvent detail with { price }
+    const detail = (ev as CustomEvent)?.detail
+    if (detail && typeof detail.price !== 'undefined') livePrice.value = detail.price
+  } catch {
+    // ignore
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    // prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
+  const stored = localStorage.getItem('czarles_payroll_price')
+  if (livePrice.value === null && stored !== null) livePrice.value = stored
+    window.addEventListener('czarles_payroll_price_update', onPriceUpdate as EventListener)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('czarles_payroll_price_update', onPriceUpdate as EventListener)
+  }
+})
+
+const formattedPrice = computed(() => {
+  const val = livePrice.value ?? props.price
+  if (val === null || typeof val === 'undefined' || val === '') return '—'
+  try {
+    return getMoneyText(val as string | number)
+  } catch {
+    return String(val)
+  }
+})
 
 const effectiveDate = computed(() => {
   // Prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
-  const source =
-    props.dateString ??
-    (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
-  if (!source) return '—'
-  // source may be 'YYYY-MM' or 'YYYY-MM-DD'
-  const ds = source.length === 7 ? `${source}-01` : source
-  const d = new Date(ds)
-  if (isNaN(d.getTime())) return source
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
+  try {
+    // Prefer an explicit from/to range saved in localStorage
+    if (typeof window !== 'undefined') {
+      const from = localStorage.getItem('czarles_payroll_fromDate')
+      const to = localStorage.getItem('czarles_payroll_toDate')
+      if (from && to) {
+        const start = new Date(from)
+        const end = new Date(to)
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          return `${start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })} - ${end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}`
+        }
+      }
+    }
+
+    const source =
+      props.dateString ??
+      (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
+    if (!source) return '—'
+    // source may be 'YYYY-MM' or 'YYYY-MM-DD'
+    const ds = source.length === 7 ? `${source}-01` : source
+    const d = new Date(ds)
+    if (isNaN(d.getTime())) return source
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
+  } catch {
+    return '—'
+  }
 })
 </script>
 
@@ -55,25 +111,25 @@ const effectiveDate = computed(() => {
         <v-col cols="10">
           RECEIVED from C'ZARLES CONSTRUCTION & SUPPLY the amount of PESOS:
         </v-col>
-        <v-col cols="2 text-end">
-            {price}
+        <v-col cols="2" class="text-end">
+          {{ formattedPrice }}
         </v-col>
-        <v-divider></v-divider>
-        <v-col cols="12">
+        <v-divider class="mx-4"></v-divider>
+        <v-col cols="12" >
           <div class="text-start">in full payment of the amount described above.</div>
         </v-col>
         <v-row class="mx-5">
           <v-col cols="4">
-            <div class="text-start" style="text-decoration:underline">NINA MIKAELAA ABANERO</div>
-            <div class="mx-10">Prepared By</div>
+            <div class="text-center" style="text-decoration:underline">NINA MIKAELAA ABANERO</div>
+            <div class="mx-10 text-center">Prepared By</div>
           </v-col>
           <v-col cols="4">
             <div class="text-center" style="text-decoration:underline">CESAR T. PALMA JR.</div>
              <div class="mx-10 text-center">Approved</div>
           </v-col>
            <v-col cols="4">
-            <div class="text-end">BY: ________________________</div>
-             <div class="mx-4 text-end">Signature Over Printed Name</div>
+            <div class="text-start">BY: ________________________</div>
+             <div>Signature Over Printed Name</div>
           </v-col>
         </v-row>
       </v-row>
@@ -85,7 +141,7 @@ const effectiveDate = computed(() => {
 <style>
 .compact-table {
   line-height: 0.8 !important;
-  font-size: 0.75rem;
+  font-size: 0.30rem;
   border-collapse: collapse;
 }
 
@@ -96,12 +152,12 @@ const effectiveDate = computed(() => {
 
 @media print {
   .thick-border {
-    border: 3px solid !important;
+    border: 1px solid !important;
   }
 }
 
 /* Programmatic hook: add .pdf-print-active to a parent during html2pdf run */
 .pdf-print-active .thick-border {
-  border: 3px solid !important;
+  border: 1px solid !important;
 }
 </style>

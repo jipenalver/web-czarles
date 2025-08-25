@@ -66,8 +66,8 @@ export function usePayrollTableDialog(
       dateString,
       cashAdvanceDateString,
       monthIndex
-    }) */
-
+    })
+ */
     if (!employeeId) {
       console.warn(`No employee ID provided for ${monthName} ${year}`)
       return {
@@ -380,10 +380,15 @@ export function usePayrollTableDialog(
     isLoading: false,
   })
 
-  const tableFilters = ref<{ year: number }>({
+  const tableFilters = ref<{ year: number; attendance_at?: Date[] | null }>({
     year: getCurrentYearInPhilippines(), // Start with current year, will be updated when employee data loads
+    attendance_at: null,
   })
   const tableData = ref<TableData[]>([])
+  // Simple cache tracker to prevent unnecessary refetches
+  const lastLoaded = ref<{ employeeId: number | null; year: number | null; monthsKey: string | null }>(
+    { employeeId: null, year: null, monthsKey: null },
+  )
   const formAction = ref({ ...formActionDefault })
   const isPrintDialogVisible = ref(false)
 
@@ -477,14 +482,31 @@ export function usePayrollTableDialog(
   const loadPayrollData = async (): Promise<void> => {
     tableOptions.value.isLoading = true
     try {
+      // Guard: if data already loaded for this employee/year/months, skip refetch
+      const employeeId = props.itemData?.id ?? null
+      const monthsKey = availableMonths.value.join(',')
+      if (
+        tableData.value.length > 0 &&
+        lastLoaded.value.employeeId === employeeId &&
+        lastLoaded.value.year === tableFilters.value.year &&
+        lastLoaded.value.monthsKey === monthsKey
+      ) {
+        // already loaded, avoid refetch
+        tableOptions.value.isLoading = false
+        return
+      }
       const payrollPromises = availableMonths.value.map((monthIndex) =>
         generatePayrollData(monthIndex),
       )
       tableData.value = await Promise.all(payrollPromises)
+      // Update cache marker so subsequent opens/changes don't refetch unnecessarily
+      lastLoaded.value = { employeeId: props.itemData?.id ?? null, year: tableFilters.value.year, monthsKey }
       /* console.log('Payroll data loaded:', tableData.value) */
     } catch (error) {
       console.error('Error loading payroll data:', error)
       tableData.value = []
+      // clear cache on error to allow retry
+      lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
     } finally {
       tableOptions.value.isLoading = false
     }
@@ -542,6 +564,17 @@ export function usePayrollTableDialog(
     },
   )
 
+  // Clear cached payroll data when the selected employee changes
+  watch(
+    () => props.itemData?.id,
+    (newId, oldId) => {
+      if (newId !== oldId) {
+        tableData.value = []
+        lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
+      }
+    },
+  )
+
   // Watch: year filter changes
   watch(
     () => tableFilters.value.year,
@@ -580,6 +613,14 @@ export function usePayrollTableDialog(
     isPrintDialogVisible.value = true
   }
 
+  // Action: filter by date (attendance_at) - simple handler to clear or reload payroll data
+  const onFilterDate = async (isCleared = false) => {
+    if (isCleared) tableFilters.value.attendance_at = null
+
+    // For payroll, changing attendance date may affect attendance-based calculations; reload data
+    await loadPayrollData()
+  }
+
   // Action: close dialog
   const onDialogClose = (): void => {
     formAction.value = { ...formActionDefault }
@@ -601,7 +642,8 @@ export function usePayrollTableDialog(
     availableYears,
     availableMonths,
     isCurrentEmployeeFieldStaff,
-    onView,
+  onFilterDate,
+  onView,
     onDialogClose,
   }
 }

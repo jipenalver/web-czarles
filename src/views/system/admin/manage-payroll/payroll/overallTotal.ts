@@ -15,7 +15,7 @@ export function useOverallEarningsTotal(
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
   nonDeductions?: Ref<EmployeeDeduction[]>,
-  isFieldStaff?: ComputedRef<boolean>,
+  /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<number> {
   return computed(() => {
     let total = 0
@@ -82,7 +82,7 @@ export function useEarningsBreakdown(
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
-  isFieldStaff?: ComputedRef<boolean>,
+  /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<Record<string, number>> {
   return computed(() => {
     // Regular work earnings (already calculated correctly in computeRegularWorkTotal)

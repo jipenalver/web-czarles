@@ -41,23 +41,23 @@ const totalCashAdvance = computed(() =>
 )
 
 // Console warn for late deduction
-watch(
-  () => props.lateDeduction,
-  (newLateDeduction) => {
-   /*  if (newLateDeduction > 0) {
-      console.warn(`[LATE DEDUCTION] Employee ${props.employeeId} - Late deduction: ₱${newLateDeduction.toFixed(2)} (${props.monthLateDeduction || 0} minutes)`)
-    } */
-  },
-  { immediate: true }
-)
+// watch(
+//   () => props.lateDeduction,
+//   (newLateDeduction) => {
+//     if (newLateDeduction > 0) {
+//       console.warn(`[LATE DEDUCTION] Employee ${props.employeeId} - Late deduction: ₱${newLateDeduction.toFixed(2)} (${props.monthLateDeduction || 0} minutes)`)
+//     }
+//   },
+//   { immediate: true }
+// )
 
 // Console warn for undertime deduction
 watch(
   () => props.undertimeDeduction,
   (newUndertimeDeduction) => {
-   /*  if (newUndertimeDeduction > 0) {
+    if (newUndertimeDeduction > 0) {
       console.warn(`[UNDERTIME DEDUCTION] Employee ${props.employeeId} - Undertime deduction: ₱${newUndertimeDeduction.toFixed(2)} (${props.monthUndertimeDeduction || 0} minutes)`)
-    } */
+    }
   },
   { immediate: true }
 )
@@ -70,6 +70,25 @@ const netSalaryCalculation = useNetSalaryCalculation(
   computed(() => props.employeeDeductions),
   totalCashAdvance,
   computed(() => props.undertimeDeduction),
+)
+
+// Publish net salary in realtime for other components (e.g. print footer)
+watch(
+  () => netSalaryCalculation.value.netSalary,
+  (newNet) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const priceValue = typeof newNet === 'number' ? newNet : Number(newNet)
+        // store as string for persistence
+        localStorage.setItem('czarles_payroll_price', String(priceValue))
+        // dispatch a custom event so same-window listeners receive updates in realtime
+        window.dispatchEvent(new CustomEvent('czarles_payroll_price_update', { detail: { price: priceValue } }))
+      } catch {
+        // noop
+      }
+    }
+  },
+  { immediate: true },
 )
 
 // ...existing code...

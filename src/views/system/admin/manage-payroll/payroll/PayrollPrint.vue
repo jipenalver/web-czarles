@@ -12,9 +12,9 @@ import { fetchEmployeeDeductions } from './computation/benefits'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-import { fetchHolidaysByDateString } from './computation/holidays'
+import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
 import type { EmployeeDeduction } from '@/stores/benefits'
-import { fetchFilteredTrips } from './computation/trips'
+import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -50,6 +50,22 @@ watch(
 )
 
 const monthDateRange = computed(() => {
+  try {
+    if (typeof window !== 'undefined') {
+      const from = localStorage.getItem('czarles_payroll_fromDate')
+      const to = localStorage.getItem('czarles_payroll_toDate')
+      if (from && to) {
+        const start = new Date(from)
+        const end = new Date(to)
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+          return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
+        }
+      }
+    }
+  } catch {
+    /* ignore and fallback */
+  }
   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
 })
 
@@ -90,8 +106,8 @@ const address = computed(() => {
 })
 
 const formattedDate = computed(() => {
-  const monthIndex = monthNames.indexOf(props.payrollData.month)
-  const date = new Date(props.payrollData.year, monthIndex)
+  // Use the current system date for the printed pay slip date
+  const date = new Date()
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 })
 
@@ -108,7 +124,7 @@ const holidayDateString = computed(() => {
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
-const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
+// const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)
 const totalHoursWorked = computed(() => {
   if (props.employeeData?.is_field_staff && employeeDailyRate.value > 0) {
@@ -140,6 +156,7 @@ const {
   monthUndertimeDeduction,
   undertimeDeduction,
   computeOverallOvertimeCalculation,
+  netSalary,
 } = payrollPrint
 
 const overallEarningsTotal = useOverallEarningsTotal(
@@ -151,7 +168,6 @@ const overallEarningsTotal = useOverallEarningsTotal(
   overallOvertime,
   codaAllowance,
   employeeNonDeductions,
-  isFieldStaff,
 )
 
 const displayTotalEarnings = computed(() => {
@@ -211,10 +227,29 @@ async function fetchEmployeeHolidays() {
     return
   }
   try {
-    holidays.value = await fetchHolidaysByDateString(
-      holidayDateString.value,
-      String(props.employeeData.id),
-    )
+    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
+    let fromDate: string | null = null
+    let toDate: string | null = null
+    try {
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate')
+        toDate = localStorage.getItem('czarles_payroll_toDate')
+      }
+    } catch {
+      fromDate = null
+      toDate = null
+    }
+
+    if (fromDate && toDate) {
+      // Use range-based fetch
+      holidays.value = await fetchHolidaysByRange(fromDate, toDate, String(props.employeeData.id))
+    } else {
+      // Fallback to month-based fetch
+      holidays.value = await fetchHolidaysByDateString(
+        holidayDateString.value,
+        String(props.employeeData.id),
+      )
+    }
   } catch (error) {
     console.error('Error fetching holidays:', error)
     holidays.value = []
@@ -230,7 +265,26 @@ async function loadTrips() {
   }
   isTripsLoading.value = true
   try {
-    const fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
+    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
+    let fromDate: string | null = null
+    let toDate: string | null = null
+    try {
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate')
+        toDate = localStorage.getItem('czarles_payroll_toDate')
+      }
+    } catch {
+      fromDate = null
+      toDate = null
+    }
+
+    let fetchedTrips
+    if (fromDate && toDate) {
+      fetchedTrips = await fetchTripsByRange(fromDate, toDate, props.employeeData.id)
+    } else {
+      fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
+    }
+
     tripsStore.trips = fetchedTrips
   } catch (error) {
     console.error('[PayrollPrint] Error loading trips:', error)
@@ -489,7 +543,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
       </tbody>
     </v-table>
 
-   <PayrollPrintFooter></PayrollPrintFooter>
+  <PayrollPrintFooter :price="getMoneyText(netSalary)"></PayrollPrintFooter>
 
     <div id="mini-payroll-section" class="mini-payroll-hidden">
       <MiniPayrollPrint
