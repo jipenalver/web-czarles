@@ -1,8 +1,33 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 import LandingLayout from '@/components/landing/LandingLayout.vue'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+
+// Vuetify display composable
+const { mobile, lgAndUp } = useDisplay()
+
+// Computed properties for responsive classes
+const heroTitleClass = computed(() => 
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+)
+
+const heroSubtitleClass = computed(() => 
+  mobile.value ? 'text-body-1' : 'text-h6'
+)
+
+const cardPadding = computed(() => 
+  mobile.value ? 'pa-4' : 'pa-6'
+)
+
+const formTitleClass = computed(() => 
+  mobile.value ? 'text-h6' : 'text-h6'
+)
+
+const bodyTextClass = computed(() => 
+  mobile.value ? 'text-body-2' : 'text-body-1'
+)
 
 const mapRef = ref<HTMLDivElement | null>(null)
 const lat = 8.949607490217725
@@ -72,8 +97,8 @@ onMounted(() => {
     <template #hero>
       <div class="text-center white--text" style="max-width: 900px">
         <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
-          <h1 class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-slide-up">Contact</h1>
-          <p class="mb-6 text-h6 text-white font-weight-light animate-slide-up delay-1">
+          <h1 :class="[heroTitleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']">Contact</h1>
+          <p :class="[heroSubtitleClass, 'mb-6', 'text-white', 'font-weight-light', 'animate-slide-up', 'delay-1']">
             Get in touch with our team for inquiries, support, or partnerships.
           </p>
           <div class="text-caption text-white animate-slide-up delay-2">
@@ -99,57 +124,57 @@ onMounted(() => {
           <v-col cols="12" md="6" lg="4">
             <v-row class="mb-4" dense>
               <v-col cols="12" md="6">
-                <v-card class="pa-4 info-card" elevation="1">
+                <v-card :class="[cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-map-marker</v-icon></div>
                   </div>
                   <div>
-                    <div class="caption text-caption">Location</div>
-                    <div class="body-2 text-body-2">Butuan City, Agusan del Norte, Philippines</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-caption']">Location</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">Butuan City, Agusan del Norte, Philippines</div>
                   </div>
                 </v-card>
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-card class="pa-4 info-card" elevation="1">
+                <v-card :class="[cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-email-outline</v-icon></div>
                   </div>
                   <div>
-                    <div class="caption text-caption">Email</div>
-                    <div class="body-2 text-body-2">czarlesconst@yahoo.com</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-caption']">Email</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">czarlesconst@yahoo.com</div>
                   </div>
                 </v-card>
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-card class="pa-4 info-card" elevation="1">
+                <v-card :class="[cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-phone</v-icon></div>
                   </div>
                   <div>
-                    <div class="caption text-caption">Call</div>
-                    <div class="body-2 text-body-2">+63 93 992 590 380</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-caption']">Call</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">+63 93 992 590 380</div>
                   </div>
                 </v-card>
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-card class="pa-4 info-card" elevation="1">
+                <v-card :class="[cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-clock-outline</v-icon></div>
                   </div>
                   <div>
-                    <div class="caption text-caption">Open Hours</div>
-                    <div class="body-2 text-body-2">Monday–Friday: 9AM - 6PM</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-caption']">Open Hours</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">Monday–Friday: 9AM - 6PM</div>
                   </div>
                 </v-card>
               </v-col>
             </v-row>
 
-            <v-card class="pa-6 contact-form-card" elevation="2">
-              <div class="mb-4 display-1 font-weight-bold text-h6">Get in Touch</div>
-              <div class="text-body-1 mb-4 text-body-2">
+            <v-card :class="[cardPadding, 'contact-form-card']" elevation="2">
+              <div :class="[formTitleClass, 'mb-4', 'font-weight-bold']">Get in Touch</div>
+              <div :class="[bodyTextClass, 'mb-4']">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod tempor
                 incididunt ut labore et dolore magna aliqua consectetur adipiscing.
               </div>
