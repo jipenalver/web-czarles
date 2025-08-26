@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import LandingLayout from '@/components/landing/LandingLayout.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
+
+// Vuetify display composable
+const { mobile, lgAndUp } = useDisplay()
+
+// Computed properties for responsive classes
+const heroTitleClass = computed(() => 
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+)
+
+const heroSubtitleClass = computed(() => 
+  mobile.value ? 'text-body-1' : 'text-h6'
+)
 
 // const companyStats = ref([
 //   { icon: 'mdi-calendar-check', value: '15+', label: 'Years of Excellence' },
@@ -82,8 +95,8 @@ onMounted(() => {
     <template #hero>
       <div class="text-center white--text animate-hero-container" :class="{ 'animate-hero-container-visible': isVisible }" style="max-width: 900px">
         <div class="hero-content">
-          <h1 class="text-h3 lg:text-h2 font-weight-bold mb-4 text-white animate-hero-title" :class="{ 'animate-hero-title-visible': isVisible }">About C'zarles</h1>
-          <p class="mb-6 text-h6 text-white font-weight-light animate-hero-subtitle" :class="{ 'animate-hero-subtitle-visible': isVisible }">
+          <h1 :class="[heroTitleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-hero-title', { 'animate-hero-title-visible': isVisible }]">About C'zarles</h1>
+          <p :class="[heroSubtitleClass, 'mb-6', 'text-white', 'font-weight-light', 'animate-hero-subtitle', { 'animate-hero-subtitle-visible': isVisible }]">
             Building Excellence. Delivering Dreams. Creating Lasting Value.
           </p>
         </div>
