@@ -82,7 +82,7 @@ const chosenMonth = ref<string>('')
 // Day-only selectors (month is selected via the table rows)
 const dayFrom = ref<number | null>(null)
 const dayTo = ref<number | null>(null)
-// If true, 'To Day' refers to the next month (cross-month). If false, the day selectors are disabled.
+// If true, 'From Day' refers to the previous month (cross-month). If false, the day selectors are disabled.
 // Default changed to false so the checkbox is not checked by default
 const crossMonthEnabled = ref<boolean>(false)
 
@@ -97,25 +97,22 @@ const daysInSelectedMonth = computed(() => {
   return new Date(Number(maybeYear), idx + 1, 0).getDate()
 })
 
-const dayOptions = computed(() =>
-  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
-)
-
-// Day options for the next month (To Day should reference next month)
-const daysInNextMonth = computed(() => {
+// Day options for the previous month (From Day should reference previous month)
+const daysInPreviousMonth = computed(() => {
   const tf = tableFilters.value as Record<string, unknown> | undefined
   const maybeYear =
     tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
   const monthName = chosenMonth.value || ''
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const startIdx = monthIndex >= 0 ? monthIndex : 0
-  const nextIdx = startIdx === 11 ? 0 : startIdx + 1
-  let nextYear = Number(maybeYear)
-  if (startIdx === 11) nextYear = Number(maybeYear) + 1
-  return new Date(nextYear, nextIdx + 1, 0).getDate()
+  const prevIdx = startIdx === 0 ? 11 : startIdx - 1
+  let prevYear = Number(maybeYear)
+  if (startIdx === 0) prevYear = Number(maybeYear) - 1
+  return new Date(prevYear, prevIdx + 1, 0).getDate()
 })
 
-const dayOptionsTo = computed(() => Array.from({ length: daysInNextMonth.value }, (_, i) => i + 1))
+const dayOptionsFrom = computed(() => Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1))
+const dayOptionsTo = computed(() => Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1))
 
 // (Day-only selects — month is selected via the table rows)
 
@@ -145,9 +142,9 @@ watch(
         localStorage.removeItem('czarles_payroll_fromDate')
         localStorage.removeItem('czarles_payroll_toDate')
       } else {
-        // default From = 1 if not set, default To = last day of next month (when enabled)
-        if (dayFrom.value === null || dayFrom.value === undefined) dayFrom.value = 1
-        if (dayTo.value === null || dayTo.value === undefined) dayTo.value = daysInNextMonth.value
+        // default From = last day of previous month if not set, default To = last day of current month (when enabled)
+        if (dayFrom.value === null || dayFrom.value === undefined) dayFrom.value = daysInPreviousMonth.value
+        if (dayTo.value === null || dayTo.value === undefined) dayTo.value = daysInSelectedMonth.value
       }
     } catch {
       /* ignore storage errors */
@@ -171,7 +168,6 @@ function onView(item: TableData) {
     dayTo,
     crossMonthEnabled,
     tableFilters: { value: tableFilters.value as Record<string, unknown> | undefined },
-    daysInNextMonth: { value: daysInNextMonth.value },
     baseOnView,
   })
 }
@@ -196,11 +192,11 @@ watch(
     }
 
     // Build range using helpers and persist
-    const from = newFrom ?? 1
-    // If cross-month is enabled, 'to' defaults to next month's last day; otherwise last day of chosen month
+    const from = newFrom ?? (crossMonthEnabled.value ? daysInPreviousMonth.value : 1)
+    // If cross-month is enabled, 'to' defaults to current month's last day; otherwise last day of chosen month
     const to =
       newTo ??
-      (crossMonthEnabled.value ? daysInNextMonth.value : getLastDayOfMonth(year, chosenMonth.value))
+      (crossMonthEnabled.value ? daysInSelectedMonth.value : getLastDayOfMonth(year, chosenMonth.value))
     const range = crossMonthEnabled.value
       ? getDateRangeForMonth(year, chosenMonth.value, from, to)
       : getDateRangeForMonthNoCross(year, chosenMonth.value, from, to)
@@ -259,8 +255,18 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
           
           <v-select
             v-model="dayFrom"
-            :items="dayOptions"
-            :label="`From Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
+            :items="dayOptionsFrom"
+            :label="`From Day (${
+              chosenMonth
+                ? (() => {
+                    const currentIndex = monthNames.indexOf(chosenMonth)
+                    if (currentIndex === -1) return 'previous month'
+                    const prevIndex = (currentIndex - 1 + 12) % 12
+                    const isPrevYear = currentIndex === 0
+                    return monthNames[prevIndex] + (isPrevYear ? ' (prev year)' : '')
+                  })()
+                : 'previous month'
+            })`"
             placeholder="Previous Month"
             clearable
             clear-icon="mdi-close"
@@ -274,18 +280,8 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             class="me-4"
             v-model="dayTo"
             :items="dayOptionsTo"
-            :label="`To Day (${
-              chosenMonth
-                ? (() => {
-                    const currentIndex = monthNames.indexOf(chosenMonth)
-                    if (currentIndex === -1) return 'next month'
-                    const nextIndex = (currentIndex + 1) % 12
-                    const isNextYear = currentIndex === 11
-                    return monthNames[nextIndex] + (isNextYear ? ' (next year)' : '')
-                  })()
-                : 'next month'
-            })`"
-            placeholder="Next Month"
+            :label="`To Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
+            placeholder="Current Month"
             clearable
             clear-icon="mdi-close"
             dense

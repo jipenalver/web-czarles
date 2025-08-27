@@ -186,9 +186,9 @@ export const calculateFieldStaffNetPay = (item: {
 
 /**
  * Build full YYYY-MM-DD range for the provided year + monthName using dayFrom/dayTo (inclusive).
- * NOTE: In the payroll UI the "To Day" selector references the next month, so when a toDay
- * is provided we interpret it as a day in the next month (handling year rollover). If toDay
- * is not provided, the end date defaults to the last day of the start month.
+ * NOTE: In the payroll UI the "From Day" selector references the previous month, so when a fromDay
+ * is provided we interpret it as a day in the previous month (handling year rollover). If fromDay
+ * is not provided, the start date defaults to the first day of the current month.
  */
 export function getDateRangeForMonth(
   year: number | undefined,
@@ -200,33 +200,33 @@ export function getDateRangeForMonth(
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const month = monthIndex >= 0 ? monthIndex : 0
 
-  // start month/year
-  const startYear = Number(y)
-  const startMonth = month // 0-based
+  // end month/year (current month)
+  const endYear = Number(y)
+  const endMonth = month // 0-based
 
-  const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate()
-  const from = fromDay && fromDay > 0 ? Math.min(Math.max(1, fromDay), daysInStartMonth) : 1
+  const daysInEndMonth = new Date(endYear, endMonth + 1, 0).getDate()
+  const to = toDay && toDay > 0 ? Math.min(Math.max(1, toDay), daysInEndMonth) : daysInEndMonth
 
-  // end month/year: if toDay is provided, interpret it as a day in the NEXT month.
-  // If toDay is not provided, default to the last day of the start month.
-  let endYear = startYear
-  let endMonth = startMonth
-  if (toDay === undefined || toDay === null) {
-    // default to last day of start month
-    endMonth = startMonth
+  // start month/year: if fromDay is provided, interpret it as a day in the PREVIOUS month.
+  // If fromDay is not provided, default to the first day of the current month.
+  let startYear = endYear
+  let startMonth = endMonth
+  if (fromDay === undefined || fromDay === null) {
+    // default to first day of current month
+    startMonth = endMonth
   } else {
-    // interpret toDay as day in the next month (handle year rollover)
-    if (startMonth === 11) {
-      endMonth = 0
-      endYear = startYear + 1
+    // interpret fromDay as day in the previous month (handle year rollover)
+    if (endMonth === 0) {
+      startMonth = 11
+      startYear = endYear - 1
     } else {
-      endMonth = startMonth + 1
+      startMonth = endMonth - 1
     }
   }
 
-  const daysInEndMonth = new Date(endYear, endMonth + 1, 0).getDate()
-  const toRaw = toDay && toDay > 0 ? toDay : daysInEndMonth
-  const to = Math.min(Math.max(1, toRaw), daysInEndMonth)
+  const daysInStartMonth = new Date(startYear, startMonth + 1, 0).getDate()
+  const fromRaw = fromDay && fromDay > 0 ? fromDay : 1
+  const from = Math.min(Math.max(1, fromRaw), daysInStartMonth)
 
   const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -365,7 +365,6 @@ export function onView(options: {
   dayTo: { value: number | null }
   crossMonthEnabled: { value: boolean }
   tableFilters?: { value?: Record<string, unknown> }
-  daysInNextMonth: { value: number }
   baseOnView: (payload: TableData) => void
 }) {
   const {
@@ -375,7 +374,6 @@ export function onView(options: {
     dayTo,
     crossMonthEnabled,
     tableFilters,
-    daysInNextMonth,
     baseOnView,
   } = options
 
@@ -390,13 +388,9 @@ export function onView(options: {
       const tf = tableFilters && tableFilters.value
       const year =
         tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
-      if (crossMonthEnabled.value) {
-        dayTo.value = daysInNextMonth.value
-      } else {
-        dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
-      }
+      dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
     } catch {
-      dayTo.value = daysInNextMonth.value
+      dayTo.value = getLastDayOfMonth(new Date().getFullYear(), chosenMonth.value)
     }
   }
 
