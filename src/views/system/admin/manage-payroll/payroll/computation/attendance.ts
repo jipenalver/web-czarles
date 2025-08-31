@@ -1,4 +1,4 @@
-import { getEmployeeAttendanceById } from './computation'
+import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55 } from './computation'
 // this script is naka connect sa computation.ts file IMPORTANT
 // 👉 Get total paid leave days para sa employee sa specific month
 // Attendance type definition para klaro ang properties
@@ -192,7 +192,10 @@ export const getTotalMinutesForMonth = async (
 
   try {
     // Fetch tanan attendance records para sa specific month
-    const attendances = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+    // Use special function for employee 55, regular function for others
+    const attendances = employeeId === 55
+      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
+      : await getEmployeeAttendanceById(employeeId, dateStringForQuery)
 
     // console.log(`[getTotalMinutesForMonth] Debug info:`, {
     //   employeeId,
@@ -249,7 +252,10 @@ export const getPaidLeaveDaysForMonth = async (
 
   try {
     // Fetch tanan attendance records para sa specific month
-    const attendancesResult = await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+    // Use special function for employee 55, regular function for others
+    const attendancesResult = employeeId === 55
+      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
+      : await getEmployeeAttendanceById(employeeId, dateStringForQuery)
     const attendances: AttendanceRecord[] = attendancesResult || []
 
     if (!Array.isArray(attendances) || attendances.length === 0) {

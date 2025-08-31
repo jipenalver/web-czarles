@@ -1,4 +1,4 @@
-import { getEmployeeAttendanceById, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
+import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
 import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { useEmployeesStore } from '@/stores/employees'
 import { computed, type Ref, ref, watch } from 'vue'
@@ -131,8 +131,11 @@ export function usePayrollComputation(
         fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
         toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
       }
-      
-      const attendances = await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
+
+      // Use special function for employee 55, regular function for others
+      const attendances = employeeId === 55
+        ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, fromDate, toDate)
+        : await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
       if (Array.isArray(attendances) && attendances.length > 0) {
         // Get employee info to check if field staff
         const emp = await employeesStore.getEmployeesById(employeeId)

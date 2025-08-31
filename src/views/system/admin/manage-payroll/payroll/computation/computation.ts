@@ -123,12 +123,10 @@ export async function computeOverallOvertimeCalculation(
       usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
   }
   if (employeeId && usedDateString) {
-    const attendances = await getEmployeeAttendanceById(
-      employeeId,
-      usedDateString,
-      usedFrom,
-      usedTo,
-    )
+    // Use special function for employee 55, regular function for others
+    const attendances = employeeId === 55
+      ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, usedFrom, usedTo)
+      : await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
     if (Array.isArray(attendances) && attendances.length > 0) {
       // sum all overtime hours for the month
       let totalOvertime = 0
@@ -162,4 +160,92 @@ export function getUndertimeMinutes(expectedOut: string, actualOut: string): num
   const diffMs = expectedDate.getTime() - actualDate.getTime()
   const diffMinutes = Math.max(0, Math.floor(diffMs / 60000))
   return diffMinutes
+}
+
+// Special function for employee ID 55 that generates full 8-hour workday records
+// When this employee has an am_time_in record, it automatically generates:
+// - am_time_out: 4 hours after am_time_in (e.g., if am_time_in is 8:00, am_time_out is 12:00)
+// - pm_time_in: 1 hour after am_time_out (lunch break - e.g., 13:00)
+// - pm_time_out: 4 hours after pm_time_in (e.g., 17:00)
+// This ensures employee 55 always has a complete 8-hour workday when they have any attendance record
+export async function getEmployeeAttendanceForEmployee55(
+  employeeId: number | string,
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): Promise<Array<{
+  am_time_in: string | null
+  am_time_out: string | null
+  pm_time_in: string | null
+  pm_time_out: string | null
+  overtime_in: string | null
+  overtime_out: string | null
+  is_leave_with_pay?: boolean
+  leave_type?: string
+  leave_reason?: string
+  attendance_date?: string
+}> | null> {
+  // Only apply this special logic for employee ID 55
+  if (Number(employeeId) !== 55) {
+    return await getEmployeeAttendanceById(employeeId, dateString, fromDateISO, toDateISO)
+  }
+
+  // First get the actual attendance records for employee 55
+  const actualAttendance = await getEmployeeAttendanceById(employeeId, dateString, fromDateISO, toDateISO)
+
+  if (!Array.isArray(actualAttendance)) {
+    return null
+  }
+
+  // Process each attendance record to generate full 8-hour workday
+  const processedAttendance = actualAttendance.map((record) => {
+    // If there's an am_time_in, generate dummy records for full 8-hour workday
+    if (record.am_time_in) {
+      // Parse the am_time_in to calculate other times
+      const amTimeIn = record.am_time_in
+
+      // Generate dummy times for full 8-hour workday
+      // Standard schedule: 8:00 AM - 12:00 PM, 1:00 PM - 5:00 PM
+      let amTimeOut = '12:00'
+      let pmTimeIn = '13:00'
+      let pmTimeOut = '17:00'
+
+      // If am_time_in is provided, calculate relative times to ensure 8 hours total
+      if (amTimeIn) {
+        try {
+          const [hours, minutes] = amTimeIn.split(':').map(Number)
+          const amInDate = new Date()
+          amInDate.setHours(hours, minutes, 0, 0)
+
+          // AM out: 4 hours after AM in
+          const amOutDate = new Date(amInDate.getTime() + 4 * 60 * 60 * 1000)
+          amTimeOut = `${amOutDate.getHours().toString().padStart(2, '0')}:${amOutDate.getMinutes().toString().padStart(2, '0')}`
+
+          // PM in: 1 hour after AM out (lunch break)
+          const pmInDate = new Date(amOutDate.getTime() + 1 * 60 * 60 * 1000)
+          pmTimeIn = `${pmInDate.getHours().toString().padStart(2, '0')}:${pmInDate.getMinutes().toString().padStart(2, '0')}`
+
+          // PM out: 4 hours after PM in
+          const pmOutDate = new Date(pmInDate.getTime() + 4 * 60 * 60 * 1000)
+          pmTimeOut = `${pmOutDate.getHours().toString().padStart(2, '0')}:${pmOutDate.getMinutes().toString().padStart(2, '0')}`
+
+        } catch (error) {
+          console.warn('Error parsing am_time_in for employee 55:', error)
+          // Use default times if parsing fails
+        }
+      }
+
+      return {
+        ...record,
+        am_time_out: amTimeOut,
+        pm_time_in: pmTimeIn,
+        pm_time_out: pmTimeOut,
+      }
+    }
+
+    // If no am_time_in, return the record as is
+    return record
+  })
+
+  return processedAttendance
 }
