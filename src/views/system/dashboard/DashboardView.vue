@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
+import EmployeeCountWidget from './partials/EmployeeCountWidget.vue'
 import UserCountWidget from './partials/UserCountWidget.vue'
 import BirthdayWidget from './birthday/BirthdayWidget.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -21,17 +22,21 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <v-row>
-          <v-col cols="12" lg="9">
+          <v-col cols="12" lg="8">
             <WelcomeWidget></WelcomeWidget>
           </v-col>
 
-          <v-col cols="12" lg="3">
+          <v-col cols="12" lg="2" sm="6">
             <UserCountWidget></UserCountWidget>
+          </v-col>
+
+          <v-col cols="12" lg="2" sm="6">
+            <EmployeeCountWidget></EmployeeCountWidget>
           </v-col>
 
           <v-col cols="12" lg="3"> </v-col>
 
-          <v-col cols="12" lg="9">
+          <v-col cols="12">
             <BirthdayWidget></BirthdayWidget>
           </v-col>
         </v-row>

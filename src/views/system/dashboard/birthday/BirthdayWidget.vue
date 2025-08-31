@@ -25,7 +25,7 @@ const slotItemLastname = 'item.lastname'
 const slotItemBirthdate = 'item.birthdate'
 const slotItemAge = 'item.age'
 
-const tableOptions = ref({ page: 1, itemsPerPage: 1000, sortBy: [], isLoading: false })
+const tableOptions = ref({ page: 1, itemsPerPage: -1, sortBy: [], isLoading: false })
 const tableFilters = ref<EmployeeTableFilter>({ search: '', designation_id: null })
 
 const tableHeaders: TableHeader[] = [
@@ -135,6 +135,7 @@ const todaysBirthdays = computed(() => {
           :items-length="birthdays.length"
           :hide-default-header="false"
           class="birthday-table"
+          hide-default-footer
         >
           <template v-slot:[slotItemLastname]="{ item }">
             <div :class="['d-flex align-center pa-2', isToday(item) ? 'birthday-today' : '']">
@@ -143,7 +144,10 @@ const todaysBirthdays = computed(() => {
                 :class="['me-3', isToday(item) ? 'birthday-avatar animate-bounce' : '']"
                 :color="isToday(item) ? 'pink' : 'primary'"
               >
-                <span :class="['font-weight-bold', isToday(item) ? 'text-h6' : 'text-body-2']" class="white--text">
+                <span
+                  :class="['font-weight-bold', isToday(item) ? 'text-h6' : 'text-body-2']"
+                  class="white--text"
+                >
                   {{ getAvatarText(`${item.firstname} ${item.lastname}`) }}
                 </span>
               </v-avatar>
