@@ -97,7 +97,7 @@ const getOfficeMinutesWithAllowance = (
     // Round the calculated minutes
     const lateMinutes = Math.max(
       0,
-      Math.round((checkIn.getTime() - sessionStartTime.getTime()) / (1000 * 60)),
+      Math.floor((checkIn.getTime() - sessionStartTime.getTime()) / (1000 * 60)),
     )
 
     if (lateMinutes > 0 && lateMinutes <= lateAllowanceMinutes)
@@ -116,7 +116,7 @@ const getOfficeMinutesWithAllowance = (
     // Round the calculated minutes
     const earlyMinutes = Math.max(
       0,
-      Math.round((sessionEndTime.getTime() - checkOut.getTime()) / (1000 * 60)),
+      Math.floor((sessionEndTime.getTime() - checkOut.getTime()) / (1000 * 60)),
     )
 
     if (earlyMinutes > 0 && earlyMinutes <= earlyDepartureAllowanceMinutes)
@@ -124,7 +124,7 @@ const getOfficeMinutesWithAllowance = (
   }
 
   // Ensure the final result is an integer
-  return Math.round(baseMinutes + totalAllowance)
+  return Math.floor(baseMinutes + totalAllowance)
 }
 
 // 👉 Get total minutes worked (AM + PM)
@@ -184,7 +184,7 @@ const convertTimeToDecimal = (totalMinutes: number) => {
 
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60
-  return Math.round((hours + minutes / 60) * 100) / 100
+  return Math.floor((hours + minutes / 60) * 100) / 100
 }
 
 // 👉 Get total work hours (AM + PM)
