@@ -334,7 +334,7 @@ const specialHolidays = computed(() => {
 <template>
   <v-container fluid class="pa-4" style="max-width: 400px">
     <!-- Header -->
-    <v-card class="border pa-3 mb-3">
+    <v-card class="thick-border pa-3 mb-3">
       <v-card-title class="text-center text-h6 font-weight-bold pa-2"> PAYSLIP </v-card-title>
 
       <!-- Employee Basic Info -->
@@ -564,5 +564,21 @@ const specialHolidays = computed(() => {
 
 .border-b-sm {
   border-bottom: 1px solid #000;
+}
+
+/* copied from PayrollPrintFooter: consistent thick border used for print/pdf */
+.thick-border {
+  border: 1px solid;
+}
+
+@media print {
+  .thick-border {
+    border: 1px solid !important;
+  }
+}
+
+/* Programmatic hook: add .pdf-print-active to a parent during html2pdf run */
+.pdf-print-active .thick-border {
+  border: 1px solid !important;
 }
 </style>

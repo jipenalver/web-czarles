@@ -42,7 +42,7 @@ export function usePictureForm() {
     } else if (data) {
       formAction.value = {
         ...formActionDefault,
-        formMessage: `Successfully Updated Profile Image. ${imgPreview.value !== profileDefault ? 'Image will be updated after 24 hours.' : ''}`,
+        formMessage: `Successfully Updated Profile Image. ${imgPreview.value !== profileDefault ? 'Image will be updated after 3 hours due to caching.' : ''}`,
         formAlert: true,
       }
 

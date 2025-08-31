@@ -71,6 +71,14 @@ export const useUsersStore = defineStore('users', () => {
     usersTableTotal.value = total
   }
 
+  async function getUserById(id: string) {
+    const { data } = await supabaseAdmin.auth.admin.getUserById(id)
+
+    const { user: userData } = data as { user: User }
+
+    return userMap(userData)
+  }
+
   async function addUser(formData: Partial<AdminUser>) {
     const { email, password, ...userMetadata } = formData
 
@@ -102,6 +110,7 @@ export const useUsersStore = defineStore('users', () => {
     $reset,
     getUsers,
     getUsersTable,
+    getUserById,
     addUser,
     updateUser,
     deleteUser,
