@@ -18,7 +18,6 @@ export async function getEmployeeAttendanceById(
   leave_type?: string
   leave_reason?: string
   attendance_date?: string // Add attendance date to track the actual date
- 
 }> | null> {
   // query sa attendance records para sa given employee ug range
   // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
@@ -27,8 +26,12 @@ export async function getEmployeeAttendanceById(
 
   if (fromDateISO && toDateISO) {
     // normalize to start of fromDate and exclusive end of toDate (add one day)
-    const start = fromDateISO.includes('T') ? new Date(fromDateISO) : new Date(`${fromDateISO}T00:00:00.000Z`)
-    const endBase = toDateISO.includes('T') ? new Date(toDateISO) : new Date(`${toDateISO}T00:00:00.000Z`)
+    const start = fromDateISO.includes('T')
+      ? new Date(fromDateISO)
+      : new Date(`${fromDateISO}T00:00:00.000Z`)
+    const endBase = toDateISO.includes('T')
+      ? new Date(toDateISO)
+      : new Date(`${toDateISO}T00:00:00.000Z`)
     const end = new Date(endBase)
     end.setDate(end.getDate() + 1)
     startISO = start.toISOString()
@@ -44,11 +47,13 @@ export async function getEmployeeAttendanceById(
   }
 
   // debug
-   //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
+  //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
 
   const { data, error } = await supabase
     .from('attendances')
-    .select('am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason')
+    .select(
+      'am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason',
+    )
     .eq('employee_id', employeeId)
     .gte('am_time_in', startISO) // Filter by am_time_in for the range
     .lt('am_time_in', endISO)
@@ -59,7 +64,7 @@ export async function getEmployeeAttendanceById(
   }
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
 
- // console.log('getEmployeeAttendanceById data:', data)
+  // console.log('getEmployeeAttendanceById data:', data)
   return Array.isArray(data)
     ? data.map((row) => ({
         am_time_in: getTimeHHMM(row.am_time_in),
@@ -72,7 +77,6 @@ export async function getEmployeeAttendanceById(
         leave_type: row.leave_type,
         leave_reason: row.leave_reason,
         attendance_date: row.am_time_in ? row.am_time_in.split('T')[0] : null, // Extract date from timestamp
-       
       }))
     : null
 }
@@ -84,7 +88,10 @@ export function getEmployeeByIdemp(id: number): Employee | undefined {
 }
 
 // Helper function to compute overtime hours between two time strings (HH:MM)
-export function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
+export function computeOvertimeHours(
+  overtimeIn: string | null,
+  overtimeOut: string | null,
+): number {
   if (!overtimeIn || !overtimeOut) return 0
   // parse time strings to Date objects (use today as date)
   const today = new Date().toISOString().split('T')[0]
@@ -110,11 +117,16 @@ export async function computeOverallOvertimeCalculation(
   let usedFrom = fromDateISO
   let usedTo = toDateISO
   if ((!usedFrom || !usedTo) && typeof window !== 'undefined') {
-    usedFrom = usedFrom || (localStorage.getItem('czarles_payroll_fromDate') as string | null) || undefined
-    usedTo = usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
+    usedFrom =
+      usedFrom || (localStorage.getItem('czarles_payroll_fromDate') as string | null) || undefined
+    usedTo =
+      usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
   }
   if (employeeId && usedDateString) {
-    const attendances = await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
+    // Use special function for employee 55, regular function for others
+    const attendances = employeeId === 55
+      ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, usedFrom, usedTo)
+      : await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
     if (Array.isArray(attendances) && attendances.length > 0) {
       // sum all overtime hours for the month
       let totalOvertime = 0
@@ -148,4 +160,92 @@ export function getUndertimeMinutes(expectedOut: string, actualOut: string): num
   const diffMs = expectedDate.getTime() - actualDate.getTime()
   const diffMinutes = Math.max(0, Math.floor(diffMs / 60000))
   return diffMinutes
+}
+
+// Special function for employee ID 55 that generates full 8-hour workday records
+// When this employee has an am_time_in record, it automatically generates:
+// - am_time_out: 4 hours after am_time_in (e.g., if am_time_in is 8:00, am_time_out is 12:00)
+// - pm_time_in: 1 hour after am_time_out (lunch break - e.g., 13:00)
+// - pm_time_out: 4 hours after pm_time_in (e.g., 17:00)
+// This ensures employee 55 always has a complete 8-hour workday when they have any attendance record
+export async function getEmployeeAttendanceForEmployee55(
+  employeeId: number | string,
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): Promise<Array<{
+  am_time_in: string | null
+  am_time_out: string | null
+  pm_time_in: string | null
+  pm_time_out: string | null
+  overtime_in: string | null
+  overtime_out: string | null
+  is_leave_with_pay?: boolean
+  leave_type?: string
+  leave_reason?: string
+  attendance_date?: string
+}> | null> {
+  // Only apply this special logic for employee ID 55
+  if (Number(employeeId) !== 55) {
+    return await getEmployeeAttendanceById(employeeId, dateString, fromDateISO, toDateISO)
+  }
+
+  // First get the actual attendance records for employee 55
+  const actualAttendance = await getEmployeeAttendanceById(employeeId, dateString, fromDateISO, toDateISO)
+
+  if (!Array.isArray(actualAttendance)) {
+    return null
+  }
+
+  // Process each attendance record to generate full 8-hour workday
+  const processedAttendance = actualAttendance.map((record) => {
+    // If there's an am_time_in, generate dummy records for full 8-hour workday
+    if (record.am_time_in) {
+      // Parse the am_time_in to calculate other times
+      const amTimeIn = record.am_time_in
+
+      // Generate dummy times for full 8-hour workday
+      // Standard schedule: 8:00 AM - 12:00 PM, 1:00 PM - 5:00 PM
+      let amTimeOut = '12:00'
+      let pmTimeIn = '13:00'
+      let pmTimeOut = '17:00'
+
+      // If am_time_in is provided, calculate relative times to ensure 8 hours total
+      if (amTimeIn) {
+        try {
+          const [hours, minutes] = amTimeIn.split(':').map(Number)
+          const amInDate = new Date()
+          amInDate.setHours(hours, minutes, 0, 0)
+
+          // AM out: 4 hours after AM in
+          const amOutDate = new Date(amInDate.getTime() + 4 * 60 * 60 * 1000)
+          amTimeOut = `${amOutDate.getHours().toString().padStart(2, '0')}:${amOutDate.getMinutes().toString().padStart(2, '0')}`
+
+          // PM in: 1 hour after AM out (lunch break)
+          const pmInDate = new Date(amOutDate.getTime() + 1 * 60 * 60 * 1000)
+          pmTimeIn = `${pmInDate.getHours().toString().padStart(2, '0')}:${pmInDate.getMinutes().toString().padStart(2, '0')}`
+
+          // PM out: 4 hours after PM in
+          const pmOutDate = new Date(pmInDate.getTime() + 4 * 60 * 60 * 1000)
+          pmTimeOut = `${pmOutDate.getHours().toString().padStart(2, '0')}:${pmOutDate.getMinutes().toString().padStart(2, '0')}`
+
+        } catch (error) {
+          console.warn('Error parsing am_time_in for employee 55:', error)
+          // Use default times if parsing fails
+        }
+      }
+
+      return {
+        ...record,
+        am_time_out: amTimeOut,
+        pm_time_in: pmTimeIn,
+        pm_time_out: pmTimeOut,
+      }
+    }
+
+    // If no am_time_in, return the record as is
+    return record
+  })
+
+  return processedAttendance
 }
