@@ -34,8 +34,6 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <EmployeeCountWidget></EmployeeCountWidget>
           </v-col>
 
-          <v-col cols="12" lg="3"> </v-col>
-
           <v-col cols="12">
             <BirthdayWidget></BirthdayWidget>
           </v-col>
