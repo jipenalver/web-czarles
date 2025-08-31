@@ -4,7 +4,7 @@ import { usePayrollPrintDialog } from './payrollPrintDialog'
 import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { reloadAllPayrollFunctions, manualRefreshPayroll } from './helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
@@ -38,6 +38,18 @@ const payrollPrintKey = ref(0)
 
 // Loading state para sa reload operations
 const isReloadingData = ref(false)
+
+// Computed para ma-track ang comprehensive loading state from PayrollPrint
+const isPayrollLoading = computed(() => {
+  // Use optional chaining and provide fallback to ensure reactivity
+  const payrollComponent = payrollPrintRef.value
+  return payrollComponent?.isPayrollCalculating ?? false
+})
+
+// Combined loading state - show dialog if either reloading or payroll calculating
+const isAnyLoading = computed(() => {
+  return isReloadingData.value || isPayrollLoading.value
+})
 
 // Delegate reload and manual refresh helpers from shared helpers.ts
 async function reloadAllPayrollFunctionsLocal() {
@@ -75,6 +87,20 @@ watch(
   },
   { deep: true }
 )
+
+// Debug logging for loading states coordination
+watch(
+  () => [isReloadingData.value, isPayrollLoading.value, isAnyLoading.value],
+  ([reloading, payrollLoading, anyLoading]) => {
+    console.log('[PayrollPrintDialog] Loading states:', {
+      reloading,
+      payrollLoading,
+      anyLoading,
+      hasPayrollRef: !!payrollPrintRef.value
+    })
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -102,15 +128,15 @@ watch(
         progress-color="primary"
       ></LoadingDialog>
 
-      <!-- Loading overlay para sa data reload -->
+      <!-- Loading overlay para sa data reload and calculations -->
       <LoadingDialog
-        v-model:is-visible="isReloadingData"
-        title="Refreshing Data..."
-        subtitle="Loading latest payroll information"
-        description="Please wait while we update the data"
+        v-model:is-visible="isAnyLoading"
+        :title="isReloadingData ? 'Refreshing Data...' : 'Calculating Payroll...'"
+        :subtitle="isReloadingData ? 'Loading latest payroll information' : 'Processing employee data and computations'"
+        :description="isReloadingData ? 'Please wait while we update the data' : 'This may take a few moments while we calculate all payroll components'"
         :progress-size="64"
         :progress-width="4"
-        progress-color="success"
+        :progress-color="isReloadingData ? 'success' : 'primary'"
       ></LoadingDialog>
 
       <template #append>
@@ -118,14 +144,14 @@ watch(
           variant="text"
           density="comfortable"
           @click="manualRefreshPayrollLocal"
-          :disabled="isPrinting || isReloadingData"
+          :disabled="isPrinting || isAnyLoading"
           :loading="isReloadingData"
           icon
           class="me-2"
         >
           <v-icon icon="mdi-refresh" color="success"></v-icon>
           <v-tooltip activator="parent" location="top">
-            {{ isReloadingData ? 'Refreshing Data...' : 'Refresh Payroll Data' }}
+            {{ isAnyLoading ? 'Processing...' : 'Refresh Payroll Data' }}
           </v-tooltip>
         </v-btn>
 
@@ -133,13 +159,13 @@ watch(
           variant="text"
           density="comfortable"
           @click="onPrint"
-          :disabled="isPrinting || isReloadingData"
+          :disabled="isPrinting || isAnyLoading"
           :loading="isPrinting"
           icon
         >
           <v-icon icon="mdi-printer" color="primary"></v-icon>
           <v-tooltip activator="parent" location="top">
-            {{ isPrinting ? 'Generating PDF...' : 'Print Employee Payroll' }}
+            {{ isPrinting ? 'Generating PDF...' : isAnyLoading ? 'Processing...' : 'Print Employee Payroll' }}
           </v-tooltip>
         </v-btn>
       </template>

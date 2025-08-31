@@ -18,7 +18,6 @@ export async function getEmployeeAttendanceById(
   leave_type?: string
   leave_reason?: string
   attendance_date?: string // Add attendance date to track the actual date
- 
 }> | null> {
   // query sa attendance records para sa given employee ug range
   // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
@@ -27,8 +26,12 @@ export async function getEmployeeAttendanceById(
 
   if (fromDateISO && toDateISO) {
     // normalize to start of fromDate and exclusive end of toDate (add one day)
-    const start = fromDateISO.includes('T') ? new Date(fromDateISO) : new Date(`${fromDateISO}T00:00:00.000Z`)
-    const endBase = toDateISO.includes('T') ? new Date(toDateISO) : new Date(`${toDateISO}T00:00:00.000Z`)
+    const start = fromDateISO.includes('T')
+      ? new Date(fromDateISO)
+      : new Date(`${fromDateISO}T00:00:00.000Z`)
+    const endBase = toDateISO.includes('T')
+      ? new Date(toDateISO)
+      : new Date(`${toDateISO}T00:00:00.000Z`)
     const end = new Date(endBase)
     end.setDate(end.getDate() + 1)
     startISO = start.toISOString()
@@ -44,11 +47,13 @@ export async function getEmployeeAttendanceById(
   }
 
   // debug
-   //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
+  //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
 
   const { data, error } = await supabase
     .from('attendances')
-    .select('am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason')
+    .select(
+      'am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason',
+    )
     .eq('employee_id', employeeId)
     .gte('am_time_in', startISO) // Filter by am_time_in for the range
     .lt('am_time_in', endISO)
@@ -59,7 +64,7 @@ export async function getEmployeeAttendanceById(
   }
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
 
- // console.log('getEmployeeAttendanceById data:', data)
+  // console.log('getEmployeeAttendanceById data:', data)
   return Array.isArray(data)
     ? data.map((row) => ({
         am_time_in: getTimeHHMM(row.am_time_in),
@@ -72,7 +77,6 @@ export async function getEmployeeAttendanceById(
         leave_type: row.leave_type,
         leave_reason: row.leave_reason,
         attendance_date: row.am_time_in ? row.am_time_in.split('T')[0] : null, // Extract date from timestamp
-       
       }))
     : null
 }
@@ -84,7 +88,10 @@ export function getEmployeeByIdemp(id: number): Employee | undefined {
 }
 
 // Helper function to compute overtime hours between two time strings (HH:MM)
-export function computeOvertimeHours(overtimeIn: string | null, overtimeOut: string | null): number {
+export function computeOvertimeHours(
+  overtimeIn: string | null,
+  overtimeOut: string | null,
+): number {
   if (!overtimeIn || !overtimeOut) return 0
   // parse time strings to Date objects (use today as date)
   const today = new Date().toISOString().split('T')[0]
@@ -110,11 +117,18 @@ export async function computeOverallOvertimeCalculation(
   let usedFrom = fromDateISO
   let usedTo = toDateISO
   if ((!usedFrom || !usedTo) && typeof window !== 'undefined') {
-    usedFrom = usedFrom || (localStorage.getItem('czarles_payroll_fromDate') as string | null) || undefined
-    usedTo = usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
+    usedFrom =
+      usedFrom || (localStorage.getItem('czarles_payroll_fromDate') as string | null) || undefined
+    usedTo =
+      usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
   }
   if (employeeId && usedDateString) {
-    const attendances = await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
+    const attendances = await getEmployeeAttendanceById(
+      employeeId,
+      usedDateString,
+      usedFrom,
+      usedTo,
+    )
     if (Array.isArray(attendances) && attendances.length > 0) {
       // sum all overtime hours for the month
       let totalOvertime = 0

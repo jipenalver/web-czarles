@@ -22,29 +22,30 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
-defineExpose({
-  initializePayrollCalculations,
-  recalculateEarnings,
-  reloadAllFunctions,
-  loadTrips,
-  fetchEmployeeHolidays,
-  updateOverallOvertime,
-  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
-})
-
 const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 
 async function updateEmployeeDeductions(employeeId: number | undefined) {
-  const result = await fetchEmployeeDeductions(employeeId)
-  employeeDeductions.value = result.deductions
-  employeeNonDeductions.value = result.nonDeductions
+  isDeductionsLoading.value = true
+  try {
+    const result = await fetchEmployeeDeductions(employeeId)
+    employeeDeductions.value = result.deductions
+    employeeNonDeductions.value = result.nonDeductions
+  } catch (error) {
+    console.error('Error updating employee deductions:', error)
+    employeeDeductions.value = []
+    employeeNonDeductions.value = []
+  } finally {
+    isDeductionsLoading.value = false
+  }
 }
 
 watch(
   () => props.employeeData?.id,
-  (id) => {
-    updateEmployeeDeductions(id)
+  async (id) => {
+    if (id) {
+      await updateEmployeeDeductions(id)
+    }
   },
   { immediate: true },
 )
@@ -86,10 +87,34 @@ const monthNames = [
 
 const isTripsLoading = ref(false)
 const isHolidaysLoading = ref(false)
+const isOvertimeLoading = ref(false)
+const isDeductionsLoading = ref(false)
+const isCalculationsCompleting = ref(false)
 const holidays = ref<Holiday[]>([])
 const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
+
+// Comprehensive loading state that tracks ALL calculations
+const isPayrollCalculating = computed(() => {
+  return isTripsLoading.value ||
+         isHolidaysLoading.value ||
+         isOvertimeLoading.value ||
+         isDeductionsLoading.value ||
+         isCalculationsCompleting.value
+})
+
+// Expose methods and state to parent components
+defineExpose({
+  initializePayrollCalculations,
+  recalculateEarnings,
+  reloadAllFunctions,
+  loadTrips,
+  fetchEmployeeHolidays,
+  updateOverallOvertime,
+  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
+  isPayrollCalculating, // Expose comprehensive loading state
+})
 
 const fullName = computed(() => {
   if (!props.employeeData) return 'N/A'
@@ -185,9 +210,12 @@ function recalculateEarnings() {
 }
 
 async function initializePayrollCalculations() {
+  isCalculationsCompleting.value = true
   try {
     isTripsLoading.value = true
     isHolidaysLoading.value = true
+    isOvertimeLoading.value = true
+    isDeductionsLoading.value = true
     holidays.value = []
     overallOvertime.value = 0
     employeeDeductions.value = []
@@ -199,12 +227,18 @@ async function initializePayrollCalculations() {
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
+  } finally {
+    // Ensure all individual loading states are false
     isTripsLoading.value = false
     isHolidaysLoading.value = false
+    isOvertimeLoading.value = false
+    isDeductionsLoading.value = false
+    isCalculationsCompleting.value = false
   }
 }
 
 async function reloadAllFunctions() {
+  isCalculationsCompleting.value = true
   try {
     tripsStore.trips = []
     holidays.value = []
@@ -214,9 +248,13 @@ async function reloadAllFunctions() {
     reactiveTotalEarnings.value = 0
     isTripsLoading.value = true
     isHolidaysLoading.value = true
+    isOvertimeLoading.value = true
+    isDeductionsLoading.value = true
     await initializePayrollCalculations()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
+  } finally {
+    isCalculationsCompleting.value = false
   }
 }
 
@@ -295,11 +333,14 @@ async function loadTrips() {
 }
 
 async function updateOverallOvertime() {
+  isOvertimeLoading.value = true
   try {
     overallOvertime.value = await computeOverallOvertimeCalculation()
   } catch (error) {
     console.error('Error calculating overtime:', error)
     overallOvertime.value = 0
+  } finally {
+    isOvertimeLoading.value = false
   }
 }
 
@@ -344,6 +385,21 @@ watch([filterDateString, () => props.employeeData?.id], async () => {
 watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
+
+// Debug logging for loading states (can be removed in production)
+watch(
+  () => isPayrollCalculating.value,
+  (isLoading) => {
+    console.log('[PayrollPrint] Comprehensive loading state:', isLoading, {
+      trips: isTripsLoading.value,
+      holidays: isHolidaysLoading.value,
+      overtime: isOvertimeLoading.value,
+      deductions: isDeductionsLoading.value,
+      completing: isCalculationsCompleting.value
+    })
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -408,10 +464,17 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
           </td>
         </tr>
 
-        <tr v-if="isTripsLoading || isHolidaysLoading">
+        <tr v-if="isPayrollCalculating">
           <td class="text-center pa-2" colspan="5">
             <v-progress-circular indeterminate color="primary" size="32" class="mx-auto mb-2" />
-            Loading payroll data...
+            <div>
+              <span v-if="isCalculationsCompleting">Initializing payroll calculations...</span>
+              <span v-else-if="isTripsLoading">Loading trips data...</span>
+              <span v-else-if="isHolidaysLoading">Loading holidays data...</span>
+              <span v-else-if="isOvertimeLoading">Calculating overtime...</span>
+              <span v-else-if="isDeductionsLoading">Loading deductions...</span>
+              <span v-else>Loading payroll data...</span>
+            </div>
           </td>
         </tr>
 
