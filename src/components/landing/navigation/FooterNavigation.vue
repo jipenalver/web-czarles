@@ -35,9 +35,9 @@ const icons = ['mdi-facebook', 'mdi-twitter', 'mdi-linkedin', 'mdi-instagram']
     <v-divider></v-divider>
 
     <div>
-      <strong
-        >Copyright © {{ new Date().getFullYear() }} | Czarles Construction and Supplies</strong
-      >
+      <strong>
+        Copyright © {{ new Date().getFullYear() }} | Czarles Construction and Supplies
+      </strong>
     </div>
   </v-footer>
 </template>
