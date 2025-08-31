@@ -117,7 +117,10 @@ export const useEmployeesStore = defineStore('employees', () => {
   }
 
   async function getEmployeesCount({ search, designation_id }: EmployeeTableFilter) {
-    let query = supabase.from('employees').select('*', { count: 'exact', head: true })
+    let query = supabase
+      .from('employees')
+      .select('*', { count: 'exact', head: true })
+      .is('deleted_at', null)
 
     query = getEmployeesFilter(query, { search, designation_id })
 
