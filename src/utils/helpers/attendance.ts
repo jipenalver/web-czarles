@@ -27,12 +27,14 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
   return Math.max(0, Math.floor(diffMs / (1000 * 60)))
 }
 
-// 👉 Get Office minutes worked with penalties for late arrivals and early departures
-const getOfficeMinutes = (
+// 👉 Get Office minutes with allowance
+const getOfficeMinutesWithAllowance = (
   timeIn: string | Date | null,
   timeOut: string | Date | null,
   sessionStart: number,
   sessionEnd: number,
+  lateAllowanceMinutes = 0,
+  earlyDepartureAllowanceMinutes = 0,
 ) => {
   const checkIn = parseLocalTime(timeIn as string)
   const checkOut = parseLocalTime(timeOut as string)
@@ -56,75 +58,31 @@ const getOfficeMinutes = (
   // If check-out is before session start or check-in is after session end, no overlap
   if (checkOut <= sessionStartTime || checkIn >= sessionEndTime) return 0
 
-  // Calculate effective times with penalties
+  // Calculate effective times with penalties AND allowances
   let effectiveIn = sessionStartTime // Always start from session start
   let effectiveOut = sessionEndTime // Always end at session end
 
-  // Late arrival penalty: If arrived late, start from actual check-in time
-  if (checkIn > sessionStartTime) effectiveIn = checkIn
+  // ✅ Late arrival penalty WITH allowance: If arrived late beyond allowance, start from actual check-in time
+  if (checkIn > sessionStartTime) {
+    const lateMinutes = Math.floor((checkIn.getTime() - sessionStartTime.getTime()) / (1000 * 60))
 
-  // Early departure penalty: If left early, end at actual check-out time
-  if (checkOut < sessionEndTime) effectiveOut = checkOut
+    // Only penalize if late minutes exceed the allowance
+    if (lateMinutes > lateAllowanceMinutes) effectiveIn = checkIn
+  }
 
-  // Calculate minutes within session bounds with deductions applied
+  // ✅ Early departure penalty WITH allowance: If left early beyond allowance, end at actual check-out time
+  if (checkOut < sessionEndTime) {
+    const earlyMinutes = Math.floor((sessionEndTime.getTime() - checkOut.getTime()) / (1000 * 60))
+
+    // Only penalize if early minutes exceed the allowance
+    if (earlyMinutes > earlyDepartureAllowanceMinutes) effectiveOut = checkOut
+  }
+
+  // Calculate minutes within session bounds with allowances applied
   const diffMs = effectiveOut.getTime() - effectiveIn.getTime()
 
   // If negative, it means no valid time worked
   return Math.max(0, Math.floor(diffMs / (1000 * 60)))
-}
-
-// 👉 Get Office minutes with allowance
-const getOfficeMinutesWithAllowance = (
-  timeIn: string | Date | null,
-  timeOut: string | Date | null,
-  sessionStart: number,
-  sessionEnd: number,
-  lateAllowanceMinutes = 0,
-  earlyDepartureAllowanceMinutes = 0,
-) => {
-  const baseMinutes = getOfficeMinutes(timeIn, timeOut, sessionStart, sessionEnd)
-  let totalAllowance = 0
-
-  // Late arrival allowance
-  if (lateAllowanceMinutes > 0 && timeIn) {
-    const checkIn = parseLocalTime(timeIn)
-    const sessionStartTime = new Date(
-      checkIn.getFullYear(),
-      checkIn.getMonth(),
-      checkIn.getDate(),
-      sessionStart,
-    )
-    // Round the calculated minutes
-    const lateMinutes = Math.max(
-      0,
-      Math.floor((checkIn.getTime() - sessionStartTime.getTime()) / (1000 * 60)),
-    )
-
-    if (lateMinutes > 0 && lateMinutes <= lateAllowanceMinutes)
-      totalAllowance += Math.min(lateMinutes, lateAllowanceMinutes)
-  }
-
-  // Early departure allowance
-  if (earlyDepartureAllowanceMinutes > 0 && timeOut) {
-    const checkOut = parseLocalTime(timeOut)
-    const sessionEndTime = new Date(
-      checkOut.getFullYear(),
-      checkOut.getMonth(),
-      checkOut.getDate(),
-      sessionEnd,
-    )
-    // Round the calculated minutes
-    const earlyMinutes = Math.max(
-      0,
-      Math.floor((sessionEndTime.getTime() - checkOut.getTime()) / (1000 * 60)),
-    )
-
-    if (earlyMinutes > 0 && earlyMinutes <= earlyDepartureAllowanceMinutes)
-      totalAllowance += Math.min(earlyMinutes, earlyDepartureAllowanceMinutes)
-  }
-
-  // Ensure the final result is an integer
-  return Math.floor(baseMinutes + totalAllowance)
 }
 
 // 👉 Get total minutes worked (AM + PM)
@@ -146,17 +104,23 @@ const getTotalMinutes = (
     // Return actual minutes worked, cap at 8 hours
     totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
-    // Office staff: Constrain to office hours (8am-12pm, 1pm-5pm)
-    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10) // 8:10am-12pm
+    // Office staff: Constrain to office hours with allowances
+    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10, 0) // 8am-12pm, 10min late allowance
 
-    let pmMinutes = 0
     // Use actual attendance date, not current date
     const attendanceDate = amTimeIn ? new Date(amTimeIn) : new Date(pmTimeIn!)
     const dayOfWeek = attendanceDate.getDay()
 
-    if (dayOfWeek === 5 || dayOfWeek === 6)
-      pmMinutes = getOfficeMinutesWithAllowance(pmTimeIn, pmTimeOut, 13, 17, 0, 30) // 1pm-4:30pm
-    else pmMinutes = getOfficeMinutes(pmTimeIn, pmTimeOut, 13, 17) // 1pm-5pm
+    // Monday-Thursday: 1pm-5pm strict, Friday/Saturday: 1pm-5pm with 30min early departure allowance (effectively 4:30pm)
+    const isFridayOrSaturday = dayOfWeek === 5 || dayOfWeek === 6
+    const pmMinutes = getOfficeMinutesWithAllowance(
+      pmTimeIn,
+      pmTimeOut,
+      13,
+      17,
+      0,
+      isFridayOrSaturday ? 30 : 0,
+    )
 
     totalMinutes = amMinutes + pmMinutes
   }
