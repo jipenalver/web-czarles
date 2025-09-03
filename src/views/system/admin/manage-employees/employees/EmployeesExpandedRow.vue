@@ -32,7 +32,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -42,7 +42,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -52,7 +52,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -64,7 +64,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -74,7 +74,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -84,7 +84,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -94,7 +94,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -104,7 +104,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -114,7 +114,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -124,7 +124,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -136,7 +136,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -151,7 +151,7 @@ const { mobile } = useDisplay()
 
           <v-col
             cols="12"
-            sm="6"
+            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
@@ -163,7 +163,7 @@ const { mobile } = useDisplay()
 
           <v-col
             cols="12"
-            sm="6"
+            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
@@ -178,7 +178,7 @@ const { mobile } = useDisplay()
               v-for="benefit in props.itemData.employee_deductions"
               :key="benefit.benefit_id"
               cols="12"
-              sm="4"
+              md="4"
               class="d-flex align-center my-2"
               :class="mobile ? 'justify-space-between' : 'justify-start'"
             >
