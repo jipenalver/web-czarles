@@ -96,16 +96,16 @@ const { mobile } = useDisplay()
               </div>
 
               <!-- Statistics Section: Responsive card layout -->
-              <v-container class="py-16">
+              <v-container v-if="false" class="py-16">
                 <v-row align="center" justify="center">
                   <v-col cols="12" md="12" lg="12">
-                    <v-card 
-                      class="mx-auto rounded-xl" 
-                      elevation="6" 
+                    <v-card
+                      class="mx-auto rounded-xl"
+                      elevation="6"
                       color="rgba(255,255,255,0.04)"
                       :class="mobile ? 'pa-5' : 'pa-12'"
                     >
-                      <v-row 
+                      <v-row
                         :class="mobile ? 'flex-column' : 'flex-row'"
                         class="align-center justify-space-between"
                         no-gutters
@@ -117,22 +117,19 @@ const { mobile } = useDisplay()
                           class="text-center"
                           :class="mobile ? 'py-3' : 'px-2'"
                         >
-                          <div 
-                            :class="mobile ? 'text-h4' : 'text-h2'" 
+                          <div
+                            :class="mobile ? 'text-h4' : 'text-h2'"
                             class="font-weight-bold text-primary mb-2"
                           >
                             {{ stat.number }}
                           </div>
-                          <div 
-                            :class="mobile ? 'text-body-1' : 'text-h6'" 
+                          <div
+                            :class="mobile ? 'text-body-1' : 'text-h6'"
                             class="font-weight-medium text-primary mb-1"
                           >
                             {{ stat.label }}
                           </div>
-                          <div 
-                            :class="mobile ? 'text-caption' : 'text-body-2'" 
-                            class="text-grey"
-                          >
+                          <div :class="mobile ? 'text-caption' : 'text-body-2'" class="text-grey">
                             {{ stat.description }}
                           </div>
                         </v-col>

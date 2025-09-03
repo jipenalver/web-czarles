@@ -11,7 +11,7 @@ import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const date = useDate()
-const { mobile, xs } = useDisplay()
+const { smAndDown, xs } = useDisplay()
 
 const {
   tableHeaders,
@@ -70,8 +70,8 @@ const {
         :items="utilizationsStore.utilizationsTable"
         :items-length="utilizationsStore.utilizationsTableTotal"
         @update:options="onLoadItems"
-        :hide-default-header="mobile"
-        :mobile="mobile"
+        :hide-default-header="smAndDown"
+        :mobile="smAndDown"
         show-expand
       >
         <template #top>
@@ -167,7 +167,7 @@ const {
         </template>
 
         <template #item.actions="{ item }">
-          <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
+          <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
               <v-tooltip activator="parent" location="top">Edit Utilization</v-tooltip>
