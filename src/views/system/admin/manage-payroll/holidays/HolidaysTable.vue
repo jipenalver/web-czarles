@@ -8,7 +8,7 @@ import { useHolidaysTable } from './holidaysTable'
 import { useDisplay, useDate } from 'vuetify'
 
 const date = useDate()
-const { mobile } = useDisplay()
+const { smAndDown } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
@@ -80,8 +80,8 @@ const {
         :items="holidaysStore.holidaysTable"
         :items-length="holidaysStore.holidaysTableTotal"
         @update:options="onLoadItems"
-        :hide-default-header="mobile"
-        :mobile="mobile"
+        :hide-default-header="smAndDown"
+        :mobile="smAndDown"
       >
         <template #top>
           <v-row dense>
@@ -129,7 +129,7 @@ const {
         </template>
 
         <template #item.actions="{ item }">
-          <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
+          <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
               <v-tooltip activator="parent" location="top">Edit Holiday</v-tooltip>

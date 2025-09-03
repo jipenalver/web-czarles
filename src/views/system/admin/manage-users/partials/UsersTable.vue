@@ -2,14 +2,14 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { getAvatarText } from '@/utils/helpers/others'
 import UsersFormDialog from './UsersFormDialog.vue'
 import { useUsersTable } from './usersTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
-import { getAvatarText } from '@/utils/helpers/others'
 
 const date = useDate()
-const { mobile } = useDisplay()
+const { smAndDown } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
@@ -85,8 +85,8 @@ const {
         :items="usersStore.usersTable"
         :items-length="usersStore.usersTableTotal"
         @update:options="onLoadItems"
-        :hide-default-header="mobile"
-        :mobile="mobile"
+        :hide-default-header="smAndDown"
+        :mobile="smAndDown"
       >
         <template #top>
           <v-row dense>
@@ -109,7 +109,10 @@ const {
         </template>
 
         <template #item.lastname="{ item }">
-          <div class="d-flex align-center my-5" :class="mobile ? 'justify-end' : 'justify-start'">
+          <div
+            class="d-flex align-center my-5"
+            :class="smAndDown ? 'justify-end' : 'justify-start'"
+          >
             <v-avatar v-if="item?.avatar" :image="item.avatar" color="primary" size="large">
             </v-avatar>
 
@@ -142,7 +145,7 @@ const {
         </template>
 
         <template #item.actions="{ item }">
-          <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
+          <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <v-btn
               variant="text"
               density="comfortable"
