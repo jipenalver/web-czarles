@@ -19,7 +19,7 @@ const props = defineProps<{
 }>()
 
 const date = useDate()
-const { mobile, xs } = useDisplay()
+const { smAndDown, xs } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
@@ -118,8 +118,8 @@ const {
         :items="employeesStore.employeesTable"
         :items-length="employeesStore.employeesTableTotal"
         @update:options="onLoadItems"
-        :hide-default-header="mobile"
-        :mobile="mobile"
+        :hide-default-header="smAndDown"
+        :mobile="smAndDown"
         show-expand
       >
         <template #top>
@@ -203,7 +203,7 @@ const {
         </template>
 
         <template #item.actions="{ item }">
-          <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
+          <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <template v-if="props.componentView === 'employees'">
               <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
                 <v-icon icon="mdi-pencil"></v-icon>

@@ -39,7 +39,7 @@ const isFieldStaff = computed(() => {
       <v-row :class="mobile ? '' : 'px-4'" :no-gutters="!mobile" dense>
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -55,7 +55,7 @@ const isFieldStaff = computed(() => {
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -71,7 +71,7 @@ const isFieldStaff = computed(() => {
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -87,7 +87,7 @@ const isFieldStaff = computed(() => {
 
         <v-col
           cols="12"
-          sm="3"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -103,7 +103,7 @@ const isFieldStaff = computed(() => {
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -135,7 +135,7 @@ const isFieldStaff = computed(() => {
 
         <v-col
           cols="12"
-          sm="6"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -181,7 +181,7 @@ const isFieldStaff = computed(() => {
 
           <v-col
             cols="12"
-            sm="6"
+            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
@@ -210,7 +210,7 @@ const isFieldStaff = computed(() => {
 
           <v-col
             cols="12"
-            sm="6"
+            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
@@ -239,7 +239,7 @@ const isFieldStaff = computed(() => {
 
           <v-col
             cols="12"
-            sm="6"
+            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
@@ -255,7 +255,7 @@ const isFieldStaff = computed(() => {
 
           <v-col
             cols="12"
-            sm="6"
+            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
