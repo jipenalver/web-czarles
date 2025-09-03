@@ -26,7 +26,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:isDialogVisible'])
 
-const { mobile, mdAndDown } = useDisplay()
+const { smAndDown, mdAndDown } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
@@ -111,8 +111,12 @@ const daysInPreviousMonth = computed(() => {
   return new Date(prevYear, prevIdx + 1, 0).getDate()
 })
 
-const dayOptionsFrom = computed(() => Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1))
-const dayOptionsTo = computed(() => Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1))
+const dayOptionsFrom = computed(() =>
+  Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1),
+)
+const dayOptionsTo = computed(() =>
+  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
+)
 
 // (Day-only selects — month is selected via the table rows)
 
@@ -143,8 +147,10 @@ watch(
         localStorage.removeItem('czarles_payroll_toDate')
       } else {
         // default From = last day of previous month if not set, default To = last day of current month (when enabled)
-        if (dayFrom.value === null || dayFrom.value === undefined) dayFrom.value = daysInPreviousMonth.value
-        if (dayTo.value === null || dayTo.value === undefined) dayTo.value = daysInSelectedMonth.value
+        if (dayFrom.value === null || dayFrom.value === undefined)
+          dayFrom.value = daysInPreviousMonth.value
+        if (dayTo.value === null || dayTo.value === undefined)
+          dayTo.value = daysInSelectedMonth.value
       }
     } catch {
       /* ignore storage errors */
@@ -196,7 +202,9 @@ watch(
     // If cross-month is enabled, 'to' defaults to current month's last day; otherwise last day of chosen month
     const to =
       newTo ??
-      (crossMonthEnabled.value ? daysInSelectedMonth.value : getLastDayOfMonth(year, chosenMonth.value))
+      (crossMonthEnabled.value
+        ? daysInSelectedMonth.value
+        : getLastDayOfMonth(year, chosenMonth.value))
     const range = crossMonthEnabled.value
       ? getDateRangeForMonth(year, chosenMonth.value, from, to)
       : getDateRangeForMonthNoCross(year, chosenMonth.value, from, to)
@@ -242,17 +250,17 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
     >
       <template #append>
         <div class="d-flex ga-3 align-center">
-            <v-checkbox
-              v-model="crossMonthEnabled"
-              class="ms-2"
-              label="Cross-month"
-              dense
-              hide-details
-              :true-value="true"
-              :false-value="false"
-              @change="onCrossMonthChange"
-            ></v-checkbox>
-          
+          <v-checkbox
+            v-model="crossMonthEnabled"
+            class="ms-2"
+            label="Cross-month"
+            dense
+            hide-details
+            :true-value="true"
+            :false-value="false"
+            @change="onCrossMonthChange"
+          ></v-checkbox>
+
           <v-select
             v-model="dayFrom"
             :items="dayOptionsFrom"
@@ -290,8 +298,6 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             style="min-width: 240px"
           ></v-select>
 
-        
-
           <v-select
             v-model="tableFilters.year"
             label="Year"
@@ -315,8 +321,8 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
           :headers="tableHeaders"
           :items="tableData"
           :items-per-page-options="[6, 12]"
-          :hide-default-header="mobile"
-          :mobile="mobile"
+          :hide-default-header="smAndDown"
+          :mobile="smAndDown"
         >
           <template #item.month="{ item }">
             <v-btn class="text-decoration-underline" variant="text" @click="onView(item)">
