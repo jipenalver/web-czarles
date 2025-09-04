@@ -125,7 +125,7 @@ const {
                   'Emergency Leave',
                   'Maternity Leave',
                   'Paternity Leave',
-                  'Leasure Leave',
+                  'Leisure Leave',
                   'Others',
                 ]"
                 :rules="[requiredValidator]"
