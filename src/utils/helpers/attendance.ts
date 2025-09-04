@@ -105,7 +105,7 @@ const getTotalMinutes = (
     totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
     // Office staff: Constrain to office hours with allowances
-    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10, 0) // 8am-12pm, 10min late allowance
+    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10, 10) // 8am-12pm, 10min late allowance, 10min early departure allowance
 
     // Use actual attendance date, not current date
     const attendanceDate = amTimeIn ? new Date(amTimeIn) : new Date(pmTimeIn!)
