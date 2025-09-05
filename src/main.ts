@@ -13,7 +13,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import { VDateInput } from 'vuetify/labs/VDateInput'
-import { VTimePicker } from 'vuetify/components/VTimePicker'
 
 // Icon Fonts
 import '@mdi/font/css/materialdesignicons.css'
@@ -34,7 +33,6 @@ const vuetify = createVuetify({
   components: {
     ...components,
     VDateInput,
-    VTimePicker,
   },
   directives,
 })
