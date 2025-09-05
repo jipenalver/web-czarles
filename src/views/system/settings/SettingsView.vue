@@ -53,9 +53,10 @@ onMounted(() => {
               <v-tab
                 v-for="([title, icon, , to], i) in settingsItemsNav"
                 :key="i"
-                class="mx-1"
+                :value="title.toLowerCase().replace(/\s+/g, '-')"
                 :prepend-icon="icon"
-                :to="to ?? undefined"
+                :to="to"
+                class="mx-1"
                 color="primary"
                 variant="flat"
                 rounded="lg"
