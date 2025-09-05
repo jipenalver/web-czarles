@@ -117,7 +117,7 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
 
   function getUtilizationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { employee_id, utilization_at }: UtilizationTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)

@@ -68,7 +68,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
 
   function getTripLocationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { search }: TripLocationTableFilter,
   ) {
     if (search) query = query.or(`location.ilike.%${search}%, description.ilike.%${search}%`)

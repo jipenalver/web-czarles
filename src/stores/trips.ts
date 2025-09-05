@@ -99,7 +99,7 @@ export const useTripsStore = defineStore('trips', () => {
 
   function getTripsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { employee_id, trip_at }: TripTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)

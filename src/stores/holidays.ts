@@ -67,7 +67,7 @@ export const useHolidaysStore = defineStore('holidays', () => {
 
   function getHolidaysFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { year }: HolidayTableFilter,
   ) {
     if (year) query = query.gte('holiday_at', `${year}-01-01`).lt('holiday_at', `${year + 1}-01-01`)
