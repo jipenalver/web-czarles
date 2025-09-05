@@ -50,6 +50,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const tableFilters = ref({
     employee_id: null,
     attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    component_view: props.componentView,
   })
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)

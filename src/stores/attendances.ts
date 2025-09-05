@@ -43,6 +43,7 @@ export type AttendanceImage = {
 export type AttendanceTableFilter = {
   employee_id: number | null
   attendance_at: Date[] | null
+  component_view: 'attendance' | 'leave' | 'overtime'
 }
 
 export const useAttendancesStore = defineStore('attendances', () => {
@@ -113,7 +114,11 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendancesTable.value = data?.map((item) => {
       return {
         ...item,
-        date: item.am_time_in ? getDate(item.am_time_in) : null,
+        date: item.am_time_in
+          ? getDate(item.am_time_in)
+          : item.pm_time_in
+            ? getDate(item.pm_time_in)
+            : null,
       }
     }) as Attendance[]
     attendancesTableTotal.value = count as number
@@ -129,8 +134,8 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   function getAttendancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
-    { employee_id, attendance_at }: AttendanceTableFilter,
+    query: PostgrestFilterBuilder<any, any, any, any>,
+    { employee_id, attendance_at, component_view }: AttendanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -139,6 +144,10 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
       if (startDate && endDate) query = query.gte('am_time_in', startDate).lt('am_time_in', endDate)
     }
+
+    if (component_view === 'leave') query = query.eq('is_am_leave', true).eq('is_pm_leave', true)
+    else if (component_view === 'overtime' || component_view === 'attendance')
+      query = query.or('is_am_leave.eq.false, is_pm_leave.eq.false')
 
     return query
   }

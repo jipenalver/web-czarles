@@ -68,7 +68,7 @@ export const useDesignationsStore = defineStore('designations', () => {
 
   function getDesignationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { search }: DesignationTableFilter,
   ) {
     if (search) query = query.or(`designation.ilike.%${search}%, description.ilike.%${search}%`)

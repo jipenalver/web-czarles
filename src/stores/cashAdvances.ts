@@ -103,7 +103,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
   function getCashAdvancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { employee_id, request_at }: CashAdvanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
