@@ -113,7 +113,11 @@ export const useAttendancesStore = defineStore('attendances', () => {
     attendancesTable.value = data?.map((item) => {
       return {
         ...item,
-        date: item.am_time_in ? getDate(item.am_time_in) : null,
+        date: item.am_time_in
+          ? getDate(item.am_time_in)
+          : item.pm_time_in
+            ? getDate(item.pm_time_in)
+            : null,
       }
     }) as Attendance[]
     attendancesTableTotal.value = count as number
@@ -129,7 +133,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   function getAttendancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { employee_id, attendance_at }: AttendanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
