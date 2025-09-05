@@ -24,6 +24,7 @@ const props = defineProps<{
 
 const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
+const isDeductionsLoading = ref(false)
 
 async function updateEmployeeDeductions(employeeId: number | undefined) {
   isDeductionsLoading.value = true
@@ -88,7 +89,6 @@ const monthNames = [
 const isTripsLoading = ref(false)
 const isHolidaysLoading = ref(false)
 const isOvertimeLoading = ref(false)
-const isDeductionsLoading = ref(false)
 const isCalculationsCompleting = ref(false)
 const holidays = ref<Holiday[]>([])
 const overallOvertime = ref<number>(0)
