@@ -129,7 +129,7 @@ export const useEmployeesStore = defineStore('employees', () => {
 
   function getEmployeesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any>,
+    query: PostgrestFilterBuilder<any, any, any, any>,
     { search, designation_id }: EmployeeTableFilter,
   ) {
     if (search)
