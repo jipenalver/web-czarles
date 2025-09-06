@@ -205,8 +205,8 @@ export async function getEmployeeAttendanceForEmployee55(
       const amTimeIn = record.am_time_in
 
       // Generate dummy times for full 8-hour workday
-      // Standard schedule: 8:00 AM - 12:00 PM, 1:00 PM - 5:00 PM
-      let amTimeOut = '12:00'
+      // Standard schedule: 8:00 AM - 11:50 AM, 1:00 PM - 5:00 PM
+      let amTimeOut = '11:50'
       let pmTimeIn = '13:00'
       let pmTimeOut = '17:00'
 

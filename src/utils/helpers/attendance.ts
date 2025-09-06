@@ -58,31 +58,33 @@ const getOfficeMinutesWithAllowance = (
   // If check-out is before session start or check-in is after session end, no overlap
   if (checkOut <= sessionStartTime || checkIn >= sessionEndTime) return 0
 
-  // Calculate effective times with penalties AND allowances
-  let effectiveIn = sessionStartTime // Always start from session start
-  let effectiveOut = sessionEndTime // Always end at session end
+  // ✅ Always start with full session minutes (240 for AM, 240 for PM)
+  let totalMinutes = (sessionEnd - sessionStart) * 60 // Full session duration
 
-  // ✅ Late arrival penalty WITH allowance: If arrived late beyond allowance, start from actual check-in time
+  // ✅ Calculate late penalty with allowance
   if (checkIn > sessionStartTime) {
     const lateMinutes = Math.floor((checkIn.getTime() - sessionStartTime.getTime()) / (1000 * 60))
 
-    // Only penalize if late minutes exceed the allowance
-    if (lateMinutes > lateAllowanceMinutes) effectiveIn = checkIn
+    // Apply penalty only if late minutes exceed allowance
+    if (lateMinutes > lateAllowanceMinutes) {
+      const penaltyMinutes = lateMinutes - lateAllowanceMinutes
+      totalMinutes -= penaltyMinutes
+    }
   }
 
-  // ✅ Early departure penalty WITH allowance: If left early beyond allowance, end at actual check-out time
+  // ✅ Calculate early departure penalty with allowance
   if (checkOut < sessionEndTime) {
     const earlyMinutes = Math.floor((sessionEndTime.getTime() - checkOut.getTime()) / (1000 * 60))
 
-    // Only penalize if early minutes exceed the allowance
-    if (earlyMinutes > earlyDepartureAllowanceMinutes) effectiveOut = checkOut
+    // Apply penalty only if early minutes exceed allowance
+    if (earlyMinutes > earlyDepartureAllowanceMinutes) {
+      const penaltyMinutes = earlyMinutes - earlyDepartureAllowanceMinutes
+      totalMinutes -= penaltyMinutes
+    }
   }
 
-  // Calculate minutes within session bounds with allowances applied
-  const diffMs = effectiveOut.getTime() - effectiveIn.getTime()
-
-  // If negative, it means no valid time worked
-  return Math.max(0, Math.floor(diffMs / (1000 * 60)))
+  // ✅ Ensure we don't go below 0 or above session maximum
+  return Math.max(0, Math.min(totalMinutes, (sessionEnd - sessionStart) * 60))
 }
 
 // 👉 Get total minutes worked (AM + PM)

@@ -47,7 +47,7 @@ export type EmployeeTableFilter = {
 
 export const useEmployeesStore = defineStore('employees', () => {
   const selectQuery =
-    '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, employee_benefit:benefit_id (*))'
+    '*, designation:designation_id (*), area_origin:area_origin_id (*), area_assignment:area_assignment_id (*), employee_deductions (*, benefit:benefit_id (benefit, is_deduction), employee_benefit:benefit_id (*))'
 
   // States
   const employees = ref<Employee[]>([])
