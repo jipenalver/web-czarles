@@ -210,7 +210,7 @@ export function usePayrollComputation(
             // Determine time rules based on day of week
             const amStartTime = isFriSat ? '08:12' : '08:12'
             const pmStartTime = isFriSat ? '13:00' : '13:00' // PM start time remains the same
-            const amEndTime = isFriSat ? '12:00' : '12:00' // AM end time remains the same
+            const amEndTime = isFriSat ? '11:50' : '11:50' // AM end time adjusted for undertime deduction
             const pmEndTime = isFriSat ? '16:30' : '17:00' // PM end time changes for Fri/Sat
 
             // Calculate late minutes

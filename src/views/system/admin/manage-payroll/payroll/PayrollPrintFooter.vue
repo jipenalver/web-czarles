@@ -120,7 +120,7 @@ const effectiveDate = computed(() => {
         </v-col>
         <v-row class="mx-5">
           <v-col cols="4">
-            <div class="text-center" style="text-decoration:underline">NINA MIKAELAA ABANERO</div>
+            <div class="text-center">____________________</div>
             <div class="mx-10 text-center">Prepared By</div>
           </v-col>
           <v-col cols="4">
@@ -134,7 +134,7 @@ const effectiveDate = computed(() => {
         </v-row>
       </v-row>
     </v-col>
- 
+
   </v-row>
 </template>
 
