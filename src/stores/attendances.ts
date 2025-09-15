@@ -69,16 +69,16 @@ export const useAttendancesStore = defineStore('attendances', () => {
     const { data } = await supabase
       .from('attendances')
       .select(selectQuery)
-      .order('am_time_in', { ascending: false })
+      .order('created_at', { ascending: false })
 
-    attendances.value = data as Attendance[]
+    attendances.value = getAttendanceMap(data as Attendance[])
   }
 
   async function getAttendancesExport(
     tableOptions: TableOptions,
     tableFilters: AttendanceTableFilter,
   ) {
-    const { column, order } = tablePagination(tableOptions, 'am_time_in', false)
+    const { column, order } = tablePagination(tableOptions, 'created_at', false)
 
     let query = supabase.from('attendances').select(selectQuery).order(column, { ascending: order })
 
@@ -86,7 +86,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { data } = await query
 
-    attendancesExport.value = data as Attendance[]
+    attendancesExport.value = getAttendanceMap(data as Attendance[])
   }
 
   async function getAttendancesTable(
@@ -95,7 +95,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
-      'am_time_in',
+      'created_at',
       false,
     )
 
@@ -111,17 +111,25 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { count } = await getAttendancesCount(tableFilters)
 
-    attendancesTable.value = data?.map((item) => {
-      return {
+    attendancesTable.value = getAttendanceMap(data as Attendance[])
+    attendancesTableTotal.value = count as number
+  }
+
+  function getAttendanceMap(attendancesList: Attendance[]) {
+    return attendancesList
+      .map((item) => ({
         ...item,
         date: item.am_time_in
           ? getDate(item.am_time_in)
           : item.pm_time_in
             ? getDate(item.pm_time_in)
             : null,
-      }
-    }) as Attendance[]
-    attendancesTableTotal.value = count as number
+      }))
+      .sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : -Infinity
+        const dateB = b.date ? new Date(b.date).getTime() : -Infinity
+        return dateB - dateA
+      })
   }
 
   async function getAttendancesCount(tableFilters: AttendanceTableFilter) {
@@ -142,7 +150,11 @@ export const useAttendancesStore = defineStore('attendances', () => {
     if (attendance_at) {
       const { startDate, endDate } = prepareDateRange(attendance_at, attendance_at.length > 1)
 
-      if (startDate && endDate) query = query.gte('am_time_in', startDate).lt('am_time_in', endDate)
+      if (startDate && endDate) {
+        query = query.or(
+          `and(am_time_in.gte.${startDate},am_time_in.lt.${endDate}),am_time_in.is.null`,
+        )
+      }
     }
 
     if (component_view === 'leave') query = query.eq('is_am_leave', true).eq('is_pm_leave', true)
