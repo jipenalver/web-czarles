@@ -409,7 +409,7 @@ watch(
         <v-img src="/image-header-title.png"></v-img>
       </v-col>
       <v-col cols="12" sm="3" class="d-flex justify-center align-center">
-        <h1 class="text-h5 font-weight-black text-primary">PAY SLIP</h1>
+        <h1 class="text-h5 font-weight-black text-primary">CASH VOUCHER</h1>
       </v-col>
     </v-row>
 
