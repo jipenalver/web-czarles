@@ -115,8 +115,8 @@ const effectiveDate = computed(() => {
           {{ formattedPrice }}
         </v-col>
         <v-divider class="mx-4"></v-divider>
-        <v-col cols="12" >
-          <div class="text-start">in full payment of the amount described above.</div>
+        <v-col cols="12 my-5" >
+          <div class="text-start ms-2">in full payment of the amount described above.</div>
         </v-col>
         <v-row class="mx-5">
           <v-col cols="4">
