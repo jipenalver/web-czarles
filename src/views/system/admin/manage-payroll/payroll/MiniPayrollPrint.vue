@@ -7,8 +7,7 @@ import {
 import {
   safeCurrencyFormat,
   getHolidayTypeName,
-  // formatTripDate,
-  // getMonthDateRange,
+  getMonthDateRange,
 } from './helpers'
 import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
@@ -36,11 +35,6 @@ const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 const cashAdvances = ref<CashAdvance[]>([])
 
-// Month date range for display
-// const monthDateRange = computed(() => {
-//   return getMonthDateRange(props.payrollData.year, props.payrollData.month)
-// })
-
 // Constants
 const monthNames = [
   'January',
@@ -59,18 +53,23 @@ const monthNames = [
 
 // Date formatting computeds
 const formattedPeriod = computed(() => {
-  const monthIndex = monthNames.indexOf(props.payrollData.month)
-  const startDate = new Date(props.payrollData.year, monthIndex, 21)
-  const endDate = new Date(props.payrollData.year, monthIndex + 1, 20)
-
-  const formatDate = (date: Date) => {
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const day = date.getDate().toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${month}.${day}.${year}`
+  try {
+    if (typeof window !== 'undefined') {
+      const from = localStorage.getItem('czarles_payroll_fromDate')
+      const to = localStorage.getItem('czarles_payroll_toDate')
+      if (from && to) {
+        const start = new Date(from)
+        const end = new Date(to)
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+          return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
+        }
+      }
+    }
+  } catch {
+    /* ignore and fallback */
   }
-
-  return `${formatDate(startDate)}-${formatDate(endDate)}`
+  return getMonthDateRange(props.payrollData.year, props.payrollData.month)
 })
 
 const filterDateString = computed(() => {

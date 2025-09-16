@@ -103,9 +103,9 @@ watch(
         <template v-if="showLateDeduction">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
-              <span class="text-caption text-disabled" style="font-size: 12px">Late Deduction</span>
+              <span class="text-caption " style="font-size: 12px">Late Deduction</span>
               <span
-                class="text-caption font-weight-bold text-end text-disabled ms-1"
+                class="text-caption font-weight-bold text-end  ms-1"
                 v-if="monthLateDeduction !== undefined && monthLateDeduction > 0"
                 style="font-size: 12px"
               >
@@ -113,7 +113,7 @@ watch(
               </span>
             </div>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 text-disabled"
+              class="border-b-thin border-s-sm text-end pa-0 "
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(netSalaryCalculation.deductions.late, formatCurrency) }}
@@ -124,9 +124,9 @@ watch(
         <template v-if="showLateDeduction">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
-              <span class="text-caption text-disabled" style="font-size: 12px">Undertime Deduction</span>
+              <span class="text-caption" style="font-size: 12px">Undertime Deduction</span>
               <span
-                class="text-caption font-weight-bold text-end text-disabled ms-1"
+                class="text-caption font-weight-bold text-end  ms-1"
                 v-if="monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0"
                 style="font-size: 12px"
               >
@@ -134,7 +134,7 @@ watch(
               </span>
             </div>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 text-disabled"
+              class="border-b-thin border-s-sm text-end pa-0 "
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(netSalaryCalculation.deductions.undertime, formatCurrency) }}
@@ -144,11 +144,11 @@ watch(
         <!-- Employee Deductions -->
         <template v-for="deduction in props.employeeDeductions" :key="deduction.id">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
-            <span class="text-caption text-disabled" style="font-size: 12px">{{
+            <span class="text-caption " style="font-size: 12px">{{
               deduction.benefit?.benefit || 'Deduction'
             }}</span>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 text-disabled"
+              class="border-b-thin border-s-sm text-end pa-0 "
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(deduction.amount || 0, formatCurrency) }}
@@ -159,13 +159,13 @@ watch(
         <template v-for="ca in cashAdvances" :key="'cashadvance-' + ca.id">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
-              <span class="text-caption text-disabled" style="font-size: 12px">Cash Advance</span>
+              <span class="text-caption " style="font-size: 12px">Cash Advance</span>
               <span class="text-caption font-weight-bold text-end ms-1" style="font-size: 12px">{{
                 ca.request_at
               }}</span>
             </div>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 text-disabled"
+              class="border-b-thin border-s-sm text-end pa-0 "
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(ca.amount || 0, formatCurrency) }}
@@ -178,9 +178,9 @@ watch(
   <!-- Less Deductions and Net Salary Rows remain unchanged -->
   <tr>
     <td class="pa-1" colspan="2"></td>
-    <td class="text-caption pa-1 text-disabled">Less Deductions</td>
+    <td class="text-caption pa-1 ">Less Deductions</td>
     <td class="pa-1"></td>
-    <td class="border-b-thin border-s-sm text-end pa-1 text-disabled">
+    <td class="border-b-thin border-s-sm text-end pa-1 ">
       {{ safeCurrencyFormat(netSalaryCalculation.totalDeductions, formatCurrency) }}
     </td>
   </tr>
