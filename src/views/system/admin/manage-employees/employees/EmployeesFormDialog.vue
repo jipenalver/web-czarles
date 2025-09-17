@@ -93,7 +93,6 @@ const {
                 v-model="formData.email"
                 label="Email"
                 prepend-inner-icon="mdi-email-outline"
-                :readonly="isUpdate"
                 :rules="[emailValidator]"
               ></v-text-field>
             </v-col>
