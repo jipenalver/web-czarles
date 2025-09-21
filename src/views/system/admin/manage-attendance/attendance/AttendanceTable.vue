@@ -273,8 +273,13 @@ const {
                 icon
                 @click="onLeave(item)"
               >
-                <v-icon icon="mdi-pencil"></v-icon>
-                <v-tooltip activator="parent" location="top">Apply Leave</v-tooltip>
+                <v-icon icon="mdi-account-arrow-left"></v-icon>
+                <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
+              </v-btn>
+
+              <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
               </v-btn>
             </template>
 
@@ -286,7 +291,7 @@ const {
                 @click="onOvertime(item)"
                 icon
               >
-                <v-icon icon="mdi-clock-plus" color="secondary"></v-icon>
+                <v-icon icon="mdi-clock-plus"></v-icon>
                 <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>
               </v-btn>
             </template>
