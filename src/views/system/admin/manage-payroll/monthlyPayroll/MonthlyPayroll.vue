@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/monthlyPayroll/components/MonthlyPayrollTable.vue'
+import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/monthlyPayroll/pdf/MonthlyPayrollPDF.vue'
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/monthlyPayroll/composables/monthlyPayroll'
+import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/monthlyPayroll/pdf/monthlyPayrollPDF'
 import { monthNames } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { ref, watch, onMounted } from 'vue'
 
 // Use composable for monthly payroll logic
@@ -13,6 +16,9 @@ const {
   selectedYear,
   loadMonthlyPayroll,
 } = useMonthlyPayroll()
+
+// Use PDF composable
+const { isLoadingPDF, onExport } = useMonthlyPayrollPDF()
 
 // Set default month to current month
 onMounted(() => {
@@ -31,6 +37,9 @@ const formAlert = ref(false)
 const formMessage = ref('')
 const formStatus = ref<number>(200)
 
+// Menu state
+const menuOpen = ref(false)
+
 // Pagination state
 const currentPage = ref(1)
 const itemsPerPage = ref(25)
@@ -46,6 +55,15 @@ watch(monthlyPayrollData, () => {
 watch(searchQuery, () => {
   currentPage.value = 1
 })
+
+// PDF Export handler
+const handleExportPDF = async () => {
+  menuOpen.value = false
+  await onExport({
+    selectedMonth: selectedMonth.value,
+    selectedYear: selectedYear.value,
+  })
+}
 </script>
 
 <template>
@@ -56,9 +74,48 @@ watch(searchQuery, () => {
       :form-status="formStatus"
     ></AppAlert>
 
+    <!-- Loading Dialog for PDF -->
+    <LoadingDialog
+      v-model:is-visible="isLoadingPDF"
+      title="Generating PDF..."
+      subtitle="Please wait while we create your payroll report"
+      description="This may take a few moments"
+    />
+
+    <!-- PDF Component (Hidden) -->
+    <MonthlyPayrollPDF
+      :items="monthlyPayrollData"
+      :selected-month="selectedMonth"
+      :selected-year="selectedYear"
+    />
+
     <!-- Combined Card with Filters and Table -->
     <v-card>
+      <v-card-title class="d-flex align-center">
+        <!-- 3-dot menu on the left -->
+        <v-menu v-model="menuOpen" :close-on-content-click="false">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              icon="mdi-dots-vertical"
+              variant="text"
+              size="small"
+              v-bind="props"
+              :disabled="monthlyPayrollData.length === 0"
+            ></v-btn>
+          </template>
+          <v-list density="compact">
+            <v-list-item @click="handleExportPDF" :disabled="isLoadingPDF">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-file-pdf-box"></v-icon>
+              </template>
+              <v-list-item-title>Export to PDF</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
 
+        <v-icon icon="mdi-calendar-month" class="me-2"></v-icon>
+        <span>Monthly Payroll Summary</span>
+      </v-card-title>
 
       <!-- Filters Section -->
       <v-card-text>
