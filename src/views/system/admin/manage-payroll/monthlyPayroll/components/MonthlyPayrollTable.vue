@@ -92,7 +92,7 @@ const totals = computed(() => {
 </script>
 
 <template>
-  <v-card>
+  <div>
     <v-card-text>
       <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
 
@@ -283,5 +283,5 @@ const totals = computed(() => {
       @update:current-page="emit('update:currentPage', $event)"
       @update:items-per-page="emit('update:itemsPerPage', $event)"
     />
-  </v-card>
+  </div>
 </template>

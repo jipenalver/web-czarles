@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import MonthlyPayrollFilters from '@/views/system/admin/manage-payroll/monthlyPayroll/components/MonthlyPayrollFilters.vue'
 import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/monthlyPayroll/components/MonthlyPayrollTable.vue'
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/monthlyPayroll/composables/monthlyPayroll'
 import { monthNames } from '@/views/system/admin/manage-payroll/payroll/helpers'
@@ -57,29 +56,80 @@ watch(searchQuery, () => {
       :form-status="formStatus"
     ></AppAlert>
 
-    <!-- Filters Component -->
-    <MonthlyPayrollFilters
-      v-model:selected-month="selectedMonth"
-      v-model:selected-year="selectedYear"
-      v-model:search-query="searchQuery"
-      :loading="loading"
-      @generate="loadMonthlyPayroll"
-    />
+    <!-- Combined Card with Filters and Table -->
+    <v-card>
 
-    <!-- Data Table Component -->
-    <MonthlyPayrollTable
-      v-if="monthlyPayrollData.length > 0"
-      class="mt-4"
-      :items="monthlyPayrollData"
-      :loading="loading"
-      :search-query="searchQuery"
-      v-model:current-page="currentPage"
-      v-model:items-per-page="itemsPerPage"
-    />
 
-    <!-- Empty State -->
-    <v-card class="mt-4" v-else-if="!loading">
+      <!-- Filters Section -->
       <v-card-text>
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-select
+              v-model="selectedMonth"
+              :items="monthNames.map((month, index) => ({
+                title: month,
+                value: month,
+                index: index,
+              }))"
+              label="Select Month"
+              variant="outlined"
+              density="compact"
+              prepend-inner-icon="mdi-calendar"
+            ></v-select>
+          </v-col>
+
+          <v-col cols="12" md="3">
+            <v-select
+              v-model="selectedYear"
+              :items="Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)"
+              label="Select Year"
+              variant="outlined"
+              density="compact"
+              prepend-inner-icon="mdi-calendar-range"
+            ></v-select>
+          </v-col>
+
+          <v-col cols="12" md="3">
+            <v-text-field
+              v-model="searchQuery"
+              label="Search Employee"
+              placeholder="Enter employee name..."
+              variant="outlined"
+              density="compact"
+              prepend-inner-icon="mdi-account-search"
+              clearable
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" md="3" class="d-flex align-center">
+            <v-btn
+              color="primary"
+              @click="loadMonthlyPayroll"
+              :loading="loading"
+              :disabled="!selectedMonth || !selectedYear"
+              block
+            >
+              <v-icon icon="mdi-refresh" class="me-2"></v-icon>
+              Generate Report
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+
+      <v-divider v-if="monthlyPayrollData.length > 0"></v-divider>
+
+      <!-- Table Section -->
+      <MonthlyPayrollTable
+        v-if="monthlyPayrollData.length > 0"
+        :items="monthlyPayrollData"
+        :loading="loading"
+        :search-query="searchQuery"
+        v-model:current-page="currentPage"
+        v-model:items-per-page="itemsPerPage"
+      />
+
+      <!-- Empty State -->
+      <v-card-text v-else-if="!loading">
         <v-alert type="info" variant="tonal">
           <v-icon icon="mdi-information" class="me-2"></v-icon>
           Select a month and year, then click "Generate Report" to view the monthly payroll summary.
