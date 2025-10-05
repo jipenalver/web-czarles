@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import MonthlyPayrollFilters from '@/views/system/admin/manage-payroll/monthlyPayroll/components/MonthlyPayrollFilters.vue'
 import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/monthlyPayroll/components/MonthlyPayrollTable.vue'
-import { tableHeaders } from '@/views/system/admin/manage-payroll/monthlyPayroll/composables/MonthlyPayrollHeaders'
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/monthlyPayroll/composables/monthlyPayroll'
 import { monthNames } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { ref, watch, onMounted } from 'vue'
-
-
-
-
 
 // Use composable for monthly payroll logic
 const {
@@ -58,7 +53,6 @@ const formStatus = ref<number>(200)
     <MonthlyPayrollTable
       v-if="monthlyPayrollData.length > 0"
       class="mt-4"
-      :headers="tableHeaders"
       :items="monthlyPayrollData"
       :loading="loading"
     />

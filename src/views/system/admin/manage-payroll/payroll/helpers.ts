@@ -36,6 +36,14 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
+/**
+ * Round decimal to specified places (default 2)
+ */
+export function roundDecimal(value: number, decimalPlaces: number = 2): number {
+  const multiplier = Math.pow(10, decimalPlaces)
+  return Math.round(value * multiplier) / multiplier
+}
+
 export function getHolidayTypeName(type: string | undefined): string {
   if (!type) return 'Unknown'
   const t = type.toLowerCase()

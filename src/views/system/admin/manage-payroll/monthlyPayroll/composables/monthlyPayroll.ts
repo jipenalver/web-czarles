@@ -15,6 +15,10 @@ export interface MonthlyPayrollRow {
   employee_name: string
   daily_rate: number
   days_worked: number
+  sunday_days: number
+  sunday_amount: number
+  cola: number
+  overtime_hrs: number
   basic_pay: number
   overtime_pay: number
   trips_pay: number
@@ -187,6 +191,18 @@ export function useMonthlyPayroll() {
 
     const overtimeRate = ((Number(payrollComp.employeeDailyRate.value) || 0) / 8) * 1.25
     const overtimeEarnings = overtimeRate * (Number(overallOvertime.value) || 0)
+    const overtimeHours = Number(overallOvertime.value) || 0
+
+    // Calculate Sunday work (assuming it's tracked in attendance or a separate field)
+    // For now, we'll set it to 0 - you can update this based on your attendance logic
+    const sundayDays = 0
+    const sundayAmount = 0
+
+    // Calculate COLA (Cost of Living Allowance)
+    // This is typically from non-deductions (benefits)
+    const colaAmount = nonDeductions.value
+      .filter((nd) => nd.benefit?.benefit?.toLowerCase().includes('cola'))
+      .reduce((sum, nd) => sum + (nd.amount || 0), 0)
 
     // Calculate detailed deductions
     const lateDeduction = netSalaryCalc.value.deductions.late || 0
@@ -200,6 +216,10 @@ export function useMonthlyPayroll() {
       employee_name: `${employee.firstname} ${employee.lastname}`,
       daily_rate: employee.daily_rate,
       days_worked: payrollComp.presentDays.value,
+      sunday_days: sundayDays,
+      sunday_amount: sundayAmount,
+      cola: colaAmount,
+      overtime_hrs: overtimeHours,
       basic_pay: payrollComp.regularWorkTotal.value,
       overtime_pay: overtimeEarnings,
       trips_pay: tripsEarnings,
