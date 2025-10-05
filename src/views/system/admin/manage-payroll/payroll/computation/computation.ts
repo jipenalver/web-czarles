@@ -19,6 +19,7 @@ export async function getEmployeeAttendanceById(
   leave_type?: string
   leave_reason?: string
   attendance_date?: string // Add attendance date to track the actual date
+  date?: string // Alias for attendance_date for compatibility
 }> | null> {
   // query sa attendance records para sa given employee ug range
   // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
@@ -71,18 +72,22 @@ export async function getEmployeeAttendanceById(
 
   // console.log('getEmployeeAttendanceById data:', data)
   return Array.isArray(data)
-    ? data.map((row) => ({
-        am_time_in: getTimeHHMM(row.am_time_in),
-        am_time_out: getTimeHHMM(row.am_time_out),
-        pm_time_in: getTimeHHMM(row.pm_time_in),
-        pm_time_out: getTimeHHMM(row.pm_time_out),
-        overtime_in: getTimeHHMM(row.overtime_in),
-        overtime_out: getTimeHHMM(row.overtime_out),
-        is_leave_with_pay: row.is_leave_with_pay,
-        leave_type: row.leave_type,
-        leave_reason: row.leave_reason,
-        attendance_date: row.am_time_in ? row.am_time_in.split('T')[0] : null, // Extract date from timestamp
-      }))
+    ? data.map((row) => {
+        const attendanceDate = row.am_time_in ? row.am_time_in.split('T')[0] : null
+        return {
+          am_time_in: getTimeHHMM(row.am_time_in),
+          am_time_out: getTimeHHMM(row.am_time_out),
+          pm_time_in: getTimeHHMM(row.pm_time_in),
+          pm_time_out: getTimeHHMM(row.pm_time_out),
+          overtime_in: getTimeHHMM(row.overtime_in),
+          overtime_out: getTimeHHMM(row.overtime_out),
+          is_leave_with_pay: row.is_leave_with_pay,
+          leave_type: row.leave_type,
+          leave_reason: row.leave_reason,
+          attendance_date: attendanceDate, // Extract date from timestamp
+          date: attendanceDate, // Alias for compatibility with Sunday detection
+        }
+      })
     : null
 }
 
@@ -189,6 +194,7 @@ export async function getEmployeeAttendanceForEmployee55(
   leave_type?: string
   leave_reason?: string
   attendance_date?: string
+  date?: string // Alias for attendance_date for compatibility
 }> | null> {
   // Only apply this special logic for employee ID 55
   if (Number(employeeId) !== 55) {

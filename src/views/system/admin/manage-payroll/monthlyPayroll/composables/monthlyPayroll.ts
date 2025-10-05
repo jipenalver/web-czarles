@@ -7,6 +7,7 @@ import { useCashAdvancesStore } from '@/stores/cashAdvances'
 import { type EmployeeDeduction } from '@/stores/benefits'
 import { useTripsStore, type Trip } from '@/stores/trips'
 import { getDateISO } from '@/utils/helpers/dates'
+import { getSundayDutyDaysForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
 
 import { ref, computed } from 'vue'
 
@@ -198,10 +199,10 @@ export function useMonthlyPayroll() {
     const overtimeEarnings = overtimeRate * (Number(overallOvertime.value) || 0)
     const overtimeHours = Number(overallOvertime.value) || 0
 
-    // Calculate Sunday work (assuming it's tracked in attendance or a separate field)
-    // For now, we'll set it to 0 - you can update this based on your attendance logic
-    const sundayDays = 0
-    const sundayAmount = 0
+    // Calculate Sunday work using the getSundayDutyDaysForMonth function
+    const sundayDays = await getSundayDutyDaysForMonth(dateString.value, employee.id)
+    // Sunday rate is typically 130% of the daily rate (30% premium)
+    const sundayAmount = sundayDays * (Number(employee.daily_rate) || 0) * 0.3
 
     // Calculate COLA (Cost of Living Allowance)
     // This is typically from non-deductions (benefits)
