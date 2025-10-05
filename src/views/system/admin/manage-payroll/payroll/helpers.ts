@@ -26,6 +26,16 @@ export const monthNames = [
   'December',
 ]
 
+/**
+ * Format currency in Philippine Peso (PHP)
+ */
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+  }).format(value)
+}
+
 export function getHolidayTypeName(type: string | undefined): string {
   if (!type) return 'Unknown'
   const t = type.toLowerCase()

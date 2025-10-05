@@ -1,12 +1,14 @@
-import { ref, computed } from 'vue'
+import { useOverallEarningsTotal, useNetSalaryCalculation } from '@/views/system/admin/manage-payroll/payroll/overallTotal'
+import { usePayrollComputation } from '@/views/system/admin/manage-payroll/payroll/payrollComputation'
+import { monthNames } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { useEmployeesStore, type Employee } from '@/stores/employees'
-import { useTripsStore, type Trip } from '@/stores/trips'
 import { useHolidaysStore, type Holiday } from '@/stores/holidays'
 import { useCashAdvancesStore } from '@/stores/cashAdvances'
 import { type EmployeeDeduction } from '@/stores/benefits'
-import { usePayrollComputation } from '../../payroll/payrollComputation'
-import { useOverallEarningsTotal, useNetSalaryCalculation } from '../../payroll/overallTotal'
+import { useTripsStore, type Trip } from '@/stores/trips'
 import { getDateISO } from '@/utils/helpers/dates'
+
+import { ref, computed } from 'vue'
 
 export interface MonthlyPayrollRow {
   employee_id: number
@@ -39,10 +41,8 @@ export interface MonthlyPayrollTotals {
   net_pay: number
 }
 
-export const monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
+
+
 
 /**
  * Composable for monthly payroll computation
@@ -82,7 +82,7 @@ export function useMonthlyPayroll() {
       employee.id,
       selectedMonth.value,
       selectedYear.value,
-      dateString.value
+      dateString.value,
     )
 
     // Wait for computation to complete
@@ -94,40 +94,42 @@ export function useMonthlyPayroll() {
     const endDate = new Date(selectedYear.value, monthIndex + 1, 0)
 
     const employeeTrips = ref<Trip[]>(
-      tripsStore.trips.filter(trip =>
-        trip.employee_id === employee.id &&
-        new Date(trip.trip_at) >= startDate &&
-        new Date(trip.trip_at) <= endDate
-      )
+      tripsStore.trips.filter(
+        (trip) =>
+          trip.employee_id === employee.id &&
+          new Date(trip.trip_at) >= startDate &&
+          new Date(trip.trip_at) <= endDate,
+      ),
     )
 
     // Get holidays for the month
     const employeeHolidays = ref<Holiday[]>(
-      holidaysStore.holidays.filter(holiday => {
+      holidaysStore.holidays.filter((holiday) => {
         const holidayDate = new Date(holiday.holiday_at)
         return holidayDate >= startDate && holidayDate <= endDate
-      })
+      }),
     )
 
     // Get cash advances
     const cashAdvance = ref(
       cashAdvancesStore.cashAdvances
-        .filter(ca =>
-          ca.employee_id === employee.id &&
-          new Date(ca.created_at) >= startDate &&
-          new Date(ca.created_at) <= endDate
+        .filter(
+          (ca) =>
+            ca.employee_id === employee.id &&
+            new Date(ca.created_at) >= startDate &&
+            new Date(ca.created_at) <= endDate,
         )
-        .reduce((sum, ca) => sum + (ca.amount || 0), 0)
+        .reduce((sum, ca) => sum + (ca.amount || 0), 0),
     )
 
     // Get employee deductions (from employee_deductions)
     const employeeDeductions = ref<EmployeeDeduction[]>(
-      employee.employee_deductions?.filter(ed => ed.benefit?.is_deduction) || []
+      employee.employee_deductions?.filter((ed) => ed.benefit?.is_deduction) || [],
     )
 
     // Get non-deductions (benefits)
     const nonDeductions = ref<EmployeeDeduction[]>(
-      employee.employee_deductions?.filter(ed => !ed.benefit?.is_deduction) || []
+      employee.employee_deductions?.filter((ed) => !ed.benefit?.is_deduction) || [],
     )
 
     const codaAllowance = ref(0)
@@ -150,7 +152,7 @@ export function useMonthlyPayroll() {
       employeeDailyRateComputed,
       overallOvertime,
       codaAllowance,
-      nonDeductions
+      nonDeductions,
     )
 
     // Show late deduction
@@ -163,14 +165,14 @@ export function useMonthlyPayroll() {
       payrollComp.lateDeduction,
       employeeDeductions,
       cashAdvance,
-      payrollComp.undertimeDeduction
+      payrollComp.undertimeDeduction,
     )
 
     // Calculate individual earnings breakdown
     const tripsEarnings = employeeTrips.value.reduce((sum, trip) => {
       const perTrip = Number(trip.per_trip) || 0
       const tripNo = Number(trip.trip_no) || 1
-      return sum + (perTrip * tripNo)
+      return sum + perTrip * tripNo
     }, 0)
 
     const holidayEarnings = employeeHolidays.value.reduce((sum, holiday) => {
@@ -180,7 +182,7 @@ export function useMonthlyPayroll() {
       if (type.includes('rh')) multiplier = 2.0
       else if (type.includes('snh')) multiplier = 1.5
       else if (type.includes('swh')) multiplier = 1.3
-      return sum + (baseRate * multiplier)
+      return sum + baseRate * multiplier
     }, 0)
 
     const overtimeRate = ((Number(payrollComp.employeeDailyRate.value) || 0) / 8) * 1.25
@@ -190,7 +192,8 @@ export function useMonthlyPayroll() {
     const lateDeduction = netSalaryCalc.value.deductions.late || 0
     const undertimeDeduction = netSalaryCalc.value.deductions.undertime || 0
     const cashAdvanceDeduction = netSalaryCalc.value.deductions.cashAdvance || 0
-    const employeeDeductionsTotal = netSalaryCalc.value.dynamicDeductions?.reduce((sum, d) => sum + d.amount, 0) || 0
+    const employeeDeductionsTotal =
+      netSalaryCalc.value.dynamicDeductions?.reduce((sum, d) => sum + d.amount, 0) || 0
 
     return {
       employee_id: employee.id,
@@ -225,7 +228,7 @@ export function useMonthlyPayroll() {
     try {
       // Load all employees
       await employeesStore.getEmployees()
-      const employees = employeesStore.employees.filter(emp => !emp.deleted_at)
+      const employees = employeesStore.employees.filter((emp) => !emp.deleted_at)
 
       // Load holidays and trips
       await holidaysStore.getHolidays()
@@ -260,23 +263,26 @@ export function useMonthlyPayroll() {
       }
     }
 
-    return monthlyPayrollData.value.reduce((acc, item) => ({
-      basic_pay: acc.basic_pay + (item.basic_pay || 0),
-      overtime_pay: acc.overtime_pay + (item.overtime_pay || 0),
-      trips_pay: acc.trips_pay + (item.trips_pay || 0),
-      holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
-      gross_pay: acc.gross_pay + (item.gross_pay || 0),
-      total_deductions: acc.total_deductions + (item.total_deductions || 0),
-      net_pay: acc.net_pay + (item.net_pay || 0),
-    }), {
-      basic_pay: 0,
-      overtime_pay: 0,
-      trips_pay: 0,
-      holidays_pay: 0,
-      gross_pay: 0,
-      total_deductions: 0,
-      net_pay: 0,
-    })
+    return monthlyPayrollData.value.reduce(
+      (acc, item) => ({
+        basic_pay: acc.basic_pay + (item.basic_pay || 0),
+        overtime_pay: acc.overtime_pay + (item.overtime_pay || 0),
+        trips_pay: acc.trips_pay + (item.trips_pay || 0),
+        holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
+        gross_pay: acc.gross_pay + (item.gross_pay || 0),
+        total_deductions: acc.total_deductions + (item.total_deductions || 0),
+        net_pay: acc.net_pay + (item.net_pay || 0),
+      }),
+      {
+        basic_pay: 0,
+        overtime_pay: 0,
+        trips_pay: 0,
+        holidays_pay: 0,
+        gross_pay: 0,
+        total_deductions: 0,
+        net_pay: 0,
+      },
+    )
   })
 
   return {
@@ -292,14 +298,4 @@ export function useMonthlyPayroll() {
     loadMonthlyPayroll,
     computeEmployeePayroll,
   }
-}
-
-/**
- * Format currency helper
- */
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-  }).format(value)
 }
