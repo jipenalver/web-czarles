@@ -6,11 +6,13 @@ const props = defineProps<{
   selectedMonth: string
   selectedYear: number
   loading: boolean
+  searchQuery: string
 }>()
 
 const emit = defineEmits<{
   'update:selectedMonth': [value: string]
   'update:selectedYear': [value: number]
+  'update:searchQuery': [value: string]
   generate: []
 }>()
 
@@ -42,7 +44,7 @@ const isGenerateDisabled = computed(() => {
 
     <v-card-text>
       <v-row>
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-select
             :model-value="selectedMonth"
             @update:model-value="emit('update:selectedMonth', $event)"
@@ -54,7 +56,7 @@ const isGenerateDisabled = computed(() => {
           ></v-select>
         </v-col>
 
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-select
             :model-value="selectedYear"
             @update:model-value="emit('update:selectedYear', $event)"
@@ -66,7 +68,20 @@ const isGenerateDisabled = computed(() => {
           ></v-select>
         </v-col>
 
-        <v-col cols="12" md="4" class="d-flex align-center">
+        <v-col cols="12" md="3">
+          <v-text-field
+            :model-value="searchQuery"
+            @update:model-value="emit('update:searchQuery', $event)"
+            label="Search Employee"
+            placeholder="Enter employee name..."
+            variant="outlined"
+            density="compact"
+            prepend-inner-icon="mdi-account-search"
+            clearable
+          ></v-text-field>
+        </v-col>
+
+        <v-col cols="12" md="3" class="d-flex align-center">
           <v-btn
             color="primary"
             @click="emit('generate')"

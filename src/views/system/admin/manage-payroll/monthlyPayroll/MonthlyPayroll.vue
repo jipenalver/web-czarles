@@ -31,6 +31,22 @@ watch([selectedMonth, selectedYear], () => {
 const formAlert = ref(false)
 const formMessage = ref('')
 const formStatus = ref<number>(200)
+
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = ref(25)
+
+// Search state
+const searchQuery = ref('')
+
+// Reset to first page when data changes or search query changes
+watch(monthlyPayrollData, () => {
+  currentPage.value = 1
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
 </script>
 
 <template>
@@ -45,6 +61,7 @@ const formStatus = ref<number>(200)
     <MonthlyPayrollFilters
       v-model:selected-month="selectedMonth"
       v-model:selected-year="selectedYear"
+      v-model:search-query="searchQuery"
       :loading="loading"
       @generate="loadMonthlyPayroll"
     />
@@ -55,6 +72,9 @@ const formStatus = ref<number>(200)
       class="mt-4"
       :items="monthlyPayrollData"
       :loading="loading"
+      :search-query="searchQuery"
+      v-model:current-page="currentPage"
+      v-model:items-per-page="itemsPerPage"
     />
 
     <!-- Empty State -->

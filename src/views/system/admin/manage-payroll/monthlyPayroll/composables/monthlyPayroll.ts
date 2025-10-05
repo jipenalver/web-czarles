@@ -25,10 +25,15 @@ export interface MonthlyPayrollRow {
   holidays_pay: number
   gross_pay: number
   deductions: {
+    cash_advance: number
+    sss: number
+    phic: number
+    pagibig: number
+    sss_loan: number
+    savings: number
+    salary_deposit: number
     late: number
     undertime: number
-    cash_advance: number
-    employee_deductions: number
     total: number
   }
   total_deductions: number
@@ -208,8 +213,31 @@ export function useMonthlyPayroll() {
     const lateDeduction = netSalaryCalc.value.deductions.late || 0
     const undertimeDeduction = netSalaryCalc.value.deductions.undertime || 0
     const cashAdvanceDeduction = netSalaryCalc.value.deductions.cashAdvance || 0
-    const employeeDeductionsTotal =
-      netSalaryCalc.value.dynamicDeductions?.reduce((sum, d) => sum + d.amount, 0) || 0
+
+    // Break down employee deductions by type
+    const sssDeduction = employeeDeductions.value
+      .filter((ed) => ed.benefit?.benefit?.toLowerCase().includes('sss') && !ed.benefit?.benefit?.toLowerCase().includes('loan'))
+      .reduce((sum, ed) => sum + (ed.amount || 0), 0)
+
+    const phicDeduction = employeeDeductions.value
+      .filter((ed) => ed.benefit?.benefit?.toLowerCase().includes('phic') || ed.benefit?.benefit?.toLowerCase().includes('philhealth'))
+      .reduce((sum, ed) => sum + (ed.amount || 0), 0)
+
+    const pagibigDeduction = employeeDeductions.value
+      .filter((ed) => ed.benefit?.benefit?.toLowerCase().includes('pag-ibig') || ed.benefit?.benefit?.toLowerCase().includes('pagibig'))
+      .reduce((sum, ed) => sum + (ed.amount || 0), 0)
+
+    const sssLoanDeduction = employeeDeductions.value
+      .filter((ed) => ed.benefit?.benefit?.toLowerCase().includes('sss') && ed.benefit?.benefit?.toLowerCase().includes('loan'))
+      .reduce((sum, ed) => sum + (ed.amount || 0), 0)
+
+    const savingsDeduction = employeeDeductions.value
+      .filter((ed) => ed.benefit?.benefit?.toLowerCase().includes('saving'))
+      .reduce((sum, ed) => sum + (ed.amount || 0), 0)
+
+    const salaryDepositDeduction = employeeDeductions.value
+      .filter((ed) => ed.benefit?.benefit?.toLowerCase().includes('salary') && ed.benefit?.benefit?.toLowerCase().includes('deposit'))
+      .reduce((sum, ed) => sum + (ed.amount || 0), 0)
 
     return {
       employee_id: employee.id,
@@ -226,10 +254,15 @@ export function useMonthlyPayroll() {
       holidays_pay: holidayEarnings,
       gross_pay: netSalaryCalc.value.grossSalary,
       deductions: {
+        cash_advance: cashAdvanceDeduction,
+        sss: sssDeduction,
+        phic: phicDeduction,
+        pagibig: pagibigDeduction,
+        sss_loan: sssLoanDeduction,
+        savings: savingsDeduction,
+        salary_deposit: salaryDepositDeduction,
         late: lateDeduction,
         undertime: undertimeDeduction,
-        cash_advance: cashAdvanceDeduction,
-        employee_deductions: employeeDeductionsTotal,
         total: netSalaryCalc.value.totalDeductions,
       },
       total_deductions: netSalaryCalc.value.totalDeductions,

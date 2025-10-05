@@ -18,7 +18,7 @@ const tabsItems = [
   },
   {
     icon: 'mdi-calendar-month',
-    text: 'Monthly Payroll',
+    text: 'Summary',
     value: 'monthly-payroll',
   },
   {
