@@ -15,6 +15,7 @@ const {
   selectedMonth,
   selectedYear,
   loadMonthlyPayroll,
+  refreshMonthlyPayroll,
 } = useMonthlyPayroll()
 
 // Use PDF composable
@@ -161,7 +162,7 @@ const handleExportPDF = async () => {
           <v-col cols="12" md="3" class="d-flex align-center">
             <v-btn
               color="primary"
-              @click="loadMonthlyPayroll"
+              @click="refreshMonthlyPayroll"
               :loading="loading"
               :disabled="!selectedMonth || !selectedYear"
               block

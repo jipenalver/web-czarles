@@ -55,6 +55,17 @@ export interface MonthlyPayrollTotals {
 
 
 /**
+ * Interface for pre-filtered month data to avoid repeated filtering
+ */
+interface MonthDataCache {
+  startDate: Date
+  endDate: Date
+  tripsByEmployee: Map<number, Trip[]>
+  holidays: Holiday[]
+  cashAdvancesByEmployee: Map<number, number>
+}
+
+/**
  * Composable for monthly payroll computation
  */
 export function useMonthlyPayroll() {
@@ -70,6 +81,9 @@ export function useMonthlyPayroll() {
   const selectedMonth = ref<string>('')
   const selectedYear = ref<number>(new Date().getFullYear())
 
+  // Cache to prevent reloading same month/year
+  const lastLoadedKey = ref<string>('')
+
   // Computed date string
   const dateString = computed(() => {
     if (!selectedMonth.value || !selectedYear.value) return ''
@@ -78,8 +92,57 @@ export function useMonthlyPayroll() {
     return getDateISO(date) || ''
   })
 
-  // Compute payroll for a single employee
-  async function computeEmployeePayroll(employee: Employee): Promise<MonthlyPayrollRow> {
+  /**
+   * Pre-filter and group all data by employee for the selected month
+   * This eliminates repeated filtering inside computeEmployeePayroll
+   */
+  function prepareMonthDataCache(): MonthDataCache {
+    const monthIndex = monthNames.indexOf(selectedMonth.value)
+    const startDate = new Date(selectedYear.value, monthIndex, 1)
+    const endDate = new Date(selectedYear.value, monthIndex + 1, 0)
+
+    // Group trips by employee
+    const tripsByEmployee = new Map<number, Trip[]>()
+    tripsStore.trips.forEach((trip) => {
+      const tripDate = new Date(trip.trip_at)
+      if (tripDate >= startDate && tripDate <= endDate && trip.employee_id) {
+        if (!tripsByEmployee.has(trip.employee_id)) {
+          tripsByEmployee.set(trip.employee_id, [])
+        }
+        tripsByEmployee.get(trip.employee_id)!.push(trip)
+      }
+    })
+
+    // Filter holidays for the month (holidays are shared across all employees)
+    const holidays = holidaysStore.holidays.filter((holiday) => {
+      const holidayDate = new Date(holiday.holiday_at)
+      return holidayDate >= startDate && holidayDate <= endDate
+    })
+
+    // Group and sum cash advances by employee
+    const cashAdvancesByEmployee = new Map<number, number>()
+    cashAdvancesStore.cashAdvances.forEach((ca) => {
+      const caDate = new Date(ca.created_at)
+      if (caDate >= startDate && caDate <= endDate && ca.employee_id) {
+        const currentAmount = cashAdvancesByEmployee.get(ca.employee_id) || 0
+        cashAdvancesByEmployee.set(ca.employee_id, currentAmount + (ca.amount || 0))
+      }
+    })
+
+    return {
+      startDate,
+      endDate,
+      tripsByEmployee,
+      holidays,
+      cashAdvancesByEmployee,
+    }
+  }
+
+  // Compute payroll for a single employee using pre-filtered data
+  async function computeEmployeePayroll(
+    employee: Employee,
+    monthDataCache: MonthDataCache,
+  ): Promise<MonthlyPayrollRow> {
     const dailyRate = ref(employee.daily_rate || 0)
     const grossSalary = ref(0)
     const tableData = ref<Record<string, unknown> | null>(null)
@@ -98,39 +161,10 @@ export function useMonthlyPayroll() {
     // Wait for computation to complete
     await payrollComp.computeRegularWorkTotal()
 
-    // Get trips for employee in selected month
-    const monthIndex = monthNames.indexOf(selectedMonth.value)
-    const startDate = new Date(selectedYear.value, monthIndex, 1)
-    const endDate = new Date(selectedYear.value, monthIndex + 1, 0)
-
-    const employeeTrips = ref<Trip[]>(
-      tripsStore.trips.filter(
-        (trip) =>
-          trip.employee_id === employee.id &&
-          new Date(trip.trip_at) >= startDate &&
-          new Date(trip.trip_at) <= endDate,
-      ),
-    )
-
-    // Get holidays for the month
-    const employeeHolidays = ref<Holiday[]>(
-      holidaysStore.holidays.filter((holiday) => {
-        const holidayDate = new Date(holiday.holiday_at)
-        return holidayDate >= startDate && holidayDate <= endDate
-      }),
-    )
-
-    // Get cash advances
-    const cashAdvance = ref(
-      cashAdvancesStore.cashAdvances
-        .filter(
-          (ca) =>
-            ca.employee_id === employee.id &&
-            new Date(ca.created_at) >= startDate &&
-            new Date(ca.created_at) <= endDate,
-        )
-        .reduce((sum, ca) => sum + (ca.amount || 0), 0),
-    )
+    // Use pre-filtered data from cache instead of filtering again
+    const employeeTrips = ref<Trip[]>(monthDataCache.tripsByEmployee.get(employee.id) || [])
+    const employeeHolidays = ref<Holiday[]>(monthDataCache.holidays)
+    const cashAdvance = ref(monthDataCache.cashAdvancesByEmployee.get(employee.id) || 0)
 
     // Get employee deductions (from employee_deductions)
     const employeeDeductions = ref<EmployeeDeduction[]>(
@@ -277,26 +311,42 @@ export function useMonthlyPayroll() {
       return
     }
 
+    // Check if we already have data for this month/year
+    const cacheKey = `${selectedMonth.value}-${selectedYear.value}`
+    if (lastLoadedKey.value === cacheKey && monthlyPayrollData.value.length > 0) {
+      // Data already loaded, skip reload
+      return
+    }
+
     loading.value = true
 
     try {
-      // Load all employees
-      await employeesStore.getEmployees()
+      // Load all employees and data in parallel
+      await Promise.all([
+        employeesStore.getEmployees(),
+        holidaysStore.getHolidays(),
+        tripsStore.getTrips(),
+        cashAdvancesStore.getCashAdvances(),
+      ])
+
       const employees = employeesStore.employees.filter((emp) => !emp.deleted_at)
 
-      // Load holidays and trips
-      await holidaysStore.getHolidays()
-      await tripsStore.getTrips()
-      await cashAdvancesStore.getCashAdvances()
+      // Pre-filter and group data ONCE for all employees
+      const monthDataCache = prepareMonthDataCache()
 
-      // Process each employee
+      // Process each employee with pre-filtered data
       const payrollPromises = employees.map(async (employee) => {
-        return await computeEmployeePayroll(employee)
+        return await computeEmployeePayroll(employee, monthDataCache)
       })
 
       monthlyPayrollData.value = await Promise.all(payrollPromises)
+
+      // Update cache key after successful load
+      lastLoadedKey.value = cacheKey
     } catch (error) {
       console.error('Error loading monthly payroll:', error)
+      // Clear cache on error to allow retry
+      lastLoadedKey.value = ''
       throw error
     } finally {
       loading.value = false
@@ -339,6 +389,12 @@ export function useMonthlyPayroll() {
     )
   })
 
+  // Force refresh - clears cache and reloads
+  async function refreshMonthlyPayroll() {
+    lastLoadedKey.value = ''
+    await loadMonthlyPayroll()
+  }
+
   return {
     // State
     loading,
@@ -350,6 +406,7 @@ export function useMonthlyPayroll() {
 
     // Methods
     loadMonthlyPayroll,
+    refreshMonthlyPayroll,
     computeEmployeePayroll,
   }
 }
