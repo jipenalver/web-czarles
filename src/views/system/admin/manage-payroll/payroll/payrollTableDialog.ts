@@ -5,6 +5,8 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { ref, watch, computed, onUnmounted } from 'vue'
 import { useEmployeesStore } from '@/stores/employees'
 import { type Employee } from '@/stores/employees'
+import { type Trip } from '@/stores/trips'
+import { type Holiday } from '@/stores/holidays'
 import { fetchCashAdvances } from './computation/cashAdvance'
 import { fetchEmployeeDeductions } from './computation/benefits'
 // import { useTripsStore } from '@/stores/trips'
@@ -37,6 +39,12 @@ export interface PayrollData {
   employee_id: number
 }
 
+// Interface for cash advance data
+interface CashAdvance {
+  amount: number
+  [key: string]: unknown
+}
+
 // Composable para sa Payroll Table Dialog
 export function usePayrollTableDialog(
   props: {
@@ -49,8 +57,83 @@ export function usePayrollTableDialog(
   // const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
 
+  // Type for year data cache
+  type YearData = {
+    employeeData: Employee | null | undefined
+    deductions: Awaited<ReturnType<typeof fetchEmployeeDeductions>>
+    monthlyData: Map<number, {
+      monthIndex: number
+      dateString: string
+      trips: Trip[]
+      holidays: Holiday[]
+      cashAdvances: CashAdvance[]
+    }>
+  }
+
+  // Cache para sa year data to avoid repeated fetches
+  const yearDataCache = ref<Map<string, YearData>>(new Map())
+
+  // Batch fetch all data for the entire year
+  const fetchYearData = async (employeeId: number, year: number): Promise<YearData> => {
+    const cacheKey = `${employeeId}-${year}`
+
+    // Check cache first
+    if (yearDataCache.value.has(cacheKey)) {
+      return yearDataCache.value.get(cacheKey)!
+    }
+
+    try {
+      // Fetch all data for the year in a single batch
+      const [employeeData, employeeDeductionsResult] = await Promise.all([
+        employeesStore.getEmployeesById(employeeId),
+        fetchEmployeeDeductions(employeeId),
+      ])
+
+      // Fetch year-wide data (trips, holidays, cash advances)
+      // Note: You may need to update these functions to accept year parameter
+      const yearPromises = []
+      for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+        const dateString = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`
+        const cashAdvanceDateString = `${dateString}-01`
+
+        yearPromises.push(
+          Promise.all([
+            fetchFilteredTrips(dateString, employeeId),
+            fetchHolidaysByDateString(dateString, employeeId.toString()),
+            fetchCashAdvances(cashAdvanceDateString, employeeId),
+          ]).then(([trips, holidays, cashAdvances]) => ({
+            monthIndex,
+            dateString,
+            trips: trips || [],
+            holidays: holidays || [],
+            cashAdvances: cashAdvances || [],
+          }))
+        )
+      }
+
+      const monthlyData = await Promise.all(yearPromises)
+
+      const yearData: YearData = {
+        employeeData,
+        deductions: employeeDeductionsResult,
+        monthlyData: new Map(monthlyData.map(m => [m.monthIndex, m])),
+      }
+
+      // Cache the result
+      yearDataCache.value.set(cacheKey, yearData)
+
+      return yearData
+    } catch (error) {
+      console.error(`Error fetching year data for ${year}:`, error)
+      throw error
+    }
+  }
+
   // Async payroll data generator using overallTotal composables
-  const generatePayrollData = async (monthIndex: number): Promise<TableData> => {
+  const generatePayrollData = async (
+    monthIndex: number,
+    yearData?: Awaited<ReturnType<typeof fetchYearData>>
+  ): Promise<TableData> => {
     const employeeId = props.itemData?.id
     const year = tableFilters.value.year
     const monthName = monthNames[monthIndex]
@@ -82,15 +165,32 @@ export function usePayrollTableDialog(
     }
 
     try {
-      // Fetch actual data para sa specific month ug employee
-      const [trips, holidays, employeeData, employeeDeductionsResult, cashAdvances] =
-        await Promise.all([
+      // Use yearData if provided (cached), otherwise fetch individual month data
+      let trips, holidays, employeeData, employeeDeductionsResult, cashAdvances
+
+      if (yearData) {
+        // Use cached year data
+        const monthData = yearData.monthlyData.get(monthIndex)
+        trips = monthData?.trips || []
+        holidays = monthData?.holidays || []
+        cashAdvances = monthData?.cashAdvances || []
+        employeeData = yearData.employeeData
+        employeeDeductionsResult = yearData.deductions
+      } else {
+        // Fallback: fetch individual month data (old behavior)
+        const results = await Promise.all([
           fetchFilteredTrips(dateString, employeeId),
           fetchHolidaysByDateString(dateString, employeeId.toString()),
           employeesStore.getEmployeesById(employeeId),
           fetchEmployeeDeductions(employeeId),
           fetchCashAdvances(cashAdvanceDateString, employeeId),
         ])
+        trips = results[0]
+        holidays = results[1]
+        employeeData = results[2]
+        employeeDeductionsResult = results[3]
+        cashAdvances = results[4]
+      }
 
       /*   console.log(`Data fetching results for ${monthName} ${year}:`, {
         employeeId,
@@ -156,7 +256,7 @@ export function usePayrollTableDialog(
 
       // Calculate total cash advance amount para sa month
       const totalCashAdvance =
-        cashAdvances?.reduce((sum, advance) => sum + (Number(advance.amount) || 0), 0) || 0
+        cashAdvances?.reduce((sum: number, advance: CashAdvance) => sum + (Number(advance.amount) || 0), 0) || 0
       const cashAdvance = ref(totalCashAdvance)
 
       // Debug log para sa cash advances
@@ -242,7 +342,7 @@ export function usePayrollTableDialog(
 
       // Get late deduction from payroll computation
       lateDeduction.value = payrollComp.lateDeduction.value
-      
+
       // Get undertime deduction from payroll computation
       const undertimeDeduction = ref(payrollComp.undertimeDeduction.value)
 
@@ -495,9 +595,21 @@ export function usePayrollTableDialog(
         tableOptions.value.isLoading = false
         return
       }
+
+      if (!employeeId) {
+        tableData.value = []
+        tableOptions.value.isLoading = false
+        return
+      }
+
+      // **Single batch fetch for the entire year**
+      const yearData = await fetchYearData(employeeId, tableFilters.value.year)
+
+      // Generate payroll for each month using cached year data
       const payrollPromises = availableMonths.value.map((monthIndex) =>
-        generatePayrollData(monthIndex),
+        generatePayrollData(monthIndex, yearData)
       )
+
       tableData.value = await Promise.all(payrollPromises)
       // Update cache marker so subsequent opens/changes don't refetch unnecessarily
       lastLoaded.value = { employeeId: props.itemData?.id ?? null, year: tableFilters.value.year, monthsKey }
@@ -571,6 +683,8 @@ export function usePayrollTableDialog(
       if (newId !== oldId) {
         tableData.value = []
         lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
+        // Clear year data cache for old employee
+        yearDataCache.value.clear()
       }
     },
   )
