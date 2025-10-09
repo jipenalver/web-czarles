@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
 import { formatCurrency, roundDecimal } from '@/views/system/admin/manage-payroll/payroll/helpers'
+import PayrollPrintFooter from '@/views/system/admin/manage-payroll/payroll/PayrollPrintFooter.vue'
 import { computed } from 'vue'
+import './monthlyPayroll.css'
 
 const props = defineProps<{
   items: MonthlyPayrollRow[]
@@ -61,10 +63,13 @@ const totals = computed(() => {
 </script>
 
 <template>
-  <!-- PDF Export Container - hidden table for PDF generation -->
+  <!-- PDF Export Container - visible for debugging -->
   <div style="display: none" id="monthly-payroll-table">
+    <div class="report-header">
+      <img src="/image-header-title.png" alt="Company Logo" class="header-logo" />
+    </div>
     <h2 class="report-title">
-      MONTHLY PAYROLL REPORT - {{ selectedMonth.toUpperCase() }} {{ selectedYear }}
+       {{ selectedMonth.toUpperCase() }} {{ selectedYear }} DRIVER & OPERATOR NO ATM SALARY SUMMARY
     </h2>
     <table class="pdf-table pa-2">
       <thead class="pdf-thead">
@@ -73,7 +78,7 @@ const totals = computed(() => {
           <th rowspan="3" class="pdf-th pdf-th--wide">Employee Name</th>
           <th colspan="9" class="pdf-th-group">PAYABLE</th>
           <th colspan="9" class="pdf-th-group">DEDUCTION</th>
-          <th rowspan="3" class="pdf-th pdf-th--narrow">Total Deductions</th>
+          <th rowspan="3" class="pdf-th pdf-th--narrow pdf-th--highlight-red">Total Deductions</th>
           <th rowspan="3" class="pdf-th pdf-th--narrow">Net Pay</th>
           <th rowspan="3" class="pdf-th pdf-th--signature">Signature</th>
         </tr>
@@ -87,7 +92,7 @@ const totals = computed(() => {
           <th colspan="2" class="pdf-th-subgroup">OT</th>
           <th rowspan="2" class="pdf-th pdf-th--extra-narrow">Holiday</th>
           <th rowspan="2" class="pdf-th pdf-th--extra-narrow">Trips</th>
-          <th rowspan="2" class="pdf-th pdf-th--narrow">Gross Pay</th>
+          <th rowspan="2" class="pdf-th pdf-th--narrow pdf-th--highlight-green">Gross Pay</th>
 
           <!-- Deduction Group -->
           <th rowspan="2" class="pdf-th pdf-th--extra-narrow">C/A</th>
@@ -129,7 +134,7 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.overtime_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.holidays_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.trips_pay) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(item.gross_pay) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">{{ formatCurrency(item.gross_pay) }}</td>
 
           <!-- Deduction Columns -->
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.cash_advance) }}</td>
@@ -143,7 +148,7 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.undertime) }}</td>
 
           <!-- Total Deductions -->
-          <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(item.total_deductions) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-red">{{ formatCurrency(item.total_deductions) }}</td>
 
           <!-- Net Pay -->
           <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(item.net_pay) }}</td>
@@ -165,7 +170,7 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.overtime_amount) }}</td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.holidays_pay) }}</td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.trips_pay) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(totals.gross_pay) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">{{ formatCurrency(totals.gross_pay) }}</td>
 
           <!-- Deduction Totals -->
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.cash_advance) }}</td>
@@ -179,7 +184,7 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.undertime) }}</td>
 
           <!-- Total Deductions Total -->
-          <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(totals.total_deductions) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-red">{{ formatCurrency(totals.total_deductions) }}</td>
 
           <!-- Net Pay Total -->
           <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(totals.net_pay) }}</td>
@@ -189,115 +194,13 @@ const totals = computed(() => {
         </tr>
       </tbody>
     </table>
+
+    <!-- Footer Component -->
+    <div class="footer-container">
+      <PayrollPrintFooter
+        :price="totals.net_pay"
+        :date-string="`${selectedMonth} ${selectedYear}`"
+      />
+    </div>
   </div>
 </template>
-
-<style scoped>
-.report-title {
-  text-align: center;
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: bold;
-  page-break-after: avoid;
-}
-
-.pdf-table {
-  border-collapse: collapse;
-  font-size: 6px;
-  width: 100%;
-  page-break-inside: auto;
-  table-layout: fixed;
-}
-
-.pdf-thead {
-  page-break-inside: avoid;
-  page-break-after: auto;
-}
-
-.pdf-th {
-  border: 1px solid #ddd;
-  padding: 2px;
-  text-align: center;
-  background-color: #f5f5f5;
-  font-size: 6px;
-  font-weight: bold;
-  width: 4%;
-}
-
-.pdf-th-group {
-  border: 1px solid #ddd;
-  padding: 2px;
-  text-align: center;
-  background-color: #e3f2fd;
-  font-size: 7px;
-  font-weight: bold;
-}
-
-.pdf-th-subgroup {
-  border: 1px solid #ddd;
-  padding: 2px;
-  text-align: center;
-  background-color: #f0f0f0;
-  font-size: 6px;
-  font-weight: bold;
-}
-
-.pdf-th--extra-narrow {
-  width: 3%;
-}
-
-.pdf-th--narrow {
-  width: 5%;
-}
-
-.pdf-th--wide {
-  width: 8%;
-}
-
-.pdf-th--signature {
-  width: 10%;
-}
-
-.pdf-tr {
-  page-break-inside: avoid;
-}
-
-.pdf-tr-total {
-  page-break-inside: avoid;
-  background-color: #f5f5f5;
-}
-
-.pdf-td {
-  border: 1px solid #ddd;
-  padding: 1px;
-  font-size: 6px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  width: 4%;
-  text-align: center;
-}
-
-.pdf-td--bold {
-  font-weight: bold;
-}
-
-.pdf-td--extra-narrow {
-  width: 3%;
-  font-size: 5px;
-}
-
-.pdf-td--narrow {
-  width: 5%;
-}
-
-.pdf-td--wide {
-  width: 8%;
-  text-align: left;
-}
-
-.pdf-td--signature {
-  width: 10%;
-  text-align: center;
-  height: 20px;
-}
-</style>
