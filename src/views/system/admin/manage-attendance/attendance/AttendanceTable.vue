@@ -5,12 +5,12 @@ import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
+import AttendanceTimeValue from './AttendanceTimeValue.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { getRandomCode } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
-import AttendanceTimeValue from './AttendanceTimeValue.vue'
 
 const props = defineProps<{
   componentView: 'attendance' | 'leave' | 'overtime'
