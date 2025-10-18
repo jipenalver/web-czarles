@@ -201,7 +201,7 @@ const {
           </span>
           <span
             v-else-if="item.pm_time_in && !hasAttendanceImage(item.attendance_images, 'pm_time_in')"
-            class="font-weight-bold cursor-pointer"
+            class="font-weight-bold"
           >
             {{ getTime(item.pm_time_in) }}
           </span>
