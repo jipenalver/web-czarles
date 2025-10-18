@@ -79,9 +79,9 @@ const { mobile } = useDisplay()
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
           <span class="text-body-2 font-weight-bold me-2">Field or Office:</span>
-          <p class="text-body-2">
+          <v-chip class="font-weight-black" color="default" size="small">
             {{ props.itemData.is_field_staff ? 'Field Staff' : 'Office Staff' }}
-          </p>
+          </v-chip>
         </v-col>
 
         <v-col
