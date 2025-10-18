@@ -10,6 +10,7 @@ import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { getRandomCode } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
+import AttendanceTimeValue from './AttendanceTimeValue.vue'
 
 const props = defineProps<{
   componentView: 'attendance' | 'leave' | 'overtime'
@@ -162,13 +163,12 @@ const {
           >
             {{ getTime(item.am_time_in) }}
           </span>
-          <span
+          <AttendanceTimeValue
             v-else-if="item.am_time_in && hasAttendanceImage(item.attendance_images, 'am_time_in')"
-            class="font-weight-bold cursor-pointer text-decoration-underline"
+            :item-data="item"
+            attendance-type="am_time_in"
             @click="onView(item, 'am_time_in')"
-          >
-            {{ getTime(item.am_time_in) }}
-          </span>
+          ></AttendanceTimeValue>
           <span v-else>-</span>
         </template>
 
@@ -184,15 +184,14 @@ const {
           >
             {{ getTime(item.am_time_out) }}
           </span>
-          <span
+          <AttendanceTimeValue
             v-else-if="
               item.am_time_out && hasAttendanceImage(item.attendance_images, 'am_time_out')
             "
-            class="font-weight-bold cursor-pointer text-decoration-underline"
+            :item-data="item"
+            attendance-type="am_time_out"
             @click="onView(item, 'am_time_out')"
-          >
-            {{ getTime(item.am_time_out) }}
-          </span>
+          ></AttendanceTimeValue>
           <span v-else>-</span>
         </template>
 
@@ -206,13 +205,12 @@ const {
           >
             {{ getTime(item.pm_time_in) }}
           </span>
-          <span
+          <AttendanceTimeValue
             v-else-if="item.pm_time_in && hasAttendanceImage(item.attendance_images, 'pm_time_in')"
-            class="font-weight-bold cursor-pointer text-decoration-underline"
+            :item-data="item"
+            attendance-type="pm_time_in"
             @click="onView(item, 'pm_time_in')"
-          >
-            {{ getTime(item.pm_time_in) }}
-          </span>
+          ></AttendanceTimeValue>
           <span v-else>-</span>
         </template>
 
@@ -228,15 +226,14 @@ const {
           >
             {{ getTime(item.pm_time_out) }}
           </span>
-          <span
+          <AttendanceTimeValue
             v-else-if="
               item.pm_time_out && hasAttendanceImage(item.attendance_images, 'pm_time_out')
             "
-            class="font-weight-bold cursor-pointer text-decoration-underline"
+            :item-data="item"
+            attendance-type="pm_time_out"
             @click="onView(item, 'pm_time_out')"
-          >
-            {{ getTime(item.pm_time_out) }}
-          </span>
+          ></AttendanceTimeValue>
           <span v-else>-</span>
         </template>
 
