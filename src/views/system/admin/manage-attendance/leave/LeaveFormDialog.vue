@@ -105,6 +105,7 @@ const {
                 class="ms-2"
                 color="primary"
                 hide-details
+                disabled
               >
                 <template #label>
                   Is Leave with Pay?
