@@ -2,6 +2,7 @@
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import UtilizationsTable from './utilizations/UtilizationsTable.vue'
 import TripLocationsTable from './locations/TripLocationsTable.vue'
+import AllowancesTable from './allowances/AllowancesTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import UnitsTable from './units/UnitsTable.vue'
@@ -21,6 +22,11 @@ const tabsItems = [
     icon: 'mdi-fuel',
     text: 'Utilizations',
     value: 'utilizations',
+  },
+  {
+    icon: 'mdi-cash-multiple',
+    text: 'Allowances',
+    value: 'allowances',
   },
   {
     icon: 'mdi-dump-truck',
@@ -74,6 +80,10 @@ const isDrawerVisible = ref(xs.value ? false : true)
 
           <v-tabs-window-item value="utilizations">
             <UtilizationsTable></UtilizationsTable>
+          </v-tabs-window-item>
+
+          <v-tabs-window-item value="allowances">
+            <AllowancesTable></AllowancesTable>
           </v-tabs-window-item>
 
           <v-tabs-window-item value="units">
