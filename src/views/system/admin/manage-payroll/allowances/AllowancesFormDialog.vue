@@ -59,13 +59,20 @@ const {
 
             <v-col cols="12" sm="6">
               <v-date-input
-                v-model="formData.trip_at"
+                v-model="formData.trip_range_at"
+                class="mb-2"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
                 label="Date"
                 placeholder="Select Date"
+                multiple="range"
                 :rules="[requiredValidator]"
-                hide-actions
+                :hide-actions="false"
+                :disabled="isUpdate"
+                :hint="
+                  isUpdate ? 'Date cannot be changed when updating' : 'You may select a date range'
+                "
+                persistent-hint
               ></v-date-input>
             </v-col>
 
@@ -93,7 +100,7 @@ const {
               <v-text-field
                 v-model="formData.amount"
                 prepend-inner-icon="mdi-currency-php"
-                label="Per Trip"
+                label="Amount"
                 type="number"
                 :rules="[requiredValidator]"
               ></v-text-field>

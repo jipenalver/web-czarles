@@ -1,4 +1,9 @@
-import { type Allowance, type AllowanceTableFilter, useAllowancesStore } from '@/stores/allowances'
+import {
+  type Allowance,
+  type AllowanceForm,
+  type AllowanceTableFilter,
+  useAllowancesStore,
+} from '@/stores/allowances'
 import { useTripLocationsStore } from '@/stores/tripLocations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -22,11 +27,11 @@ export function useAllowancesFormDialog(
   const formDataDefault = {
     employee_id: null,
     trip_location_id: null,
-    trip_at: new Date(),
+    trip_range_at: [new Date()],
     activities: '',
     amount: undefined,
   }
-  const formData = ref<Partial<Allowance>>({ ...formDataDefault })
+  const formData = ref<Partial<AllowanceForm>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -35,7 +40,9 @@ export function useAllowancesFormDialog(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
-      formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+      formData.value = props.itemData
+        ? { ...props.itemData, trip_range_at: [new Date(props.itemData.trip_at)] }
+        : { ...formDataDefault }
     },
   )
 
