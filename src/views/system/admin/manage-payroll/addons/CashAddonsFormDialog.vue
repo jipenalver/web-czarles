@@ -34,7 +34,11 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-plus" title="Salary Add-on">
+    <v-card
+      prepend-icon="mdi-cash-plus"
+      title="Salary Add-on"
+      subtitle="Additional Amount to be added on Employee's Payroll"
+    >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
@@ -52,11 +56,14 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
             <v-col cols="12">
               <v-date-input
                 v-model="formData.addon_at"
+                class="mb-2"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
                 label="Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
+                hint="Date that this add-on belongs to (e.g., payroll date or work date)"
+                persistent-hint
                 hide-actions
               ></v-date-input>
             </v-col>
@@ -70,12 +77,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
             </v-col>
 
             <v-col cols="12">
-              <v-textarea
-                v-model="formData.remarks"
-                label="Remarks"
-                rows="2"
-                :rules="[requiredValidator]"
-              ></v-textarea>
+              <v-textarea v-model="formData.remarks" label="Remarks" rows="2"></v-textarea>
             </v-col>
 
             <v-col cols="12">
