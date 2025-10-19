@@ -22,7 +22,7 @@ export function useAllowancesTable() {
     { title: 'Date', key: 'trip_at', align: 'start' },
     { title: 'Location', key: 'trip_location', sortable: false, align: 'start' },
     { title: 'Activities', key: 'activities', align: 'start' },
-    { title: 'Amount', key: 'amount', sortable: false, align: 'center' },
+    { title: 'Amount', key: 'amount', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)

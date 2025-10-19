@@ -19,7 +19,7 @@ export function useCashAddonsTable() {
     { title: 'Date', key: 'addon_at', align: 'start' },
     { title: 'Name', key: 'name', align: 'start' },
     { title: 'Remarks', key: 'remarks', align: 'start' },
-    { title: 'Amount', key: 'amount', sortable: false, align: 'center' },
+    { title: 'Amount', key: 'amount', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
