@@ -64,7 +64,7 @@ const getAttendanceTime = (type: string) => {
       <template #badge>
         <v-icon icon="mdi-cloud-off"></v-icon>
       </template>
-      <v-tooltip activator="parent" location="top">From Offline</v-tooltip>
+      <v-tooltip activator="parent" location="top">From Offline Mode</v-tooltip>
     </v-badge>
   </span>
 </template>
