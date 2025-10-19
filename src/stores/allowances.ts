@@ -114,7 +114,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
     return query
   }
 
-  async function addAllowances(formData: Partial<Allowance>) {
+  async function addAllowance(formData: Partial<Allowance>) {
     const preparedData = prepareFormDates(formData, ['trip_at'])
 
     return await supabase.from('allowances').insert(preparedData).select()
@@ -140,7 +140,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
     getAllowances,
     getAllowancesExport,
     getAllowancesTable,
-    addAllowances,
+    addAllowance,
     updateAllowance,
     deleteAllowance,
   }
