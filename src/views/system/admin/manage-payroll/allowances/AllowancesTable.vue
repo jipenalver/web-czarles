@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 // import LoadingDialog from '@/components/common/LoadingDialog.vue'
+import AllowancesFormDialog from './AllowancesFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAllowancesTable } from './allowancesTable'
 import { getMoneyText } from '@/utils/helpers/others'
@@ -16,9 +17,9 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -169,14 +170,14 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- <TripsPDF :table-filters="tableFilters" />
+  <!-- <TripsPDF :table-filters="tableFilters" /> -->
 
-  <TripsFormDialog
+  <AllowancesFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></TripsFormDialog> -->
+  ></AllowancesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"

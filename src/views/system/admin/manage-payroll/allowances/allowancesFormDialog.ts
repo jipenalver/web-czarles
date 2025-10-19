@@ -5,7 +5,7 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref, watch } from 'vue'
 
-export function useTripsFormDialog(
+export function useAllowancesFormDialog(
   props: {
     isDialogVisible: boolean
     itemData: Allowance | null
