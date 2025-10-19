@@ -65,7 +65,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
 
     let query = supabase.from('allowances').select(selectQuery).order(column, { ascending: order })
 
-    query = getTripsFilter(query, tableFilters)
+    query = getAllowancesFilter(query, tableFilters)
 
     const { data } = await query
 
@@ -84,7 +84,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getTripsFilter(query, tableFilters)
+    query = getAllowancesFilter(query, tableFilters)
 
     const { data } = await query
 
@@ -97,12 +97,12 @@ export const useAllowancesStore = defineStore('allowances', () => {
   async function getAllowancesCount(tableFilters: AllowanceTableFilter) {
     let query = supabase.from('allowances').select('*', { count: 'exact', head: true })
 
-    query = getTripsFilter(query, tableFilters)
+    query = getAllowancesFilter(query, tableFilters)
 
     return await query
   }
 
-  function getTripsFilter(
+  function getAllowancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
     { employee_id, trip_at }: AllowanceTableFilter,

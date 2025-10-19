@@ -42,7 +42,7 @@ const {
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-highway" title="Trip Details">
+    <v-card prepend-icon="mdi-cash-multiple" title="Allowance">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
