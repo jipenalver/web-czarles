@@ -37,7 +37,8 @@ export type AttendanceImage = {
   image_path: string
   image_type: string
   created_at: string
-  coordinates: string
+  coordinates: string | null
+  is_from_offline: boolean | null
 }
 
 export type AttendanceTableFilter = {

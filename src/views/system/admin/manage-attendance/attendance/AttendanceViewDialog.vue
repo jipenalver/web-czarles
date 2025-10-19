@@ -93,6 +93,17 @@ const { formAction, imageType, imageData, onDownload, onDialogClose } = useAtten
               {{ imageData?.coordinates }}
             </span>
           </v-col>
+
+          <v-col cols="12" class="d-flex justify-space-between align-center">
+            <strong>Mode:</strong>
+            <v-chip
+              class="font-weight-black"
+              :color="imageData?.is_from_offline ? 'warning' : 'success'"
+              size="small"
+            >
+              {{ imageData?.is_from_offline ? 'Offline' : 'Online' }}
+            </v-chip>
+          </v-col>
         </v-row>
       </v-card-text>
 
