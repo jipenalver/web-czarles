@@ -4,6 +4,7 @@ import EmployeesTable from '../manage-employees/employees/EmployeesTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import HolidaysTable from './holidays/HolidaysTable.vue'
+import SummaryTable from './summary/SummaryTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -14,6 +15,11 @@ const tabsItems = [
     icon: 'mdi-account-cash',
     text: 'Payroll',
     value: 'payroll',
+  },
+  {
+    icon: 'mdi-calendar-month',
+    text: 'Summary',
+    value: 'summary',
   },
   {
     icon: 'mdi-bed',
@@ -41,23 +47,35 @@ const isDrawerVisible = ref(xs.value ? false : true)
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
-          <v-tab
-            v-for="item in tabsItems"
-            :key="item.value"
-            class="mx-1"
-            :prepend-icon="item.icon"
-            :text="item.text"
-            :value="item.value"
-            min-width="200"
-            color="primary"
-            variant="flat"
-            rounded="lg"
-          ></v-tab>
+          <template v-for="(item, index) in tabsItems" :key="item.value">
+            <v-divider
+              v-if="index === 2"
+              class="border-opacity-100 mx-2"
+              thickness="2"
+              color="primary"
+              vertical
+            ></v-divider>
+
+            <v-tab
+              class="mx-1"
+              :prepend-icon="item.icon"
+              :text="item.text"
+              :value="item.value"
+              min-width="200"
+              color="primary"
+              variant="flat"
+              rounded="lg"
+            ></v-tab>
+          </template>
         </v-tabs>
 
         <v-tabs-window v-model="tabWindow">
           <v-tabs-window-item value="payroll">
             <EmployeesTable component-view="payroll"></EmployeesTable>
+          </v-tabs-window-item>
+
+          <v-tabs-window-item value="summary">
+            <SummaryTable></SummaryTable>
           </v-tabs-window-item>
 
           <v-tabs-window-item value="holidays">
