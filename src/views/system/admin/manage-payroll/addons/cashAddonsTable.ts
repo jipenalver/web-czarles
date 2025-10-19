@@ -7,7 +7,7 @@ import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
-export function useAddonsTable() {
+export function useCashAddonsTable() {
   const date = useDate()
 
   const cashAddonsStore = useCashAddonsStore()
@@ -99,7 +99,7 @@ export function useAddonsTable() {
   }
 
   const onExportCSV = () => {
-    const filename = `${getDateISO(new Date())}-trips`
+    const filename = `${getDateISO(new Date())}-cash-addons`
 
     const csvData = () => {
       const defaultHeaders = tableHeaders.value
