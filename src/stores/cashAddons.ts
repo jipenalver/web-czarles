@@ -7,62 +7,68 @@ import { type Employee } from './employees'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type Addon = {
+export type CashAddon = {
   id: number
   created_at: string
   addon_at: string | Date
   name: string
-  remarks: number
+  remarks: string
   amount: number
   employee_id: number | null
   employee: Employee
 }
 
-export type AddonTableFilter = {
+export type CashAddonTableFilter = {
   employee_id: number | null
   addon_at: Date[] | null
 }
 
-export const useCashAddonsStore = defineStore('cash_addons', () => {
+export const useCashAddonsStore = defineStore('cashAddons', () => {
   const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
 
   // States
-  const addons = ref<Addon[]>([])
-  const addonsTable = ref<Addon[]>([])
-  const addonsTableTotal = ref(0)
-  const addonsExport = ref<Addon[]>([])
+  const cashAddons = ref<CashAddon[]>([])
+  const cashAddonsTable = ref<CashAddon[]>([])
+  const cashAddonsTableTotal = ref(0)
+  const cashAddonsExport = ref<CashAddon[]>([])
 
   // Reset State
   function $reset() {
-    addons.value = []
-    addonsTable.value = []
-    addonsTableTotal.value = 0
-    addonsExport.value = []
+    cashAddons.value = []
+    cashAddonsTable.value = []
+    cashAddonsTableTotal.value = 0
+    cashAddonsExport.value = []
   }
 
   // Actions
-  async function getAddons() {
+  async function getCashAddons() {
     const { data } = await supabase
       .from('cash_addons')
       .select(selectQuery)
       .order('addon_at', { ascending: false })
 
-    addons.value = data as Addon[]
+    cashAddons.value = data as CashAddon[]
   }
 
-  async function getAddonsExport(tableOptions: TableOptions, tableFilters: AddonTableFilter) {
+  async function getCashAddonsExport(
+    tableOptions: TableOptions,
+    tableFilters: CashAddonTableFilter,
+  ) {
     const { column, order } = tablePagination(tableOptions, 'addon_at', false)
 
     let query = supabase.from('cash_addons').select(selectQuery).order(column, { ascending: order })
 
-    query = getAddonsFilter(query, tableFilters)
+    query = getCashAddonsFilter(query, tableFilters)
 
     const { data } = await query
 
-    addonsExport.value = data as Addon[]
+    cashAddonsExport.value = data as CashAddon[]
   }
 
-  async function getAddonsTable(tableOptions: TableOptions, tableFilters: AddonTableFilter) {
+  async function getCashAddonsTable(
+    tableOptions: TableOptions,
+    tableFilters: CashAddonTableFilter,
+  ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'addon_at', false)
 
     let query = supabase
@@ -71,28 +77,28 @@ export const useCashAddonsStore = defineStore('cash_addons', () => {
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getAddonsFilter(query, tableFilters)
+    query = getCashAddonsFilter(query, tableFilters)
 
     const { data } = await query
 
-    const { count } = await getAddonsCount(tableFilters)
+    const { count } = await getCashAddonsCount(tableFilters)
 
-    addonsTable.value = data as Addon[]
-    addonsTableTotal.value = count as number
+    cashAddonsTable.value = data as CashAddon[]
+    cashAddonsTableTotal.value = count as number
   }
 
-  async function getAddonsCount(tableFilters: AddonTableFilter) {
+  async function getCashAddonsCount(tableFilters: CashAddonTableFilter) {
     let query = supabase.from('cash_addons').select('*', { count: 'exact', head: true })
 
-    query = getAddonsFilter(query, tableFilters)
+    query = getCashAddonsFilter(query, tableFilters)
 
     return await query
   }
 
-  function getAddonsFilter(
+  function getCashAddonsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, addon_at }: AddonTableFilter,
+    { employee_id, addon_at }: CashAddonTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -105,34 +111,34 @@ export const useCashAddonsStore = defineStore('cash_addons', () => {
     return query
   }
 
-  async function addAddon(formData: Partial<Addon>) {
+  async function addCashAddon(formData: Partial<CashAddon>) {
     const preparedData = prepareFormDates(formData, ['addon_at'])
 
     return await supabase.from('cash_addons').insert(preparedData).select()
   }
 
-  async function updateAddon(formData: Partial<Addon>) {
+  async function updateCashAddon(formData: Partial<CashAddon>) {
     const { employee, ...updatedData } = prepareFormDates(formData, ['addon_at'])
 
     return await supabase.from('cash_addons').update(updatedData).eq('id', formData.id).select()
   }
 
-  async function deleteAddon(id: number) {
+  async function deleteCashAddon(id: number) {
     return await supabase.from('cash_addons').delete().eq('id', id).select()
   }
 
   // Expose States and Actions
   return {
-    addons,
-    addonsTable,
-    addonsTableTotal,
-    addonsExport,
+    cashAddons,
+    cashAddonsTable,
+    cashAddonsTableTotal,
+    cashAddonsExport,
     $reset,
-    getAddons,
-    getAddonsExport,
-    getAddonsTable,
-    addAddon,
-    updateAddon,
-    deleteAddon,
+    getCashAddons,
+    getCashAddonsExport,
+    getCashAddonsTable,
+    addCashAddon,
+    updateCashAddon,
+    deleteCashAddon,
   }
 })
