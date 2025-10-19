@@ -47,18 +47,26 @@ const isDrawerVisible = ref(xs.value ? false : true)
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
-          <v-tab
-            v-for="item in tabsItems"
-            :key="item.value"
-            class="mx-1"
-            :prepend-icon="item.icon"
-            :text="item.text"
-            :value="item.value"
-            min-width="200"
-            color="primary"
-            variant="flat"
-            rounded="lg"
-          ></v-tab>
+          <template v-for="(item, index) in tabsItems" :key="item.value">
+            <v-divider
+              v-if="index === 2"
+              class="border-opacity-100 mx-2"
+              thickness="2"
+              color="primary"
+              vertical
+            ></v-divider>
+
+            <v-tab
+              class="mx-1"
+              :prepend-icon="item.icon"
+              :text="item.text"
+              :value="item.value"
+              min-width="200"
+              color="primary"
+              variant="flat"
+              rounded="lg"
+            ></v-tab>
+          </template>
         </v-tabs>
 
         <v-tabs-window v-model="tabWindow">
