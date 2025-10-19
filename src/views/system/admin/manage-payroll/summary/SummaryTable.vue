@@ -92,7 +92,7 @@ const handleExportPDF = async () => {
 
     <!-- Combined Card with Filters and Table -->
     <v-card>
-      <v-card-title class="d-flex align-center">
+      <v-card-text class="d-flex align-center">
         <!-- 3-dot menu on the left -->
         <v-menu v-model="menuOpen" :close-on-content-click="false">
           <template v-slot:activator="{ props }">
@@ -114,9 +114,11 @@ const handleExportPDF = async () => {
           </v-list>
         </v-menu>
 
-        <v-icon icon="mdi-calendar-month" class="me-2"></v-icon>
-        <span>Monthly Payroll Summary</span>
-      </v-card-title>
+        <span class="text-h5">
+          <v-icon class="me-2" icon="mdi-calendar-month" size="small"></v-icon>
+          Payroll Summary
+        </span>
+      </v-card-text>
 
       <!-- Filters Section -->
       <v-card-text>

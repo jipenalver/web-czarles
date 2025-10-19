@@ -4,7 +4,7 @@ import EmployeesTable from '../manage-employees/employees/EmployeesTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import HolidaysTable from './holidays/HolidaysTable.vue'
-import MonthlyPayroll from './monthlyPayroll/MonthlyPayroll.vue'
+import SummaryTable from './summary/SummaryTable.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -19,7 +19,7 @@ const tabsItems = [
   {
     icon: 'mdi-calendar-month',
     text: 'Summary',
-    value: 'monthly-payroll',
+    value: 'summary',
   },
   {
     icon: 'mdi-bed',
@@ -66,8 +66,8 @@ const isDrawerVisible = ref(xs.value ? false : true)
             <EmployeesTable component-view="payroll"></EmployeesTable>
           </v-tabs-window-item>
 
-          <v-tabs-window-item value="monthly-payroll">
-            <MonthlyPayroll></MonthlyPayroll>
+          <v-tabs-window-item value="summary">
+            <SummaryTable></SummaryTable>
           </v-tabs-window-item>
 
           <v-tabs-window-item value="holidays">
