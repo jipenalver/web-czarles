@@ -4,7 +4,7 @@ import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Allowance, useAllowancesStore } from '@/stores/allowances'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
-// import { useTripsPDF } from './pdf/tripsPDF'
+// import { useAllowancesPDF } from './pdf/allowancesPDF'
 import { onMounted, ref } from 'vue'
 import { useDate } from 'vuetify'
 
@@ -14,7 +14,7 @@ export function useAllowancesTable() {
   const allowancesStore = useAllowancesStore()
   const employeesStore = useEmployeesStore()
 
-  // const { isLoadingPDF, formAction: formActionPDF, onExport } = useTripsPDF()
+  // const { isLoadingPDF, formAction: formActionPDF, onExport } = useAllowancesPDF()
 
   // States
   const baseHeaders: TableHeader[] = [

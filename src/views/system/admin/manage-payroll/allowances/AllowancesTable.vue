@@ -5,8 +5,7 @@ import AllowancesFormDialog from './AllowancesFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAllowancesTable } from './allowancesTable'
 import { getMoneyText } from '@/utils/helpers/others'
-// import TripsFormDialog from './TripsFormDialog.vue'
-// import TripsPDF from './pdf/TripsPDF.vue'
+// import AllowancesPDF from './pdf/AllowancesPDF.vue'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
@@ -170,7 +169,7 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- <TripsPDF :table-filters="tableFilters" /> -->
+  <!-- <AllowancesPDF :table-filters="tableFilters" /> -->
 
   <AllowancesFormDialog
     v-model:is-dialog-visible="isDialogVisible"

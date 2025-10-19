@@ -45,7 +45,7 @@ const tabsItems = [
   },
 ]
 
-const tabWindow = ref('trips')
+const tabWindow = ref('miscellaneous')
 const isDrawerVisible = ref(xs.value ? false : true)
 </script>
 
