@@ -5,6 +5,7 @@ import TripLocationsTable from './locations/TripLocationsTable.vue'
 import AllowancesTable from './allowances/AllowancesTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
+import AddonsTable from './addons/AddonsTable.vue'
 import UnitsTable from './units/UnitsTable.vue'
 import TripsTable from './trips/TripsTable.vue'
 import { useDisplay } from 'vuetify'
@@ -15,8 +16,8 @@ const { xs } = useDisplay()
 const tabsItems = [
   {
     icon: 'mdi-cash-plus',
-    text: 'Miscellaneous',
-    value: 'miscellaneous',
+    text: 'Add-ons',
+    value: 'addons',
   },
   {
     icon: 'mdi-highway',
@@ -45,7 +46,7 @@ const tabsItems = [
   },
 ]
 
-const tabWindow = ref('miscellaneous')
+const tabWindow = ref('addons')
 const isDrawerVisible = ref(xs.value ? false : true)
 </script>
 
@@ -58,9 +59,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Payroll Management', 'Addons']"
+          :header-items="['Payroll Management', 'Salary Add-ons']"
           header-icon="mdi-cash-multiple"
-          headline="Manage employee's addons on monthly payroll."
+          headline="Manage employee's salary add-ons on monthly payroll."
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
@@ -87,7 +88,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
         </v-tabs>
 
         <v-tabs-window v-model="tabWindow">
-          <v-tabs-window-item value="miscellaneous"> </v-tabs-window-item>
+          <v-tabs-window-item value="addons">
+            <AddonsTable></AddonsTable>
+          </v-tabs-window-item>
 
           <v-tabs-window-item value="trips">
             <TripsTable></TripsTable>
