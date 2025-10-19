@@ -302,3 +302,59 @@ export function isFridayOrSaturday(dateString: string): boolean {
   const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
   return dayOfWeek === 5 || dayOfWeek === 6 // Friday or Saturday
 }
+
+// Helper function to check if a date is Sunday
+export function isSunday(dateString: string): boolean {
+  const date = new Date(dateString)
+  const dayOfWeek = date.getDay() // 0 = Sunday
+  return dayOfWeek === 0
+}
+
+// 👉 Get total Sunday duty days para sa employee sa specific month
+export const getSundayDutyDaysForMonth = async (
+  filterDateString: string, // Format: "YYYY-MM-01"
+  employeeId: number,
+): Promise<number> => {
+  // Extract year-month from filterDateString para sa month range
+  const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
+
+  try {
+    // Fetch tanan attendance records para sa specific month
+    // Use special function for employee 55, regular function for others
+    const attendancesResult = employeeId === 55
+      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
+      : await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+    const attendances: AttendanceRecord[] = attendancesResult || []
+
+    if (!Array.isArray(attendances) || attendances.length === 0) {
+      return 0
+    }
+
+    let sundayDutyCounter = 0
+
+    // Iterate through all attendance records and check if the date is Sunday
+    attendances.forEach((attendance) => {
+      // Check if attendance has a date and if it's a Sunday
+      if (attendance.date && isSunday(attendance.date)) {
+        // Additional check: only count if there's actual time-in recorded
+        if (attendance.am_time_in || attendance.pm_time_in) {
+          sundayDutyCounter++
+          /* console.log(`[getSundayDutyDaysForMonth] Sunday duty found:`, {
+            date: attendance.date,
+            am_time_in: attendance.am_time_in,
+            pm_time_in: attendance.pm_time_in,
+          }) */
+        }
+      }
+    })
+
+    /* console.log(
+      `[getSundayDutyDaysForMonth] Total Sunday duty days for employee ${employeeId} in month ${dateStringForQuery}:`,
+      sundayDutyCounter,
+    ) */
+    return sundayDutyCounter
+  } catch (error) {
+    console.error('Error sa getSundayDutyDaysForMonth:', error)
+    return 0
+  }
+}

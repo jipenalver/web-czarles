@@ -1,6 +1,7 @@
 import { useEmployeesStore, type Employee } from '@/stores/employees'
 import { supabase } from '@/utils/supabase'
 import { getTimeHHMM } from '../helpers'
+import { getDateISO } from '@/utils/helpers/dates'
 
 export async function getEmployeeAttendanceById(
   employeeId: number | string,
@@ -18,6 +19,7 @@ export async function getEmployeeAttendanceById(
   leave_type?: string
   leave_reason?: string
   attendance_date?: string // Add attendance date to track the actual date
+  date?: string // Alias for attendance_date for compatibility
 }> | null> {
   // query sa attendance records para sa given employee ug range
   // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
@@ -28,22 +30,26 @@ export async function getEmployeeAttendanceById(
     // normalize to start of fromDate and exclusive end of toDate (add one day)
     const start = fromDateISO.includes('T')
       ? new Date(fromDateISO)
-      : new Date(`${fromDateISO}T00:00:00.000Z`)
+      : new Date(`${fromDateISO}T00:00:00`)
     const endBase = toDateISO.includes('T')
       ? new Date(toDateISO)
-      : new Date(`${toDateISO}T00:00:00.000Z`)
-    const end = new Date(endBase)
-    end.setDate(end.getDate() + 1)
+      : new Date(`${toDateISO}T23:59:59`)
     startISO = start.toISOString()
-    endISO = new Date(end.getTime() - 1).toISOString()
+    endISO = endBase.toISOString()
   } else {
-    // fallback to using dateString (format: YYYY-MM)
-    const startOfMonth = `${dateString}-01T00:00:00.000Z`
-    const [year, month] = dateString.split('-')
-    const nextMonth = new Date(parseInt(year), parseInt(month), 1)
-    const endOfMonth = nextMonth.toISOString()
-    startISO = startOfMonth
-    endISO = endOfMonth
+    // fallback to using dateString (format: YYYY-MM-DD or YYYY-MM)
+    // Extract year and month from dateString
+    const parts = dateString.split('-')
+    const year = parseInt(parts[0])
+    const month = parseInt(parts[1])
+
+    // Create start of month (first day at 00:00:00)
+    const startOfMonth = new Date(year, month - 1, 1)
+    // Create end of month (last day at 23:59:59)
+    const endOfMonth = new Date(year, month, 0, 23, 59, 59)
+
+    startISO = startOfMonth.toISOString()
+    endISO = endOfMonth.toISOString()
   }
 
   // debug
@@ -66,18 +72,22 @@ export async function getEmployeeAttendanceById(
 
   // console.log('getEmployeeAttendanceById data:', data)
   return Array.isArray(data)
-    ? data.map((row) => ({
-        am_time_in: getTimeHHMM(row.am_time_in),
-        am_time_out: getTimeHHMM(row.am_time_out),
-        pm_time_in: getTimeHHMM(row.pm_time_in),
-        pm_time_out: getTimeHHMM(row.pm_time_out),
-        overtime_in: getTimeHHMM(row.overtime_in),
-        overtime_out: getTimeHHMM(row.overtime_out),
-        is_leave_with_pay: row.is_leave_with_pay,
-        leave_type: row.leave_type,
-        leave_reason: row.leave_reason,
-        attendance_date: row.am_time_in ? row.am_time_in.split('T')[0] : null, // Extract date from timestamp
-      }))
+    ? data.map((row) => {
+        const attendanceDate = row.am_time_in ? row.am_time_in.split('T')[0] : null
+        return {
+          am_time_in: getTimeHHMM(row.am_time_in),
+          am_time_out: getTimeHHMM(row.am_time_out),
+          pm_time_in: getTimeHHMM(row.pm_time_in),
+          pm_time_out: getTimeHHMM(row.pm_time_out),
+          overtime_in: getTimeHHMM(row.overtime_in),
+          overtime_out: getTimeHHMM(row.overtime_out),
+          is_leave_with_pay: row.is_leave_with_pay,
+          leave_type: row.leave_type,
+          leave_reason: row.leave_reason,
+          attendance_date: attendanceDate, // Extract date from timestamp
+          date: attendanceDate, // Alias for compatibility with Sunday detection
+        }
+      })
     : null
 }
 
@@ -94,7 +104,7 @@ export function computeOvertimeHours(
 ): number {
   if (!overtimeIn || !overtimeOut) return 0
   // parse time strings to Date objects (use today as date)
-  const today = new Date().toISOString().split('T')[0]
+  const today = getDateISO(new Date()) || new Date().toISOString().split('T')[0]
   const inDate = new Date(`${today}T${overtimeIn}:00`)
   const outDate = new Date(`${today}T${overtimeOut}:00`)
   const diffMs = outDate.getTime() - inDate.getTime()
@@ -143,7 +153,7 @@ export async function computeOverallOvertimeCalculation(
 
 // Helper function to compute excess minutes (late)
 export function getExcessMinutes(defaultOut: string, actualOut: string): number {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getDateISO(new Date()) || new Date().toISOString().split('T')[0]
   const defaultDate = new Date(`${today}T${defaultOut}:00`)
   const actualDate = new Date(`${today}T${actualOut}:00`)
   const diffMs = actualDate.getTime() - defaultDate.getTime()
@@ -154,7 +164,7 @@ export function getExcessMinutes(defaultOut: string, actualOut: string): number 
 // Helper function to compute undertime minutes (early time-out)
 export function getUndertimeMinutes(expectedOut: string, actualOut: string): number {
   if (!actualOut) return 0 // No time-out recorded
-  const today = new Date().toISOString().split('T')[0]
+  const today = getDateISO(new Date()) || new Date().toISOString().split('T')[0]
   const expectedDate = new Date(`${today}T${expectedOut}:00`)
   const actualDate = new Date(`${today}T${actualOut}:00`)
   const diffMs = expectedDate.getTime() - actualDate.getTime()
@@ -184,6 +194,7 @@ export async function getEmployeeAttendanceForEmployee55(
   leave_type?: string
   leave_reason?: string
   attendance_date?: string
+  date?: string // Alias for attendance_date for compatibility
 }> | null> {
   // Only apply this special logic for employee ID 55
   if (Number(employeeId) !== 55) {
