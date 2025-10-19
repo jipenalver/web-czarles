@@ -81,7 +81,7 @@ const isGenerateDisabled = computed(() => {
           ></v-text-field>
         </v-col>
 
-        <v-col cols="12" md="3" class="d-flex align-center">
+        <v-col cols="12" md="3">
           <v-btn
             color="primary"
             @click="emit('generate')"

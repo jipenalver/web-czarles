@@ -24,9 +24,7 @@ const filteredItems = computed(() => {
   }
 
   const query = props.searchQuery.toLowerCase().trim()
-  return props.items.filter((item) =>
-    item.employee_name.toLowerCase().includes(query)
-  )
+  return props.items.filter((item) => item.employee_name.toLowerCase().includes(query))
 })
 
 // Paginated items
@@ -107,7 +105,9 @@ const totals = computed(() => {
             <th colspan="9" class="text-center font-weight-bold text-uppercase text-error border">
               DEDUCTION
             </th>
-            <th rowspan="3" class="text-center font-weight-bold text-error border">Total Deductions</th>
+            <th rowspan="3" class="text-center font-weight-bold text-error border">
+              Total Deductions
+            </th>
             <th rowspan="3" class="text-center font-weight-bold text-success border">Net Pay</th>
           </tr>
 
@@ -120,9 +120,7 @@ const totals = computed(() => {
             <th colspan="2" class="text-center font-weight-medium border">Overtime</th>
             <th rowspan="2" class="text-center text-caption border">Holiday Pay</th>
             <th rowspan="2" class="text-center text-caption border">Monthly Tripping</th>
-            <th rowspan="2" class="text-center text-caption border font-weight-bold">
-              Gross Pay
-            </th>
+            <th rowspan="2" class="text-center text-caption border font-weight-bold">Gross Pay</th>
 
             <!-- Deduction Sub-columns -->
             <th rowspan="2" class="text-center text-caption border">Total C/A</th>
@@ -172,9 +170,15 @@ const totals = computed(() => {
             </td>
             <td class="text-end text-error border">{{ formatCurrency(item.deductions.sss) }}</td>
             <td class="text-end text-error border">{{ formatCurrency(item.deductions.phic) }}</td>
-            <td class="text-end text-error border">{{ formatCurrency(item.deductions.pagibig) }}</td>
-            <td class="text-end text-error border">{{ formatCurrency(item.deductions.sss_loan) }}</td>
-            <td class="text-end text-error border">{{ formatCurrency(item.deductions.savings) }}</td>
+            <td class="text-end text-error border">
+              {{ formatCurrency(item.deductions.pagibig) }}
+            </td>
+            <td class="text-end text-error border">
+              {{ formatCurrency(item.deductions.sss_loan) }}
+            </td>
+            <td class="text-end text-error border">
+              {{ formatCurrency(item.deductions.savings) }}
+            </td>
             <td class="text-end text-error border">
               {{ formatCurrency(item.deductions.salary_deposit) }}
             </td>
@@ -267,7 +271,12 @@ const totals = computed(() => {
       </v-alert>
 
       <!-- No Results from Search -->
-      <v-alert v-if="!loading && items.length > 0 && filteredItems.length === 0" type="warning" variant="tonal" class="mt-4">
+      <v-alert
+        v-if="!loading && items.length > 0 && filteredItems.length === 0"
+        type="warning"
+        variant="tonal"
+        class="mt-4"
+      >
         <v-icon icon="mdi-magnify-close" class="me-2"></v-icon>
         No employees found matching "{{ searchQuery }}". Try a different search term.
       </v-alert>

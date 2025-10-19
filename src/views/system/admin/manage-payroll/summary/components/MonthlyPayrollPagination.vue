@@ -107,9 +107,7 @@ const isLastPage = computed(() => props.currentPage === totalPages.value)
         @click="goToPreviousPage"
       ></v-btn>
 
-      <span class="text-caption mx-2">
-        Page {{ currentPage }} of {{ totalPages }}
-      </span>
+      <span class="text-caption mx-2"> Page {{ currentPage }} of {{ totalPages }} </span>
 
       <v-btn
         icon="mdi-chevron-right"

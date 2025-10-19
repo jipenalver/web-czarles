@@ -69,7 +69,7 @@ const totals = computed(() => {
       <img src="/image-header-title.png" alt="Company Logo" class="header-logo" />
     </div>
     <h2 class="report-title">
-       {{ selectedMonth.toUpperCase() }} {{ selectedYear }} DRIVER & OPERATOR NO ATM SALARY SUMMARY
+      {{ selectedMonth.toUpperCase() }} {{ selectedYear }} DRIVER & OPERATOR NO ATM SALARY SUMMARY
     </h2>
     <table class="pdf-table pa-2">
       <thead class="pdf-thead">
@@ -134,21 +134,33 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.overtime_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.holidays_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.trips_pay) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">{{ formatCurrency(item.gross_pay) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">
+            {{ formatCurrency(item.gross_pay) }}
+          </td>
 
           <!-- Deduction Columns -->
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.cash_advance) }}</td>
+          <td class="pdf-td pdf-td--extra-narrow">
+            {{ formatCurrency(item.deductions.cash_advance) }}
+          </td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.sss) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.phic) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.pagibig) }}</td>
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.sss_loan) }}</td>
+          <td class="pdf-td pdf-td--extra-narrow">
+            {{ formatCurrency(item.deductions.sss_loan) }}
+          </td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.savings) }}</td>
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.salary_deposit) }}</td>
+          <td class="pdf-td pdf-td--extra-narrow">
+            {{ formatCurrency(item.deductions.salary_deposit) }}
+          </td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.late) }}</td>
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.deductions.undertime) }}</td>
+          <td class="pdf-td pdf-td--extra-narrow">
+            {{ formatCurrency(item.deductions.undertime) }}
+          </td>
 
           <!-- Total Deductions -->
-          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-red">{{ formatCurrency(item.total_deductions) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-red">
+            {{ formatCurrency(item.total_deductions) }}
+          </td>
 
           <!-- Net Pay -->
           <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(item.net_pay) }}</td>
@@ -164,27 +176,59 @@ const totals = computed(() => {
           <!-- Payable Totals -->
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ totals.days_worked }}</td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ totals.sunday_days }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.sunday_amount) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.cola) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ roundDecimal(totals.overtime_hrs, 2) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.overtime_amount) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.holidays_pay) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.trips_pay) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">{{ formatCurrency(totals.gross_pay) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.sunday_amount) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.cola) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ roundDecimal(totals.overtime_hrs, 2) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.overtime_amount) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.holidays_pay) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.trips_pay) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">
+            {{ formatCurrency(totals.gross_pay) }}
+          </td>
 
           <!-- Deduction Totals -->
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.cash_advance) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.cash_advance) }}
+          </td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.sss) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.phic) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.pagibig) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.sss_loan) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.savings) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.salary_deposit) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.late) }}</td>
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ formatCurrency(totals.undertime) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.phic) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.pagibig) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.sss_loan) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.savings) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.salary_deposit) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.late) }}
+          </td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ formatCurrency(totals.undertime) }}
+          </td>
 
           <!-- Total Deductions Total -->
-          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-red">{{ formatCurrency(totals.total_deductions) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-red">
+            {{ formatCurrency(totals.total_deductions) }}
+          </td>
 
           <!-- Net Pay Total -->
           <td class="pdf-td pdf-td--bold pdf-td--narrow">{{ formatCurrency(totals.net_pay) }}</td>

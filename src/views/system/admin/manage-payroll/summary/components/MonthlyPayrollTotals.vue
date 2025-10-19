@@ -2,7 +2,6 @@
 import { formatCurrency } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
 
-
 defineProps<{
   payrollData: MonthlyPayrollRow[]
 }>()

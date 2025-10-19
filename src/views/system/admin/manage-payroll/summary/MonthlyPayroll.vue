@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/monthlyPayroll/components/MonthlyPayrollTable.vue'
-import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/monthlyPayroll/pdf/MonthlyPayrollPDF.vue'
-import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/monthlyPayroll/composables/monthlyPayroll'
-import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/monthlyPayroll/pdf/monthlyPayrollPDF'
+import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/summary/components/MonthlyPayrollTable.vue'
+import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/summary/pdf/MonthlyPayrollPDF.vue'
+import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayroll'
+import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summary/pdf/monthlyPayrollPDF'
 import { monthNames } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
@@ -124,11 +124,13 @@ const handleExportPDF = async () => {
           <v-col cols="12" md="3">
             <v-select
               v-model="selectedMonth"
-              :items="monthNames.map((month, index) => ({
-                title: month,
-                value: month,
-                index: index,
-              }))"
+              :items="
+                monthNames.map((month, index) => ({
+                  title: month,
+                  value: month,
+                  index: index,
+                }))
+              "
               label="Select Month"
               variant="outlined"
               density="compact"
@@ -159,8 +161,9 @@ const handleExportPDF = async () => {
             ></v-text-field>
           </v-col>
 
-          <v-col cols="12" md="3" class="d-flex align-center">
+          <v-col cols="12" md="3">
             <v-btn
+              class="mt-1"
               color="primary"
               @click="refreshMonthlyPayroll"
               :loading="loading"
