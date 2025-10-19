@@ -18,6 +18,7 @@ export const adminItemsNav1: SubNavigation[] = [
 export const adminItemsNav2: SubNavigation[] = [
   ['Employee Information', 'mdi-account-multiple', '', '/hrms/employees/list'],
   ['Rates & Benefits', 'mdi-cash-clock', '', '/hrms/employees/benefits'],
+  ['Employee Memos', 'mdi-file-account', '', '/hrms/employees/memos'],
 ]
 export const adminItemsNav3: SubNavigation[] = [
   ['Attendance', 'mdi-clock-in', '', '/hrms/attendance/list'],
