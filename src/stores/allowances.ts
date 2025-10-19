@@ -20,6 +20,10 @@ export type Allowance = {
   employee: Employee
 }
 
+export type AllowanceForm = Omit<Allowance, 'trip_at'> & {
+  trip_range_at: Date[]
+}
+
 export type AllowanceTableFilter = {
   employee_id: number | null
   trip_at: Date[] | null
@@ -114,14 +118,28 @@ export const useAllowancesStore = defineStore('allowances', () => {
     return query
   }
 
-  async function addAllowance(formData: Partial<Allowance>) {
-    const preparedData = prepareFormDates(formData, ['trip_at'])
+  async function addAllowance(formData: Partial<AllowanceForm>) {
+    const dates =
+      formData.trip_range_at && formData.trip_range_at[0] !== formData.trip_range_at[1]
+        ? formData.trip_range_at
+        : [formData.trip_range_at?.[0]]
 
-    return await supabase.from('allowances').insert(preparedData).select()
+    const allowancesData = dates.map((date) => {
+      const { trip_range_at, ...cleanFormData } = formData
+
+      return prepareFormDates({ ...cleanFormData, trip_at: date }, ['trip_at'])
+    })
+
+    return await supabase.from('allowances').insert(allowancesData).select()
   }
 
-  async function updateAllowance(formData: Partial<Allowance>) {
-    const { employee, trip_location, ...updatedData } = prepareFormDates(formData, ['trip_at'])
+  async function updateAllowance(formData: Partial<AllowanceForm>) {
+    const preparedData = { ...formData, trip_at: formData.trip_range_at?.[0] }
+
+    const { employee, trip_location, trip_range_at, ...updatedData } = prepareFormDates(
+      preparedData,
+      ['trip_at'],
+    )
 
     return await supabase.from('allowances').update(updatedData).eq('id', formData.id).select()
   }
