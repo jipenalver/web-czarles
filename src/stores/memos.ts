@@ -1,5 +1,6 @@
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -10,6 +11,15 @@ export type Memo = {
   name: string
   description: string
   file_path: string
+  employee_memos: EmployeeMemo[]
+}
+
+type EmployeeMemo = {
+  id: number
+  created_at: string
+  memo_id: number
+  employee_id: number
+  employee: Employee
 }
 
 export type MemoTableFilter = {
@@ -18,7 +28,7 @@ export type MemoTableFilter = {
 
 export const useMemosStore = defineStore('memos', () => {
   const selectQuery =
-    '*, employee_memos (*, employee:employee_id (id, firstname, lastname, middlename))'
+    '*, employee_memos (*, employee:employee_id (id, firstname, lastname, middlename, email))'
 
   // States
   const memos = ref<Memo[]>([])
