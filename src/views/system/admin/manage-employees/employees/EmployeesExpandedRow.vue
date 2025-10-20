@@ -185,7 +185,7 @@ const { mobile } = useDisplay()
               :class="mobile ? 'justify-space-between' : 'justify-start'"
             >
               <span class="text-body-2 font-weight-bold me-2">
-                {{ benefit.employee_benefit.benefit }}:
+                {{ benefit.benefit.benefit }}:
               </span>
               <p class="text-body-2">{{ getMoneyText(benefit.amount as number) }}</p>
             </v-col>
