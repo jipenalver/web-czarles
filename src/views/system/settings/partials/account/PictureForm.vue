@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { imageValidator, requiredValidator } from '@/utils/validators'
+import { fileSizeValidator, requiredValidator } from '@/utils/validators'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { usePictureForm } from './pictureForm'
 
@@ -37,7 +37,7 @@ const { formAction, refVForm, imgPreview, onPreview, onPreviewReset, onFormSubmi
           label="Browse Profile Picture"
           placeholder="Browse Profile Picture"
           hint="Allowed JPG or PNG. Max size of 2MB."
-          :rules="[requiredValidator, imageValidator]"
+          :rules="[requiredValidator, fileSizeValidator]"
           persistent-hint
           show-size
           chips

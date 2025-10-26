@@ -135,11 +135,11 @@ export const alphaDashValidator = (value: unknown) => {
   )
 }
 
-// 👉 Image Validator
-export const imageValidator = (value: FileList) => {
+// 👉 File Size Validator
+export const fileSizeValidator = (value: FileList) => {
   if (isEmpty(value)) return true
 
-  return !value || !value.length || value[0].size < 2000000 || 'Image size should be less than 2 MB'
+  return !value || !value.length || value[0].size < 2000000 || 'File size should be less than 2 MB'
 }
 
 // 👉 General Date Comparison Validator
