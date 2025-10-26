@@ -2,6 +2,7 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import MemosFormDialog from './MemosFormDialog.vue'
 import { useMemosTable } from './memosTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -46,9 +47,9 @@ const tableHeaders: TableHeader[] = [
 const {
   tableOptions,
   tableFilters,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onUpdate,
@@ -134,6 +135,13 @@ const {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <MemosFormDialog
+    v-model:is-dialog-visible="isDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></MemosFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
