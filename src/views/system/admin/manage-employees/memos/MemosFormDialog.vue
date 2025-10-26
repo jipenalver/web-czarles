@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { fileSizeValidator, requiredValidator } from '@/utils/validators'
 import { type Memo, type MemoTableFilter } from '@/stores/memos'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { requiredValidator } from '@/utils/validators'
 import { useMemosFormDialog } from './memosFormDialog'
 import { useDisplay } from 'vuetify'
 
@@ -17,10 +17,8 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useMemosFormDialog(
-  props,
-  emit,
-)
+const { formData, formAction, refVForm, isUpdate, onFile, onFileReset, onFormSubmit, onFormReset } =
+  useMemosFormDialog(props, emit)
 </script>
 
 <template>
@@ -40,6 +38,23 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = 
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
+            <v-col cols="12">
+              <v-file-input
+                prepend-icon=""
+                prepend-inner-icon="mdi-file-document"
+                accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                label="Browse Memo File"
+                placeholder="Browse Memo File"
+                hint="Allowed PDF or DOCX. Max size of 2MB."
+                :rules="[requiredValidator, fileSizeValidator]"
+                persistent-hint
+                show-size
+                chips
+                @change="onFile"
+                @click:clear="onFileReset"
+              ></v-file-input>
+            </v-col>
+
             <v-col cols="12">
               <v-text-field
                 v-model="formData.name"

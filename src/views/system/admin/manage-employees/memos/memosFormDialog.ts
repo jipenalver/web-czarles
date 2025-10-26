@@ -1,6 +1,7 @@
-import { type Memo, type MemoTableFilter, useMemosStore } from '@/stores/memos'
+import { type Memo, type MemoForm, type MemoTableFilter, useMemosStore } from '@/stores/memos'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { fileExtract } from '@/utils/helpers/others'
 import { ref, watch } from 'vue'
 
 export function useMemosFormDialog(
@@ -20,7 +21,7 @@ export function useMemosFormDialog(
     description: '',
     file: null as File | null,
   }
-  const formData = ref<Partial<Memo>>({ ...formDataDefault })
+  const formData = ref<Partial<MemoForm>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -34,6 +35,15 @@ export function useMemosFormDialog(
   )
 
   // Actions
+  const onFile = async (event: Event) => {
+    const { fileObject } = await fileExtract(event)
+    formData.value.file = fileObject
+  }
+
+  const onFileReset = () => {
+    formData.value.file = null
+  }
+
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
@@ -79,6 +89,8 @@ export function useMemosFormDialog(
     formAction,
     refVForm,
     isUpdate,
+    onFile,
+    onFileReset,
     onFormSubmit,
     onFormReset,
   }
