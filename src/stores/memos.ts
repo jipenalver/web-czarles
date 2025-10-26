@@ -14,6 +14,10 @@ export type Memo = {
   employee_memos: EmployeeMemo[]
 }
 
+export type MemoForm = Omit<Memo, 'file_path' | 'employee_memos'> & {
+  file: File | null
+}
+
 type EmployeeMemo = {
   id: number
   created_at: string
