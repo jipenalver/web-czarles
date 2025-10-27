@@ -1,30 +1,34 @@
-import { type CashAddon, type CashAddonTableFilter, useCashAddonsStore } from '@/stores/cashAddons'
+import {
+  type CashAdjustment,
+  type CashAdjustmentTableFilter,
+  useCashAdjustmentsStore,
+} from '@/stores/cashAdjustments'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref, watch } from 'vue'
 
-export function useCashAddonsFormDialog(
+export function useCashAdjustmentsFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: CashAddon | null
+    itemData: CashAdjustment | null
     tableOptions: TableOptions
-    tableFilters: CashAddonTableFilter
+    tableFilters: CashAdjustmentTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const cashAddonsStore = useCashAddonsStore()
+  const cashAdjustmentsStore = useCashAdjustmentsStore()
   const employeesStore = useEmployeesStore()
 
   // States
   const formDataDefault = {
     employee_id: null,
-    addon_at: new Date(),
+    adjustment_at: new Date(),
     name: '',
     remarks: '',
     amount: undefined,
   }
-  const formData = ref<Partial<CashAddon>>({ ...formDataDefault })
+  const formData = ref<Partial<CashAdjustment>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -42,8 +46,8 @@ export function useCashAddonsFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await cashAddonsStore.updateCashAddon(formData.value)
-      : await cashAddonsStore.addCashAddon(formData.value)
+      ? await cashAdjustmentsStore.updateCashAdjustment(formData.value)
+      : await cashAdjustmentsStore.addCashAdjustment(formData.value)
 
     if (error) {
       formAction.value = {
@@ -55,7 +59,7 @@ export function useCashAddonsFormDialog(
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Add-on.`
 
-      await cashAddonsStore.getCashAddonsTable(props.tableOptions, props.tableFilters)
+      await cashAdjustmentsStore.getCashAdjustmentsTable(props.tableOptions, props.tableFilters)
 
       setTimeout(() => {
         onFormReset()

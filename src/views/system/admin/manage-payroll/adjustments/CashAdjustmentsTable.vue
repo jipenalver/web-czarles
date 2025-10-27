@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import CashAdjustmentsFormDialog from './CashAdjustmentsDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import CashAddonsFormDialog from './CashAddonsFormDialog.vue'
+import { useCashAdjustmentsTable } from './cashAdjustmentsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { useCashAddonsTable } from './cashAddonsTable'
 import { getMoneyText } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -26,9 +26,9 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  cashAddonsStore,
+  cashAdjustmentsStore,
   employeesStore,
-} = useCashAddonsTable()
+} = useCashAdjustmentsTable()
 </script>
 
 <template>
@@ -47,8 +47,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="cashAddonsStore.cashAddonsTable"
-        :items-length="cashAddonsStore.cashAddonsTableTotal"
+        :items="cashAdjustmentsStore.cashAdjustmentsTable"
+        :items-length="cashAdjustmentsStore.cashAdjustmentsTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="smAndDown"
         :mobile="smAndDown"
@@ -86,7 +86,7 @@ const {
 
             <v-col cols="12" sm="3">
               <v-date-input
-                v-model="tableFilters.addon_at"
+                v-model="tableFilters.adjustment_at"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
                 density="compact"
@@ -114,9 +114,9 @@ const {
           </span>
         </template>
 
-        <template #item.addon_at="{ item }">
+        <template #item.adjustment_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.addon_at, 'fullDate') }}
+            {{ date.format(item.adjustment_at, 'fullDate') }}
           </span>
         </template>
 
@@ -143,12 +143,12 @@ const {
     </v-card-text>
   </v-card>
 
-  <CashAddonsFormDialog
+  <CashAdjustmentsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></CashAddonsFormDialog>
+  ></CashAdjustmentsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
