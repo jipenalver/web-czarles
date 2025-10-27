@@ -55,7 +55,7 @@ const {
                 label="Browse Memo File"
                 placeholder="Browse Memo File"
                 hint="Allowed PDF or DOCX. Max size of 2MB."
-                :rules="[requiredValidator, fileSizeValidator]"
+                :rules="isUpdate ? [fileSizeValidator] : [requiredValidator, fileSizeValidator]"
                 persistent-hint
                 show-size
                 chips
