@@ -7,138 +7,151 @@ import { type Employee } from './employees'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type CashAddon = {
+export type CashAdjustment = {
   id: number
   created_at: string
-  addon_at: string | Date
+  adjustment_at: string | Date
   name: string
   remarks: string
   amount: number
+  is_deduction: boolean
   employee_id: number | null
   employee: Employee
 }
 
-export type CashAddonTableFilter = {
+export type CashAdjustmentTableFilter = {
   employee_id: number | null
-  addon_at: Date[] | null
+  adjustment_at: Date[] | null
 }
 
-export const useCashAddonsStore = defineStore('cashAddons', () => {
+export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
   const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
 
   // States
-  const cashAddons = ref<CashAddon[]>([])
-  const cashAddonsTable = ref<CashAddon[]>([])
-  const cashAddonsTableTotal = ref(0)
-  const cashAddonsExport = ref<CashAddon[]>([])
+  const cashAdjustment = ref<CashAdjustment[]>([])
+  const cashAdjustmentTable = ref<CashAdjustment[]>([])
+  const cashAdjustmentTableTotal = ref(0)
+  const cashAdjustmentExport = ref<CashAdjustment[]>([])
 
   // Reset State
   function $reset() {
-    cashAddons.value = []
-    cashAddonsTable.value = []
-    cashAddonsTableTotal.value = 0
-    cashAddonsExport.value = []
+    cashAdjustment.value = []
+    cashAdjustmentTable.value = []
+    cashAdjustmentTableTotal.value = 0
+    cashAdjustmentExport.value = []
   }
 
   // Actions
-  async function getCashAddons() {
+  async function getCashAdjustments() {
     const { data } = await supabase
-      .from('cash_addons')
+      .from('cash_adjustments')
       .select(selectQuery)
-      .order('addon_at', { ascending: false })
+      .order('adjustment_at', { ascending: false })
 
-    cashAddons.value = data as CashAddon[]
+    cashAdjustment.value = data as CashAdjustment[]
   }
 
-  async function getCashAddonsExport(
+  async function getCashAdjustmentsExport(
     tableOptions: TableOptions,
-    tableFilters: CashAddonTableFilter,
+    tableFilters: CashAdjustmentTableFilter,
   ) {
-    const { column, order } = tablePagination(tableOptions, 'addon_at', false)
+    const { column, order } = tablePagination(tableOptions, 'adjustment_at', false)
 
-    let query = supabase.from('cash_addons').select(selectQuery).order(column, { ascending: order })
+    let query = supabase
+      .from('cash_adjustments')
+      .select(selectQuery)
+      .order(column, { ascending: order })
 
-    query = getCashAddonsFilter(query, tableFilters)
+    query = getCashAdjustmentsFilter(query, tableFilters)
 
     const { data } = await query
 
-    cashAddonsExport.value = data as CashAddon[]
+    cashAdjustmentExport.value = data as CashAdjustment[]
   }
 
-  async function getCashAddonsTable(
+  async function getCashAdjustmentsTable(
     tableOptions: TableOptions,
-    tableFilters: CashAddonTableFilter,
+    tableFilters: CashAdjustmentTableFilter,
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'addon_at', false)
+    const { rangeStart, rangeEnd, column, order } = tablePagination(
+      tableOptions,
+      'adjustment_at',
+      false,
+    )
 
     let query = supabase
-      .from('cash_addons')
+      .from('cash_adjustments')
       .select(selectQuery)
       .order(column, { ascending: order })
       .range(rangeStart, rangeEnd)
 
-    query = getCashAddonsFilter(query, tableFilters)
+    query = getCashAdjustmentsFilter(query, tableFilters)
 
     const { data } = await query
 
-    const { count } = await getCashAddonsCount(tableFilters)
+    const { count } = await getCashAdjustmentsCount(tableFilters)
 
-    cashAddonsTable.value = data as CashAddon[]
-    cashAddonsTableTotal.value = count as number
+    cashAdjustmentTable.value = data as CashAdjustment[]
+    cashAdjustmentTableTotal.value = count as number
   }
 
-  async function getCashAddonsCount(tableFilters: CashAddonTableFilter) {
-    let query = supabase.from('cash_addons').select('*', { count: 'exact', head: true })
+  async function getCashAdjustmentsCount(tableFilters: CashAdjustmentTableFilter) {
+    let query = supabase.from('cash_adjustments').select('*', { count: 'exact', head: true })
 
-    query = getCashAddonsFilter(query, tableFilters)
+    query = getCashAdjustmentsFilter(query, tableFilters)
 
     return await query
   }
 
-  function getCashAddonsFilter(
+  function getCashAdjustmentsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, addon_at }: CashAddonTableFilter,
+    { employee_id, adjustment_at }: CashAdjustmentTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
-    if (addon_at) {
-      const { startDate, endDate } = prepareDateRange(addon_at, addon_at.length > 1)
+    if (adjustment_at) {
+      const { startDate, endDate } = prepareDateRange(adjustment_at, adjustment_at.length > 1)
 
-      if (startDate && endDate) query = query.gte('addon_at', startDate).lt('addon_at', endDate)
+      if (startDate && endDate)
+        query = query.gte('adjustment_at', startDate).lt('adjustment_at', endDate)
     }
 
     return query
   }
 
-  async function addCashAddon(formData: Partial<CashAddon>) {
-    const preparedData = prepareFormDates(formData, ['addon_at'])
+  async function addCashAdjustment(formData: Partial<CashAdjustment>) {
+    const preparedData = prepareFormDates(formData, ['adjustment_at'])
 
-    return await supabase.from('cash_addons').insert(preparedData).select()
+    return await supabase.from('cash_adjustments').insert(preparedData).select()
   }
 
-  async function updateCashAddon(formData: Partial<CashAddon>) {
-    const { employee, ...updatedData } = prepareFormDates(formData, ['addon_at'])
+  async function updateCashAdjustment(formData: Partial<CashAdjustment>) {
+    const { employee, ...updatedData } = prepareFormDates(formData, ['adjustment_at'])
 
-    return await supabase.from('cash_addons').update(updatedData).eq('id', formData.id).select()
+    return await supabase
+      .from('cash_adjustments')
+      .update(updatedData)
+      .eq('id', formData.id)
+      .select()
   }
 
-  async function deleteCashAddon(id: number) {
-    return await supabase.from('cash_addons').delete().eq('id', id).select()
+  async function deleteCashAdjustment(id: number) {
+    return await supabase.from('cash_adjustments').delete().eq('id', id).select()
   }
 
   // Expose States and Actions
   return {
-    cashAddons,
-    cashAddonsTable,
-    cashAddonsTableTotal,
-    cashAddonsExport,
+    cashAdjustment,
+    cashAdjustmentTable,
+    cashAdjustmentTableTotal,
+    cashAdjustmentExport,
     $reset,
-    getCashAddons,
-    getCashAddonsExport,
-    getCashAddonsTable,
-    addCashAddon,
-    updateCashAddon,
-    deleteCashAddon,
+    getCashAdjustments,
+    getCashAdjustmentsExport,
+    getCashAdjustmentsTable,
+    addCashAdjustment,
+    updateCashAdjustment,
+    deleteCashAdjustment,
   }
 })
