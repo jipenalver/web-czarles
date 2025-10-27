@@ -21,6 +21,7 @@ export function useMemosFormDialog(
   const formDataDefault = {
     name: '',
     description: '',
+    is_everybody: false,
     file: null as File | null,
     employee_ids: [] as number[],
   }

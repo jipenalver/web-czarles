@@ -73,10 +73,26 @@ const {
             </v-col>
 
             <v-col cols="12">
-              <v-textarea v-model="formData.description" label="Description" rows="2"></v-textarea>
+              <v-textarea
+                v-model="formData.description"
+                label="Description"
+                rows="2"
+                hide-details
+              ></v-textarea>
             </v-col>
 
             <v-col cols="12">
+              <v-switch v-model="formData.is_everybody" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is For Everybody?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_everybody ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-col v-if="!formData.is_everybody" cols="12">
               <v-autocomplete
                 v-model="formData.employee_ids"
                 :items="employeesStore.employees"
