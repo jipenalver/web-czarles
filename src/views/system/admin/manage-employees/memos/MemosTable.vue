@@ -22,11 +22,6 @@ const tableHeaders: TableHeader[] = [
     align: 'start',
   },
   {
-    title: 'Attachment',
-    key: 'file_path',
-    align: 'start',
-  },
-  {
     title: 'Employees',
     key: 'employees',
     align: 'start',
@@ -113,6 +108,26 @@ const {
           <span class="font-weight-bold"> {{ item.name }} </span>
         </template>
 
+        <template #item.employees="{ item }">
+          <div v-if="item.employee_memos && item.employee_memos.length > 0">
+            <v-chip
+              v-for="memo in item.employee_memos"
+              :key="memo.id"
+              class="mx-1"
+              variant="elevated"
+              color="secondary"
+              size="x-small"
+            >
+              {{ memo.employee.firstname }} {{ memo.employee.lastname }}
+            </v-chip>
+          </div>
+          <div v-else>
+            <v-chip class="mx-1" variant="elevated" color="default" size="x-small">
+              For Everybody
+            </v-chip>
+          </div>
+        </template>
+
         <template #item.created_at="{ item }">
           <span class="font-weight-bold">
             {{ date.format(item.created_at, 'fullDateTime') }}
@@ -121,6 +136,13 @@ const {
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
+            <a :href="item.file_path" target="_blank" rel="noopener noreferrer">
+              <v-btn variant="text" density="comfortable" icon>
+                <v-icon icon="mdi-download"></v-icon>
+                <v-tooltip activator="parent" location="top">Download Memo</v-tooltip>
+              </v-btn>
+            </a>
+
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
               <v-tooltip activator="parent" location="top">Edit Memo</v-tooltip>
