@@ -36,7 +36,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
   >
     <v-card
       prepend-icon="mdi-cash-plus"
-      title="Salary Add-on"
+      title="Salary Adjustment"
       subtitle="Additional Amount to be added on Employee's Payroll"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
@@ -62,7 +62,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 label="Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                hint="Date that this add-on belongs to (e.g., payroll date or work date)"
+                hint="Date that this adjustment belongs to (e.g., payroll date or work date)"
                 persistent-hint
                 hide-actions
               ></v-date-input>
@@ -107,7 +107,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Add-on' : 'Add Add-on' }}
+            {{ isUpdate ? 'Update Adjustment' : 'Add Adjustment' }}
           </v-btn>
         </v-card-actions>
       </v-form>

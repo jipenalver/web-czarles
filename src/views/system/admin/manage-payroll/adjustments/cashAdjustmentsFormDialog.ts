@@ -57,7 +57,7 @@ export function useCashAdjustmentsFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Add-on.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Salary Adjustment.`
 
       await cashAdjustmentsStore.getCashAdjustmentsTable(props.tableOptions, props.tableFilters)
 

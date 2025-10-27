@@ -100,7 +100,7 @@ const {
 
             <v-col cols="12" sm="3">
               <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
-                Add Add-on
+                Add Adjustment
               </v-btn>
             </v-col>
           </v-row>
@@ -130,12 +130,12 @@ const {
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Add-on</v-tooltip>
+              <v-tooltip activator="parent" location="top">Edit Adjustment</v-tooltip>
             </v-btn>
 
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Add-on</v-tooltip>
+              <v-tooltip activator="parent" location="top">Delete Adjustment</v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -153,7 +153,7 @@ const {
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this add-on?"
+    text="Are you sure you want to delete this adjustment?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>

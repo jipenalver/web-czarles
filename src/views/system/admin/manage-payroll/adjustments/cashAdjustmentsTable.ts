@@ -64,7 +64,7 @@ export function useCashAdjustmentsTable() {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Salary Add-on.'
+      formAction.value.formMessage = 'Successfully Deleted Salary Adjustment.'
 
       await onLoadItems(tableOptions.value)
     }

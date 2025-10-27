@@ -59,9 +59,9 @@ const isDrawerVisible = ref(xs.value ? false : true)
     <template #content>
       <v-container fluid>
         <HeaderPanel
-          :header-items="['Payroll Management', 'Salary Add-ons']"
+          :header-items="['Payroll Management', 'Supplemental']"
           header-icon="mdi-cash-multiple"
-          headline="Manage employee's salary add-ons on monthly payroll."
+          headline="Manage employee's salary supplemental on monthly payroll."
         ></HeaderPanel>
 
         <v-tabs v-model="tabWindow" class="mb-5">
