@@ -52,7 +52,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          md="6"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -81,6 +81,22 @@ const { mobile } = useDisplay()
           <span class="text-body-2 font-weight-bold me-2">Field or Office:</span>
           <v-chip class="font-weight-black" color="default" size="small">
             {{ props.itemData.is_field_staff ? 'Field Staff' : 'Office Staff' }}
+          </v-chip>
+        </v-col>
+
+        <v-col
+          cols="12"
+          md="3"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
+          <span class="text-body-2 font-weight-bold me-2">GPS Enabled / Disabled:</span>
+          <v-chip
+            class="font-weight-black"
+            :color="props.itemData.is_gps_disabled ? 'error' : 'success'"
+            size="small"
+          >
+            {{ props.itemData.is_gps_disabled ? 'Disabled' : 'Enabled' }}
           </v-chip>
         </v-col>
 
