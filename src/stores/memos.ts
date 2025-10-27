@@ -16,6 +16,7 @@ export type Memo = {
 
 export type MemoForm = Omit<Memo, 'file_path' | 'employee_memos'> & {
   file: File | null
+  employee_ids: number[]
 }
 
 type EmployeeMemo = {
@@ -91,16 +92,54 @@ export const useMemosStore = defineStore('memos', () => {
     return query
   }
 
-  async function addMemo(formData: Partial<Memo>) {
-    return await supabase.from('memos').insert(formData).select()
+  async function addMemo(formData: Partial<MemoForm>) {
+    const { employee_ids, ...memoData } = formData
+
+    const { data, error } = await supabase.from('memos').insert(memoData).select()
+
+    if (data) await addEmployeeMemos(data[0].id, employee_ids as number[])
+
+    return { data, error }
   }
 
-  async function updateMemo(formData: Partial<Memo>) {
-    return await supabase.from('memos').update(formData).eq('id', formData.id).select()
+  async function updateMemo(formData: Partial<MemoForm>) {
+    const { employee_ids, ...memoData } = formData
+
+    const { data, error } = await supabase
+      .from('memos')
+      .update(memoData)
+      .eq('id', memoData.id)
+      .select()
+
+    await updateEmployeeMemos(memoData.id as number, employee_ids as number[])
+
+    return { data, error }
   }
 
   async function deleteMemo(id: number) {
+    const { data, error: deleteError } = await deleteEmployeeMemos(id)
+
+    if (deleteError) return { data, error: deleteError }
+
     return await supabase.from('memos').delete().eq('id', id).select()
+  }
+
+  async function addEmployeeMemos(id: number, employeeIds: number[]) {
+    const employeeData = employeeIds.map((employeeId) => ({ employee_id: employeeId, memo_id: id }))
+
+    return await supabase.from('employee_memos').insert(employeeData).select()
+  }
+
+  async function updateEmployeeMemos(id: number, employeeIds: number[]) {
+    const { data, error: deleteError } = await deleteEmployeeMemos(id)
+
+    if (deleteError) return { data, error: deleteError }
+
+    return await addEmployeeMemos(id, employeeIds)
+  }
+
+  async function deleteEmployeeMemos(id: number) {
+    return await supabase.from('employee_memos').delete().eq('memo_id', id).select()
   }
 
   // Expose States and Actions
