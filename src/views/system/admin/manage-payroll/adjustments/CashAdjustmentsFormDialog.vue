@@ -37,7 +37,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
     <v-card
       prepend-icon="mdi-cash-plus"
       title="Salary Adjustment"
-      subtitle="Additional Amount to be added on Employee's Payroll"
+      subtitle="Amount to be added or deducted on Employee's Payroll"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
