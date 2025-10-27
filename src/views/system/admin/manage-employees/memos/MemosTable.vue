@@ -113,8 +113,8 @@ const {
             <v-chip
               v-for="memo in item.employee_memos"
               :key="memo.id"
-              class="mx-1"
-              variant="elevated"
+              class="mx-1 font-weight-bold"
+              variant="flat"
               color="secondary"
               size="x-small"
             >
@@ -122,7 +122,7 @@ const {
             </v-chip>
           </div>
           <div v-else>
-            <v-chip class="mx-1" variant="elevated" color="default" size="x-small">
+            <v-chip class="mx-1 font-weight-bold" variant="flat" color="default" size="x-small">
               For Everybody
             </v-chip>
           </div>
