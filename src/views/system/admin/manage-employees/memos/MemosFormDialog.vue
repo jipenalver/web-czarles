@@ -101,6 +101,7 @@ const {
                 item-title="label"
                 item-value="id"
                 hint="Select employees to assign this memo."
+                :rules="[requiredValidator]"
                 persistent-hint
                 multiple
                 chips

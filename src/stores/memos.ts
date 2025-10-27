@@ -144,8 +144,8 @@ export const useMemosStore = defineStore('memos', () => {
       .select()
 
     const { data: fileData, error: fileError } = await supabase.storage
-      .from('avatars')
-      .remove(['memos/' + memoData?.[0].file_path])
+      .from('czarles')
+      .remove(['memos/' + memoData?.[0].file_path.split('/').pop()])
 
     if (fileError) return { data: fileData, error: fileError }
 
