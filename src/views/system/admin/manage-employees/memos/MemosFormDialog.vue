@@ -17,8 +17,17 @@ const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFile, onFileReset, onFormSubmit, onFormReset } =
-  useMemosFormDialog(props, emit)
+const {
+  formData,
+  formAction,
+  refVForm,
+  isUpdate,
+  onFile,
+  onFileReset,
+  onFormSubmit,
+  onFormReset,
+  employeesStore,
+} = useMemosFormDialog(props, emit)
 </script>
 
 <template>
@@ -65,6 +74,21 @@ const { formData, formAction, refVForm, isUpdate, onFile, onFileReset, onFormSub
 
             <v-col cols="12">
               <v-textarea v-model="formData.description" label="Description" rows="2"></v-textarea>
+            </v-col>
+
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="formData.employee_ids"
+                :items="employeesStore.employees"
+                label="Employees"
+                placeholder="Select Employees"
+                item-title="label"
+                item-value="id"
+                hint="Select employees to assign this memo."
+                persistent-hint
+                multiple
+                chips
+              ></v-autocomplete>
             </v-col>
           </v-row>
         </v-card-text>

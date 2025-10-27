@@ -1,8 +1,9 @@
 import { type Memo, type MemoForm, type MemoTableFilter, useMemosStore } from '@/stores/memos'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useEmployeesStore } from '@/stores/employees'
 import { fileExtract } from '@/utils/helpers/others'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 export function useMemosFormDialog(
   props: {
@@ -14,12 +15,14 @@ export function useMemosFormDialog(
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const memosStore = useMemosStore()
+  const employeesStore = useEmployeesStore()
 
   // States
   const formDataDefault = {
     name: '',
     description: '',
     file: null as File | null,
+    employee_ids: [] as number[],
   }
   const formData = ref<Partial<MemoForm>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -83,6 +86,10 @@ export function useMemosFormDialog(
     emit('update:isDialogVisible', false)
   }
 
+  onMounted(async () => {
+    if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+  })
+
   // Expose State and Actions
   return {
     formData,
@@ -93,5 +100,6 @@ export function useMemosFormDialog(
     onFileReset,
     onFormSubmit,
     onFormReset,
+    employeesStore,
   }
 }
