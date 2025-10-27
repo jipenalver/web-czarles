@@ -20,6 +20,7 @@ export function useCashAdjustmentsTable() {
     { title: 'Name', key: 'name', align: 'start' },
     { title: 'Remarks', key: 'remarks', align: 'start' },
     { title: 'Amount', key: 'amount', align: 'center' },
+    { title: 'Type', key: 'is_deduction', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
@@ -121,6 +122,7 @@ export function useCashAdjustmentsTable() {
           prepareCSV(item.name),
           prepareCSV(item.remarks),
           prepareCSV(getMoneyText(item.amount)),
+          item.is_deduction ? 'Deduction' : 'Add-on',
         ]
 
         return csvData.join(',')

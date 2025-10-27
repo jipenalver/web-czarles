@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CashAdjustmentsFormDialog from './CashAdjustmentsDialog.vue'
+import CashAdjustmentsFormDialog from './CashAdjustmentsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useCashAdjustmentsTable } from './cashAdjustmentsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -124,6 +124,17 @@ const {
           <span class="font-weight-black">
             {{ getMoneyText(item.amount) }}
           </span>
+        </template>
+
+        <template #item.is_deduction="{ item }">
+          <v-chip
+            class="font-weight-bold"
+            :color="item.is_deduction ? 'error' : 'success'"
+            variant="flat"
+            size="small"
+          >
+            {{ item.is_deduction ? 'Deduction' : 'Add-on' }}
+          </v-chip>
         </template>
 
         <template #item.actions="{ item }">
