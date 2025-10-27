@@ -14,7 +14,7 @@ export type Memo = {
   employee_memos: EmployeeMemo[]
 }
 
-export type MemoForm = Omit<Memo, 'file_path' | 'employee_memos'> & {
+export type MemoForm = Omit<Memo, 'employee_memos'> & {
   file: File | null
   employee_ids: number[]
 }
@@ -93,17 +93,23 @@ export const useMemosStore = defineStore('memos', () => {
   }
 
   async function addMemo(formData: Partial<MemoForm>) {
-    const { employee_ids, ...memoData } = formData
+    const { employee_ids, file, ...memoData } = formData
 
     const { data, error } = await supabase.from('memos').insert(memoData).select()
 
-    if (data) await addEmployeeMemos(data[0].id, employee_ids as number[])
+    if (data) {
+      await addEmployeeMemos(data[0].id, employee_ids as number[])
+
+      const { data: fileData } = await updateMemoFile(data[0].id, file as File)
+
+      await updateMemo({ id: data[0].id, file_path: fileData?.publicUrl })
+    }
 
     return { data, error }
   }
 
   async function updateMemo(formData: Partial<MemoForm>) {
-    const { employee_ids, ...memoData } = formData
+    const { employee_ids, file, ...memoData } = formData
 
     const { data, error } = await supabase
       .from('memos')
@@ -113,6 +119,12 @@ export const useMemosStore = defineStore('memos', () => {
 
     await updateEmployeeMemos(memoData.id as number, employee_ids as number[])
 
+    if (file) {
+      const { data: fileData } = await updateMemoFile(memoData.id as number, file as File)
+
+      await updateMemo({ id: memoData.id, file_path: fileData?.publicUrl })
+    }
+
     return { data, error }
   }
 
@@ -121,7 +133,19 @@ export const useMemosStore = defineStore('memos', () => {
 
     if (deleteError) return { data, error: deleteError }
 
-    return await supabase.from('memos').delete().eq('id', id).select()
+    const { data: memoData, error: memoError } = await supabase
+      .from('memos')
+      .delete()
+      .eq('id', id)
+      .select()
+
+    const { data: fileData, error: fileError } = await supabase.storage
+      .from('avatars')
+      .remove(['memos/' + memoData?.[0].file_path])
+
+    if (fileError) return { data: fileData, error: fileError }
+
+    return { data: memoData, error: memoError }
   }
 
   async function addEmployeeMemos(id: number, employeeIds: number[]) {
@@ -142,7 +166,21 @@ export const useMemosStore = defineStore('memos', () => {
     return await supabase.from('employee_memos').delete().eq('memo_id', id).select()
   }
 
-  // Expose States and Actions
+  async function updateMemoFile(id: number, file: File) {
+    const { data, error } = await supabase.storage
+      .from('czarles')
+      .upload('memos/' + id + '-memo.' + file.name.split('.').pop(), file, {
+        cacheControl: '3600',
+        upsert: true,
+      })
+
+    if (error) return { data, error }
+
+    const { data: imageData } = supabase.storage.from('czarles').getPublicUrl(data.path)
+
+    return { data: imageData, error: null }
+  }
+
   return {
     memos,
     memosTable,
