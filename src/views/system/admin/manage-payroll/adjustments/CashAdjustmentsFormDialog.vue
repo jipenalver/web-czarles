@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { type CashAddon, type CashAddonTableFilter } from '@/stores/cashAddons'
-import { useCashAddonsFormDialog } from './cashAddonsFormDialog'
+import { type CashAdjustment, type CashAdjustmentTableFilter } from '@/stores/cashAdjustments'
+import { useCashAdjustmentsFormDialog } from './cashAdjustmentsFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
@@ -8,9 +8,9 @@ import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: CashAddon | null
+  itemData: CashAdjustment | null
   tableOptions: TableOptions
-  tableFilters: CashAddonTableFilter
+  tableFilters: CashAdjustmentTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -18,7 +18,7 @@ const emit = defineEmits(['update:isDialogVisible'])
 const { mdAndDown } = useDisplay()
 
 const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, employeesStore } =
-  useCashAddonsFormDialog(props, emit)
+  useCashAdjustmentsFormDialog(props, emit)
 </script>
 
 <template>
@@ -36,8 +36,8 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
   >
     <v-card
       prepend-icon="mdi-cash-plus"
-      title="Salary Add-on"
-      subtitle="Additional Amount to be added on Employee's Payroll"
+      title="Salary Adjustment"
+      subtitle="Amount to be added or deducted on Employee's Payroll"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
@@ -55,14 +55,14 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
 
             <v-col cols="12">
               <v-date-input
-                v-model="formData.addon_at"
+                v-model="formData.adjustment_at"
                 class="mb-2"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
                 label="Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                hint="Date that this add-on belongs to (e.g., payroll date or work date)"
+                hint="Date that this adjustment belongs to (e.g., payroll date or work date)"
                 persistent-hint
                 hide-actions
               ></v-date-input>
@@ -89,6 +89,17 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
+
+            <v-col cols="12">
+              <v-switch v-model="formData.is_deduction" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Deduction?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_deduction ? 'Deduction' : 'Add-on' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
           </v-row>
         </v-card-text>
 
@@ -107,7 +118,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Add-on' : 'Add Add-on' }}
+            {{ isUpdate ? 'Update Adjustment' : 'Add Adjustment' }}
           </v-btn>
         </v-card-actions>
       </v-form>

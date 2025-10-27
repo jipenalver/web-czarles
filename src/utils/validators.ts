@@ -135,11 +135,31 @@ export const alphaDashValidator = (value: unknown) => {
   )
 }
 
+// 👉 File Size Validator
+export const fileSizeValidator = (value: FileList) => {
+  if (isEmpty(value)) return true
+
+  return (
+    !value ||
+    !value.length ||
+    value[0].size < 5 * 1024 * 1024 ||
+    `File size should be less than 5 MB`
+  )
+}
+
 // 👉 Image Validator
 export const imageValidator = (value: FileList) => {
   if (isEmpty(value)) return true
 
-  return !value || !value.length || value[0].size < 2000000 || 'Image size should be less than 2 MB'
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+  return (
+    !value ||
+    !value.length ||
+    value[0].size < 2 * 1024 * 1024 ||
+    !allowedTypes.includes(value[0].type) ||
+    `Only image files (JPEG, PNG) are allowed. Max size of 2MB.`
+  )
 }
 
 // 👉 General Date Comparison Validator
