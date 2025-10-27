@@ -11,10 +11,11 @@ export type Memo = {
   name: string
   description: string
   file_path: string
+  is_everybody: boolean
   employee_memos: EmployeeMemo[]
 }
 
-export type MemoForm = Omit<Memo, 'employee_memos'> & {
+export type MemoForm = Memo & {
   file: File | null
   employee_ids: number[]
 }
@@ -98,7 +99,8 @@ export const useMemosStore = defineStore('memos', () => {
     const { data, error } = await supabase.from('memos').insert(memoData).select()
 
     if (data) {
-      await addEmployeeMemos(data[0].id, employee_ids as number[])
+      if (employee_ids && employee_ids.length > 0)
+        await addEmployeeMemos(data[0].id, employee_ids as number[])
 
       const { data: fileData } = await updateMemoFile(data[0].id, file as File)
 
@@ -109,7 +111,8 @@ export const useMemosStore = defineStore('memos', () => {
   }
 
   async function updateMemo(formData: Partial<MemoForm>) {
-    const { employee_ids, file, ...memoData } = formData
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { employee_ids, file, employee_memos, ...memoData } = formData
 
     const { data, error } = await supabase
       .from('memos')
@@ -117,7 +120,8 @@ export const useMemosStore = defineStore('memos', () => {
       .eq('id', memoData.id)
       .select()
 
-    await updateEmployeeMemos(memoData.id as number, employee_ids as number[])
+    if (employee_ids && employee_ids.length > 0)
+      await updateEmployeeMemos(memoData.id as number, employee_ids as number[])
 
     if (file) {
       const { data: fileData } = await updateMemoFile(memoData.id as number, file as File)
