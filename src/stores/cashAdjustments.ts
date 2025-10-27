@@ -28,17 +28,17 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
   const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
 
   // States
-  const cashAdjustment = ref<CashAdjustment[]>([])
-  const cashAdjustmentTable = ref<CashAdjustment[]>([])
-  const cashAdjustmentTableTotal = ref(0)
-  const cashAdjustmentExport = ref<CashAdjustment[]>([])
+  const cashAdjustments = ref<CashAdjustment[]>([])
+  const cashAdjustmentsTable = ref<CashAdjustment[]>([])
+  const cashAdjustmentsTableTotal = ref(0)
+  const cashAdjustmentsExport = ref<CashAdjustment[]>([])
 
   // Reset State
   function $reset() {
-    cashAdjustment.value = []
-    cashAdjustmentTable.value = []
-    cashAdjustmentTableTotal.value = 0
-    cashAdjustmentExport.value = []
+    cashAdjustments.value = []
+    cashAdjustmentsTable.value = []
+    cashAdjustmentsTableTotal.value = 0
+    cashAdjustmentsExport.value = []
   }
 
   // Actions
@@ -48,7 +48,7 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
       .select(selectQuery)
       .order('adjustment_at', { ascending: false })
 
-    cashAdjustment.value = data as CashAdjustment[]
+    cashAdjustments.value = data as CashAdjustment[]
   }
 
   async function getCashAdjustmentsExport(
@@ -66,7 +66,7 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
 
     const { data } = await query
 
-    cashAdjustmentExport.value = data as CashAdjustment[]
+    cashAdjustmentsExport.value = data as CashAdjustment[]
   }
 
   async function getCashAdjustmentsTable(
@@ -91,8 +91,8 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
 
     const { count } = await getCashAdjustmentsCount(tableFilters)
 
-    cashAdjustmentTable.value = data as CashAdjustment[]
-    cashAdjustmentTableTotal.value = count as number
+    cashAdjustmentsTable.value = data as CashAdjustment[]
+    cashAdjustmentsTableTotal.value = count as number
   }
 
   async function getCashAdjustmentsCount(tableFilters: CashAdjustmentTableFilter) {
@@ -142,10 +142,10 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
 
   // Expose States and Actions
   return {
-    cashAdjustment,
-    cashAdjustmentTable,
-    cashAdjustmentTableTotal,
-    cashAdjustmentExport,
+    cashAdjustments,
+    cashAdjustmentsTable,
+    cashAdjustmentsTableTotal,
+    cashAdjustmentsExport,
     $reset,
     getCashAdjustments,
     getCashAdjustmentsExport,
