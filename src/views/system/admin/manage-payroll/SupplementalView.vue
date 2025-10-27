@@ -67,7 +67,7 @@ const isDrawerVisible = ref(xs.value ? false : true)
         <v-tabs v-model="tabWindow" class="mb-5">
           <template v-for="(item, index) in tabsItems" :key="item.value">
             <v-divider
-              v-if="index === 4"
+              v-if="index === 4 || index === 1"
               class="border-opacity-100 mx-2"
               thickness="2"
               color="primary"
