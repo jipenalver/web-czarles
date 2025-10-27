@@ -19,6 +19,8 @@ export function useRatesFormDialog(
   // States
   const formDataDefault = {
     daily_rate: undefined,
+    payroll_start: undefined,
+    payroll_end: undefined,
     is_insured: false,
   }
   const formData = ref<Partial<Employee>>({ ...formDataDefault })
@@ -52,7 +54,7 @@ export function useRatesFormDialog(
       await logsStore.addLog({
         type: 'rates',
         employee_id: formData.value.id,
-        description: `Updated employee rate to ${formData.value.daily_rate} and insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}.`,
+        description: `Updated employee rate to ${formData.value.daily_rate} and insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}. With Payroll Period: ${formData.value.payroll_start} - ${formData.value.payroll_end}.`,
       })
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)

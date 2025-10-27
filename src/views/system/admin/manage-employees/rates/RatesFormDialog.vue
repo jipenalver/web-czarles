@@ -5,7 +5,7 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import EmployeeLogs from '../employees/EmployeeLogs.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useRatesFormDialog } from './ratesFormDialog'
-import { requiredValidator } from '@/utils/validators'
+import { betweenValidator, requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -54,6 +54,30 @@ const {
                 label="Daily Rate"
                 type="number"
                 :rules="[requiredValidator]"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="formData.payroll_start"
+                label="From Date (Prev. Month)"
+                placeholder="eg. 26"
+                type="number"
+                hint="Cutoff Start Date of Monthly Payroll"
+                :rules="[requiredValidator, betweenValidator(formData.payroll_start, 1, 31)]"
+                persistent-hint
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-text-field
+                v-model="formData.payroll_end"
+                label="To Date (Cur. Month)"
+                placeholder="eg. 25"
+                type="number"
+                hint="Cutoff End Date of Monthly Payroll"
+                :rules="[requiredValidator, betweenValidator(formData.payroll_end, 1, 31)]"
+                persistent-hint
               ></v-text-field>
             </v-col>
 
