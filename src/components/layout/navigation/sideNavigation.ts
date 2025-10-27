@@ -18,6 +18,7 @@ export const adminItemsNav1: SubNavigation[] = [
 export const adminItemsNav2: SubNavigation[] = [
   ['Employee Information', 'mdi-account-multiple', '', '/hrms/employees/list'],
   ['Rates & Benefits', 'mdi-cash-clock', '', '/hrms/employees/benefits'],
+  ['Employee Memos', 'mdi-file-account', '', '/hrms/employees/memos'],
 ]
 export const adminItemsNav3: SubNavigation[] = [
   ['Attendance', 'mdi-clock-in', '', '/hrms/attendance/list'],
@@ -25,7 +26,7 @@ export const adminItemsNav3: SubNavigation[] = [
   ['Overtime Application', 'mdi-clock-plus', '', '/hrms/attendance/overtime'],
 ]
 export const adminItemsNav4: SubNavigation[] = [
-  ['Salary Add-ons', 'mdi-cash-multiple', '', '/hrms/payroll/addons'],
+  ['Supplemental', 'mdi-cash-multiple', '', '/hrms/payroll/supplemental'],
   ['Cash Advance', 'mdi-cash-refund', '', '/hrms/payroll/advance'],
   ['Payroll', 'mdi-account-cash', '', '/hrms/payroll/list'],
 ]

@@ -8,10 +8,11 @@ import UsersView from '@/views/system/admin/manage-users/UsersView.vue'
 import DashboardView from '@/views/system/dashboard/DashboardView.vue'
 import EmployeesView from '@/views/system/admin/manage-employees/EmployeesView.vue'
 import RatesBenefitsView from '@/views/system/admin/manage-employees/RatesBenefitsView.vue'
+import MemosView from '@/views/system/admin/manage-employees/MemosView.vue'
 import AttendanceView from '@/views/system/admin/manage-attendance/AttendanceView.vue'
 import LeaveView from '@/views/system/admin/manage-attendance/LeaveView.vue'
 import OvertimeView from '@/views/system/admin/manage-attendance/OvertimeView.vue'
-import AddonsView from '@/views/system/admin/manage-payroll/AddonsView.vue'
+import SupplementalView from '@/views/system/admin/manage-payroll/SupplementalView.vue'
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
@@ -117,6 +118,12 @@ export const routes = [
     component: RatesBenefitsView,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/hrms/employees/memos',
+    name: 'hrms-employees-memos',
+    component: MemosView,
+    meta: { requiresAuth: true },
+  },
 
   // Attendance
   {
@@ -140,9 +147,9 @@ export const routes = [
 
   // Payroll
   {
-    path: '/hrms/payroll/addons',
-    name: 'hrms-payroll-addons',
-    component: AddonsView,
+    path: '/hrms/payroll/supplemental',
+    name: 'hrms-payroll-supplemental',
+    component: SupplementalView,
     meta: { requiresAuth: true },
   },
   {

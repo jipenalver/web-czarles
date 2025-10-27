@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import CashAdjustmentsFormDialog from './CashAdjustmentsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import CashAddonsFormDialog from './CashAddonsFormDialog.vue'
+import { useCashAdjustmentsTable } from './cashAdjustmentsTable'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { useCashAddonsTable } from './cashAddonsTable'
 import { getMoneyText } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
@@ -26,9 +26,9 @@ const {
   onFilterItems,
   onLoadItems,
   onExportCSV,
-  cashAddonsStore,
+  cashAdjustmentsStore,
   employeesStore,
-} = useCashAddonsTable()
+} = useCashAdjustmentsTable()
 </script>
 
 <template>
@@ -47,8 +47,8 @@ const {
         v-model:sort-by="tableOptions.sortBy"
         :loading="tableOptions.isLoading"
         :headers="tableHeaders"
-        :items="cashAddonsStore.cashAddonsTable"
-        :items-length="cashAddonsStore.cashAddonsTableTotal"
+        :items="cashAdjustmentsStore.cashAdjustmentsTable"
+        :items-length="cashAdjustmentsStore.cashAdjustmentsTableTotal"
         @update:options="onLoadItems"
         :hide-default-header="smAndDown"
         :mobile="smAndDown"
@@ -86,7 +86,7 @@ const {
 
             <v-col cols="12" sm="3">
               <v-date-input
-                v-model="tableFilters.addon_at"
+                v-model="tableFilters.adjustment_at"
                 prepend-icon=""
                 prepend-inner-icon="mdi-calendar"
                 density="compact"
@@ -100,7 +100,7 @@ const {
 
             <v-col cols="12" sm="3">
               <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
-                Add Add-on
+                Add Adjustment
               </v-btn>
             </v-col>
           </v-row>
@@ -114,9 +114,9 @@ const {
           </span>
         </template>
 
-        <template #item.addon_at="{ item }">
+        <template #item.adjustment_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.addon_at, 'fullDate') }}
+            {{ date.format(item.adjustment_at, 'fullDate') }}
           </span>
         </template>
 
@@ -126,16 +126,27 @@ const {
           </span>
         </template>
 
+        <template #item.is_deduction="{ item }">
+          <v-chip
+            class="font-weight-bold"
+            :color="item.is_deduction ? 'error' : 'success'"
+            variant="flat"
+            size="small"
+          >
+            {{ item.is_deduction ? 'Deduction' : 'Add-on' }}
+          </v-chip>
+        </template>
+
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
               <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Add-on</v-tooltip>
+              <v-tooltip activator="parent" location="top">Edit Adjustment</v-tooltip>
             </v-btn>
 
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Add-on</v-tooltip>
+              <v-tooltip activator="parent" location="top">Delete Adjustment</v-tooltip>
             </v-btn>
           </div>
         </template>
@@ -143,17 +154,17 @@ const {
     </v-card-text>
   </v-card>
 
-  <CashAddonsFormDialog
+  <CashAdjustmentsFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></CashAddonsFormDialog>
+  ></CashAdjustmentsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this add-on?"
+    text="Are you sure you want to delete this adjustment?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>

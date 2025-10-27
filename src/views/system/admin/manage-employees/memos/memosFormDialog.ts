@@ -1,30 +1,31 @@
-import { type CashAddon, type CashAddonTableFilter, useCashAddonsStore } from '@/stores/cashAddons'
+import { type Memo, type MemoForm, type MemoTableFilter, useMemosStore } from '@/stores/memos'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { fileExtract } from '@/utils/helpers/others'
 import { onMounted, ref, watch } from 'vue'
 
-export function useCashAddonsFormDialog(
+export function useMemosFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: CashAddon | null
+    itemData: Memo | null
     tableOptions: TableOptions
-    tableFilters: CashAddonTableFilter
+    tableFilters: MemoTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const cashAddonsStore = useCashAddonsStore()
+  const memosStore = useMemosStore()
   const employeesStore = useEmployeesStore()
 
   // States
   const formDataDefault = {
-    employee_id: null,
-    addon_at: new Date(),
     name: '',
-    remarks: '',
-    amount: undefined,
+    description: '',
+    is_everybody: false,
+    file: null as File | null,
+    employee_ids: [] as number[],
   }
-  const formData = ref<Partial<CashAddon>>({ ...formDataDefault })
+  const formData = ref<Partial<MemoForm>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -38,12 +39,21 @@ export function useCashAddonsFormDialog(
   )
 
   // Actions
+  const onFile = async (event: Event) => {
+    const { fileObject } = await fileExtract(event)
+    formData.value.file = fileObject
+  }
+
+  const onFileReset = () => {
+    formData.value.file = null
+  }
+
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await cashAddonsStore.updateCashAddon(formData.value)
-      : await cashAddonsStore.addCashAddon(formData.value)
+      ? await memosStore.updateMemo(formData.value)
+      : await memosStore.addMemo(formData.value)
 
     if (error) {
       formAction.value = {
@@ -53,9 +63,9 @@ export function useCashAddonsFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Add-on.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Memo.`
 
-      await cashAddonsStore.getCashAddonsTable(props.tableOptions, props.tableFilters)
+      await memosStore.getMemosTable(props.tableOptions, props.tableFilters)
 
       setTimeout(() => {
         onFormReset()
@@ -87,6 +97,8 @@ export function useCashAddonsFormDialog(
     formAction,
     refVForm,
     isUpdate,
+    onFile,
+    onFileReset,
     onFormSubmit,
     onFormReset,
     employeesStore,
