@@ -89,6 +89,17 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
                 :rules="[requiredValidator]"
               ></v-text-field>
             </v-col>
+
+            <v-col cols="12">
+              <v-switch v-model="formData.is_deduction" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Deduction?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_deduction ? 'Deduction' : 'Add-on' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
           </v-row>
         </v-card-text>
 

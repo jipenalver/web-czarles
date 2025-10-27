@@ -26,6 +26,7 @@ export function useCashAdjustmentsFormDialog(
     adjustment_at: new Date(),
     name: '',
     remarks: '',
+    is_deduction: false,
     amount: undefined,
   }
   const formData = ref<Partial<CashAdjustment>>({ ...formDataDefault })
