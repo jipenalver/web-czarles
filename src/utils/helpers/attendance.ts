@@ -99,12 +99,15 @@ const getTotalMinutes = (
 
   if (isField) {
     // Field staff: Calculate total time worked
-    const amMinutes = getFieldMinutes(amTimeIn, amTimeOut)
-    const pmMinutes = getFieldMinutes(pmTimeIn, pmTimeOut)
-    const actualMinutes = amMinutes + pmMinutes
+    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 7, 12, 20, 10) // 7am-12pm, 20min late allowance, 10min early departure allowance
+
+    const pmMinutes = getOfficeMinutesWithAllowance(pmTimeIn, pmTimeOut, 13, 17) // 1pm-5pm strict
+
+    totalMinutes = amMinutes - 60 + pmMinutes // Subtract 60 minutes to 7am-12pm
 
     // Return actual minutes worked, cap at 8 hours
-    totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
+    // const actualMinutes = amMinutes + pmMinutes
+    // totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
   } else {
     // Office staff: Constrain to office hours with allowances
     const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10, 10) // 8am-12pm, 10min late allowance, 10min early departure allowance
