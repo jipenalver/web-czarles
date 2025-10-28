@@ -153,7 +153,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
       if (startDate && endDate) {
         query = query.or(
-          `and(am_time_in.gte.${startDate},am_time_in.lt.${endDate}),am_time_in.is.null`,
+          `and(am_time_in.gte.${startDate},am_time_in.lt.${endDate}),and(am_time_in.is.null,pm_time_in.gte.${startDate},pm_time_in.lt.${endDate})`,
         )
       }
     }

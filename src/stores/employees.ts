@@ -35,6 +35,9 @@ export type Employee = {
   area_assignment_id: number | null
   area_assignment: Area
   daily_rate: number
+  payroll_start: number
+  payroll_end: number
+  is_gps_disabled: boolean
   employee_deductions: EmployeeDeduction[]
 }
 

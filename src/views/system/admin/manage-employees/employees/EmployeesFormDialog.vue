@@ -166,22 +166,38 @@ const {
             </v-col>
 
             <v-col cols="12" sm="6">
-              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+              <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
                 <template #label>
-                  Is Permanent Status?
+                  Is Field Staff?
                   <span class="font-weight-black ms-1">
-                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
+                    {{ formData.is_field_staff ? 'Field Staff' : 'Office Staff' }}
                   </span>
                 </template>
               </v-switch>
             </v-col>
 
-            <v-col cols="12" sm="6">
-              <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
+            <v-col v-if="!formData.is_field_staff" cols="12" sm="6">
+              <v-switch
+                v-model="formData.is_gps_disabled"
+                class="ms-2"
+                color="primary"
+                hide-details
+              >
                 <template #label>
-                  Is Field Staff?
+                  Is GPS Disabled?
                   <span class="font-weight-black ms-1">
-                    {{ formData.is_field_staff ? 'Yes' : 'No' }}
+                    {{ formData.is_gps_disabled ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-col cols="12">
+              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Permanent Status?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
                   </span>
                 </template>
               </v-switch>
