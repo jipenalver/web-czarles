@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { type Employee, type EmployeeTableFilter } from '@/stores/employees'
+import { betweenValidator, requiredValidator } from '@/utils/validators'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableOptions } from '@/utils/helpers/tables'
 import EmployeeLogs from '../employees/EmployeeLogs.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useRatesFormDialog } from './ratesFormDialog'
-import { betweenValidator, requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
