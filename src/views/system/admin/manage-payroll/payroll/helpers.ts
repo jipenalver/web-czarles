@@ -44,6 +44,22 @@ export function roundDecimal(value: number, decimalPlaces: number = 2): number {
   return Math.round(value * multiplier) / multiplier
 }
 
+/**
+ * Check if benefit amount is greater than zero
+ * Returns true kung ang benefit amount kay dili zero, false kung zero
+ */
+export function hasBenefitAmount(amount: number | null | undefined): boolean {
+  return (amount ?? 0) > 0
+}
+
+/**
+ * Convert hours worked to work days
+ * I-convert ang hours nga gi-trabaho to number of days (8 hours = 1 day)
+ */
+export function convertHoursToDays(hours: number): number {
+  return roundDecimal(hours / 8, 2)
+}
+
 export function getHolidayTypeName(type: string | undefined): string {
   if (!type) return 'Unknown'
   const t = type.toLowerCase()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useOverallEarningsTotal } from './overallTotal'
-import { getHolidayTypeName, formatTripDate, getMonthDateRange } from './helpers'
+import { getHolidayTypeName, /* formatTripDate, */ getMonthDateRange, hasBenefitAmount, convertHoursToDays } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
 import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
@@ -455,7 +455,7 @@ watch(
           </td>
           <td class="pa-2">
             <span v-if="props.employeeData?.is_field_staff">
-              {{ totalHoursWorked.toFixed(2) }} hours
+              x {{ convertHoursToDays(totalHoursWorked) }} days
             </span>
             <span v-else> x {{ effectiveWorkDays }} </span>
           </td>
@@ -480,7 +480,7 @@ watch(
 
         <template v-else>
           <template v-if="tripsStore.trips && tripsStore.trips.length > 0">
-            <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
+           <!--  <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
@@ -493,15 +493,15 @@ watch(
               >
                 {{ getMoneyText((trip.per_trip ?? 0) * (trip.trip_no ?? 1)) }}
               </td>
-            </tr>
+            </tr> -->
           </template>
-          <template v-else>
+         <!--  <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">
                 No trips to preview for this payroll period.
               </td>
             </tr>
-          </template>
+          </template> -->
 
           <template v-if="holidays.length > 0">
             <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
@@ -543,14 +543,14 @@ watch(
               </td>
             </tr>
           </template>
-          <template v-else>
+         <!--  <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">No holidays for this payroll period.</td>
             </tr>
-          </template>
+          </template> -->
         </template>
 
-        <tr>
+        <tr v-show="overallOvertime > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
           <td class="pa-2">{{ getMoneyText(overallOvertime) }} / hour</td>
@@ -560,7 +560,7 @@ watch(
         </tr>
 
         <template v-if="employeeNonDeductions.length > 0">
-          <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id">
+          <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id" v-show="hasBenefitAmount(benefit.amount)">
             <td class="border-b-thin text-center pa-2" colspan="2">
               {{ benefit.benefit.benefit || 'Other Benefit' }}
             </td>
@@ -571,7 +571,7 @@ watch(
             </td>
           </tr>
         </template>
-        <tr>
+        <tr v-show="monthlyTrippingsTotal > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
           <td class="pa-2">{{ getMoneyText(monthlyTrippingsTotal) }}/month</td>
