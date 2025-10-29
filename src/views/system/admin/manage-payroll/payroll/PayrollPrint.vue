@@ -457,7 +457,7 @@ watch(
             <span v-if="props.employeeData?.is_field_staff">
               x {{ convertHoursToDays(totalHoursWorked) }} days
             </span>
-            <span v-else> x {{ effectiveWorkDays }} </span>
+            <span v-else> x {{ effectiveWorkDays }} days</span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
             {{ getMoneyText(regularWorkTotal) }}
@@ -553,7 +553,7 @@ watch(
         <tr v-show="overallOvertime > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ getMoneyText(overallOvertime) }} / hour</td>
+          <td class="pa-2">{{ overallOvertime }} hours</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             {{ getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime) }}
           </td>
