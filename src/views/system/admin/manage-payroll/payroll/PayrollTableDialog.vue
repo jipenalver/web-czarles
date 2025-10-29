@@ -83,8 +83,10 @@ const chosenMonth = ref<string>('')
 // Initialize gamit ang payroll_start ug payroll_end from employee data
 const dayFrom = ref<number | null>(props.itemData?.payroll_start ?? null)
 const dayTo = ref<number | null>(props.itemData?.payroll_end ?? null)
-// Cross-month is checked by default
-const crossMonthEnabled = ref<boolean>(true)
+// Cross-month is checked by default ONLY if payroll_start ug payroll_end naa
+const crossMonthEnabled = ref<boolean>(
+  Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+)
 
 // Compute days in the currently chosen month (chosenMonth set when clicking a month row)
 const daysInSelectedMonth = computed(() => {
@@ -132,22 +134,25 @@ watch(
     //   fullData: newData
     // })
 
-    // Set ang payroll_start ug payroll_end kung naa, crossmonth is always enabled
+    // Set ang payroll_start ug payroll_end kung naa
     if (newData?.payroll_start !== undefined && newData?.payroll_start !== null) {
       dayFrom.value = newData.payroll_start
       // console.log('✅ Set dayFrom to:', newData.payroll_start)
-    } // else {
-    //   console.log('⚠️ No payroll_start found')
-    // }
+    } else {
+      dayFrom.value = null
+      // console.log('⚠️ No payroll_start found')
+    }
 
     if (newData?.payroll_end !== undefined && newData?.payroll_end !== null) {
       dayTo.value = newData.payroll_end
       // console.log('✅ Set dayTo to:', newData.payroll_end)
-    } // else {
-    //   console.log('⚠️ No payroll_end found')
-    // }
+    } else {
+      dayTo.value = null
+      // console.log('⚠️ No payroll_end found')
+    }
 
-    crossMonthEnabled.value = true
+    // Enable crossmonth ONLY if both payroll_start ug payroll_end naa
+    crossMonthEnabled.value = Boolean(newData?.payroll_start && newData?.payroll_end)
     // console.log('📊 Final values:', { dayFrom: dayFrom.value, dayTo: dayTo.value, crossMonthEnabled: crossMonthEnabled.value })
   },
   { immediate: true },
