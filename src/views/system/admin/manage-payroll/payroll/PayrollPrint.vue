@@ -17,6 +17,8 @@ import type { EmployeeDeduction } from '@/stores/benefits'
 import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 import type { Utilization } from '@/stores/utilizations'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
+import type { Allowance } from '@/stores/allowances'
+import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -92,12 +94,14 @@ const isTripsLoading = ref(false)
 const isHolidaysLoading = ref(false)
 const isOvertimeLoading = ref(false)
 const isUtilizationsLoading = ref(false)
+const isAllowancesLoading = ref(false)
 const isCalculationsCompleting = ref(false)
 const holidays = ref<Holiday[]>([])
 const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 const utilizations = ref<Utilization[]>([])
+const allowances = ref<Allowance[]>([])
 
 // Comprehensive loading state that tracks ALL calculations
 const isPayrollCalculating = computed(() => {
@@ -105,6 +109,7 @@ const isPayrollCalculating = computed(() => {
          isHolidaysLoading.value ||
          isOvertimeLoading.value ||
          isUtilizationsLoading.value ||
+         isAllowancesLoading.value ||
          isDeductionsLoading.value ||
          isCalculationsCompleting.value
 })
@@ -116,6 +121,7 @@ defineExpose({
   reloadAllFunctions,
   loadTrips,
   loadUtilizations,
+  loadAllowances,
   fetchEmployeeHolidays,
   updateOverallOvertime,
   updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
@@ -190,21 +196,6 @@ const {
   netSalary,
 } = payrollPrint
 
-const overallEarningsTotal = useOverallEarningsTotal(
-  regularWorkTotal,
-  computed(() => tripsStore.trips),
-  holidays,
-  dailyRate,
-  computed(() => employeeDailyRate.value),
-  overallOvertime,
-  codaAllowance,
-  employeeNonDeductions,
-)
-
-const displayTotalEarnings = computed(() => {
-  return overallEarningsTotal.value || 0
-})
-
 const monthlyTrippingsTotal = computed(() => {
   return tripsStore.trips.reduce((sum, trip) => {
     return sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1)
@@ -239,6 +230,45 @@ const monthlyUtilizationsTotal = computed(() => {
   return total
 })
 
+const monthlyAllowancesTotal = computed(() => {
+  const total = allowances.value.reduce((sum, allowance) => {
+    const amount = allowance.amount ?? 0
+
+    // console.log('[monthlyAllowancesTotal] Calculating:', {
+    //   allowanceId: allowance.id,
+    //   tripLocation: allowance.trip_location?.location,
+    //   amount,
+    //   runningSum: sum + amount
+    // })
+
+    return sum + amount
+  }, 0)
+
+  // console.log('[monthlyAllowancesTotal] Final total:', {
+  //   allowancesCount: allowances.value.length,
+  //   total
+  // })
+
+  return total
+})
+
+const overallEarningsTotal = useOverallEarningsTotal(
+  regularWorkTotal,
+  computed(() => tripsStore.trips),
+  holidays,
+  dailyRate,
+  computed(() => employeeDailyRate.value),
+  overallOvertime,
+  codaAllowance,
+  employeeNonDeductions,
+  monthlyUtilizationsTotal,
+  monthlyAllowancesTotal,
+)
+
+const displayTotalEarnings = computed(() => {
+  return overallEarningsTotal.value || 0
+})
+
 function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
 }
@@ -250,16 +280,18 @@ async function initializePayrollCalculations() {
     isHolidaysLoading.value = true
     isOvertimeLoading.value = true
     isUtilizationsLoading.value = true
+    isAllowancesLoading.value = true
     isDeductionsLoading.value = true
     holidays.value = []
     overallOvertime.value = 0
     utilizations.value = []
+    allowances.value = []
     employeeDeductions.value = []
     employeeNonDeductions.value = []
     if (props.employeeData?.id) {
       await updateEmployeeDeductions(props.employeeData.id)
     }
-    await Promise.all([loadTrips(), loadUtilizations(), fetchEmployeeHolidays(), updateOverallOvertime()])
+    await Promise.all([loadTrips(), loadUtilizations(), loadAllowances(), fetchEmployeeHolidays(), updateOverallOvertime()])
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
@@ -269,6 +301,7 @@ async function initializePayrollCalculations() {
     isHolidaysLoading.value = false
     isOvertimeLoading.value = false
     isUtilizationsLoading.value = false
+    isAllowancesLoading.value = false
     isDeductionsLoading.value = false
     isCalculationsCompleting.value = false
   }
@@ -281,6 +314,7 @@ async function reloadAllFunctions() {
     holidays.value = []
     overallOvertime.value = 0
     utilizations.value = []
+    allowances.value = []
     employeeDeductions.value = []
     employeeNonDeductions.value = []
     reactiveTotalEarnings.value = 0
@@ -288,6 +322,7 @@ async function reloadAllFunctions() {
     isHolidaysLoading.value = true
     isOvertimeLoading.value = true
     isUtilizationsLoading.value = true
+    isAllowancesLoading.value = true
     isDeductionsLoading.value = true
     await initializePayrollCalculations()
   } catch (error) {
@@ -424,6 +459,59 @@ async function loadUtilizations() {
   }
 }
 
+async function loadAllowances() {
+  if (!props.employeeData?.id) {
+    // console.warn('[loadAllowances] No employee ID, skipping')
+    isAllowancesLoading.value = false
+    return
+  }
+
+  // console.log('[loadAllowances] Starting...', {
+  //   employeeId: props.employeeData.id,
+  //   employeeName: `${props.employeeData.firstname} ${props.employeeData.lastname}`,
+  //   filterDateString: filterDateString.value
+  // })
+
+  isAllowancesLoading.value = true
+  try {
+    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
+    let fromDate: string | null = null
+    let toDate: string | null = null
+    try {
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate')
+        toDate = localStorage.getItem('czarles_payroll_toDate')
+      }
+    } catch {
+      fromDate = null
+      toDate = null
+    }
+
+    // console.log('[loadAllowances] Date range from localStorage:', { fromDate, toDate })
+
+    let fetchedAllowances
+    if (fromDate && toDate) {
+      // console.log('[loadAllowances] Using range-based fetch')
+      fetchedAllowances = await fetchAllowancesByRange(fromDate, toDate, props.employeeData.id)
+    } else {
+      // console.log('[loadAllowances] Using month-based fetch')
+      fetchedAllowances = await fetchFilteredAllowances(filterDateString.value, props.employeeData.id)
+    }
+
+    allowances.value = fetchedAllowances
+
+    // console.log('[loadAllowances] Allowances loaded:', {
+    //   count: fetchedAllowances.length,
+    //   allowances: fetchedAllowances
+    // })
+  } catch (error) {
+    console.error('[PayrollPrint] Error loading allowances:', error)
+    allowances.value = []
+  } finally {
+    isAllowancesLoading.value = false
+  }
+}
+
 async function updateOverallOvertime() {
   isOvertimeLoading.value = true
   try {
@@ -487,6 +575,7 @@ watch(
       holidays: isHolidaysLoading.value,
       overtime: isOvertimeLoading.value,
       utilizations: isUtilizationsLoading.value,
+      allowances: isAllowancesLoading.value,
       deductions: isDeductionsLoading.value,
       completing: isCalculationsCompleting.value
     })
@@ -564,6 +653,7 @@ watch(
               <span v-if="isCalculationsCompleting">Initializing payroll calculations...</span>
               <span v-else-if="isTripsLoading">Loading trips data...</span>
               <span v-else-if="isUtilizationsLoading">Loading utilizations data...</span>
+              <span v-else-if="isAllowancesLoading">Loading allowances data...</span>
               <span v-else-if="isHolidaysLoading">Loading holidays data...</span>
               <span v-else-if="isOvertimeLoading">Calculating overtime...</span>
               <span v-else-if="isDeductionsLoading">Loading deductions...</span>
@@ -668,7 +758,7 @@ watch(
         <tr v-show="monthlyTrippingsTotal > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ getMoneyText(monthlyTrippingsTotal) }}/month</td>
+          <td class="pa-2"></td>
           <td
             class="border-b-thin border-s-sm text-end pa-2 total-cell"
             data-total="monthly-trippings"
@@ -680,12 +770,24 @@ watch(
         <tr v-show="monthlyUtilizationsTotal > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Utilizations</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ getMoneyText(monthlyUtilizationsTotal) }}/month</td>
+          <td class="pa-2"></td>
           <td
             class="border-b-thin border-s-sm text-end pa-2 total-cell"
             data-total="monthly-utilizations"
           >
             {{ getMoneyText(monthlyUtilizationsTotal) }}
+          </td>
+        </tr>
+
+        <tr v-show="monthlyAllowancesTotal > 0">
+          <td class="border-b-thin text-center pa-2" colspan="2">Monthly Allowances</td>
+          <td class="pa-2"></td>
+          <td class="pa-2"></td>
+          <td
+            class="border-b-thin border-s-sm text-end pa-2 total-cell"
+            data-total="monthly-allowances"
+          >
+            {{ getMoneyText(monthlyAllowancesTotal) }}
           </td>
         </tr>
 

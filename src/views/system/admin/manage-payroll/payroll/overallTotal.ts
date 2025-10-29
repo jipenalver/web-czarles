@@ -4,7 +4,7 @@ import type { Trip } from '@/stores/trips'
 import type { EmployeeDeduction } from '@/stores/benefits'
 
 /**
- * Computes the overall earnings total including regular work, trips, holidays, overtime, and benefits
+ * Computes the overall earnings total including regular work, trips, holidays, overtime, benefits, utilizations, and allowances
  */
 export function useOverallEarningsTotal(
   regularWorkTotal: Ref<number>,
@@ -15,6 +15,8 @@ export function useOverallEarningsTotal(
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
   nonDeductions?: Ref<EmployeeDeduction[]>,
+  monthlyUtilizationsTotal?: ComputedRef<number>,
+  monthlyAllowancesTotal?: ComputedRef<number>,
   /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<number> {
   return computed(() => {
@@ -65,6 +67,16 @@ export function useOverallEarningsTotal(
         return sum + (Number(item.amount) || 0)
       }, 0)
       total += nonDeductionTotal
+    }
+
+    // 7. Add monthly utilizations
+    if (monthlyUtilizationsTotal) {
+      total += Number(monthlyUtilizationsTotal.value) || 0
+    }
+
+    // 8. Add monthly allowances
+    if (monthlyAllowancesTotal) {
+      total += Number(monthlyAllowancesTotal.value) || 0
     }
 
     return total
