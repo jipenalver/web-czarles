@@ -60,6 +60,14 @@ export function convertHoursToDays(hours: number): number {
   return roundDecimal(hours / 8, 2)
 }
 
+/**
+ * Format hours to 1 decimal place
+ * I-format ang hours to one decimal place lang (e.g., 5.5 hours)
+ */
+export function formatHoursOneDecimal(hours: number): string {
+  return roundDecimal(hours, 1).toFixed(1)
+}
+
 export function getHolidayTypeName(type: string | undefined): string {
   if (!type) return 'Unknown'
   const t = type.toLowerCase()
