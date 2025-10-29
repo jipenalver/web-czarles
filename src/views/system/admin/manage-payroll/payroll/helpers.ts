@@ -201,15 +201,26 @@ export function getLastDayOfMonth(year: number, monthName: string): number {
 
 /**
  * Simple change handler for cross-month checkbox. Clears day refs when disabled.
+ * Sets payroll_start and payroll_end when enabled (if provided).
  */
 export function onCrossMonthChange(
   val: boolean,
   dayFrom: Ref<number | null>,
   dayTo: Ref<number | null>,
+  payrollStart?: number | null,
+  payrollEnd?: number | null,
 ) {
   if (!val) {
     dayFrom.value = null
     dayTo.value = null
+  } else {
+    // Set ang payroll_start ug payroll_end kung naa
+    if (payrollStart !== null && payrollStart !== undefined) {
+      dayFrom.value = payrollStart
+    }
+    if (payrollEnd !== null && payrollEnd !== undefined) {
+      dayTo.value = payrollEnd
+    }
   }
 }
 
