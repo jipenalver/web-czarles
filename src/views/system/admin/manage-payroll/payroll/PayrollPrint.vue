@@ -1,27 +1,16 @@
 <script setup lang="ts">
 import { useOverallEarningsTotal } from './overallTotal'
-import { getHolidayTypeName, /* formatTripDate, */ getMonthDateRange, hasBenefitAmount, convertHoursToDays, formatHoursOneDecimal } from './helpers'
+import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount, convertHoursToDays, formatHoursOneDecimal } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
-import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './usePayrollPrint'
+import { usePayrollData } from './usePayrollData'
 import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './MiniPayrollPrint.vue'
 import PayrollPrintFooter from './PayrollPrintFooter.vue'
-import { fetchEmployeeDeductions } from './computation/benefits'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
-import type { EmployeeDeduction } from '@/stores/benefits'
-import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
-import type { Utilization } from '@/stores/utilizations'
-import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
-import type { Allowance } from '@/stores/allowances'
-import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
-import type { CashAdjustment } from '@/stores/cashAdjustments'
-import { supabase } from '@/utils/supabase'
-import { getLastDateOfMonth } from './helpers'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -29,25 +18,52 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
-const employeeDeductions = ref<EmployeeDeduction[]>([])
-const employeeNonDeductions = ref<EmployeeDeduction[]>([])
-const isDeductionsLoading = ref(false)
+const filterDateString = computed(() => {
+  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
+  return `${props.payrollData.year}-${month}-01`
+})
 
-async function updateEmployeeDeductions(employeeId: number | undefined) {
-  isDeductionsLoading.value = true
-  try {
-    const result = await fetchEmployeeDeductions(employeeId)
-    employeeDeductions.value = result.deductions
-    employeeNonDeductions.value = result.nonDeductions
-  } catch (error) {
-    console.error('Error updating employee deductions:', error)
-    employeeDeductions.value = []
-    employeeNonDeductions.value = []
-  } finally {
-    isDeductionsLoading.value = false
-  }
-}
+const holidayDateString = computed(() => {
+  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
+  return `${props.payrollData.year}-${month}`
+})
 
+// Create params para sa composable
+const payrollDataParams = computed(() => ({
+  employeeId: props.employeeData?.id,
+  filterDateString: filterDateString.value,
+  holidayDateString: holidayDateString.value,
+}))
+
+// Use payroll data composable for all data fetching
+const {
+  holidays,
+
+  cashAdjustmentsAdditions,
+  employeeDeductions,
+  employeeNonDeductions,
+  isTripsLoading,
+  isHolidaysLoading,
+  isUtilizationsLoading,
+  isAllowancesLoading,
+  isCashAdjustmentsLoading,
+  isDeductionsLoading,
+  isPayrollCalculating,
+  monthlyTrippingsTotal,
+  monthlyUtilizationsTotal,
+  monthlyAllowancesTotal,
+  monthlyCashAdjustmentsTotal,
+  loadTrips,
+  loadUtilizations,
+  loadAllowances,
+  loadCashAdjustments,
+  fetchEmployeeHolidays,
+  updateEmployeeDeductions,
+  initializePayrollCalculations: initializeDataCalculations,
+  reloadAllFunctions: reloadAllData,
+} = usePayrollData(payrollDataParams)
+
+// Watch kuha sa employee deductions when employee changes
 watch(
   () => props.employeeData?.id,
   async (id) => {
@@ -93,47 +109,11 @@ const monthNames = [
   'December',
 ]
 
-const isTripsLoading = ref(false)
-const isHolidaysLoading = ref(false)
 const isOvertimeLoading = ref(false)
-const isUtilizationsLoading = ref(false)
-const isAllowancesLoading = ref(false)
 const isCalculationsCompleting = ref(false)
-const holidays = ref<Holiday[]>([])
 const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
-const utilizations = ref<Utilization[]>([])
-const allowances = ref<Allowance[]>([])
-const cashAdjustmentsAdditions = ref<CashAdjustment[]>([])
-const isCashAdjustmentsLoading = ref(false)
-
-// Comprehensive loading state that tracks ALL calculations
-const isPayrollCalculating = computed(() => {
-  return isTripsLoading.value ||
-         isHolidaysLoading.value ||
-         isOvertimeLoading.value ||
-         isUtilizationsLoading.value ||
-         isAllowancesLoading.value ||
-         isCashAdjustmentsLoading.value ||
-         isDeductionsLoading.value ||
-         isCalculationsCompleting.value
-})
-
-// Expose methods and state to parent components
-defineExpose({
-  initializePayrollCalculations,
-  recalculateEarnings,
-  reloadAllFunctions,
-  loadTrips,
-  loadUtilizations,
-  loadAllowances,
-  loadCashAdjustments,
-  fetchEmployeeHolidays,
-  updateOverallOvertime,
-  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
-  isPayrollCalculating, // Expose comprehensive loading state
-})
 
 const fullName = computed(() => {
   if (!props.employeeData) return 'N/A'
@@ -153,16 +133,6 @@ const formattedDate = computed(() => {
   // Use the current system date for the printed pay slip date
   const date = new Date()
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-})
-
-const filterDateString = computed(() => {
-  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
-  return `${props.payrollData.year}-${month}-01`
-})
-
-const holidayDateString = computed(() => {
-  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
-  return `${props.payrollData.year}-${month}`
 })
 
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
@@ -203,70 +173,7 @@ const {
   netSalary,
 } = payrollPrint
 
-const monthlyTrippingsTotal = computed(() => {
-  return tripsStore.trips.reduce((sum, trip) => {
-    return sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1)
-  }, 0)
-})
-
-const monthlyUtilizationsTotal = computed(() => {
-  const total = utilizations.value.reduce((sum, utilization) => {
-    const totalHours = utilization.hours ?? 0
-    const overtimeHours = utilization.overtime_hours ?? 0
-    const perHour = utilization.per_hour ?? 0
-    const lineTotal = (totalHours + overtimeHours) * perHour
-
-    // console.log('[monthlyUtilizationsTotal] Calculating:', {
-    //   utilizationId: utilization.id,
-    //   unit: utilization.unit?.name,
-    //   totalHours,
-    //   overtimeHours,
-    //   perHour,
-    //   lineTotal,
-    //   runningSum: sum + lineTotal
-    // })
-
-    return sum + lineTotal
-  }, 0)
-
-  // console.log('[monthlyUtilizationsTotal] Final total:', {
-  //   utilizationsCount: utilizations.value.length,
-  //   total
-  // })
-
-  return total
-})
-
-const monthlyAllowancesTotal = computed(() => {
-  const total = allowances.value.reduce((sum, allowance) => {
-    const amount = allowance.amount ?? 0
-
-    // console.log('[monthlyAllowancesTotal] Calculating:', {
-    //   allowanceId: allowance.id,
-    //   tripLocation: allowance.trip_location?.location,
-    //   amount,
-    //   runningSum: sum + amount
-    // })
-
-    return sum + amount
-  }, 0)
-
-  // console.log('[monthlyAllowancesTotal] Final total:', {
-  //   allowancesCount: allowances.value.length,
-  //   total
-  // })
-
-  return total
-})
-
-const monthlyCashAdjustmentsTotal = computed(() => {
-  const total = cashAdjustmentsAdditions.value.reduce((sum, adjustment) => {
-    const amount = adjustment.amount ?? 0
-    return sum + amount
-  }, 0)
-
-  return total
-})
+// Monthly totals from composable are already available
 
 const overallEarningsTotal = useOverallEarningsTotal(
   regularWorkTotal,
@@ -286,306 +193,40 @@ const displayTotalEarnings = computed(() => {
   return overallEarningsTotal.value || 0
 })
 
+// Recalculate earnings function
 function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
 }
 
+// Wrapper function para sa full initialization including overtime
 async function initializePayrollCalculations() {
   isCalculationsCompleting.value = true
   try {
-    isTripsLoading.value = true
-    isHolidaysLoading.value = true
-    isOvertimeLoading.value = true
-    isUtilizationsLoading.value = true
-    isAllowancesLoading.value = true
-    isCashAdjustmentsLoading.value = true
-    isDeductionsLoading.value = true
-    holidays.value = []
     overallOvertime.value = 0
-    utilizations.value = []
-    allowances.value = []
-    cashAdjustmentsAdditions.value = []
-    employeeDeductions.value = []
-    employeeNonDeductions.value = []
-    if (props.employeeData?.id) {
-      await updateEmployeeDeductions(props.employeeData.id)
-    }
-    await Promise.all([loadTrips(), loadUtilizations(), loadAllowances(), loadCashAdjustments(), fetchEmployeeHolidays(), updateOverallOvertime()])
+    // Call composable initialization with overtime callback
+    await initializeDataCalculations(computeOverallOvertimeCalculation)
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
   } finally {
-    // Ensure all individual loading states are false
-    isTripsLoading.value = false
-    isHolidaysLoading.value = false
-    isOvertimeLoading.value = false
-    isUtilizationsLoading.value = false
-    isAllowancesLoading.value = false
-    isCashAdjustmentsLoading.value = false
-    isDeductionsLoading.value = false
     isCalculationsCompleting.value = false
   }
 }
 
+// Wrapper function para sa full reload including overtime
 async function reloadAllFunctions() {
   isCalculationsCompleting.value = true
   try {
     tripsStore.trips = []
-    holidays.value = []
     overallOvertime.value = 0
-    utilizations.value = []
-    allowances.value = []
-    cashAdjustmentsAdditions.value = []
-    employeeDeductions.value = []
-    employeeNonDeductions.value = []
     reactiveTotalEarnings.value = 0
-    isTripsLoading.value = true
-    isHolidaysLoading.value = true
-    isOvertimeLoading.value = true
-    isUtilizationsLoading.value = true
-    isAllowancesLoading.value = true
-    isCashAdjustmentsLoading.value = true
-    isDeductionsLoading.value = true
-    await initializePayrollCalculations()
+    // Call composable reload with overtime callback
+    await reloadAllData(computeOverallOvertimeCalculation)
+    recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
   } finally {
     isCalculationsCompleting.value = false
-  }
-}
-
-async function fetchEmployeeHolidays() {
-  if (!props.employeeData?.id) {
-    holidays.value = []
-    isHolidaysLoading.value = false
-    return
-  }
-  try {
-    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    if (fromDate && toDate) {
-      // Use range-based fetch
-      holidays.value = await fetchHolidaysByRange(fromDate, toDate, String(props.employeeData.id))
-    } else {
-      // Fallback to month-based fetch
-      holidays.value = await fetchHolidaysByDateString(
-        holidayDateString.value,
-        String(props.employeeData.id),
-      )
-    }
-  } catch (error) {
-    console.error('Error fetching holidays:', error)
-    holidays.value = []
-  } finally {
-    isHolidaysLoading.value = false
-  }
-}
-
-async function loadTrips() {
-  if (!props.employeeData?.id) {
-    isTripsLoading.value = false
-    return
-  }
-  isTripsLoading.value = true
-  try {
-    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    let fetchedTrips
-    if (fromDate && toDate) {
-      fetchedTrips = await fetchTripsByRange(fromDate, toDate, props.employeeData.id)
-    } else {
-      fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
-    }
-
-    tripsStore.trips = fetchedTrips
-  } catch (error) {
-    console.error('[PayrollPrint] Error loading trips:', error)
-    tripsStore.trips = []
-  } finally {
-    isTripsLoading.value = false
-  }
-}
-
-async function loadUtilizations() {
-  if (!props.employeeData?.id) {
-    // console.warn('[loadUtilizations] No employee ID, skipping')
-    isUtilizationsLoading.value = false
-    return
-  }
-
-  // console.log('[loadUtilizations] Starting...', {
-  //   employeeId: props.employeeData.id,
-  //   employeeName: `${props.employeeData.firstname} ${props.employeeData.lastname}`,
-  //   filterDateString: filterDateString.value
-  // })
-
-  isUtilizationsLoading.value = true
-  try {
-    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    // console.log('[loadUtilizations] Date range from localStorage:', { fromDate, toDate })
-
-    let fetchedUtilizations
-    if (fromDate && toDate) {
-      // console.log('[loadUtilizations] Using range-based fetch')
-      fetchedUtilizations = await fetchUtilizationsByRange(fromDate, toDate, props.employeeData.id)
-    } else {
-      // console.log('[loadUtilizations] Using month-based fetch')
-      fetchedUtilizations = await fetchFilteredUtilizations(filterDateString.value, props.employeeData.id)
-    }
-
-    utilizations.value = fetchedUtilizations
-
-    // console.log('[loadUtilizations] Utilizations loaded:', {
-    //   count: fetchedUtilizations.length,
-    //   utilizations: fetchedUtilizations
-    // })
-  } catch (error) {
-    console.error('[PayrollPrint] Error loading utilizations:', error)
-    utilizations.value = []
-  } finally {
-    isUtilizationsLoading.value = false
-  }
-}
-
-async function loadAllowances() {
-  if (!props.employeeData?.id) {
-    // console.warn('[loadAllowances] No employee ID, skipping')
-    isAllowancesLoading.value = false
-    return
-  }
-
-  // console.log('[loadAllowances] Starting...', {
-  //   employeeId: props.employeeData.id,
-  //   employeeName: `${props.employeeData.firstname} ${props.employeeData.lastname}`,
-  //   filterDateString: filterDateString.value
-  // })
-
-  isAllowancesLoading.value = true
-  try {
-    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    // console.log('[loadAllowances] Date range from localStorage:', { fromDate, toDate })
-
-    let fetchedAllowances
-    if (fromDate && toDate) {
-      // console.log('[loadAllowances] Using range-based fetch')
-      fetchedAllowances = await fetchAllowancesByRange(fromDate, toDate, props.employeeData.id)
-    } else {
-      // console.log('[loadAllowances] Using month-based fetch')
-      fetchedAllowances = await fetchFilteredAllowances(filterDateString.value, props.employeeData.id)
-    }
-
-    allowances.value = fetchedAllowances
-
-    // console.log('[loadAllowances] Allowances loaded:', {
-    //   count: fetchedAllowances.length,
-    //   allowances: fetchedAllowances
-    // })
-  } catch (error) {
-    console.error('[PayrollPrint] Error loading allowances:', error)
-    allowances.value = []
-  } finally {
-    isAllowancesLoading.value = false
-  }
-}
-
-async function loadCashAdjustments() {
-  if (!props.employeeData?.id) {
-    isCashAdjustmentsLoading.value = false
-    return
-  }
-
-  isCashAdjustmentsLoading.value = true
-  try {
-    // Prefer explicit from/to range saved in localStorage
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    let startDate: string
-    let endDate: string
-
-    if (fromDate && toDate) {
-      startDate = fromDate
-      endDate = toDate
-    } else {
-      startDate = filterDateString.value
-      endDate = getLastDateOfMonth(startDate)
-    }
-
-    // Fetch cash adjustments with is_deduction=false (additions/earnings)
-    const { data, error } = await supabase
-      .from('cash_adjustments')
-      .select('*')
-      .eq('employee_id', props.employeeData.id)
-      .eq('is_deduction', false)
-      .gte('adjustment_at', startDate)
-      .lt('adjustment_at', endDate)
-
-    if (error) {
-      console.error('[PayrollPrint] Error loading cash adjustments:', error)
-      cashAdjustmentsAdditions.value = []
-    } else {
-      cashAdjustmentsAdditions.value = data || []
-    }
-  } catch (error) {
-    console.error('[PayrollPrint] Error loading cash adjustments:', error)
-    cashAdjustmentsAdditions.value = []
-  } finally {
-    isCashAdjustmentsLoading.value = false
   }
 }
 
@@ -600,6 +241,21 @@ async function updateOverallOvertime() {
     isOvertimeLoading.value = false
   }
 }
+
+// Expose methods and state to parent components
+defineExpose({
+  initializePayrollCalculations,
+  recalculateEarnings,
+  reloadAllFunctions,
+  loadTrips,
+  loadUtilizations,
+  loadAllowances,
+  loadCashAdjustments,
+  fetchEmployeeHolidays,
+  updateOverallOvertime,
+  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
+  isPayrollCalculating, // Expose comprehensive loading state
+})
 
 onMounted(async () => {
   await initializePayrollCalculations()
