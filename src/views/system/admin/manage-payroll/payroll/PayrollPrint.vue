@@ -19,6 +19,9 @@ import type { Utilization } from '@/stores/utilizations'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
 import type { Allowance } from '@/stores/allowances'
 import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
+import type { CashAdjustment } from '@/stores/cashAdjustments'
+import { supabase } from '@/utils/supabase'
+import { getLastDateOfMonth } from './helpers'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -102,6 +105,8 @@ const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 const utilizations = ref<Utilization[]>([])
 const allowances = ref<Allowance[]>([])
+const cashAdjustmentsAdditions = ref<CashAdjustment[]>([])
+const isCashAdjustmentsLoading = ref(false)
 
 // Comprehensive loading state that tracks ALL calculations
 const isPayrollCalculating = computed(() => {
@@ -110,6 +115,7 @@ const isPayrollCalculating = computed(() => {
          isOvertimeLoading.value ||
          isUtilizationsLoading.value ||
          isAllowancesLoading.value ||
+         isCashAdjustmentsLoading.value ||
          isDeductionsLoading.value ||
          isCalculationsCompleting.value
 })
@@ -122,6 +128,7 @@ defineExpose({
   loadTrips,
   loadUtilizations,
   loadAllowances,
+  loadCashAdjustments,
   fetchEmployeeHolidays,
   updateOverallOvertime,
   updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
@@ -252,6 +259,15 @@ const monthlyAllowancesTotal = computed(() => {
   return total
 })
 
+const monthlyCashAdjustmentsTotal = computed(() => {
+  const total = cashAdjustmentsAdditions.value.reduce((sum, adjustment) => {
+    const amount = adjustment.amount ?? 0
+    return sum + amount
+  }, 0)
+
+  return total
+})
+
 const overallEarningsTotal = useOverallEarningsTotal(
   regularWorkTotal,
   computed(() => tripsStore.trips),
@@ -263,6 +279,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   employeeNonDeductions,
   monthlyUtilizationsTotal,
   monthlyAllowancesTotal,
+  monthlyCashAdjustmentsTotal,
 )
 
 const displayTotalEarnings = computed(() => {
@@ -281,17 +298,19 @@ async function initializePayrollCalculations() {
     isOvertimeLoading.value = true
     isUtilizationsLoading.value = true
     isAllowancesLoading.value = true
+    isCashAdjustmentsLoading.value = true
     isDeductionsLoading.value = true
     holidays.value = []
     overallOvertime.value = 0
     utilizations.value = []
     allowances.value = []
+    cashAdjustmentsAdditions.value = []
     employeeDeductions.value = []
     employeeNonDeductions.value = []
     if (props.employeeData?.id) {
       await updateEmployeeDeductions(props.employeeData.id)
     }
-    await Promise.all([loadTrips(), loadUtilizations(), loadAllowances(), fetchEmployeeHolidays(), updateOverallOvertime()])
+    await Promise.all([loadTrips(), loadUtilizations(), loadAllowances(), loadCashAdjustments(), fetchEmployeeHolidays(), updateOverallOvertime()])
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
@@ -302,6 +321,7 @@ async function initializePayrollCalculations() {
     isOvertimeLoading.value = false
     isUtilizationsLoading.value = false
     isAllowancesLoading.value = false
+    isCashAdjustmentsLoading.value = false
     isDeductionsLoading.value = false
     isCalculationsCompleting.value = false
   }
@@ -315,6 +335,7 @@ async function reloadAllFunctions() {
     overallOvertime.value = 0
     utilizations.value = []
     allowances.value = []
+    cashAdjustmentsAdditions.value = []
     employeeDeductions.value = []
     employeeNonDeductions.value = []
     reactiveTotalEarnings.value = 0
@@ -323,6 +344,7 @@ async function reloadAllFunctions() {
     isOvertimeLoading.value = true
     isUtilizationsLoading.value = true
     isAllowancesLoading.value = true
+    isCashAdjustmentsLoading.value = true
     isDeductionsLoading.value = true
     await initializePayrollCalculations()
   } catch (error) {
@@ -512,6 +534,61 @@ async function loadAllowances() {
   }
 }
 
+async function loadCashAdjustments() {
+  if (!props.employeeData?.id) {
+    isCashAdjustmentsLoading.value = false
+    return
+  }
+
+  isCashAdjustmentsLoading.value = true
+  try {
+    // Prefer explicit from/to range saved in localStorage
+    let fromDate: string | null = null
+    let toDate: string | null = null
+    try {
+      if (typeof window !== 'undefined') {
+        fromDate = localStorage.getItem('czarles_payroll_fromDate')
+        toDate = localStorage.getItem('czarles_payroll_toDate')
+      }
+    } catch {
+      fromDate = null
+      toDate = null
+    }
+
+    let startDate: string
+    let endDate: string
+
+    if (fromDate && toDate) {
+      startDate = fromDate
+      endDate = toDate
+    } else {
+      startDate = filterDateString.value
+      endDate = getLastDateOfMonth(startDate)
+    }
+
+    // Fetch cash adjustments with is_deduction=false (additions/earnings)
+    const { data, error } = await supabase
+      .from('cash_adjustments')
+      .select('*')
+      .eq('employee_id', props.employeeData.id)
+      .eq('is_deduction', false)
+      .gte('adjustment_at', startDate)
+      .lt('adjustment_at', endDate)
+
+    if (error) {
+      console.error('[PayrollPrint] Error loading cash adjustments:', error)
+      cashAdjustmentsAdditions.value = []
+    } else {
+      cashAdjustmentsAdditions.value = data || []
+    }
+  } catch (error) {
+    console.error('[PayrollPrint] Error loading cash adjustments:', error)
+    cashAdjustmentsAdditions.value = []
+  } finally {
+    isCashAdjustmentsLoading.value = false
+  }
+}
+
 async function updateOverallOvertime() {
   isOvertimeLoading.value = true
   try {
@@ -576,6 +653,7 @@ watch(
       overtime: isOvertimeLoading.value,
       utilizations: isUtilizationsLoading.value,
       allowances: isAllowancesLoading.value,
+      cashAdjustments: isCashAdjustmentsLoading.value,
       deductions: isDeductionsLoading.value,
       completing: isCalculationsCompleting.value
     })
@@ -654,6 +732,7 @@ watch(
               <span v-else-if="isTripsLoading">Loading trips data...</span>
               <span v-else-if="isUtilizationsLoading">Loading utilizations data...</span>
               <span v-else-if="isAllowancesLoading">Loading allowances data...</span>
+              <span v-else-if="isCashAdjustmentsLoading">Loading cash adjustments data...</span>
               <span v-else-if="isHolidaysLoading">Loading holidays data...</span>
               <span v-else-if="isOvertimeLoading">Calculating overtime...</span>
               <span v-else-if="isDeductionsLoading">Loading deductions...</span>
@@ -780,7 +859,7 @@ watch(
         </tr>
 
         <tr v-show="monthlyAllowancesTotal > 0">
-          <td class="border-b-thin text-center pa-2" colspan="2">Monthly Allowances</td>
+          <td class="border-b-thin text-center pa-2" colspan="2">Allowance</td>
           <td class="pa-2"></td>
           <td class="pa-2"></td>
           <td
@@ -788,6 +867,18 @@ watch(
             data-total="monthly-allowances"
           >
             {{ getMoneyText(monthlyAllowancesTotal) }}
+          </td>
+        </tr>
+
+        <tr v-for="adj in cashAdjustmentsAdditions" :key="'cashadjustment-' + adj.id">
+          <td class="border-b-thin text-center pa-2" colspan="2">
+            {{ adj.name || 'Cash Adjustment' }}
+            <span v-if="adj.remarks" class="text-caption"> ({{ adj.remarks }})</span>
+          </td>
+          <td class="pa-2"></td>
+          <td class="pa-2">-</td>
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="cash-adjustment">
+            {{ getMoneyText(adj.amount ?? 0) }}
           </td>
         </tr>
 

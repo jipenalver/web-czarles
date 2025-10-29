@@ -9,6 +9,13 @@ import { type Trip } from '@/stores/trips'
 import { type Holiday } from '@/stores/holidays'
 import { fetchCashAdvances } from './computation/cashAdvance'
 import { fetchEmployeeDeductions } from './computation/benefits'
+import type { Utilization } from '@/stores/utilizations'
+import { fetchFilteredUtilizations } from './computation/utilizations'
+import type { Allowance } from '@/stores/allowances'
+import { fetchFilteredAllowances } from './computation/allowances'
+import type { CashAdjustment } from '@/stores/cashAdjustments'
+import { supabase } from '@/utils/supabase'
+import { getLastDateOfMonth } from './helpers'
 // import { useTripsStore } from '@/stores/trips'
 
 import {
@@ -67,6 +74,9 @@ export function usePayrollTableDialog(
       trips: Trip[]
       holidays: Holiday[]
       cashAdvances: CashAdvance[]
+      utilizations: Utilization[]
+      allowances: Allowance[]
+      cashAdjustments: CashAdjustment[]
     }>
   }
 
@@ -101,12 +111,29 @@ export function usePayrollTableDialog(
             fetchFilteredTrips(dateString, employeeId),
             fetchHolidaysByDateString(dateString, employeeId.toString()),
             fetchCashAdvances(cashAdvanceDateString, employeeId),
-          ]).then(([trips, holidays, cashAdvances]) => ({
+            fetchFilteredUtilizations(dateString, employeeId),
+            fetchFilteredAllowances(dateString, employeeId),
+            (async () => {
+              const startDate = cashAdvanceDateString
+              const endDate = getLastDateOfMonth(startDate)
+              const { data } = await supabase
+                .from('cash_adjustments')
+                .select('*')
+                .eq('employee_id', employeeId)
+                .eq('is_deduction', false)
+                .gte('adjustment_at', startDate)
+                .lt('adjustment_at', endDate)
+              return data || []
+            })(),
+          ]).then(([trips, holidays, cashAdvances, utilizations, allowances, cashAdjustments]) => ({
             monthIndex,
             dateString,
             trips: trips || [],
             holidays: holidays || [],
             cashAdvances: cashAdvances || [],
+            utilizations: utilizations || [],
+            allowances: allowances || [],
+            cashAdjustments: cashAdjustments || [],
           }))
         )
       }
@@ -166,7 +193,7 @@ export function usePayrollTableDialog(
 
     try {
       // Use yearData if provided (cached), otherwise fetch individual month data
-      let trips, holidays, employeeData, employeeDeductionsResult, cashAdvances
+      let trips, holidays, employeeData, employeeDeductionsResult, cashAdvances, utilizations, allowances, cashAdjustments
 
       if (yearData) {
         // Use cached year data
@@ -174,6 +201,9 @@ export function usePayrollTableDialog(
         trips = monthData?.trips || []
         holidays = monthData?.holidays || []
         cashAdvances = monthData?.cashAdvances || []
+        utilizations = monthData?.utilizations || []
+        allowances = monthData?.allowances || []
+        cashAdjustments = monthData?.cashAdjustments || []
         employeeData = yearData.employeeData
         employeeDeductionsResult = yearData.deductions
       } else {
@@ -184,12 +214,29 @@ export function usePayrollTableDialog(
           employeesStore.getEmployeesById(employeeId),
           fetchEmployeeDeductions(employeeId),
           fetchCashAdvances(cashAdvanceDateString, employeeId),
+          fetchFilteredUtilizations(dateString, employeeId),
+          fetchFilteredAllowances(dateString, employeeId),
+          (async () => {
+            const startDate = cashAdvanceDateString
+            const endDate = getLastDateOfMonth(startDate)
+            const { data } = await supabase
+              .from('cash_adjustments')
+              .select('*')
+              .eq('employee_id', employeeId)
+              .eq('is_deduction', false)
+              .gte('adjustment_at', startDate)
+              .lt('adjustment_at', endDate)
+            return data || []
+          })(),
         ])
         trips = results[0]
         holidays = results[1]
         employeeData = results[2]
         employeeDeductionsResult = results[3]
         cashAdvances = results[4]
+        utilizations = results[5]
+        allowances = results[6]
+        cashAdjustments = results[7]
       }
 
       /*   console.log(`Data fetching results for ${monthName} ${year}:`, {
@@ -246,6 +293,9 @@ export function usePayrollTableDialog(
       const regularWorkTotal = ref(0)
       const tripsRef = ref(trips || [])
       const holidaysRef = ref(holidays || [])
+      const utilizationsRef = ref(utilizations || [])
+      const allowancesRef = ref(allowances || [])
+      const cashAdjustmentsRef = ref(cashAdjustments || [])
       const dailyRate = computed(() => employeeData?.daily_rate || 0)
       const employeeDailyRate = computed(() => employeeData?.daily_rate || 0)
       const overallOvertime = ref(0)
@@ -253,6 +303,30 @@ export function usePayrollTableDialog(
       const nonDeductions = ref(employeeDeductionsResult.nonDeductions || [])
       const lateDeduction = ref(0)
       const employeeDeductionsRef = ref(employeeDeductionsResult.deductions || [])
+
+      // Compute monthly utilizations total
+      const monthlyUtilizationsTotal = computed(() => {
+        return utilizationsRef.value.reduce((sum, utilization) => {
+          const totalHours = utilization.hours ?? 0
+          const overtimeHours = utilization.overtime_hours ?? 0
+          const perHour = utilization.per_hour ?? 0
+          return sum + (totalHours + overtimeHours) * perHour
+        }, 0)
+      })
+
+      // Compute monthly allowances total
+      const monthlyAllowancesTotal = computed(() => {
+        return allowancesRef.value.reduce((sum, allowance) => {
+          return sum + (allowance.amount ?? 0)
+        }, 0)
+      })
+
+      // Compute monthly cash adjustments total (additions/earnings)
+      const monthlyCashAdjustmentsTotal = computed(() => {
+        return cashAdjustmentsRef.value.reduce((sum, adjustment) => {
+          return sum + (adjustment.amount ?? 0)
+        }, 0)
+      })
 
       // Calculate total cash advance amount para sa month
       const totalCashAdvance =
@@ -378,6 +452,9 @@ export function usePayrollTableDialog(
         overallOvertime,
         codaAllowance,
         nonDeductions,
+        monthlyUtilizationsTotal,
+        monthlyAllowancesTotal,
+        monthlyCashAdjustmentsTotal,
       )
 
       /* console.log(`Overall earnings calculation for ${monthName} ${year}:`, {
