@@ -16,6 +16,7 @@ interface PayrollDatabaseRow {
   basic_pay: number
   overtime_pay: number
   trips_pay: number
+  utilizations_pay: number
   holidays_pay: number
   gross_pay: number
   cash_advance: number
@@ -43,6 +44,7 @@ export interface MonthlyPayrollRow {
   basic_pay: number
   overtime_pay: number
   trips_pay: number
+  utilizations_pay: number
   holidays_pay: number
   gross_pay: number
   deductions: {
@@ -65,6 +67,7 @@ export interface MonthlyPayrollTotals {
   basic_pay: number
   overtime_pay: number
   trips_pay: number
+  utilizations_pay: number
   holidays_pay: number
   gross_pay: number
   total_deductions: number
@@ -127,6 +130,7 @@ export function useMonthlyPayroll() {
         basic_pay: Number(row.basic_pay) || 0,
         overtime_pay: Number(row.overtime_pay) || 0,
         trips_pay: Number(row.trips_pay) || 0,
+        utilizations_pay: Number(row.utilizations_pay) || 0,
         holidays_pay: Number(row.holidays_pay) || 0,
         gross_pay: Number(row.gross_pay) || 0,
         deductions: {
@@ -164,6 +168,7 @@ export function useMonthlyPayroll() {
         basic_pay: 0,
         overtime_pay: 0,
         trips_pay: 0,
+        utilizations_pay: 0,
         holidays_pay: 0,
         gross_pay: 0,
         total_deductions: 0,
@@ -176,6 +181,7 @@ export function useMonthlyPayroll() {
         basic_pay: acc.basic_pay + (item.basic_pay || 0),
         overtime_pay: acc.overtime_pay + (item.overtime_pay || 0),
         trips_pay: acc.trips_pay + (item.trips_pay || 0),
+        utilizations_pay: acc.utilizations_pay + (item.utilizations_pay || 0),
         holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
         gross_pay: acc.gross_pay + (item.gross_pay || 0),
         total_deductions: acc.total_deductions + (item.total_deductions || 0),
@@ -185,6 +191,7 @@ export function useMonthlyPayroll() {
         basic_pay: 0,
         overtime_pay: 0,
         trips_pay: 0,
+        utilizations_pay: 0,
         holidays_pay: 0,
         gross_pay: 0,
         total_deductions: 0,

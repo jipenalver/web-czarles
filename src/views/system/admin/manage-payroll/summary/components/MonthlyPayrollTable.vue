@@ -50,6 +50,7 @@ const totals = computed(() => {
       overtime_amount: acc.overtime_amount + (item.overtime_pay || 0),
       holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
       trips_pay: acc.trips_pay + (item.trips_pay || 0),
+      utilizations_pay: acc.utilizations_pay + (item.utilizations_pay || 0),
       gross_pay: acc.gross_pay + (item.gross_pay || 0),
       cash_advance: acc.cash_advance + (item.deductions.cash_advance || 0),
       sss: acc.sss + (item.deductions.sss || 0),
@@ -72,6 +73,7 @@ const totals = computed(() => {
       overtime_amount: 0,
       holidays_pay: 0,
       trips_pay: 0,
+      utilizations_pay: 0,
       gross_pay: 0,
       cash_advance: 0,
       sss: 0,
@@ -99,10 +101,10 @@ const totals = computed(() => {
           <!-- Main Header Row - Level 1 -->
           <tr>
             <th rowspan="3" class="text-center font-weight-bold border">Employee Name</th>
-            <th colspan="9" class="text-center font-weight-bold text-uppercase text-info border">
+            <th colspan="11" class="text-center font-weight-bold text-uppercase text-info border">
               PAYABLE
             </th>
-            <th colspan="9" class="text-center font-weight-bold text-uppercase text-error border">
+            <th colspan="8" class="text-center font-weight-bold text-uppercase text-error border">
               DEDUCTION
             </th>
             <th rowspan="3" class="text-center font-weight-bold text-error border">
@@ -116,10 +118,12 @@ const totals = computed(() => {
             <!-- Payable Group Sub-columns -->
             <th rowspan="2" class="text-center text-caption border">No. of Days Work</th>
             <th colspan="2" class="text-center font-weight-medium border">Sunday Rate</th>
-            <th rowspan="2" class="text-center text-caption border">Allowance (COLA)</th>
+            <th rowspan="2" class="text-center text-caption border">Allowance</th>
             <th colspan="2" class="text-center font-weight-medium border">Overtime</th>
             <th rowspan="2" class="text-center text-caption border">Holiday Pay</th>
             <th rowspan="2" class="text-center text-caption border">Monthly Tripping</th>
+            <th rowspan="2" class="text-center text-caption border">Utilization</th>
+            <th colspan="1" class="text-center font-weight-medium border">Others</th>
             <th rowspan="2" class="text-center text-caption border font-weight-bold">Gross Pay</th>
 
             <!-- Deduction Sub-columns -->
@@ -128,9 +132,7 @@ const totals = computed(() => {
             <th rowspan="2" class="text-center text-caption border">PHIC</th>
             <th rowspan="2" class="text-center text-caption border">Pag-IBIG</th>
             <th rowspan="2" class="text-center text-caption border">SSS Loan</th>
-            <th rowspan="2" class="text-center text-caption border">Savings</th>
-            <th rowspan="2" class="text-center text-caption border">Salary Deposit</th>
-            <th colspan="2" class="text-center font-weight-medium border">Others</th>
+            <th colspan="3" class="text-center font-weight-medium border">Others</th>
           </tr>
 
           <!-- Sub Header Row - Level 3 (Detail columns) -->
@@ -143,9 +145,13 @@ const totals = computed(() => {
             <th class="text-center text-caption border">HRS</th>
             <th class="text-center text-caption border">Amount</th>
 
+            <!-- Other Details -->
+            <th class="text-center text-caption border">Add-on</th>
+
             <!-- Others Details -->
             <th class="text-center text-caption border">Late</th>
             <th class="text-center text-caption border">Undertime</th>
+            <th class="text-center text-caption border">Deduction</th>
           </tr>
         </thead>
 
@@ -156,12 +162,14 @@ const totals = computed(() => {
             <!-- Payable Columns -->
             <td class="text-center border">{{ item.days_worked }}</td>
             <td class="text-center border">{{ item.sunday_days || 0 }}</td>
-            <td class="text-end border">{{ formatCurrency(item.sunday_amount || 0) }}</td>
-            <td class="text-end border">{{ formatCurrency(item.cola || 0) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.sunday_amount || 0) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.cola || 0) }}</td>
             <td class="text-center border">{{ roundDecimal(item.overtime_hrs || 0, 2) }}</td>
-            <td class="text-end border">{{ formatCurrency(item.overtime_pay) }}</td>
-            <td class="text-end border">{{ formatCurrency(item.holidays_pay) }}</td>
-            <td class="text-end border">{{ formatCurrency(item.trips_pay) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.overtime_pay) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.holidays_pay) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.trips_pay) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.utilizations_pay) }}</td>
+            <td class="text-center border">{{ formatCurrency(0) }}</td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(item.gross_pay) }}</td>
 
             <!-- Deduction Columns -->
@@ -176,16 +184,13 @@ const totals = computed(() => {
             <td class="text-end text-error border">
               {{ formatCurrency(item.deductions.sss_loan) }}
             </td>
-            <td class="text-end text-error border">
-              {{ formatCurrency(item.deductions.savings) }}
-            </td>
-            <td class="text-end text-error border">
-              {{ formatCurrency(item.deductions.salary_deposit) }}
-            </td>
             <!-- Others Group -->
             <td class="text-end text-error border">{{ formatCurrency(item.deductions.late) }}</td>
             <td class="text-end text-error border">
               {{ formatCurrency(item.deductions.undertime) }}
+            </td>
+            <td class="text-end text-error border">
+              {{ formatCurrency((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)) }}
             </td>
 
             <!-- Total Deductions -->
@@ -206,20 +211,22 @@ const totals = computed(() => {
             <!-- Payable Totals -->
             <td class="text-center font-weight-bold border">{{ totals.days_worked }}</td>
             <td class="text-center font-weight-bold border">{{ totals.sunday_days }}</td>
-            <td class="text-end font-weight-bold border">
+            <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.sunday_amount) }}
             </td>
-            <td class="text-end font-weight-bold border">{{ formatCurrency(totals.cola) }}</td>
+            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.cola) }}</td>
             <td class="text-center font-weight-bold border">
               {{ roundDecimal(totals.overtime_hrs, 2) }}
             </td>
-            <td class="text-end font-weight-bold border">
+            <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.overtime_amount) }}
             </td>
-            <td class="text-end font-weight-bold border">
+            <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.holidays_pay) }}
             </td>
-            <td class="text-end font-weight-bold border">{{ formatCurrency(totals.trips_pay) }}</td>
+            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.trips_pay) }}</td>
+            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.utilizations_pay) }}</td>
+            <td class="text-center font-weight-bold border">{{ formatCurrency(0) }}</td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(totals.gross_pay) }}</td>
 
             <!-- Deduction Totals -->
@@ -238,18 +245,15 @@ const totals = computed(() => {
             <td class="text-end font-weight-bold text-error border">
               {{ formatCurrency(totals.sss_loan) }}
             </td>
-            <td class="text-end font-weight-bold text-error border">
-              {{ formatCurrency(totals.savings) }}
-            </td>
-            <td class="text-end font-weight-bold text-error border">
-              {{ formatCurrency(totals.salary_deposit) }}
-            </td>
             <!-- Others Group Totals -->
             <td class="text-end font-weight-bold text-error border">
               {{ formatCurrency(totals.late) }}
             </td>
             <td class="text-end font-weight-bold text-error border">
               {{ formatCurrency(totals.undertime) }}
+            </td>
+            <td class="text-end font-weight-bold text-error border">
+              {{ formatCurrency(totals.savings + totals.salary_deposit) }}
             </td>
 
             <!-- Total Deductions Total -->
