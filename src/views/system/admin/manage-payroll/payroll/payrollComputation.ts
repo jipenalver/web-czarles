@@ -251,27 +251,46 @@ export function usePayrollComputation(
             console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
           } */
 
-          // Check attendance data for present/absent days calculation
+          // Check attendance data for present/absent days calculation including half days
           let employeePresentDays = 0
+          // let fullDaysCount = 0
+          // let halfDaysCount = 0
 
           attendances.forEach((attendance) => {
-            // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
+            // Check if both AM time-in and time-out are present
             const hasAmData =
               attendance.am_time_in !== null &&
               attendance.am_time_in !== undefined &&
               attendance.am_time_out !== null &&
               attendance.am_time_out !== undefined
+
+            // Check if both PM time-in and time-out are present
             const hasPmData =
               attendance.pm_time_in !== null &&
               attendance.pm_time_in !== undefined &&
               attendance.pm_time_out != null &&
               attendance.pm_time_out != undefined
 
-            // Consider present if both AM and PM data are available
+            // const attendanceDate = attendance.attendance_date
+
+            // Full day: both AM and PM data are available
             if (hasAmData && hasPmData) {
-              employeePresentDays++
+              employeePresentDays += 1
+              // fullDaysCount++
+            }
+            // Half day: only AM data or only PM data is available
+            else if (hasAmData || hasPmData) {
+              employeePresentDays += 0.5
+              // halfDaysCount++
+              // const timeType = hasAmData ? 'AM' : 'PM'
+              // console.error(`[HALF DAY ${timeType}] Employee ${employeeId} - Date: ${attendanceDate}, AM: ${hasAmData ? 'Complete' : 'Missing'}, PM: ${hasPmData ? 'Complete' : 'Missing'}`)
             }
           })
+
+          // Log summary para sa half days
+          // if (halfDaysCount > 0) {
+          //   console.error(`[HALF DAYS SUMMARY] Employee ${employeeId} - Total Full Days: ${fullDaysCount}, Total Half Days: ${halfDaysCount}, Total Present Days (with half days): ${employeePresentDays}`)
+          // }
 
           // Add paid leave days to present days para office staff
           employeePresentDays += paidLeaveDays

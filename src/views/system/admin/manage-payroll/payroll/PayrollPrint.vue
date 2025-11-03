@@ -373,7 +373,7 @@ watch(
             <span v-if="props.employeeData?.is_field_staff">
               x {{ convertHoursToDays(totalHoursWorked) }} days
             </span>
-            <span v-else> x {{ effectiveWorkDays }} days</span>
+            <span v-else> x {{ effectiveWorkDays }} day{{ effectiveWorkDays !== 1 ? 's' : '' }}</span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
             {{ getMoneyText(regularWorkTotal) }}
