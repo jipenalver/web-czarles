@@ -91,6 +91,7 @@ BEGIN
         END
       ), 0) AS days_worked,
       -- Calculate late minutes (time in after scheduled start) - Only for non-field staff
+      -- Keep as total minutes for accurate deduction calculation
       COALESCE(SUM(
         CASE 
           WHEN ae.is_field_staff THEN 0
@@ -104,8 +105,9 @@ BEGIN
             GREATEST(0, EXTRACT(EPOCH FROM (a.pm_time_in::time - '13:00:00'::time)) / 60)
           ELSE 0
         END
-      ), 0) / 60.0 AS late_hours,
+      ), 0) AS late_minutes,
       -- Calculate undertime minutes (time out before scheduled end) - Only for non-field staff
+      -- Keep as total minutes for accurate deduction calculation
       COALESCE(SUM(
         CASE 
           WHEN ae.is_field_staff THEN 0
@@ -124,7 +126,7 @@ BEGIN
             )) / 60)
           ELSE 0
         END
-      ), 0) / 60.0 AS undertime_hours
+      ), 0) AS undertime_minutes
     FROM attendances a
     INNER JOIN active_employees ae ON a.employee_id = ae.id
     WHERE a.am_time_in::DATE BETWEEN v_start_date AND v_end_date
@@ -166,18 +168,31 @@ BEGIN
       COALESCE(SUM(
         ae.daily_rate * 
         CASE 
-          WHEN LOWER(h.type) LIKE '%rh%' THEN 2.0
-          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.5
-          WHEN LOWER(h.type) LIKE '%swh%' THEN 1.3
+          WHEN LOWER(h.type) LIKE '%rh%' THEN 2.0        -- Regular Holiday: 200%
+          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.5       -- Special Non-Working Holiday: 150%
+          WHEN LOWER(h.type) LIKE '%swh%' THEN 1.3       -- Special Working Holiday: 130%
           ELSE 1.0
+        END *
+        -- Apply day fraction based on attendance (full day or half day)
+        CASE 
+          -- Full day: all 4 timestamps present
+          WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
+            AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 1.0
+          -- Half day AM: only AM timestamps present
+          WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
+            AND (a.pm_time_in IS NULL OR a.pm_time_out IS NULL) THEN 0.5
+          -- Half day PM: only PM timestamps present
+          WHEN (a.am_time_in IS NULL OR a.am_time_out IS NULL) 
+            AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 0.5
+          ELSE 0
         END
       ), 0) AS holiday_amount
     FROM attendances a
-    INNER JOIN holidays h ON a.am_time_in::DATE = h.holiday_at
+    INNER JOIN holidays h ON COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) = h.holiday_at
     INNER JOIN active_employees ae ON a.employee_id = ae.id
-    WHERE a.am_time_in::DATE BETWEEN v_start_date AND v_end_date
-      AND a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
-      AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL
+    WHERE COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) >= v_start_date 
+      AND COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) <= v_end_date
+      AND (a.am_time_in IS NOT NULL OR a.pm_time_in IS NOT NULL)
     GROUP BY a.employee_id
   ),
   
@@ -253,18 +268,14 @@ BEGIN
     COALESCE(ded.sss_loan, 0) AS sss_loan,
     COALESCE(ded.savings, 0) AS savings,
     COALESCE(ded.salary_deposit, 0) AS salary_deposit,
-    ROUND(
-      CASE 
-        WHEN ae.is_field_staff THEN 0
-        ELSE COALESCE(att.late_hours, 0) * (ae.daily_rate / 8)
-      END, 2
-    ) AS late_deduction,
-    ROUND(
-      CASE 
-        WHEN ae.is_field_staff THEN 0
-        ELSE COALESCE(att.undertime_hours, 0) * (ae.daily_rate / 8)
-      END, 2
-    ) AS undertime_deduction,
+    CASE 
+      WHEN ae.is_field_staff THEN 0
+      ELSE COALESCE(att.late_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
+    END AS late_deduction,
+    CASE 
+      WHEN ae.is_field_staff THEN 0
+      ELSE COALESCE(att.undertime_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
+    END AS undertime_deduction,
     ROUND(
       COALESCE(ca.cash_advance_total, 0) +
       COALESCE(ded.sss, 0) +
@@ -275,12 +286,12 @@ BEGIN
       COALESCE(ded.salary_deposit, 0) +
       CASE 
         WHEN ae.is_field_staff THEN 0
-        ELSE COALESCE(att.late_hours, 0) * (ae.daily_rate / 8)
+        ELSE COALESCE(att.late_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
       END +
       CASE 
         WHEN ae.is_field_staff THEN 0
-        ELSE COALESCE(att.undertime_hours, 0) * (ae.daily_rate / 8)
-      END, 2
+        ELSE COALESCE(att.undertime_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
+      END
     ) AS total_deductions,
     ROUND(
       (COALESCE(att.days_worked, 0) * ae.daily_rate + 
@@ -297,12 +308,12 @@ BEGIN
        COALESCE(ded.salary_deposit, 0) +
        CASE 
          WHEN ae.is_field_staff THEN 0
-         ELSE COALESCE(att.late_hours, 0) * (ae.daily_rate / 8)
+         ELSE COALESCE(att.late_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
        END +
        CASE 
          WHEN ae.is_field_staff THEN 0
-         ELSE COALESCE(att.undertime_hours, 0) * (ae.daily_rate / 8)
-       END), 2
+         ELSE COALESCE(att.undertime_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
+       END)
     ) AS net_pay
   FROM active_employees ae
   LEFT JOIN attendance_data att ON ae.id = att.employee_id

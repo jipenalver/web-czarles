@@ -1,5 +1,5 @@
 import { computed, type Ref, type ComputedRef } from 'vue'
-import type { Holiday } from '@/stores/holidays'
+import type { HolidayWithAttendance } from './computation/holidays'
 import type { Trip } from '@/stores/trips'
 import type { EmployeeDeduction } from '@/stores/benefits'
 
@@ -9,7 +9,7 @@ import type { EmployeeDeduction } from '@/stores/benefits'
 export function useOverallEarningsTotal(
   regularWorkTotal: Ref<number>,
   trips: Ref<Trip[]>,
-  holidays: Ref<Holiday[]>,
+  holidays: Ref<HolidayWithAttendance[]>,
   dailyRate: ComputedRef<number>,
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
@@ -41,6 +41,7 @@ export function useOverallEarningsTotal(
       holidays.value?.reduce((sum, holiday) => {
         const baseRate = Number(dailyRate.value) || 0
         const type = holiday.type?.toLowerCase() || ''
+        const attendanceFraction = Number(holiday.attendance_fraction) || 0
 
         let multiplier = 1
         if (type.includes('rh'))
@@ -49,7 +50,7 @@ export function useOverallEarningsTotal(
           multiplier = 1.5 // Special Non-working Holiday
         else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday
 
-        return sum + baseRate * multiplier
+        return sum + (baseRate * multiplier * attendanceFraction)
       }, 0) || 0
     total += holidayEarnings
 
@@ -95,7 +96,7 @@ export function useOverallEarningsTotal(
 export function useEarningsBreakdown(
   regularWorkTotal: Ref<number>,
   trips: Ref<Trip[]>,
-  holidays: Ref<Holiday[]>,
+  holidays: Ref<HolidayWithAttendance[]>,
   dailyRate: ComputedRef<number>,
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
@@ -119,6 +120,7 @@ export function useEarningsBreakdown(
       holidays.value?.reduce((sum, holiday) => {
         const baseRate = Number(dailyRate.value) || 0
         const type = holiday.type?.toLowerCase() || ''
+        const attendanceFraction = Number(holiday.attendance_fraction) || 0
 
         let multiplier = 1
         if (type.includes('rh'))
@@ -127,7 +129,7 @@ export function useEarningsBreakdown(
           multiplier = 1.5 // Special Non-working Holiday
         else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday
 
-        return sum + baseRate * multiplier
+        return sum + (baseRate * multiplier * attendanceFraction)
       }, 0) || 0
 
     // Overtime earnings

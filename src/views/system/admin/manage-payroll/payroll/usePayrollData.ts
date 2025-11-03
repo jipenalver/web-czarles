@@ -1,13 +1,12 @@
 import { ref, computed, type Ref } from 'vue'
 import { useTripsStore } from '@/stores/trips'
-import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
+import { fetchHolidaysByDateString, fetchHolidaysByRange, type HolidayWithAttendance } from './computation/holidays'
 import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
 import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
 import { fetchEmployeeDeductions } from './computation/benefits'
 import { supabase } from '@/utils/supabase'
 import { getLastDateOfMonth } from './helpers'
-import type { Holiday } from '@/stores/holidays'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import type { Utilization } from '@/stores/utilizations'
 import type { Allowance } from '@/stores/allowances'
@@ -27,7 +26,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
   const tripsStore = useTripsStore()
 
   // State refs
-  const holidays = ref<Holiday[]>([])
+  const holidays = ref<HolidayWithAttendance[]>([])
   const utilizations = ref<Utilization[]>([])
   const allowances = ref<Allowance[]>([])
   const cashAdjustmentsAdditions = ref<CashAdjustment[]>([])
