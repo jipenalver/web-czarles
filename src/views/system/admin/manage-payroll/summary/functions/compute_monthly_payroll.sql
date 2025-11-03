@@ -9,7 +9,7 @@ RETURNS TABLE (
   employee_id INTEGER,
   employee_name TEXT,
   daily_rate NUMERIC,
-  days_worked INTEGER,
+  days_worked NUMERIC,
   cola NUMERIC,
   overtime_hrs NUMERIC,
   basic_pay NUMERIC,
@@ -75,10 +75,21 @@ BEGIN
   attendance_data AS (
     SELECT 
       a.employee_id,
-      COUNT(DISTINCT COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE)) FILTER (
-        WHERE a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
-          AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL
-      ) AS days_worked,
+      -- Count full days and half days
+      COALESCE(SUM(
+        CASE 
+          -- Full day: all 4 timestamps present
+          WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
+            AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 1.0
+          -- Half day AM: only AM timestamps present
+          WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
+            AND (a.pm_time_in IS NULL OR a.pm_time_out IS NULL) THEN 0.5
+          -- Half day PM: only PM timestamps present
+          WHEN (a.am_time_in IS NULL OR a.am_time_out IS NULL) 
+            AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 0.5
+          ELSE 0
+        END
+      ), 0) AS days_worked,
       -- Calculate late minutes (time in after scheduled start) - Only for non-field staff
       COALESCE(SUM(
         CASE 
@@ -221,7 +232,7 @@ BEGIN
     ae.id::INTEGER AS employee_id,
     (ae.firstname || ' ' || ae.lastname) AS employee_name,
     ae.daily_rate AS daily_rate,
-    COALESCE(att.days_worked, 0)::INTEGER AS days_worked,
+    ROUND(COALESCE(att.days_worked, 0), 1) AS days_worked,
     COALESCE(eb.benefits_total, 0) AS cola,
     ROUND(COALESCE(ot.overtime_hrs, 0), 2) AS overtime_hrs,
     ROUND(COALESCE(att.days_worked, 0) * ae.daily_rate, 2) AS basic_pay,

@@ -169,15 +169,31 @@ export function usePayrollComputation(
           const hourlyRate = daily / 8
           regularWorkTotal.value = totalWorkHours * hourlyRate
 
-          // Set present days based on days with any attendance + paid leave days
+          // Set present days based on days with attendance (including half days) + paid leave days
           let employeePresentDays = 0
           attendances.forEach((attendance) => {
-            const hasAnyData =
-              attendance.am_time_in ||
-              attendance.am_time_out ||
-              attendance.pm_time_in ||
-              attendance.pm_time_out
-            if (hasAnyData) employeePresentDays++
+            // Check if both AM time-in and time-out are present
+            const hasAmData =
+              attendance.am_time_in !== null &&
+              attendance.am_time_in !== undefined &&
+              attendance.am_time_out !== null &&
+              attendance.am_time_out !== undefined
+
+            // Check if both PM time-in and time-out are present
+            const hasPmData =
+              attendance.pm_time_in !== null &&
+              attendance.pm_time_in !== undefined &&
+              attendance.pm_time_out != null &&
+              attendance.pm_time_out != undefined
+
+            // Full day: both AM and PM data are available
+            if (hasAmData && hasPmData) {
+              employeePresentDays += 1
+            }
+            // Half day: only AM data or only PM data is available
+            else if (hasAmData || hasPmData) {
+              employeePresentDays += 0.5
+            }
           })
 
           // Add paid leave days to present days para field staff
@@ -304,9 +320,8 @@ export function usePayrollComputation(
           presentDays.value = employeePresentDays
           absentDays.value = totalAbsentDays
 
-          // Calculate regular work total: (total work days - absent days) * daily rate
-          const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
-          regularWorkTotal.value = (daily ?? 0) * effectiveWorkDays
+          // Calculate regular work total using present days (which includes half days)
+          regularWorkTotal.value = (daily ?? 0) * employeePresentDays
         }
 
         // Update daily rate from employee data if available

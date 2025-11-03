@@ -160,7 +160,7 @@ const totals = computed(() => {
             <td class="font-weight-medium border">{{ item.employee_name }}</td>
 
             <!-- Payable Columns -->
-            <td class="text-center border">{{ item.days_worked }}</td>
+            <td class="text-center border">{{ roundDecimal(item.days_worked || 0, 1) }}</td>
             <td class="text-center border">{{ item.sunday_days || 0 }}</td>
             <td class="text-center border">{{ formatCurrency(item.sunday_amount || 0) }}</td>
             <td class="text-center border">{{ formatCurrency(item.cola || 0) }}</td>
@@ -209,7 +209,7 @@ const totals = computed(() => {
             <td class="font-weight-bold border">TOTAL</td>
 
             <!-- Payable Totals -->
-            <td class="text-center font-weight-bold border">{{ totals.days_worked }}</td>
+            <td class="text-center font-weight-bold border">{{ roundDecimal(totals.days_worked, 1) }}</td>
             <td class="text-center font-weight-bold border">{{ totals.sunday_days }}</td>
             <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.sunday_amount) }}

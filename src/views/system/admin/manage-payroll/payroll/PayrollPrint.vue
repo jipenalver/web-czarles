@@ -38,7 +38,7 @@ const payrollDataParams = computed(() => ({
 // Use payroll data composable for all data fetching
 const {
   holidays,
-
+  overallOvertime,
   cashAdjustmentsAdditions,
   employeeDeductions,
   employeeNonDeductions,
@@ -48,6 +48,8 @@ const {
   isAllowancesLoading,
   isCashAdjustmentsLoading,
   isDeductionsLoading,
+  isOvertimeLoading,
+  isCalculationsCompleting,
   isPayrollCalculating,
   monthlyTrippingsTotal,
   monthlyUtilizationsTotal,
@@ -109,9 +111,6 @@ const monthNames = [
   'December',
 ]
 
-const isOvertimeLoading = ref(false)
-const isCalculationsCompleting = ref(false)
-const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
@@ -200,49 +199,34 @@ function recalculateEarnings() {
 
 // Wrapper function para sa full initialization including overtime
 async function initializePayrollCalculations() {
-  isCalculationsCompleting.value = true
   try {
-    overallOvertime.value = 0
     // Call composable initialization with overtime callback
     await initializeDataCalculations(computeOverallOvertimeCalculation)
-    // Update overtime after initialization
-    overallOvertime.value = await computeOverallOvertimeCalculation()
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
-  } finally {
-    isCalculationsCompleting.value = false
   }
 }
 
 // Wrapper function para sa full reload including overtime
 async function reloadAllFunctions() {
-  isCalculationsCompleting.value = true
   try {
     tripsStore.trips = []
-    overallOvertime.value = 0
     reactiveTotalEarnings.value = 0
     // Call composable reload with overtime callback
     await reloadAllData(computeOverallOvertimeCalculation)
-    // Update overtime after reload
-    overallOvertime.value = await computeOverallOvertimeCalculation()
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
-  } finally {
-    isCalculationsCompleting.value = false
   }
 }
 
 async function updateOverallOvertime() {
-  isOvertimeLoading.value = true
   try {
     overallOvertime.value = await computeOverallOvertimeCalculation()
   } catch (error) {
     console.error('Error calculating overtime:', error)
     overallOvertime.value = 0
-  } finally {
-    isOvertimeLoading.value = false
   }
 }
 
