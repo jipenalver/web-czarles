@@ -139,6 +139,16 @@ const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
 // const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)
+
+// Computed property to ensure holidays reactivity
+const holidaysArray = computed(() => {
+  const result = holidays.value || []
+  console.log('[PayrollPrint] holidaysArray computed:', {
+    count: result.length,
+    holidays: result
+  })
+  return result
+})
 const totalHoursWorked = computed(() => {
   if (props.employeeData?.is_field_staff && employeeDailyRate.value > 0) {
     const hourlyRate = employeeDailyRate.value / 8
@@ -177,7 +187,7 @@ const {
 const overallEarningsTotal = useOverallEarningsTotal(
   regularWorkTotal,
   computed(() => tripsStore.trips),
-  holidays,
+  holidaysArray,
   dailyRate,
   computed(() => employeeDailyRate.value),
   overallOvertime,
@@ -253,7 +263,7 @@ watch(
   [
     regularWorkTotal,
     () => tripsStore.trips,
-    holidays,
+    holidaysArray,
     overallOvertime,
     employeeDailyRate,
     dailyRate,
@@ -286,6 +296,21 @@ watch([filterDateString, () => props.employeeData?.id], async () => {
 watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
+
+// Debug logging for holidays data
+watch(
+  () => holidays.value,
+  (newHolidays) => {
+    console.log('[PayrollPrint] Holidays data updated:', {
+      count: newHolidays.length,
+      holidays: newHolidays,
+      employeeId: props.employeeData?.id,
+      holidayDateString: holidayDateString.value,
+      filterDateString: filterDateString.value
+    })
+  },
+  { deep: true, immediate: true }
+)
 
 // Debug logging for loading states (can be removed in production)
 watch(
@@ -410,8 +435,8 @@ watch(
             </tr>
           </template> -->
 
-          <template v-if="holidays.length > 0">
-            <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
+          <template v-if="holidaysArray.length > 0">
+            <tr v-for="holiday in holidaysArray" :key="'holiday-' + holiday.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ holiday.name }} ({{ getHolidayTypeName(holiday.type ?? undefined) }})
