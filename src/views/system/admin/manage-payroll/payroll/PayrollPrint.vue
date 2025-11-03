@@ -205,6 +205,8 @@ async function initializePayrollCalculations() {
     overallOvertime.value = 0
     // Call composable initialization with overtime callback
     await initializeDataCalculations(computeOverallOvertimeCalculation)
+    // Update overtime after initialization
+    overallOvertime.value = await computeOverallOvertimeCalculation()
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
@@ -222,6 +224,8 @@ async function reloadAllFunctions() {
     reactiveTotalEarnings.value = 0
     // Call composable reload with overtime callback
     await reloadAllData(computeOverallOvertimeCalculation)
+    // Update overtime after reload
+    overallOvertime.value = await computeOverallOvertimeCalculation()
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
