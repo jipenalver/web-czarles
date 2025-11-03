@@ -188,24 +188,20 @@ watch(
             </span>
           </div>
         </template>
-        <!-- Cash Advances (merged as one row) -->
-        <template v-if="cashAdvances.length > 0">
+        <!-- Cash Advances -->
+        <template v-for="ca in cashAdvances" :key="'cashadvance-' + ca.id">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
               <span class="text-caption " style="font-size: 12px">Cash Advance</span>
-              <span
-                v-if="cashAdvances.length > 1"
-                class="text-caption font-weight-bold text-end ms-1"
-                style="font-size: 12px"
-              >
-                x{{ cashAdvances.length }}
-              </span>
+              <span class="text-caption font-weight-bold text-end ms-1" style="font-size: 12px">{{
+                ca.request_at
+              }}</span>
             </div>
             <span
               class="border-b-thin border-s-sm text-end pa-0 "
               style="font-size: 12px; min-width: 70px"
             >
-              {{ safeCurrencyFormat(totalCashAdvance, formatCurrency) }}
+              {{ safeCurrencyFormat(ca.amount || 0, formatCurrency) }}
             </span>
           </div>
         </template>
