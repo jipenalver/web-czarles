@@ -172,19 +172,23 @@ export function usePayrollComputation(
           // Set present days based on days with attendance (including half days) + paid leave days
           let employeePresentDays = 0
           attendances.forEach((attendance) => {
-            // Check if both AM time-in and time-out are present
+            // Check if both AM time-in and time-out are present and not empty strings
             const hasAmData =
               attendance.am_time_in !== null &&
               attendance.am_time_in !== undefined &&
+              attendance.am_time_in !== '' &&
               attendance.am_time_out !== null &&
-              attendance.am_time_out !== undefined
+              attendance.am_time_out !== undefined &&
+              attendance.am_time_out !== ''
 
-            // Check if both PM time-in and time-out are present
+            // Check if both PM time-in and time-out are present and not empty strings
             const hasPmData =
               attendance.pm_time_in !== null &&
               attendance.pm_time_in !== undefined &&
+              attendance.pm_time_in !== '' &&
               attendance.pm_time_out != null &&
-              attendance.pm_time_out != undefined
+              attendance.pm_time_out != undefined &&
+              attendance.pm_time_out !== ''
 
             // Full day: both AM and PM data are available
             if (hasAmData && hasPmData) {
@@ -273,19 +277,23 @@ export function usePayrollComputation(
           // let halfDaysCount = 0
 
           attendances.forEach((attendance) => {
-            // Check if both AM time-in and time-out are present
+            // Check if both AM time-in and time-out are present and not empty strings
             const hasAmData =
               attendance.am_time_in !== null &&
               attendance.am_time_in !== undefined &&
+              attendance.am_time_in !== '' &&
               attendance.am_time_out !== null &&
-              attendance.am_time_out !== undefined
+              attendance.am_time_out !== undefined &&
+              attendance.am_time_out !== ''
 
-            // Check if both PM time-in and time-out are present
+            // Check if both PM time-in and time-out are present and not empty strings
             const hasPmData =
               attendance.pm_time_in !== null &&
               attendance.pm_time_in !== undefined &&
+              attendance.pm_time_in !== '' &&
               attendance.pm_time_out != null &&
-              attendance.pm_time_out != undefined
+              attendance.pm_time_out != undefined &&
+              attendance.pm_time_out !== ''
 
             // const attendanceDate = attendance.attendance_date
 

@@ -58,11 +58,10 @@ export async function getEmployeeAttendanceById(
   const { data, error } = await supabase
     .from('attendances')
     .select(
-      'am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason',
+      'id, am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason',
     )
     .eq('employee_id', employeeId)
-    .gte('am_time_in', startISO) // Filter by am_time_in for the range
-    .lt('am_time_in', endISO)
+    .or(`and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(pm_time_in.gte.${startISO},pm_time_in.lt.${endISO})`)
     .order('created_at', { ascending: false })
   if (error) {
     console.error('getEmployeeAttendanceById error:', error)
@@ -70,10 +69,18 @@ export async function getEmployeeAttendanceById(
   }
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
 
-  // console.log('getEmployeeAttendanceById data:', data)
-  return Array.isArray(data)
-    ? data.map((row) => {
-        const attendanceDate = row.am_time_in ? row.am_time_in.split('T')[0] : null
+  // Deduplicate records by id (in case OR query returns duplicates for records with both AM and PM)
+  const uniqueData = data ? Array.from(new Map(data.map(item => [item.id, item])).values()) : []
+
+  // console.log('getEmployeeAttendanceById data:', uniqueData)
+  return Array.isArray(uniqueData)
+    ? uniqueData.map((row) => {
+        // Extract date from am_time_in first, fallback to pm_time_in for PM half-days
+        const attendanceDate = row.am_time_in
+          ? row.am_time_in.split('T')[0]
+          : row.pm_time_in
+            ? row.pm_time_in.split('T')[0]
+            : null
         return {
           am_time_in: getTimeHHMM(row.am_time_in),
           am_time_out: getTimeHHMM(row.am_time_out),
