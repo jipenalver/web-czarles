@@ -58,11 +58,11 @@ export async function getEmployeeAttendanceById(
   const { data, error } = await supabase
     .from('attendances')
     .select(
-      'am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason, created_at',
+      'am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason',
     )
     .eq('employee_id', employeeId)
-    .gte('created_at', startISO) // Filter by created_at for the range
-    .lt('created_at', endISO)
+    .gte('am_time_in', startISO) // Filter by am_time_in for the range
+    .lt('am_time_in', endISO)
     .order('created_at', { ascending: false })
   if (error) {
     console.error('getEmployeeAttendanceById error:', error)
@@ -73,8 +73,7 @@ export async function getEmployeeAttendanceById(
   // console.log('getEmployeeAttendanceById data:', data)
   return Array.isArray(data)
     ? data.map((row) => {
-        // Use created_at as the source of truth for attendance date
-        const attendanceDate = row.created_at ? row.created_at.split('T')[0] : null
+        const attendanceDate = row.am_time_in ? row.am_time_in.split('T')[0] : null
         return {
           am_time_in: getTimeHHMM(row.am_time_in),
           am_time_out: getTimeHHMM(row.am_time_out),
@@ -85,7 +84,7 @@ export async function getEmployeeAttendanceById(
           is_leave_with_pay: row.is_leave_with_pay,
           leave_type: row.leave_type,
           leave_reason: row.leave_reason,
-          attendance_date: attendanceDate, // Extract date from created_at timestamp
+          attendance_date: attendanceDate, // Extract date from timestamp
           date: attendanceDate, // Alias for compatibility with Sunday detection
         }
       })
