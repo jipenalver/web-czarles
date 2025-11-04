@@ -1,5 +1,7 @@
 import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
+import { getTotalMinutesForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
+import { useEmployeesStore } from '@/stores/employees'
 
 /**
  * Interface for database function response row
@@ -37,6 +39,8 @@ export interface MonthlyPayrollRow {
   employee_name: string
   daily_rate: number
   days_worked: number
+  is_field_staff: boolean // Added to track field staff status
+  hours_worked?: number // Added for field staff - stores actual hours worked
   sunday_days: number
   sunday_amount: number
   cola: number
@@ -87,6 +91,9 @@ export function useMonthlyPayroll() {
   // Cache to prevent reloading same month/year
   const lastLoadedKey = ref<string>('')
 
+  // Initialize employees store
+  const employeesStore = useEmployeesStore()
+
   /**
    * Load payroll data using Supabase function
    * This replaces client-side computation with server-side processing
@@ -118,11 +125,13 @@ export function useMonthlyPayroll() {
       }
 
       // Transform database response to match MonthlyPayrollRow interface
-      monthlyPayrollData.value = (data || []).map((row: PayrollDatabaseRow) => ({
+      const transformedData = (data || []).map((row: PayrollDatabaseRow) => ({
         employee_id: row.employee_id,
         employee_name: row.employee_name,
         daily_rate: Number(row.daily_rate) || 0,
         days_worked: Number(row.days_worked) || 0,
+        is_field_staff: false, // Will be updated below
+        hours_worked: undefined, // Will be calculated for field staff
         sunday_days: Number(row.sunday_days) || 0,
         sunday_amount: Number(row.sunday_amount) || 0,
         cola: Number(row.cola) || 0,
@@ -148,6 +157,55 @@ export function useMonthlyPayroll() {
         total_deductions: Number(row.total_deductions) || 0,
         net_pay: Number(row.net_pay) || 0,
       }))
+
+      // Calculate hours worked for field staff
+      // Create date string in format YYYY-MM-01 for getTotalMinutesForMonth
+      const monthIndex = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ].indexOf(selectedMonth.value)
+      const dateStringForCalculation = `${selectedYear.value}-${String(monthIndex + 1).padStart(2, '0')}-01`
+
+      // Process each employee to check if field staff and calculate hours
+      await Promise.all(
+        transformedData.map(async (employee: MonthlyPayrollRow) => {
+          const emp = await employeesStore.getEmployeesById(employee.employee_id)
+          if (emp?.is_field_staff) {
+            employee.is_field_staff = true
+            // Calculate actual hours worked for field staff
+            const totalWorkMinutes = await getTotalMinutesForMonth(
+              dateStringForCalculation,
+              employee.employee_id,
+              true // isField = true
+            )
+            employee.hours_worked = totalWorkMinutes / 60 // Convert minutes to hours
+
+            // Recalculate basic_pay based on actual hours worked
+            // Formula: (hours worked * hourly rate) where hourly rate = daily rate / 8
+            const hourlyRate = employee.daily_rate / 8
+            const newBasicPay = employee.hours_worked * hourlyRate
+
+            // Recalculate gross_pay: basic_pay + cola + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+            const newGrossPay =
+              newBasicPay +
+              employee.cola +
+              employee.overtime_pay +
+              employee.trips_pay +
+              employee.holidays_pay +
+              (employee.utilizations_pay || 0)
+
+            // Recalculate net_pay: gross_pay - total_deductions
+            const newNetPay = newGrossPay - employee.total_deductions
+
+            // Update the employee record with recalculated values
+            employee.basic_pay = Number(newBasicPay.toFixed(2))
+            employee.gross_pay = Number(newGrossPay.toFixed(2))
+            employee.net_pay = Number(newNetPay.toFixed(2))
+          }
+        })
+      )
+
+      monthlyPayrollData.value = transformedData
 
       // Update cache key after successful load
       lastLoadedKey.value = cacheKey

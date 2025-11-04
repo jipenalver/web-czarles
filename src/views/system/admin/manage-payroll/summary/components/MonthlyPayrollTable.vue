@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatCurrency, roundDecimal } from '@/views/system/admin/manage-payroll/payroll/helpers'
+import { formatCurrency, roundDecimal, convertHoursToDays } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
 
@@ -116,7 +116,7 @@ const totals = computed(() => {
           <!-- Sub Header Row - Level 2 (Group headers) -->
           <tr>
             <!-- Payable Group Sub-columns -->
-            <th rowspan="2" class="text-center text-caption border">No. of Days Work</th>
+            <th rowspan="2" class="text-center text-caption border">No. of Days Work / Hours</th>
             <th colspan="2" class="text-center font-weight-medium border">Sunday Rate</th>
             <th rowspan="2" class="text-center text-caption border">Allowance</th>
             <th colspan="2" class="text-center font-weight-medium border">Overtime</th>
@@ -160,7 +160,14 @@ const totals = computed(() => {
             <td class="font-weight-medium border">{{ item.employee_name }}</td>
 
             <!-- Payable Columns -->
-            <td class="text-center border">{{ roundDecimal(item.days_worked || 0, 1) }}</td>
+            <td class="text-center border">
+              <template v-if="item.is_field_staff">
+                {{ convertHoursToDays(item.hours_worked || 0) }} days
+              </template>
+              <template v-else>
+                {{ roundDecimal(item.days_worked || 0, 1) }} days
+              </template>
+            </td>
             <td class="text-center border">{{ item.sunday_days || 0 }}</td>
             <td class="text-center border">{{ formatCurrency(item.sunday_amount || 0) }}</td>
             <td class="text-center border">{{ formatCurrency(item.cola || 0) }}</td>
@@ -209,7 +216,7 @@ const totals = computed(() => {
             <td class="font-weight-bold border">TOTAL</td>
 
             <!-- Payable Totals -->
-            <td class="text-center font-weight-bold border">{{ roundDecimal(totals.days_worked, 1) }}</td>
+            <td class="text-center font-weight-bold border">{{ roundDecimal(totals.days_worked, 1) }} days</td>
             <td class="text-center font-weight-bold border">{{ totals.sunday_days }}</td>
             <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.sunday_amount) }}
