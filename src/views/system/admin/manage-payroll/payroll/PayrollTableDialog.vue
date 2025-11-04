@@ -11,7 +11,6 @@ import {
   getDateRangeForMonth,
   getDateRangeForMonthNoCross,
   getLastDayOfMonth,
-  onCrossMonthChange as onCrossMonthChangeHelper,
   calculateFieldStaffNetPay as calculateFieldStaffNetPayHelper,
   onView as onViewHelper,
 } from './helpers'
@@ -158,42 +157,24 @@ watch(
   { immediate: true },
 )
 
-// When cross-month is toggled off, clear and remove persisted values; when enabled, set sensible defaults
+// When cross-month is toggled off, clear both inputs; when enabled, set defaults from employee data
 watch(
   () => crossMonthEnabled.value,
   (enabled) => {
-    try {
-      if (!enabled) {
-        dayFrom.value = null
-        dayTo.value = null
-        localStorage.removeItem('czarles_payroll_fromDate')
-        localStorage.removeItem('czarles_payroll_toDate')
-      } else {
-        // default From = payroll_start or last day of previous month if not set
-        // default To = payroll_end or last day of current month if not set
-        if (dayFrom.value === null || dayFrom.value === undefined)
-          dayFrom.value = props.itemData?.payroll_start ?? daysInPreviousMonth.value
-        if (dayTo.value === null || dayTo.value === undefined)
-          dayTo.value = props.itemData?.payroll_end ?? daysInSelectedMonth.value
-      }
-    } catch {
-      /* ignore storage errors */
+    if (!enabled) {
+      // Simply clear both inputs
+      dayFrom.value = null
+      dayTo.value = null
+    } else {
+      // Set defaults from employee data when enabling
+      if (dayFrom.value === null || dayFrom.value === undefined)
+        dayFrom.value = props.itemData?.payroll_start ?? daysInPreviousMonth.value
+      if (dayTo.value === null || dayTo.value === undefined)
+        dayTo.value = props.itemData?.payroll_end ?? daysInSelectedMonth.value
     }
   },
   { immediate: true },
 )
-
-// Typed handler for checkbox change (delegates to helper)
-function onCrossMonthChange(val: boolean) {
-  // helper expects refs for dayFrom/dayTo, ug payroll_start/payroll_end from employee
-  onCrossMonthChangeHelper(
-    val,
-    dayFrom,
-    dayTo,
-    props.itemData?.payroll_start,
-    props.itemData?.payroll_end
-  )
-}
 
 // onView: delegate complex behavior to helper while keeping the component API
 function onView(item: TableData) {
@@ -288,7 +269,6 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             hide-details
             :true-value="true"
             :false-value="false"
-            @change="onCrossMonthChange"
           ></v-checkbox>
 
           <v-select

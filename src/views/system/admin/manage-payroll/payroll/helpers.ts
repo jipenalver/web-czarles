@@ -213,6 +213,13 @@ export function onCrossMonthChange(
   if (!val) {
     dayFrom.value = null
     dayTo.value = null
+    // Clear localStorage when disabling cross-month
+    try {
+      localStorage.removeItem('czarles_payroll_fromDate')
+      localStorage.removeItem('czarles_payroll_toDate')
+    } catch {
+      /* ignore storage errors */
+    }
   } else {
     // Set ang payroll_start ug payroll_end kung naa
     if (payrollStart !== null && payrollStart !== undefined) {
