@@ -3,12 +3,12 @@ import { supabase } from '@/utils/supabase'
 import { getTimeHHMM } from '../helpers'
 import { getDateISO } from '@/utils/helpers/dates'
 
-export async function getEmployeeAttendanceById(
-  employeeId: number | string,
-  dateString: string,
-  fromDateISO?: string,
-  toDateISO?: string,
-): Promise<Array<{
+// ============================================================================
+// BATCH FETCHING & CACHING LAYER
+// ============================================================================
+
+// Type definition for attendance record
+export interface AttendanceRecord {
   am_time_in: string | null
   am_time_out: string | null
   pm_time_in: string | null
@@ -18,9 +18,164 @@ export async function getEmployeeAttendanceById(
   is_leave_with_pay?: boolean
   leave_type?: string
   leave_reason?: string
-  attendance_date?: string // Add attendance date to track the actual date
+  attendance_date?: string
   date?: string // Alias for attendance_date for compatibility
-}> | null> {
+}
+
+// Cache for storing attendance data to reduce duplicate API calls
+const attendanceCache = new Map<string, AttendanceRecord[]>()
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRY_MS = 5 * 60 * 1000
+
+// Cache metadata to track expiration
+const cacheMetadata = new Map<string, number>()
+
+// Clear expired cache entries
+function clearExpiredCache() {
+  const now = Date.now()
+  for (const [key, timestamp] of cacheMetadata.entries()) {
+    if (now - timestamp > CACHE_EXPIRY_MS) {
+      attendanceCache.delete(key)
+      cacheMetadata.delete(key)
+    }
+  }
+}
+
+// Public function to manually clear all cache
+export function clearAttendanceCache() {
+  attendanceCache.clear()
+  cacheMetadata.clear()
+}
+
+// Generate cache key for attendance data
+function getCacheKey(
+  employeeId: number | string,
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): string {
+  return `${employeeId}-${dateString}-${fromDateISO || ''}-${toDateISO || ''}`
+}
+
+/**
+ * Batch fetch attendance for multiple employees (optimized with RPC)
+ * This reduces API calls by fetching all employees' attendance in one query
+ */
+export async function getEmployeesAttendanceBatch(
+  employeeIds: (number | string)[],
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): Promise<Map<number, AttendanceRecord[]>> {
+  // Calculate date range (same logic as getEmployeeAttendanceById)
+  let startISO: string
+  let endISO: string
+
+  if (fromDateISO && toDateISO) {
+    const start = fromDateISO.includes('T')
+      ? new Date(fromDateISO)
+      : new Date(`${fromDateISO}T00:00:00`)
+    const endBase = toDateISO.includes('T')
+      ? new Date(toDateISO)
+      : new Date(`${toDateISO}T23:59:59`)
+    startISO = start.toISOString()
+    endISO = endBase.toISOString()
+  } else {
+    const parts = dateString.split('-')
+    const year = parseInt(parts[0])
+    const month = parseInt(parts[1])
+    const startOfMonth = new Date(year, month - 1, 1)
+    const endOfMonth = new Date(year, month, 0, 23, 59, 59)
+    startISO = startOfMonth.toISOString()
+    endISO = endOfMonth.toISOString()
+  }
+
+  // Convert all employee IDs to numbers
+  const numericIds = employeeIds.map((id) => Number(id))
+
+  try {
+    // Call the RPC function for batch fetching
+    const { data, error } = await supabase.rpc('get_attendance_batch', {
+      p_employee_ids: numericIds,
+      p_start_date: startISO,
+      p_end_date: endISO,
+    })
+
+    if (error) {
+      console.error('❌ [BATCH] RPC Error:', error)
+      console.error('❌ [BATCH] Function might not exist. Run: supabase/functions/get_attendance_batch.sql')
+      console.error('❌ [BATCH] Parameters:', { numericIds, startISO, endISO })
+      return new Map()
+    }
+
+    // Group results by employee_id
+    const grouped = new Map<number, AttendanceRecord[]>()
+
+    if (Array.isArray(data)) {
+      // Deduplicate records by id within each employee
+      const deduplicatedByEmployee = new Map<number, Map<number, Record<string, unknown>>>()
+
+      data.forEach((record: Record<string, unknown>) => {
+        const empId = Number(record.employee_id)
+        if (!deduplicatedByEmployee.has(empId)) {
+          deduplicatedByEmployee.set(empId, new Map())
+        }
+        deduplicatedByEmployee.get(empId)!.set(record.id as number, record)
+      })
+
+      // Convert to final format
+      deduplicatedByEmployee.forEach((recordsMap, empId) => {
+        const records: AttendanceRecord[] = Array.from(recordsMap.values()).map((row: Record<string, unknown>) => ({
+          am_time_in: (row.am_time_in as string) || null,
+          am_time_out: (row.am_time_out as string) || null,
+          pm_time_in: (row.pm_time_in as string) || null,
+          pm_time_out: (row.pm_time_out as string) || null,
+          overtime_in: (row.overtime_in as string) || null,
+          overtime_out: (row.overtime_out as string) || null,
+          is_leave_with_pay: row.is_leave_with_pay as boolean | undefined,
+          leave_type: row.leave_type as string | undefined,
+          leave_reason: row.leave_reason as string | undefined,
+          attendance_date: row.attendance_date as string | undefined,
+          date: row.attendance_date as string | undefined, // Alias for compatibility
+        }))
+        grouped.set(empId, records)
+
+        // Update cache for each employee
+        const cacheKey = getCacheKey(empId, dateString, fromDateISO, toDateISO)
+        attendanceCache.set(cacheKey, records)
+        cacheMetadata.set(cacheKey, Date.now())
+      })
+    }
+
+    return grouped
+  } catch (error) {
+    console.error('getEmployeesAttendanceBatch error:', error)
+    return new Map()
+  }
+}
+
+// ============================================================================
+// ORIGINAL FUNCTIONS (Now with caching support)
+// ============================================================================
+
+export async function getEmployeeAttendanceById(
+  employeeId: number | string,
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): Promise<AttendanceRecord[] | null> {
+  // Clear expired cache entries periodically
+  clearExpiredCache()
+
+  // Check cache first
+  const cacheKey = getCacheKey(employeeId, dateString, fromDateISO, toDateISO)
+  if (attendanceCache.has(cacheKey)) {
+    const cachedData = attendanceCache.get(cacheKey)!
+    // console.log('[getEmployeeAttendanceById] Cache hit for employee:', employeeId)
+    return cachedData
+  }
+
   // query sa attendance records para sa given employee ug range
   // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
   let startISO: string
@@ -73,7 +228,7 @@ export async function getEmployeeAttendanceById(
   const uniqueData = data ? Array.from(new Map(data.map(item => [item.id, item])).values()) : []
 
   // console.log('getEmployeeAttendanceById data:', uniqueData)
-  return Array.isArray(uniqueData)
+  const result = Array.isArray(uniqueData)
     ? uniqueData.map((row) => {
         // Extract date from am_time_in first, fallback to pm_time_in for PM half-days
         const attendanceDate = row.am_time_in
@@ -96,6 +251,14 @@ export async function getEmployeeAttendanceById(
         }
       })
     : null
+
+  // Cache the result
+  if (result) {
+    attendanceCache.set(cacheKey, result)
+    cacheMetadata.set(cacheKey, Date.now())
+  }
+
+  return result
 }
 
 export function getEmployeeByIdemp(id: number): Employee | undefined {
@@ -190,19 +353,7 @@ export async function getEmployeeAttendanceForEmployee55(
   dateString: string,
   fromDateISO?: string,
   toDateISO?: string,
-): Promise<Array<{
-  am_time_in: string | null
-  am_time_out: string | null
-  pm_time_in: string | null
-  pm_time_out: string | null
-  overtime_in: string | null
-  overtime_out: string | null
-  is_leave_with_pay?: boolean
-  leave_type?: string
-  leave_reason?: string
-  attendance_date?: string
-  date?: string // Alias for attendance_date for compatibility
-}> | null> {
+): Promise<AttendanceRecord[] | null> {
   // Only apply this special logic for employee ID 55
   if (Number(employeeId) !== 55) {
     return await getEmployeeAttendanceById(employeeId, dateString, fromDateISO, toDateISO)

@@ -90,65 +90,16 @@ BEGIN
           ELSE 0
         END
       ), 0) AS days_worked,
-      -- Calculate late minutes (time in after scheduled start) - Only for non-field staff
-      -- Keep as total minutes for accurate deduction calculation
-      COALESCE(SUM(
-        CASE 
-          WHEN ae.is_field_staff THEN 0
-          WHEN a.am_time_in IS NOT NULL THEN
-            GREATEST(0, EXTRACT(EPOCH FROM (a.am_time_in::time - '08:12:00'::time)) / 60)
-          ELSE 0
-        END +
-        CASE 
-          WHEN ae.is_field_staff THEN 0
-          WHEN a.pm_time_in IS NOT NULL THEN
-            GREATEST(0, EXTRACT(EPOCH FROM (a.pm_time_in::time - '13:00:00'::time)) / 60)
-          ELSE 0
-        END
-      ), 0) AS late_minutes,
-      -- Calculate undertime minutes (time out before scheduled end) - Only for non-field staff
-      -- Keep as total minutes for accurate deduction calculation
-      COALESCE(SUM(
-        CASE 
-          WHEN ae.is_field_staff THEN 0
-          WHEN a.am_time_out IS NOT NULL THEN
-            GREATEST(0, EXTRACT(EPOCH FROM ('11:50:00'::time - a.am_time_out::time)) / 60)
-          ELSE 0
-        END +
-        CASE 
-          WHEN ae.is_field_staff THEN 0
-          WHEN a.pm_time_out IS NOT NULL THEN
-            GREATEST(0, EXTRACT(EPOCH FROM (
-              CASE 
-                WHEN EXTRACT(DOW FROM COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE)) IN (5, 6) THEN '16:30:00'::time
-                ELSE '17:00:00'::time
-              END - a.pm_time_out::time
-            )) / 60)
-          ELSE 0
-        END
-      ), 0) AS undertime_minutes
+      -- Note: Late and undertime calculations removed - handled client-side for PayrollPrint.vue consistency
+      0.00 AS late_minutes,
+      0.00 AS undertime_minutes
     FROM attendances a
     INNER JOIN active_employees ae ON a.employee_id = ae.id
-    WHERE a.am_time_in::DATE BETWEEN v_start_date AND v_end_date
+    WHERE COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) BETWEEN v_start_date AND v_end_date
     GROUP BY a.employee_id
   ),
   
-  -- Calculate overtime (from attendances table)
-  overtime_data AS (
-    SELECT 
-      a.employee_id,
-      COALESCE(SUM(
-        CASE 
-          WHEN a.overtime_in IS NOT NULL AND a.overtime_out IS NOT NULL THEN
-            EXTRACT(EPOCH FROM (a.overtime_out::timestamp - a.overtime_in::timestamp)) / 3600.0
-          ELSE 0
-        END
-      ), 0) AS overtime_hrs
-    FROM attendances a
-    WHERE a.am_time_in::DATE BETWEEN v_start_date AND v_end_date
-      AND a.is_overtime_applied = true
-    GROUP BY a.employee_id
-  ),
+  -- Note: Overtime calculation removed - handled client-side for PayrollPrint.vue consistency
   
   -- Calculate trips
   trips_data AS (
@@ -249,18 +200,17 @@ BEGIN
     ae.daily_rate AS daily_rate,
     ROUND(COALESCE(att.days_worked, 0), 1) AS days_worked,
     COALESCE(eb.benefits_total, 0) AS cola,
-    ROUND(COALESCE(ot.overtime_hrs, 0), 2) AS overtime_hrs,
+    0.00 AS overtime_hrs, -- Calculated client-side for PayrollPrint.vue consistency
     ROUND(COALESCE(att.days_worked, 0) * ae.daily_rate, 2) AS basic_pay,
-    ROUND(COALESCE(ot.overtime_hrs, 0) * ((ae.daily_rate / 8) * 1.25), 2) AS overtime_pay,
+    0.00 AS overtime_pay, -- Calculated client-side for PayrollPrint.vue consistency
     COALESCE(tr.trips_amount, 0) AS trips_pay,
     COALESCE(hp.holiday_amount, 0) AS holidays_pay,
     ROUND(
       (COALESCE(att.days_worked, 0) * ae.daily_rate) + 
       COALESCE(eb.benefits_total, 0) +
-      (COALESCE(ot.overtime_hrs, 0) * ((ae.daily_rate / 8) * 1.25)) +
       COALESCE(tr.trips_amount, 0) +
       COALESCE(hp.holiday_amount, 0), 2
-    ) AS gross_pay,
+    ) AS gross_pay, -- Note: Overtime pay excluded, calculated client-side
     COALESCE(ca.cash_advance_total, 0) AS cash_advance,
     COALESCE(ded.sss, 0) AS sss,
     COALESCE(ded.phic, 0) AS phic,
@@ -268,14 +218,8 @@ BEGIN
     COALESCE(ded.sss_loan, 0) AS sss_loan,
     COALESCE(ded.savings, 0) AS savings,
     COALESCE(ded.salary_deposit, 0) AS salary_deposit,
-    CASE 
-      WHEN ae.is_field_staff THEN 0
-      ELSE COALESCE(att.late_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
-    END AS late_deduction,
-    CASE 
-      WHEN ae.is_field_staff THEN 0
-      ELSE COALESCE(att.undertime_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
-    END AS undertime_deduction,
+    0.00 AS late_deduction, -- Calculated client-side for PayrollPrint.vue consistency
+    0.00 AS undertime_deduction, -- Calculated client-side for PayrollPrint.vue consistency
     ROUND(
       COALESCE(ca.cash_advance_total, 0) +
       COALESCE(ded.sss, 0) +
@@ -283,20 +227,12 @@ BEGIN
       COALESCE(ded.pagibig, 0) +
       COALESCE(ded.sss_loan, 0) +
       COALESCE(ded.savings, 0) +
-      COALESCE(ded.salary_deposit, 0) +
-      CASE 
-        WHEN ae.is_field_staff THEN 0
-        ELSE COALESCE(att.late_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
-      END +
-      CASE 
-        WHEN ae.is_field_staff THEN 0
-        ELSE COALESCE(att.undertime_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
-      END
+      COALESCE(ded.salary_deposit, 0)
+      -- Note: Late and undertime deductions excluded, calculated client-side
     ) AS total_deductions,
     ROUND(
       (COALESCE(att.days_worked, 0) * ae.daily_rate + 
        COALESCE(eb.benefits_total, 0) +
-       COALESCE(ot.overtime_hrs, 0) * ((ae.daily_rate / 8) * 1.25) +
        COALESCE(tr.trips_amount, 0) +
        COALESCE(hp.holiday_amount, 0)) -
       (COALESCE(ca.cash_advance_total, 0) +
@@ -305,20 +241,13 @@ BEGIN
        COALESCE(ded.pagibig, 0) +
        COALESCE(ded.sss_loan, 0) +
        COALESCE(ded.savings, 0) +
-       COALESCE(ded.salary_deposit, 0) +
-       CASE 
-         WHEN ae.is_field_staff THEN 0
-         ELSE COALESCE(att.late_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
-       END +
-       CASE 
-         WHEN ae.is_field_staff THEN 0
-         ELSE COALESCE(att.undertime_minutes, 0) * (ae.daily_rate / 8.0 / 60.0)
-       END)
+       COALESCE(ded.salary_deposit, 0))
+      -- Note: Overtime, late, and undertime excluded, calculated client-side
     ) AS net_pay
   FROM active_employees ae
   LEFT JOIN attendance_data att ON ae.id = att.employee_id
-  LEFT JOIN overtime_data ot ON ae.id = ot.employee_id
   LEFT JOIN trips_data tr ON ae.id = tr.employee_id
+  -- Note: overtime_data join removed, calculated client-side
   LEFT JOIN holiday_pay_data hp ON ae.id = hp.employee_id
   LEFT JOIN cash_advance_data ca ON ae.id = ca.employee_id
   LEFT JOIN deduction_totals ded ON ae.id = ded.employee_id

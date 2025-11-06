@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { formatCurrency, roundDecimal, convertHoursToDays } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
+// TODO: Re-add payroll computation imports when implementing full client-side calculations
 
 const props = defineProps<{
   items: MonthlyPayrollRow[]
@@ -10,6 +11,8 @@ const props = defineProps<{
   currentPage: number
   itemsPerPage: number
   searchQuery: string
+  selectedMonth?: string
+  selectedYear?: number
 }>()
 
 const emit = defineEmits<{
@@ -27,20 +30,102 @@ const filteredItems = computed(() => {
   return props.items.filter((item) => item.employee_name.toLowerCase().includes(query))
 })
 
+// Reactive refs for client-side calculations
+const recalculatedItems = ref<MonthlyPayrollRow[]>([])
+const isRecalculating = ref(false)
+
+// Simplified client-side calculation function
+function calculateClientSideValues() {
+  if (filteredItems.value.length === 0) {
+    recalculatedItems.value = filteredItems.value
+    return
+  }
+
+  isRecalculating.value = true
+
+  try {
+    const calculatedItems = filteredItems.value.map((item) => {
+      // For field staff, recalculate basic_pay based on hours worked
+      let clientBasicPay = item.basic_pay
+      if (item.is_field_staff && item.hours_worked !== undefined) {
+        const hourlyRate = item.daily_rate / 8
+        clientBasicPay = item.hours_worked * hourlyRate
+      }
+
+      // Use server-side overtime values for now (will be replaced with client-side calculations later)
+      const clientOvertimeHours = item.overtime_hrs || 0
+      const clientOvertimePay = item.overtime_pay || 0
+
+      // Use server-side late/undertime values for now (will be replaced with client-side calculations later)
+      const clientLateDeduction = item.deductions.late || 0
+      const clientUndertimeDeduction = item.deductions.undertime || 0
+
+      // Recalculate gross_pay: basic_pay + cola + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+      const clientGrossPay = clientBasicPay +
+        (item.cola || 0) +
+        clientOvertimePay +
+        (item.trips_pay || 0) +
+        (item.holidays_pay || 0) +
+        (item.utilizations_pay || 0)
+
+      // Recalculate total_deductions including client-side late and undertime
+      const serverDeductions = (item.deductions.cash_advance || 0) +
+        (item.deductions.sss || 0) +
+        (item.deductions.phic || 0) +
+        (item.deductions.pagibig || 0) +
+        (item.deductions.sss_loan || 0) +
+        (item.deductions.savings || 0) +
+        (item.deductions.salary_deposit || 0)
+
+      const clientTotalDeductions = serverDeductions + clientLateDeduction + clientUndertimeDeduction
+
+      // Recalculate net_pay: gross_pay - total_deductions
+      const clientNetPay = clientGrossPay - clientTotalDeductions
+
+      return {
+        ...item,
+        basic_pay: Number(clientBasicPay.toFixed(2)),
+        overtime_hrs: Number(clientOvertimeHours.toFixed(2)),
+        overtime_pay: Number(clientOvertimePay.toFixed(2)),
+        gross_pay: Number(clientGrossPay.toFixed(2)),
+        total_deductions: Number(clientTotalDeductions.toFixed(2)),
+        net_pay: Number(clientNetPay.toFixed(2)),
+        deductions: {
+          ...item.deductions,
+          late: Number(clientLateDeduction.toFixed(2)),
+          undertime: Number(clientUndertimeDeduction.toFixed(2))
+        }
+      }
+    })
+
+    recalculatedItems.value = calculatedItems
+  } catch (error) {
+    console.error('Error calculating client-side values:', error)
+    recalculatedItems.value = filteredItems.value
+  } finally {
+    isRecalculating.value = false
+  }
+}
+
+// Watch for changes and recalculate
+watch([filteredItems, () => props.selectedMonth, () => props.selectedYear], () => {
+  nextTick(calculateClientSideValues)
+}, { immediate: true })
+
 // Paginated items
 const paginatedItems = computed(() => {
   if (props.itemsPerPage === -1) {
-    return filteredItems.value
+    return recalculatedItems.value
   }
 
   const start = (props.currentPage - 1) * props.itemsPerPage
   const end = start + props.itemsPerPage
-  return filteredItems.value.slice(start, end)
+  return recalculatedItems.value.slice(start, end)
 })
 
-// Compute totals based on filtered items
+// Compute totals based on recalculated items
 const totals = computed(() => {
-  return filteredItems.value.reduce(
+  return recalculatedItems.value.reduce(
     (acc, item) => ({
       days_worked: acc.days_worked + (item.days_worked || 0),
       sunday_days: acc.sunday_days + (item.sunday_days || 0),
@@ -94,7 +179,11 @@ const totals = computed(() => {
 <template>
   <div>
     <v-card-text>
-      <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+      <v-progress-linear v-if="loading || isRecalculating" indeterminate color="primary" class="mb-4" />
+      <v-alert v-if="isRecalculating" type="info" variant="tonal" class="mb-4">
+        <v-icon icon="mdi-calculator" class="me-2"></v-icon>
+        Calculating client-side payroll values for consistency with PayrollPrint.vue...
+      </v-alert>
 
       <v-table density="compact" class="text-caption" fixed-header height="600px">
         <thead>

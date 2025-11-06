@@ -491,3 +491,45 @@ export function onView(options: {
 
   baseOnView({ ...item, dateString })
 }
+
+// ============================================================================
+// BATCH ATTENDANCE PRELOADING
+// ============================================================================
+
+/**
+ * Preload attendance data for multiple employees in a single batch
+ * This significantly reduces API calls when loading payroll for many employees
+ *
+ * @param employeeIds - Array of employee IDs to preload
+ * @param dateString - Date string in YYYY-MM format
+ * @param fromDateISO - Optional start date in ISO format
+ * @param toDateISO - Optional end date in ISO format
+ * @returns Promise that resolves when preloading is complete
+ */
+export async function preloadEmployeesAttendance(
+  employeeIds: number[],
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): Promise<void> {
+  // Dynamic import to avoid circular dependency
+  const { getEmployeesAttendanceBatch } = await import('./computation/computation')
+
+  console.log(`[BATCH] Preloading attendance for ${employeeIds.length} employees...`)
+  const startTime = performance.now()
+
+  await getEmployeesAttendanceBatch(employeeIds, dateString, fromDateISO, toDateISO)
+
+  const endTime = performance.now()
+  console.log(`[BATCH] Preload complete in ${Math.round(endTime - startTime)}ms`)
+}
+
+/**
+ * Clear attendance cache manually
+ * Useful when data is updated and needs to be refreshed
+ */
+export async function clearAttendanceCacheHelper(): Promise<void> {
+  const { clearAttendanceCache } = await import('./computation/computation')
+  clearAttendanceCache()
+  console.log('[CACHE] Attendance cache cleared')
+}

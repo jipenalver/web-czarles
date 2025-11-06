@@ -5,7 +5,7 @@ import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 import { ref, watch, computed } from 'vue'
-import { reloadAllPayrollFunctions, manualRefreshPayroll } from './helpers'
+import { reloadAllPayrollFunctions, manualRefreshPayroll, preloadEmployeesAttendance, clearAttendanceCacheHelper } from './helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
 
@@ -57,6 +57,8 @@ async function reloadAllPayrollFunctionsLocal() {
 }
 
 async function manualRefreshPayrollLocal() {
+  // Clear cache before refreshing to ensure fresh data
+  await clearAttendanceCacheHelper()
   await manualRefreshPayroll(payrollPrintRef, isReloadingData)
 }
 
@@ -65,6 +67,22 @@ watch(
   () => props.isDialogVisible,
   async (isVisible) => {
     if (isVisible) {
+      // Preload attendance data for current employee before loading payroll
+      if (props.employeeData?.id && props.payrollData?.month && props.payrollData?.year) {
+        const dateString = `${props.payrollData.year}-${String(new Date(`${props.payrollData.month} 1`).getMonth() + 1).padStart(2, '0')}`
+
+        // Get date range from localStorage if available
+        let fromDate: string | undefined
+        let toDate: string | undefined
+        if (typeof window !== 'undefined') {
+          fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
+          toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
+        }
+
+        // Preload attendance for the current employee
+        await preloadEmployeesAttendance([props.employeeData.id], dateString, fromDate, toDate)
+      }
+
       // Reload all functions when dialog opens
       await reloadAllPayrollFunctionsLocal()
     }
