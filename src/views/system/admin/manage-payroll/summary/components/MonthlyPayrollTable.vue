@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue'
 import { formatCurrency, roundDecimal, convertHoursToDays } from '@/views/system/admin/manage-payroll/payroll/helpers'
-import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
+import { type MonthlyPayrollRow } from '../composables/types'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
 // TODO: Re-add payroll computation imports when implementing full client-side calculations
 
