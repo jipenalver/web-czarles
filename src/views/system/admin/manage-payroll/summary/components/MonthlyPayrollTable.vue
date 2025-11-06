@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed } from 'vue'
 import { formatCurrency, roundDecimal, convertHoursToDays } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { type MonthlyPayrollRow } from '../composables/types'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
-// TODO: Re-add payroll computation imports when implementing full client-side calculations
 
 const props = defineProps<{
   items: MonthlyPayrollRow[]
@@ -30,102 +29,20 @@ const filteredItems = computed(() => {
   return props.items.filter((item) => item.employee_name.toLowerCase().includes(query))
 })
 
-// Reactive refs for client-side calculations
-const recalculatedItems = ref<MonthlyPayrollRow[]>([])
-const isRecalculating = ref(false)
-
-// Simplified client-side calculation function
-function calculateClientSideValues() {
-  if (filteredItems.value.length === 0) {
-    recalculatedItems.value = filteredItems.value
-    return
-  }
-
-  isRecalculating.value = true
-
-  try {
-    const calculatedItems = filteredItems.value.map((item) => {
-      // For field staff, recalculate basic_pay based on hours worked
-      let clientBasicPay = item.basic_pay
-      if (item.is_field_staff && item.hours_worked !== undefined) {
-        const hourlyRate = item.daily_rate / 8
-        clientBasicPay = item.hours_worked * hourlyRate
-      }
-
-      // Use server-side overtime values for now (will be replaced with client-side calculations later)
-      const clientOvertimeHours = item.overtime_hrs || 0
-      const clientOvertimePay = item.overtime_pay || 0
-
-      // Use server-side late/undertime values for now (will be replaced with client-side calculations later)
-      const clientLateDeduction = item.deductions.late || 0
-      const clientUndertimeDeduction = item.deductions.undertime || 0
-
-      // Recalculate gross_pay: basic_pay + cola + overtime_pay + trips_pay + holidays_pay + utilizations_pay
-      const clientGrossPay = clientBasicPay +
-        (item.cola || 0) +
-        clientOvertimePay +
-        (item.trips_pay || 0) +
-        (item.holidays_pay || 0) +
-        (item.utilizations_pay || 0)
-
-      // Recalculate total_deductions including client-side late and undertime
-      const serverDeductions = (item.deductions.cash_advance || 0) +
-        (item.deductions.sss || 0) +
-        (item.deductions.phic || 0) +
-        (item.deductions.pagibig || 0) +
-        (item.deductions.sss_loan || 0) +
-        (item.deductions.savings || 0) +
-        (item.deductions.salary_deposit || 0)
-
-      const clientTotalDeductions = serverDeductions + clientLateDeduction + clientUndertimeDeduction
-
-      // Recalculate net_pay: gross_pay - total_deductions
-      const clientNetPay = clientGrossPay - clientTotalDeductions
-
-      return {
-        ...item,
-        basic_pay: Number(clientBasicPay.toFixed(2)),
-        overtime_hrs: Number(clientOvertimeHours.toFixed(2)),
-        overtime_pay: Number(clientOvertimePay.toFixed(2)),
-        gross_pay: Number(clientGrossPay.toFixed(2)),
-        total_deductions: Number(clientTotalDeductions.toFixed(2)),
-        net_pay: Number(clientNetPay.toFixed(2)),
-        deductions: {
-          ...item.deductions,
-          late: Number(clientLateDeduction.toFixed(2)),
-          undertime: Number(clientUndertimeDeduction.toFixed(2))
-        }
-      }
-    })
-
-    recalculatedItems.value = calculatedItems
-  } catch (error) {
-    console.error('Error calculating client-side values:', error)
-    recalculatedItems.value = filteredItems.value
-  } finally {
-    isRecalculating.value = false
-  }
-}
-
-// Watch for changes and recalculate
-watch([filteredItems, () => props.selectedMonth, () => props.selectedYear], () => {
-  nextTick(calculateClientSideValues)
-}, { immediate: true })
-
 // Paginated items
 const paginatedItems = computed(() => {
   if (props.itemsPerPage === -1) {
-    return recalculatedItems.value
+    return filteredItems.value
   }
 
   const start = (props.currentPage - 1) * props.itemsPerPage
   const end = start + props.itemsPerPage
-  return recalculatedItems.value.slice(start, end)
+  return filteredItems.value.slice(start, end)
 })
 
-// Compute totals based on recalculated items
+// Compute totals based on filtered items
 const totals = computed(() => {
-  return recalculatedItems.value.reduce(
+  return filteredItems.value.reduce(
     (acc, item) => ({
       days_worked: acc.days_worked + (item.days_worked || 0),
       sunday_days: acc.sunday_days + (item.sunday_days || 0),
@@ -136,6 +53,7 @@ const totals = computed(() => {
       holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
       trips_pay: acc.trips_pay + (item.trips_pay || 0),
       utilizations_pay: acc.utilizations_pay + (item.utilizations_pay || 0),
+      cash_adjustment_addon: acc.cash_adjustment_addon + (item.cash_adjustment_addon || 0),
       gross_pay: acc.gross_pay + (item.gross_pay || 0),
       cash_advance: acc.cash_advance + (item.deductions.cash_advance || 0),
       sss: acc.sss + (item.deductions.sss || 0),
@@ -146,6 +64,7 @@ const totals = computed(() => {
       salary_deposit: acc.salary_deposit + (item.deductions.salary_deposit || 0),
       late: acc.late + (item.deductions.late || 0),
       undertime: acc.undertime + (item.deductions.undertime || 0),
+      cash_adjustment_deduction: acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
       total_deductions: acc.total_deductions + (item.total_deductions || 0),
       net_pay: acc.net_pay + (item.net_pay || 0),
     }),
@@ -159,6 +78,7 @@ const totals = computed(() => {
       holidays_pay: 0,
       trips_pay: 0,
       utilizations_pay: 0,
+      cash_adjustment_addon: 0,
       gross_pay: 0,
       cash_advance: 0,
       sss: 0,
@@ -169,6 +89,7 @@ const totals = computed(() => {
       salary_deposit: 0,
       late: 0,
       undertime: 0,
+      cash_adjustment_deduction: 0,
       total_deductions: 0,
       net_pay: 0,
     },
@@ -179,11 +100,7 @@ const totals = computed(() => {
 <template>
   <div>
     <v-card-text>
-      <v-progress-linear v-if="loading || isRecalculating" indeterminate color="primary" class="mb-4" />
-      <v-alert v-if="isRecalculating" type="info" variant="tonal" class="mb-4">
-        <v-icon icon="mdi-calculator" class="me-2"></v-icon>
-        Calculating client-side payroll values for consistency with PayrollPrint.vue...
-      </v-alert>
+      <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
 
       <v-table density="compact" class="text-caption" fixed-header height="600px">
         <thead>
@@ -193,7 +110,7 @@ const totals = computed(() => {
             <th colspan="11" class="text-center font-weight-bold text-uppercase text-info border">
               PAYABLE
             </th>
-            <th colspan="8" class="text-center font-weight-bold text-uppercase text-error border">
+            <th colspan="9" class="text-center font-weight-bold text-uppercase text-error border">
               DEDUCTION
             </th>
             <th rowspan="3" class="text-center font-weight-bold text-error border">
@@ -221,7 +138,7 @@ const totals = computed(() => {
             <th rowspan="2" class="text-center text-caption border">PHIC</th>
             <th rowspan="2" class="text-center text-caption border">Pag-IBIG</th>
             <th rowspan="2" class="text-center text-caption border">SSS Loan</th>
-            <th colspan="3" class="text-center font-weight-medium border">Others</th>
+            <th colspan="4" class="text-center font-weight-medium border">Others</th>
           </tr>
 
           <!-- Sub Header Row - Level 3 (Detail columns) -->
@@ -235,12 +152,13 @@ const totals = computed(() => {
             <th class="text-center text-caption border">Amount</th>
 
             <!-- Other Details -->
-            <th class="text-center text-caption border">Add-on</th>
+            <th class="text-center text-caption border">Adjustments</th>
 
             <!-- Others Details -->
             <th class="text-center text-caption border">Late</th>
             <th class="text-center text-caption border">Undertime</th>
-            <th class="text-center text-caption border">Deduction</th>
+            <th class="text-center text-caption border">Savings</th>
+            <th class="text-center text-caption border">Adjustments</th>
           </tr>
         </thead>
 
@@ -265,7 +183,7 @@ const totals = computed(() => {
             <td class="text-center border">{{ formatCurrency(item.holidays_pay) }}</td>
             <td class="text-center border">{{ formatCurrency(item.trips_pay) }}</td>
             <td class="text-center border">{{ formatCurrency(item.utilizations_pay) }}</td>
-            <td class="text-center border">{{ formatCurrency(0) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.cash_adjustment_addon || 0) }}</td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(item.gross_pay) }}</td>
 
             <!-- Deduction Columns -->
@@ -287,6 +205,9 @@ const totals = computed(() => {
             </td>
             <td class="text-end text-error border">
               {{ formatCurrency((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)) }}
+            </td>
+            <td class="text-end text-error border">
+              {{ formatCurrency(item.deductions.cash_adjustment || 0) }}
             </td>
 
             <!-- Total Deductions -->
@@ -322,7 +243,7 @@ const totals = computed(() => {
             </td>
             <td class="text-center font-weight-bold border">{{ formatCurrency(totals.trips_pay) }}</td>
             <td class="text-center font-weight-bold border">{{ formatCurrency(totals.utilizations_pay) }}</td>
-            <td class="text-center font-weight-bold border">{{ formatCurrency(0) }}</td>
+            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.cash_adjustment_addon) }}</td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(totals.gross_pay) }}</td>
 
             <!-- Deduction Totals -->
@@ -350,6 +271,9 @@ const totals = computed(() => {
             </td>
             <td class="text-end font-weight-bold text-error border">
               {{ formatCurrency(totals.savings + totals.salary_deposit) }}
+            </td>
+            <td class="text-end font-weight-bold text-error border">
+              {{ formatCurrency(totals.cash_adjustment_deduction) }}
             </td>
 
             <!-- Total Deductions Total -->

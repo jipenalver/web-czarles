@@ -20,6 +20,7 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
     trips_pay: Number(row.trips_pay) || 0,
     utilizations_pay: Number(row.utilizations_pay) || 0,
     holidays_pay: Number(row.holidays_pay) || 0,
+    cash_adjustment_addon: 0, // Will be calculated client-side
     gross_pay: Number(row.gross_pay) || 0,
     deductions: {
       cash_advance: Number(row.cash_advance) || 0,
@@ -31,6 +32,7 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
       salary_deposit: Number(row.salary_deposit) || 0,
       late: Number(row.late_deduction) || 0,
       undertime: Number(row.undertime_deduction) || 0,
+      cash_adjustment: 0, // Will be calculated client-side
       total: Number(row.total_deductions) || 0,
     },
     total_deductions: Number(row.total_deductions) || 0,
@@ -46,7 +48,7 @@ export function createDateStringForCalculation(selectedMonth: string, selectedYe
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ].indexOf(selectedMonth)
-  
+
   return `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-01`
 }
 
@@ -58,7 +60,7 @@ export function separateEmployeesByType(
 ): { fieldStaff: MonthlyPayrollRow[]; nonFieldStaff: MonthlyPayrollRow[] } {
   const fieldStaff: MonthlyPayrollRow[] = []
   const nonFieldStaff: MonthlyPayrollRow[] = []
-  
+
   employees.forEach(employee => {
     if (employee.is_field_staff) {
       fieldStaff.push(employee)
@@ -66,6 +68,6 @@ export function separateEmployeesByType(
       nonFieldStaff.push(employee)
     }
   })
-  
+
   return { fieldStaff, nonFieldStaff }
 }

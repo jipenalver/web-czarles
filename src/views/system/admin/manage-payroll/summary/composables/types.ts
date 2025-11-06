@@ -49,6 +49,7 @@ export interface MonthlyPayrollRow {
   trips_pay: number
   utilizations_pay: number
   holidays_pay: number
+  cash_adjustment_addon: number // Cash adjustment add-ons (is_deduction = false)
   gross_pay: number
   deductions: {
     cash_advance: number
@@ -60,6 +61,7 @@ export interface MonthlyPayrollRow {
     salary_deposit: number
     late: number
     undertime: number
+    cash_adjustment: number // Cash adjustment deductions (is_deduction = true)
     total: number
   }
   total_deductions: number
@@ -72,6 +74,7 @@ export interface MonthlyPayrollTotals {
   trips_pay: number
   utilizations_pay: number
   holidays_pay: number
+  cash_adjustment_addon: number
   gross_pay: number
   total_deductions: number
   net_pay: number

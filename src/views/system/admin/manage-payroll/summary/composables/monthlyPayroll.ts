@@ -8,6 +8,7 @@ import type { MonthlyPayrollRow, MonthlyPayrollTotals } from './types'
 import { transformPayrollData, createDateStringForCalculation, separateEmployeesByType } from './dataTransformation'
 import { processFieldStaffEmployees } from './fieldStaffProcessor'
 import { processNonFieldStaffEmployees } from './nonFieldStaffProcessor'
+import { getCashAdjustmentsForEmployee } from './cashAdjustmentCalculations'
 
 /**
  * Composable for monthly payroll computation using Supabase function
@@ -89,12 +90,44 @@ export function useMonthlyPayroll() {
 
       // Process field staff employees with special calculations
       await processFieldStaffEmployees(fieldStaffEmployees, dateStringForCalculation)
-      
+
       // Process non-field staff employees with late/undertime calculations
       await processNonFieldStaffEmployees(nonFieldStaffEmployees, dateStringForCalculation)
 
       // Combine field staff and non-field staff employees
       const finalData = [...fieldStaffEmployees, ...nonFieldStaffEmployees]
+
+      // Fetch and apply cash adjustments for all employees
+      await Promise.all(
+        finalData.map(async (employee: MonthlyPayrollRow) => {
+          const { addOnAmount, deductionAmount } = await getCashAdjustmentsForEmployee(
+            employee.employee_id,
+            selectedMonth.value,
+            selectedYear.value
+          )
+
+          // Update employee with cash adjustment values
+          employee.cash_adjustment_addon = addOnAmount
+          employee.deductions.cash_adjustment = deductionAmount
+
+          // Recalculate gross_pay: add cash adjustment add-ons
+          employee.gross_pay = employee.gross_pay + addOnAmount
+
+          // Recalculate total_deductions: add cash adjustment deductions
+          employee.total_deductions = employee.total_deductions + deductionAmount
+
+          // Recalculate net_pay: gross_pay - total_deductions
+          employee.net_pay = employee.gross_pay - employee.total_deductions
+
+          // Round to 2 decimal places
+          employee.cash_adjustment_addon = Number(employee.cash_adjustment_addon.toFixed(2))
+          employee.deductions.cash_adjustment = Number(employee.deductions.cash_adjustment.toFixed(2))
+          employee.gross_pay = Number(employee.gross_pay.toFixed(2))
+          employee.total_deductions = Number(employee.total_deductions.toFixed(2))
+          employee.net_pay = Number(employee.net_pay.toFixed(2))
+        })
+      )
+
       monthlyPayrollData.value = finalData
 
       // Update cache key after successful load
@@ -118,6 +151,7 @@ export function useMonthlyPayroll() {
         trips_pay: 0,
         utilizations_pay: 0,
         holidays_pay: 0,
+        cash_adjustment_addon: 0,
         gross_pay: 0,
         total_deductions: 0,
         net_pay: 0,
@@ -131,6 +165,7 @@ export function useMonthlyPayroll() {
         trips_pay: acc.trips_pay + (item.trips_pay || 0),
         utilizations_pay: acc.utilizations_pay + (item.utilizations_pay || 0),
         holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
+        cash_adjustment_addon: acc.cash_adjustment_addon + (item.cash_adjustment_addon || 0),
         gross_pay: acc.gross_pay + (item.gross_pay || 0),
         total_deductions: acc.total_deductions + (item.total_deductions || 0),
         net_pay: acc.net_pay + (item.net_pay || 0),
@@ -141,6 +176,7 @@ export function useMonthlyPayroll() {
         trips_pay: 0,
         utilizations_pay: 0,
         holidays_pay: 0,
+        cash_adjustment_addon: 0,
         gross_pay: 0,
         total_deductions: 0,
         net_pay: 0,
