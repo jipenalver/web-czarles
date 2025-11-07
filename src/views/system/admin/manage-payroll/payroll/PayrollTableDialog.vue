@@ -11,7 +11,6 @@ import {
   getDateRangeForMonth,
   getDateRangeForMonthNoCross,
   getLastDayOfMonth,
-  onCrossMonthChange as onCrossMonthChangeHelper,
   calculateFieldStaffNetPay as calculateFieldStaffNetPayHelper,
   onView as onViewHelper,
 } from './helpers'
@@ -80,11 +79,13 @@ const {
 const chosenMonth = ref<string>('')
 
 // Day-only selectors (month is selected via the table rows)
-const dayFrom = ref<number | null>(null)
-const dayTo = ref<number | null>(null)
-// If true, 'From Day' refers to the previous month (cross-month). If false, the day selectors are disabled.
-// Default changed to false so the checkbox is not checked by default
-const crossMonthEnabled = ref<boolean>(false)
+// Initialize gamit ang payroll_start ug payroll_end from employee data
+const dayFrom = ref<number | null>(props.itemData?.payroll_start ?? null)
+const dayTo = ref<number | null>(props.itemData?.payroll_end ?? null)
+// Cross-month is checked by default ONLY if payroll_start ug payroll_end naa
+const crossMonthEnabled = ref<boolean>(
+  Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+)
 
 // Compute days in the currently chosen month (chosenMonth set when clicking a month row)
 const daysInSelectedMonth = computed(() => {
@@ -120,50 +121,60 @@ const dayOptionsTo = computed(() =>
 
 // (Day-only selects — month is selected via the table rows)
 
-// When year changes, ensure the from/to stay within that year (clear if not)
+// Watch para ma-update ang day values from employee's payroll_start ug payroll_end
 watch(
-  () => {
-    const tf = tableFilters.value as Record<string, unknown> | undefined
-    return tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : undefined
-  },
-  (newYear) => {
-    if (!newYear) return
-    // clear day selections if they are incompatible with new year + chosenMonth
-    dayFrom.value = null
-    dayTo.value = null
+  () => props.itemData,
+  (newData) => {
+    // console.log('🔍 PayrollTableDialog - Employee Data:', {
+    //   employeeId: newData?.id,
+    //   employeeName: `${newData?.firstname || ''} ${newData?.lastname || ''}`,
+    //   payroll_start: newData?.payroll_start,
+    //   payroll_end: newData?.payroll_end,
+    //   fullData: newData
+    // })
+
+    // Set ang payroll_start ug payroll_end kung naa
+    if (newData?.payroll_start !== undefined && newData?.payroll_start !== null) {
+      dayFrom.value = newData.payroll_start
+      // console.log('✅ Set dayFrom to:', newData.payroll_start)
+    } else {
+      dayFrom.value = null
+      // console.log('⚠️ No payroll_start found')
+    }
+
+    if (newData?.payroll_end !== undefined && newData?.payroll_end !== null) {
+      dayTo.value = newData.payroll_end
+      // console.log('✅ Set dayTo to:', newData.payroll_end)
+    } else {
+      dayTo.value = null
+      // console.log('⚠️ No payroll_end found')
+    }
+
+    // Enable crossmonth ONLY if both payroll_start ug payroll_end naa
+    crossMonthEnabled.value = Boolean(newData?.payroll_start && newData?.payroll_end)
+    // console.log('📊 Final values:', { dayFrom: dayFrom.value, dayTo: dayTo.value, crossMonthEnabled: crossMonthEnabled.value })
   },
   { immediate: true },
 )
 
-// When cross-month is toggled off, clear and remove persisted values; when enabled, set sensible defaults
+// When cross-month is toggled off, clear both inputs; when enabled, set defaults from employee data
 watch(
   () => crossMonthEnabled.value,
   (enabled) => {
-    try {
-      if (!enabled) {
-        dayFrom.value = null
-        dayTo.value = null
-        localStorage.removeItem('czarles_payroll_fromDate')
-        localStorage.removeItem('czarles_payroll_toDate')
-      } else {
-        // default From = last day of previous month if not set, default To = last day of current month (when enabled)
-        if (dayFrom.value === null || dayFrom.value === undefined)
-          dayFrom.value = daysInPreviousMonth.value
-        if (dayTo.value === null || dayTo.value === undefined)
-          dayTo.value = daysInSelectedMonth.value
-      }
-    } catch {
-      /* ignore storage errors */
+    if (!enabled) {
+      // Simply clear both inputs
+      dayFrom.value = null
+      dayTo.value = null
+    } else {
+      // Set defaults from employee data when enabling
+      if (dayFrom.value === null || dayFrom.value === undefined)
+        dayFrom.value = props.itemData?.payroll_start ?? daysInPreviousMonth.value
+      if (dayTo.value === null || dayTo.value === undefined)
+        dayTo.value = props.itemData?.payroll_end ?? daysInSelectedMonth.value
     }
   },
   { immediate: true },
 )
-
-// Typed handler for checkbox change (delegates to helper)
-function onCrossMonthChange(val: boolean) {
-  // helper expects refs for dayFrom/dayTo
-  onCrossMonthChangeHelper(val, dayFrom, dayTo)
-}
 
 // onView: delegate complex behavior to helper while keeping the component API
 function onView(item: TableData) {
@@ -258,7 +269,6 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             hide-details
             :true-value="true"
             :false-value="false"
-            @change="onCrossMonthChange"
           ></v-checkbox>
 
           <v-select
@@ -275,7 +285,7 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
                   })()
                 : 'previous month'
             })`"
-            placeholder="Previous Month"
+            :placeholder="props.itemData?.payroll_start ? `Default: ${props.itemData.payroll_start}` : 'Previous Month'"
             clearable
             clear-icon="mdi-close"
             dense
@@ -289,7 +299,7 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             v-model="dayTo"
             :items="dayOptionsTo"
             :label="`To Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
-            placeholder="Current Month"
+            :placeholder="props.itemData?.payroll_end ? `Default: ${props.itemData.payroll_end}` : 'Current Month'"
             clearable
             clear-icon="mdi-close"
             dense

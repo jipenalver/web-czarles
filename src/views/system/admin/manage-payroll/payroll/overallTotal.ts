@@ -1,20 +1,23 @@
 import { computed, type Ref, type ComputedRef } from 'vue'
-import type { Holiday } from '@/stores/holidays'
+import type { HolidayWithAttendance } from './computation/holidays'
 import type { Trip } from '@/stores/trips'
 import type { EmployeeDeduction } from '@/stores/benefits'
 
 /**
- * Computes the overall earnings total including regular work, trips, holidays, overtime, and benefits
+ * Computes the overall earnings total including regular work, trips, holidays, overtime, benefits, utilizations, allowances, and cash adjustments
  */
 export function useOverallEarningsTotal(
   regularWorkTotal: Ref<number>,
   trips: Ref<Trip[]>,
-  holidays: Ref<Holiday[]>,
+  holidays: Ref<HolidayWithAttendance[]>,
   dailyRate: ComputedRef<number>,
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
   codaAllowance: Ref<number>,
   nonDeductions?: Ref<EmployeeDeduction[]>,
+  monthlyUtilizationsTotal?: ComputedRef<number>,
+  monthlyAllowancesTotal?: ComputedRef<number>,
+  monthlyCashAdjustmentsTotal?: ComputedRef<number>,
   /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<number> {
   return computed(() => {
@@ -38,6 +41,7 @@ export function useOverallEarningsTotal(
       holidays.value?.reduce((sum, holiday) => {
         const baseRate = Number(dailyRate.value) || 0
         const type = holiday.type?.toLowerCase() || ''
+        const attendanceFraction = Number(holiday.attendance_fraction) || 0
 
         let multiplier = 1
         if (type.includes('rh'))
@@ -46,7 +50,7 @@ export function useOverallEarningsTotal(
           multiplier = 1.5 // Special Non-working Holiday
         else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday
 
-        return sum + baseRate * multiplier
+        return sum + (baseRate * multiplier * attendanceFraction)
       }, 0) || 0
     total += holidayEarnings
 
@@ -67,6 +71,21 @@ export function useOverallEarningsTotal(
       total += nonDeductionTotal
     }
 
+    // 7. Add monthly utilizations
+    if (monthlyUtilizationsTotal) {
+      total += Number(monthlyUtilizationsTotal.value) || 0
+    }
+
+    // 8. Add monthly allowances
+    if (monthlyAllowancesTotal) {
+      total += Number(monthlyAllowancesTotal.value) || 0
+    }
+
+    // 9. Add monthly cash adjustments (additions/earnings)
+    if (monthlyCashAdjustmentsTotal) {
+      total += Number(monthlyCashAdjustmentsTotal.value) || 0
+    }
+
     return total
   })
 }
@@ -77,7 +96,7 @@ export function useOverallEarningsTotal(
 export function useEarningsBreakdown(
   regularWorkTotal: Ref<number>,
   trips: Ref<Trip[]>,
-  holidays: Ref<Holiday[]>,
+  holidays: Ref<HolidayWithAttendance[]>,
   dailyRate: ComputedRef<number>,
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
@@ -101,6 +120,7 @@ export function useEarningsBreakdown(
       holidays.value?.reduce((sum, holiday) => {
         const baseRate = Number(dailyRate.value) || 0
         const type = holiday.type?.toLowerCase() || ''
+        const attendanceFraction = Number(holiday.attendance_fraction) || 0
 
         let multiplier = 1
         if (type.includes('rh'))
@@ -109,7 +129,7 @@ export function useEarningsBreakdown(
           multiplier = 1.5 // Special Non-working Holiday
         else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday
 
-        return sum + baseRate * multiplier
+        return sum + (baseRate * multiplier * attendanceFraction)
       }, 0) || 0
 
     // Overtime earnings

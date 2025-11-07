@@ -44,6 +44,30 @@ export function roundDecimal(value: number, decimalPlaces: number = 2): number {
   return Math.round(value * multiplier) / multiplier
 }
 
+/**
+ * Check if benefit amount is greater than zero
+ * Returns true kung ang benefit amount kay dili zero, false kung zero
+ */
+export function hasBenefitAmount(amount: number | null | undefined): boolean {
+  return (amount ?? 0) > 0
+}
+
+/**
+ * Convert hours worked to work days
+ * I-convert ang hours nga gi-trabaho to number of days (8 hours = 1 day)
+ */
+export function convertHoursToDays(hours: number): number {
+  return roundDecimal(hours / 8, 2)
+}
+
+/**
+ * Format hours to 1 decimal place
+ * I-format ang hours to one decimal place lang (e.g., 5.5 hours)
+ */
+export function formatHoursOneDecimal(hours: number): string {
+  return roundDecimal(hours, 1).toFixed(1)
+}
+
 export function getHolidayTypeName(type: string | undefined): string {
   if (!type) return 'Unknown'
   const t = type.toLowerCase()
@@ -177,15 +201,33 @@ export function getLastDayOfMonth(year: number, monthName: string): number {
 
 /**
  * Simple change handler for cross-month checkbox. Clears day refs when disabled.
+ * Sets payroll_start and payroll_end when enabled (if provided).
  */
 export function onCrossMonthChange(
   val: boolean,
   dayFrom: Ref<number | null>,
   dayTo: Ref<number | null>,
+  payrollStart?: number | null,
+  payrollEnd?: number | null,
 ) {
   if (!val) {
     dayFrom.value = null
     dayTo.value = null
+    // Clear localStorage when disabling cross-month
+    try {
+      localStorage.removeItem('czarles_payroll_fromDate')
+      localStorage.removeItem('czarles_payroll_toDate')
+    } catch {
+      /* ignore storage errors */
+    }
+  } else {
+    // Set ang payroll_start ug payroll_end kung naa
+    if (payrollStart !== null && payrollStart !== undefined) {
+      dayFrom.value = payrollStart
+    }
+    if (payrollEnd !== null && payrollEnd !== undefined) {
+      dayTo.value = payrollEnd
+    }
   }
 }
 
@@ -448,4 +490,46 @@ export function onView(options: {
   }
 
   baseOnView({ ...item, dateString })
+}
+
+// ============================================================================
+// BATCH ATTENDANCE PRELOADING
+// ============================================================================
+
+/**
+ * Preload attendance data for multiple employees in a single batch
+ * This significantly reduces API calls when loading payroll for many employees
+ *
+ * @param employeeIds - Array of employee IDs to preload
+ * @param dateString - Date string in YYYY-MM format
+ * @param fromDateISO - Optional start date in ISO format
+ * @param toDateISO - Optional end date in ISO format
+ * @returns Promise that resolves when preloading is complete
+ */
+export async function preloadEmployeesAttendance(
+  employeeIds: number[],
+  dateString: string,
+  fromDateISO?: string,
+  toDateISO?: string,
+): Promise<void> {
+  // Dynamic import to avoid circular dependency
+  const { getEmployeesAttendanceBatch } = await import('./computation/computation')
+
+  console.log(`[BATCH] Preloading attendance for ${employeeIds.length} employees...`)
+  const startTime = performance.now()
+
+  await getEmployeesAttendanceBatch(employeeIds, dateString, fromDateISO, toDateISO)
+
+  const endTime = performance.now()
+  console.log(`[BATCH] Preload complete in ${Math.round(endTime - startTime)}ms`)
+}
+
+/**
+ * Clear attendance cache manually
+ * Useful when data is updated and needs to be refreshed
+ */
+export async function clearAttendanceCacheHelper(): Promise<void> {
+  const { clearAttendanceCache } = await import('./computation/computation')
+  clearAttendanceCache()
+  console.log('[CACHE] Attendance cache cleared')
 }

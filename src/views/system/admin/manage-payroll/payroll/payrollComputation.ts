@@ -169,15 +169,35 @@ export function usePayrollComputation(
           const hourlyRate = daily / 8
           regularWorkTotal.value = totalWorkHours * hourlyRate
 
-          // Set present days based on days with any attendance + paid leave days
+          // Set present days based on days with attendance (including half days) + paid leave days
           let employeePresentDays = 0
           attendances.forEach((attendance) => {
-            const hasAnyData =
-              attendance.am_time_in ||
-              attendance.am_time_out ||
-              attendance.pm_time_in ||
-              attendance.pm_time_out
-            if (hasAnyData) employeePresentDays++
+            // Check if both AM time-in and time-out are present and not empty strings
+            const hasAmData =
+              attendance.am_time_in !== null &&
+              attendance.am_time_in !== undefined &&
+              attendance.am_time_in !== '' &&
+              attendance.am_time_out !== null &&
+              attendance.am_time_out !== undefined &&
+              attendance.am_time_out !== ''
+
+            // Check if both PM time-in and time-out are present and not empty strings
+            const hasPmData =
+              attendance.pm_time_in !== null &&
+              attendance.pm_time_in !== undefined &&
+              attendance.pm_time_in !== '' &&
+              attendance.pm_time_out != null &&
+              attendance.pm_time_out != undefined &&
+              attendance.pm_time_out !== ''
+
+            // Full day: both AM and PM data are available
+            if (hasAmData && hasPmData) {
+              employeePresentDays += 1
+            }
+            // Half day: only AM data or only PM data is available
+            else if (hasAmData || hasPmData) {
+              employeePresentDays += 0.5
+            }
           })
 
           // Add paid leave days to present days para field staff
@@ -251,27 +271,50 @@ export function usePayrollComputation(
             console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
           } */
 
-          // Check attendance data for present/absent days calculation
+          // Check attendance data for present/absent days calculation including half days
           let employeePresentDays = 0
+          // let fullDaysCount = 0
+          // let halfDaysCount = 0
 
           attendances.forEach((attendance) => {
-            // Strict check: BOTH AM or BOTH PM time-in and time-out must be present (not null or undefined)
+            // Check if both AM time-in and time-out are present and not empty strings
             const hasAmData =
               attendance.am_time_in !== null &&
               attendance.am_time_in !== undefined &&
+              attendance.am_time_in !== '' &&
               attendance.am_time_out !== null &&
-              attendance.am_time_out !== undefined
+              attendance.am_time_out !== undefined &&
+              attendance.am_time_out !== ''
+
+            // Check if both PM time-in and time-out are present and not empty strings
             const hasPmData =
               attendance.pm_time_in !== null &&
               attendance.pm_time_in !== undefined &&
+              attendance.pm_time_in !== '' &&
               attendance.pm_time_out != null &&
-              attendance.pm_time_out != undefined
+              attendance.pm_time_out != undefined &&
+              attendance.pm_time_out !== ''
 
-            // Consider present if both AM and PM data are available
+            // const attendanceDate = attendance.attendance_date
+
+            // Full day: both AM and PM data are available
             if (hasAmData && hasPmData) {
-              employeePresentDays++
+              employeePresentDays += 1
+              // fullDaysCount++
+            }
+            // Half day: only AM data or only PM data is available
+            else if (hasAmData || hasPmData) {
+              employeePresentDays += 0.5
+              // halfDaysCount++
+              // const timeType = hasAmData ? 'AM' : 'PM'
+              // console.error(`[HALF DAY ${timeType}] Employee ${employeeId} - Date: ${attendanceDate}, AM: ${hasAmData ? 'Complete' : 'Missing'}, PM: ${hasPmData ? 'Complete' : 'Missing'}`)
             }
           })
+
+          // Log summary para sa half days
+          // if (halfDaysCount > 0) {
+          //   console.error(`[HALF DAYS SUMMARY] Employee ${employeeId} - Total Full Days: ${fullDaysCount}, Total Half Days: ${halfDaysCount}, Total Present Days (with half days): ${employeePresentDays}`)
+          // }
 
           // Add paid leave days to present days para office staff
           employeePresentDays += paidLeaveDays
@@ -285,9 +328,8 @@ export function usePayrollComputation(
           presentDays.value = employeePresentDays
           absentDays.value = totalAbsentDays
 
-          // Calculate regular work total: (total work days - absent days) * daily rate
-          const effectiveWorkDays = Math.max(0, workDays.value - absentDays.value)
-          regularWorkTotal.value = (daily ?? 0) * effectiveWorkDays
+          // Calculate regular work total using present days (which includes half days)
+          regularWorkTotal.value = (daily ?? 0) * employeePresentDays
         }
 
         // Update daily rate from employee data if available
