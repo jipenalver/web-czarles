@@ -103,9 +103,9 @@ export async function getEmployeesAttendanceBatch(
     })
 
     if (error) {
-      console.error('❌ [BATCH] RPC Error:', error)
-      console.error('❌ [BATCH] Function might not exist. Run: supabase/functions/get_attendance_batch.sql')
-      console.error('❌ [BATCH] Parameters:', { numericIds, startISO, endISO })
+      console.error('[BATCH] RPC Error:', error)
+      console.error('[BATCH] Function might not exist. Run: supabase/functions/get_attendance_batch.sql')
+      console.error('[BATCH] Parameters:', { numericIds, startISO, endISO })
       return new Map()
     }
 

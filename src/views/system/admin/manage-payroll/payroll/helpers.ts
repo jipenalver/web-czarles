@@ -73,6 +73,8 @@ export function getHolidayTypeName(type: string | undefined): string {
   const t = type.toLowerCase()
   if (t.includes('rh')) return 'Regular Holiday'
   if (t.includes('snh')) return 'Special Non-Working Holiday'
+  if (t.includes('lh')) return 'Local Holiday'
+  if (t.includes('ch')) return 'Company Holiday'
   if (t.includes('swh')) return 'Special Working Holiday'
   return type
 }

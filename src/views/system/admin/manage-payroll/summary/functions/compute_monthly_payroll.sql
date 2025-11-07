@@ -120,7 +120,9 @@ BEGIN
         ae.daily_rate * 
         CASE 
           WHEN LOWER(h.type) LIKE '%rh%' THEN 2.0        -- Regular Holiday: 200%
-          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.5       -- Special Non-Working Holiday: 150%
+          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.3       -- Special Non-Working Holiday: 130%
+          WHEN LOWER(h.type) LIKE '%lh%' THEN 1.3        -- Local Holiday: 130%
+          WHEN LOWER(h.type) LIKE '%ch%' THEN 1.0        -- Company Holiday: 100%
           WHEN LOWER(h.type) LIKE '%swh%' THEN 1.3       -- Special Working Holiday: 130%
           ELSE 1.0
         END *
