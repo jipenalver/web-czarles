@@ -7,6 +7,8 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
   return (data || []).map((row: PayrollDatabaseRow) => ({
     employee_id: row.employee_id,
     employee_name: row.employee_name,
+    designation_id: row.designation_id ?? null,
+    designation_name: row.designation_name || '',
     daily_rate: Number(row.daily_rate) || 0,
     days_worked: Number(row.days_worked) || 0,
     is_field_staff: false, // Will be updated later
