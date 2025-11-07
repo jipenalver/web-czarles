@@ -32,7 +32,10 @@ export const useDesignationsStore = defineStore('designations', () => {
   async function getDesignations() {
     const { data } = await supabase.from('employee_designations').select()
 
-    designations.value = data as Designation[]
+    designations.value = (data as Designation[]).map((designation) => ({
+      ...designation,
+      title: `${designation.designation} ${designation.description ? `(${designation.description})` : ''}`,
+    }))
   }
 
   async function getDesignationsTable(

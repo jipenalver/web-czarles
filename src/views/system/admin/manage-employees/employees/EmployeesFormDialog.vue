@@ -127,7 +127,6 @@ const {
                 v-model="formData.designation_id"
                 label="Designation"
                 :items="designationsStore.designations"
-                item-title="designation"
                 item-value="id"
                 :rules="[requiredValidator]"
               ></v-autocomplete>

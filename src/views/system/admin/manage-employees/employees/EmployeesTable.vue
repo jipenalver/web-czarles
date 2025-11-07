@@ -161,7 +161,6 @@ const {
                 :items="designationsStore.designations"
                 density="compact"
                 label="Filter by Designation"
-                item-title="designation"
                 item-value="id"
                 clearable
                 @update:model-value="onFilterItems"
