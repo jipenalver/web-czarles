@@ -10,6 +10,7 @@ const props = defineProps<{
   currentPage: number
   itemsPerPage: number
   searchQuery: string
+  selectedDesignation: number | null
   selectedMonth?: string
   selectedYear?: number
 }>()
@@ -19,14 +20,22 @@ const emit = defineEmits<{
   'update:itemsPerPage': [value: number]
 }>()
 
-// Filtered items based on search query
+// Filtered items based on search query and designation
 const filteredItems = computed(() => {
-  if (!props.searchQuery || props.searchQuery.trim() === '') {
-    return props.items
+  let filtered = props.items
+
+  // Filter by designation
+  if (props.selectedDesignation !== null) {
+    filtered = filtered.filter((item) => item.designation_id === props.selectedDesignation)
   }
 
-  const query = props.searchQuery.toLowerCase().trim()
-  return props.items.filter((item) => item.employee_name.toLowerCase().includes(query))
+  // Filter by search query
+  if (props.searchQuery && props.searchQuery.trim() !== '') {
+    const query = props.searchQuery.toLowerCase().trim()
+    filtered = filtered.filter((item) => item.employee_name.toLowerCase().includes(query))
+  }
+
+  return filtered
 })
 
 // Paginated items

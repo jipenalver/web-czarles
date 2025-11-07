@@ -36,6 +36,8 @@ export interface PayrollDatabaseRow {
 export interface MonthlyPayrollRow {
   employee_id: number
   employee_name: string
+  designation_id: number | null
+  designation_name: string
   daily_rate: number
   days_worked: number
   is_field_staff: boolean // Added to track field staff status

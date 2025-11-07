@@ -4,6 +4,7 @@ import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/summary/pdf/M
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayroll'
 import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summary/pdf/monthlyPayrollPDF'
 import { monthNames } from '@/views/system/admin/manage-payroll/payroll/helpers'
+import { useDesignationsStore } from '@/stores/designations'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { ref, watch, onMounted } from 'vue'
@@ -21,9 +22,13 @@ const {
 // Use PDF composable
 const { isLoadingPDF, onExport } = useMonthlyPayrollPDF()
 
-// Set default month to current month
-onMounted(() => {
+// Use designations store
+const designationsStore = useDesignationsStore()
+
+// Set default month to current month and load designations
+onMounted(async () => {
   selectedMonth.value = monthNames[new Date().getMonth()]
+  await designationsStore.getDesignations()
 })
 
 // Watch for changes
@@ -48,12 +53,19 @@ const itemsPerPage = ref(25)
 // Search state
 const searchQuery = ref('')
 
+// Designation filter state
+const selectedDesignation = ref<number | null>(null)
+
 // Reset to first page when data changes or search query changes
 watch(monthlyPayrollData, () => {
   currentPage.value = 1
 })
 
 watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
+watch(selectedDesignation, () => {
   currentPage.value = 1
 })
 
@@ -152,6 +164,24 @@ const handleExportPDF = async () => {
           </v-col>
 
           <v-col cols="12" md="3">
+            <v-select
+              v-model="selectedDesignation"
+              :items="[
+                { title: 'All Designations', value: null },
+                ...designationsStore.designations.map((d) => ({
+                  title: d.designation,
+                  value: d.id,
+                })),
+              ]"
+              label="Filter by Designation"
+              variant="outlined"
+              density="compact"
+              prepend-inner-icon="mdi-briefcase"
+              clearable
+            ></v-select>
+          </v-col>
+
+          <v-col cols="12" md="3">
             <v-text-field
               v-model="searchQuery"
               label="Search Employee"
@@ -187,6 +217,7 @@ const handleExportPDF = async () => {
         :items="monthlyPayrollData"
         :loading="loading"
         :search-query="searchQuery"
+        :selected-designation="selectedDesignation"
         v-model:current-page="currentPage"
         v-model:items-per-page="itemsPerPage"
       />
