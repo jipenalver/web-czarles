@@ -126,6 +126,16 @@ const handleExportPDF = async () => {
           </v-list>
         </v-menu>
 
+        <!-- Generate Report Icon -->
+        <v-btn
+          icon="mdi-refresh"
+          variant="text"
+          size="small"
+          @click="refreshMonthlyPayroll"
+          :loading="loading"
+          :disabled="!selectedMonth || !selectedYear"
+        ></v-btn>
+
         <span class="text-h5">
           <v-icon class="me-2" icon="mdi-calendar-month" size="small"></v-icon>
           Payroll Summary
@@ -191,20 +201,6 @@ const handleExportPDF = async () => {
               prepend-inner-icon="mdi-account-search"
               clearable
             ></v-text-field>
-          </v-col>
-
-          <v-col cols="12" md="3">
-            <v-btn
-              class="mt-1"
-              color="primary"
-              @click="refreshMonthlyPayroll"
-              :loading="loading"
-              :disabled="!selectedMonth || !selectedYear"
-              block
-            >
-              <v-icon icon="mdi-refresh" class="me-2"></v-icon>
-              Generate Report
-            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
