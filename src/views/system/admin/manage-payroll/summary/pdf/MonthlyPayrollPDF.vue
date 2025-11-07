@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
+import { type MonthlyPayrollRow } from '../composables/types'
 import { formatCurrency, roundDecimal } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import PayrollPrintFooter from '@/views/system/admin/manage-payroll/payroll/PayrollPrintFooter.vue'
 import { computed } from 'vue'
