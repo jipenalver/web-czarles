@@ -133,7 +133,7 @@ watch(
     <td class="pa-1" colspan="3">
       <div class="d-flex flex-column pa-0 ma-0">
         <!-- Late Deduction -->
-        <template v-if="showLateDeduction">
+        <template v-if="showLateDeduction && (lateDeduction > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0))">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
               <span class="text-caption " style="font-size: 12px">Late Deduction</span>
@@ -154,7 +154,7 @@ watch(
           </div>
         </template>
         <!-- Undertime Deduction -->
-        <template v-if="showLateDeduction">
+        <template v-if="showLateDeduction && (undertimeDeduction > 0 || (monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0))">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
               <span class="text-caption" style="font-size: 12px">Undertime Deduction</span>

@@ -11,6 +11,7 @@ export interface PayrollDatabaseRow {
   designation_id?: number | null
   designation_name?: string
   daily_rate: number
+  is_field_staff: boolean
   days_worked: number // Can be decimal for half days (e.g., 0.5, 1.5, 2.0)
   sunday_days: number
   sunday_amount: number

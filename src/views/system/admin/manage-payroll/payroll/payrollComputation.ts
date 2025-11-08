@@ -21,6 +21,56 @@ export interface TableData {
   other_deductions?: number
 }
 
+/**
+ * Calculate field staff late and undertime minutes with specific time thresholds
+ * AM Late: starts at 7:21, AM Undertime: before 11:49
+ * PM Late: starts at 1:01, PM Undertime: before 4:59
+ */
+function calculateFieldStaffLateUndertime(attendances: Array<{ am_time_in?: string | null; pm_time_in?: string | null; am_time_out?: string | null; pm_time_out?: string | null }>): { lateMinutes: number; undertimeMinutes: number } {
+  let totalLateMinutes = 0
+  let totalUndertimeMinutes = 0
+
+  attendances.forEach((attendance) => {
+    // AM Late calculation: after 7:20 (7:21 and later)
+    if (attendance.am_time_in) {
+      const amTimeIn = new Date(`1970-01-01T${attendance.am_time_in}`)
+      const amLateThreshold = new Date('1970-01-01T07:20:59')
+      if (amTimeIn > amLateThreshold) {
+        totalLateMinutes += Math.floor((amTimeIn.getTime() - amLateThreshold.getTime()) / (1000 * 60))
+      }
+    }
+
+    // PM Late calculation: after 1:00 (1:01 and later)
+    if (attendance.pm_time_in) {
+      const pmTimeIn = new Date(`1970-01-01T${attendance.pm_time_in}`)
+      const pmLateThreshold = new Date('1970-01-01T13:00:59')
+      if (pmTimeIn > pmLateThreshold) {
+        totalLateMinutes += Math.floor((pmTimeIn.getTime() - pmLateThreshold.getTime()) / (1000 * 60))
+      }
+    }
+
+    // AM Undertime calculation: before 11:49
+    if (attendance.am_time_out) {
+      const amTimeOut = new Date(`1970-01-01T${attendance.am_time_out}`)
+      const amUndertimeThreshold = new Date('1970-01-01T11:49:00')
+      if (amTimeOut < amUndertimeThreshold) {
+        totalUndertimeMinutes += Math.floor((amUndertimeThreshold.getTime() - amTimeOut.getTime()) / (1000 * 60))
+      }
+    }
+
+    // PM Undertime calculation: before 4:59
+    if (attendance.pm_time_out) {
+      const pmTimeOut = new Date(`1970-01-01T${attendance.pm_time_out}`)
+      const pmUndertimeThreshold = new Date('1970-01-01T16:59:00')
+      if (pmTimeOut < pmUndertimeThreshold) {
+        totalUndertimeMinutes += Math.floor((pmUndertimeThreshold.getTime() - pmTimeOut.getTime()) / (1000 * 60))
+      }
+    }
+  })
+
+  return { lateMinutes: totalLateMinutes, undertimeMinutes: totalUndertimeMinutes }
+}
+
 export function usePayrollComputation(
   dailyRate: Ref<number>,
   grossSalary: Ref<number>,
@@ -208,8 +258,18 @@ export function usePayrollComputation(
 
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
-          monthLateDeduction.value = 0 // Field staff don't have late deductions
-          monthUndertimeDeduction.value = 0 // Field staff don't have undertime deductions
+
+          // Calculate field staff late and undertime with specific thresholds
+          const { lateMinutes, undertimeMinutes } = calculateFieldStaffLateUndertime(attendances)
+          monthLateDeduction.value = lateMinutes
+          monthUndertimeDeduction.value = undertimeMinutes
+
+          if (lateMinutes > 0) {
+            console.warn(`[FIELD STAFF LATE] Employee ${employeeId} - Late minutes: ${lateMinutes} (AM: 7:21+, PM: 1:01+)`)
+          }
+          if (undertimeMinutes > 0) {
+            console.warn(`[FIELD STAFF UNDERTIME] Employee ${employeeId} - Undertime minutes: ${undertimeMinutes} (AM: <11:49, PM: <4:59)`)
+          }
         } else {
           // For office staff, use existing logic with Friday/Saturday special rules
           /* const allAmTimeIn = attendances.map((a) => a.am_time_in)

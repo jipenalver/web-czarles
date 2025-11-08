@@ -11,7 +11,7 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
     designation_name: row.designation_name || '',
     daily_rate: Number(row.daily_rate) || 0,
     days_worked: Number(row.days_worked) || 0,
-    is_field_staff: false, // Will be updated later
+    is_field_staff: row.is_field_staff || false, // Now comes from SQL function
     hours_worked: undefined, // Will be calculated for field staff
     sunday_days: Number(row.sunday_days) || 0,
     sunday_amount: Number(row.sunday_amount) || 0,
@@ -32,8 +32,8 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
       sss_loan: Number(row.sss_loan) || 0,
       savings: Number(row.savings) || 0,
       salary_deposit: Number(row.salary_deposit) || 0,
-      late: Number(row.late_deduction) || 0,
-      undertime: Number(row.undertime_deduction) || 0,
+      late: Number(row.late_deduction) || 0, // For field staff: calculated in SQL, for non-field staff: calculated client-side
+      undertime: Number(row.undertime_deduction) || 0, // For field staff: calculated in SQL, for non-field staff: calculated client-side
       cash_adjustment: 0, // Will be calculated client-side
       total: 0, // Will be calculated client-side
     },

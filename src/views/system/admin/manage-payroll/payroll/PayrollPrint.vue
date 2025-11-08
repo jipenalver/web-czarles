@@ -136,7 +136,7 @@ const formattedDate = computed(() => {
 
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
-const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
+const showLateDeduction = computed(() => true) // Show late/undertime deductions for both field staff and office staff
 // const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)
 

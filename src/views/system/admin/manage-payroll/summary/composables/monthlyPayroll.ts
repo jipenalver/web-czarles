@@ -1,7 +1,6 @@
 import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
 import { getEmployeesAttendanceBatch } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
-import { useEmployeesStore } from '@/stores/employees'
 
 // Import modular components
 import type { MonthlyPayrollRow, MonthlyPayrollTotals } from './types'
@@ -22,9 +21,6 @@ export function useMonthlyPayroll() {
 
   // Cache to prevent reloading same month/year
   const lastLoadedKey = ref<string>('')
-
-  // Initialize employees store
-  const employeesStore = useEmployeesStore()
 
   /**
    * Load payroll data using Supabase function for base calculations,
@@ -57,21 +53,14 @@ export function useMonthlyPayroll() {
       }
 
       // Transform database response to match MonthlyPayrollRow interface
-      // Note: late_deduction and undertime_deduction from server are 0.00, will be calculated client-side
+      // Note: is_field_staff, late_deduction and undertime_deduction now come from SQL function
       const transformedData = transformPayrollData(data)
 
       // Create date string in format YYYY-MM-01 for calculations
       const dateStringForCalculation = createDateStringForCalculation(selectedMonth.value, selectedYear.value)
 
-      // First pass: categorize employees by field staff status and fetch designation
-      await Promise.all(
-        transformedData.map(async (employee: MonthlyPayrollRow) => {
-          const emp = await employeesStore.getEmployeesById(employee.employee_id)
-          employee.is_field_staff = emp?.is_field_staff || false
-          employee.designation_id = emp?.designation_id || null
-          employee.designation_name = emp?.designation?.designation || 'N/A'
-        })
-      )
+      // Field staff status now comes from SQL function, no need to fetch from employees store
+      // Late and undertime deductions for field staff are calculated in SQL function
 
       // Separate employees by type
       const { fieldStaff: fieldStaffEmployees, nonFieldStaff: nonFieldStaffEmployees } = separateEmployeesByType(transformedData)

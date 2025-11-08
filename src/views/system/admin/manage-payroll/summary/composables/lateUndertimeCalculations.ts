@@ -4,6 +4,7 @@ import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, getExces
 /**
  * Calculate client-side late and undertime deductions using PayrollPrint.vue logic
  * Returns { lateDeductionAmount, undertimeDeductionAmount }
+ * Note: Field staff late/undertime deductions are calculated in SQL function
  */
 export async function calculateLateAndUndertimeDeductions(
   employeeId: number,
@@ -11,7 +12,7 @@ export async function calculateLateAndUndertimeDeductions(
   dailyRate: number,
   isFieldStaff: boolean
 ): Promise<{ lateDeductionAmount: number; undertimeDeductionAmount: number }> {
-  // Field staff don't have late/undertime deductions
+  // Field staff late/undertime deductions are calculated server-side in SQL function
   if (isFieldStaff) {
     return { lateDeductionAmount: 0, undertimeDeductionAmount: 0 }
   }
