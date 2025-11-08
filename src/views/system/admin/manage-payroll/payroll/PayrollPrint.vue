@@ -605,9 +605,9 @@ watch(
 </template>
 
 <style scoped>
-/* .mini-payroll-hidden {
+.mini-payroll-hidden {
   display: none;
-} */
+}
 
 .thick-border {
   border: 1px solid !important;
