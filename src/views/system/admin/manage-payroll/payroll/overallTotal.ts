@@ -45,10 +45,14 @@ export function useOverallEarningsTotal(
 
         let multiplier = 1
         if (type.includes('rh'))
-          multiplier = 2.0 // Regular Holiday
+          multiplier = 2.0 // Regular Holiday - 200%
         else if (type.includes('snh'))
-          multiplier = 1.5 // Special Non-working Holiday
-        else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday
+          multiplier = 1.3 // Special Non-working Holiday - 130%
+        else if (type.includes('lh'))
+          multiplier = 1.3 // Local Holiday - 130%
+        else if (type.includes('ch'))
+          multiplier = 1.0 // Company Holiday - 100%
+        else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday - 130%
 
         return sum + (baseRate * multiplier * attendanceFraction)
       }, 0) || 0
@@ -124,10 +128,14 @@ export function useEarningsBreakdown(
 
         let multiplier = 1
         if (type.includes('rh'))
-          multiplier = 2.0 // Regular Holiday
+          multiplier = 2.0 // Regular Holiday - 200%
         else if (type.includes('snh'))
-          multiplier = 1.5 // Special Non-working Holiday
-        else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday
+          multiplier = 1.3 // Special Non-working Holiday - 130%
+        else if (type.includes('lh'))
+          multiplier = 1.3 // Local Holiday - 130%
+        else if (type.includes('ch'))
+          multiplier = 1.0 // Company Holiday - 100%
+        else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday - 130%
 
         return sum + (baseRate * multiplier * attendanceFraction)
       }, 0) || 0

@@ -43,10 +43,10 @@ export async function processFieldStaffEmployees(
       // Formula: (hours worked * hourly rate) where hourly rate = daily rate / 8
       const newBasicPay = employee.hours_worked * hourlyRate
 
-      // Recalculate gross_pay: basic_pay + cola + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay
       const newGrossPay =
         newBasicPay +
-        employee.cola +
+        employee.allowance +
         clientOvertimePay +
         employee.trips_pay +
         employee.holidays_pay +

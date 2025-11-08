@@ -8,13 +8,18 @@ CREATE OR REPLACE FUNCTION compute_monthly_payroll(
 RETURNS TABLE (
   employee_id INTEGER,
   employee_name TEXT,
+  designation_id INTEGER,
+  designation_name TEXT,
   daily_rate NUMERIC,
   days_worked NUMERIC,
-  cola NUMERIC,
+  sunday_days NUMERIC,
+  sunday_amount NUMERIC,
+  allowance NUMERIC,
   overtime_hrs NUMERIC,
   basic_pay NUMERIC,
   overtime_pay NUMERIC,
   trips_pay NUMERIC,
+  utilizations_pay NUMERIC,
   holidays_pay NUMERIC,
   gross_pay NUMERIC,
   cash_advance NUMERIC,
@@ -66,8 +71,11 @@ BEGIN
       e.firstname,
       e.lastname,
       COALESCE(e.daily_rate, 0) AS daily_rate,
-      COALESCE(e.is_field_staff, false) AS is_field_staff
+      COALESCE(e.is_field_staff, false) AS is_field_staff,
+      e.designation_id,
+      COALESCE(ed.designation, 'No Designation') AS designation_name
     FROM employees e
+    LEFT JOIN employee_designations ed ON e.designation_id = ed.id
     WHERE e.deleted_at IS NULL
   ),
   
@@ -101,6 +109,17 @@ BEGIN
   
   -- Note: Overtime calculation removed - handled client-side for PayrollPrint.vue consistency
   
+  -- Calculate allowances
+  allowances_data AS (
+    SELECT 
+      a.employee_id,
+      COALESCE(SUM(a.amount), 0) AS allowances_total
+    FROM allowances a
+    WHERE a.trip_at BETWEEN v_start_date AND v_end_date
+      AND a.employee_id IS NOT NULL
+    GROUP BY a.employee_id
+  ),
+  
   -- Calculate trips
   trips_data AS (
     SELECT 
@@ -112,6 +131,17 @@ BEGIN
     GROUP BY t.employee_id
   ),
   
+  -- Calculate utilizations
+  utilizations_data AS (
+    SELECT 
+      u.employee_id,
+      COALESCE(SUM(COALESCE(u.hours, 0) * COALESCE(u.per_hour, 0) + COALESCE(u.overtime_hours, 0) * COALESCE(u.per_hour, 0)), 0) AS utilizations_total
+    FROM utilizations u
+    WHERE u.utilization_at BETWEEN v_start_date AND v_end_date
+      AND u.employee_id IS NOT NULL
+    GROUP BY u.employee_id
+  ),
+  
   -- Calculate holiday pay per employee (only for days with attendance)
   holiday_pay_data AS (
     SELECT 
@@ -120,7 +150,9 @@ BEGIN
         ae.daily_rate * 
         CASE 
           WHEN LOWER(h.type) LIKE '%rh%' THEN 2.0        -- Regular Holiday: 200%
-          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.5       -- Special Non-Working Holiday: 150%
+          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.3       -- Special Non-Working Holiday: 130%
+          WHEN LOWER(h.type) LIKE '%lh%' THEN 1.3        -- Local Holiday: 130%
+          WHEN LOWER(h.type) LIKE '%ch%' THEN 1.0        -- Company Holiday: 100%
           WHEN LOWER(h.type) LIKE '%swh%' THEN 1.3       -- Special Working Holiday: 130%
           ELSE 1.0
         END *
@@ -181,45 +213,41 @@ BEGIN
       COALESCE(SUM(edwb.amount) FILTER (WHERE edwb.is_deduction = true AND LOWER(edwb.benefit) LIKE '%salary%' AND LOWER(edwb.benefit) LIKE '%deposit%'), 0) AS salary_deposit
     FROM employee_deductions_with_benefits edwb
     GROUP BY edwb.employee_id
-  ),
-  
-  -- Calculate non-deduction benefits (earnings/allowances) - for gross pay
-  employee_benefits_total AS (
-    SELECT 
-      edwb.employee_id,
-      COALESCE(SUM(edwb.amount), 0) AS benefits_total
-    FROM employee_deductions_with_benefits edwb
-    WHERE edwb.is_deduction = false OR edwb.is_deduction IS NULL
-    GROUP BY edwb.employee_id
   )
   
   -- Final computation
   SELECT 
     ae.id::INTEGER AS employee_id,
     (ae.firstname || ' ' || ae.lastname) AS employee_name,
-    ae.daily_rate AS daily_rate,
-    ROUND(COALESCE(att.days_worked, 0), 1) AS days_worked,
-    COALESCE(eb.benefits_total, 0) AS cola,
-    0.00 AS overtime_hrs, -- Calculated client-side for PayrollPrint.vue consistency
-    ROUND(COALESCE(att.days_worked, 0) * ae.daily_rate, 2) AS basic_pay,
-    0.00 AS overtime_pay, -- Calculated client-side for PayrollPrint.vue consistency
-    COALESCE(tr.trips_amount, 0) AS trips_pay,
-    COALESCE(hp.holiday_amount, 0) AS holidays_pay,
+    ae.designation_id::INTEGER AS designation_id,
+    ae.designation_name AS designation_name,
+    COALESCE(ae.daily_rate, 0)::NUMERIC AS daily_rate,
+    ROUND(COALESCE(att.days_worked, 0), 1)::NUMERIC AS days_worked,
+    0::NUMERIC AS sunday_days,
+    0.00::NUMERIC AS sunday_amount,
+    COALESCE(al.allowances_total, 0)::NUMERIC AS allowance,
+    0.00::NUMERIC AS overtime_hrs, -- Calculated client-side for PayrollPrint.vue consistency
+    ROUND(COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0), 2)::NUMERIC AS basic_pay,
+    0.00::NUMERIC AS overtime_pay, -- Calculated client-side for PayrollPrint.vue consistency
+    COALESCE(tr.trips_amount, 0)::NUMERIC AS trips_pay,
+    COALESCE(ut.utilizations_total, 0)::NUMERIC AS utilizations_pay,
+    COALESCE(hp.holiday_amount, 0)::NUMERIC AS holidays_pay,
     ROUND(
-      (COALESCE(att.days_worked, 0) * ae.daily_rate) + 
-      COALESCE(eb.benefits_total, 0) +
+      (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0)) + 
+      COALESCE(al.allowances_total, 0) +
       COALESCE(tr.trips_amount, 0) +
+      COALESCE(ut.utilizations_total, 0) +
       COALESCE(hp.holiday_amount, 0), 2
-    ) AS gross_pay, -- Note: Overtime pay excluded, calculated client-side
-    COALESCE(ca.cash_advance_total, 0) AS cash_advance,
-    COALESCE(ded.sss, 0) AS sss,
-    COALESCE(ded.phic, 0) AS phic,
-    COALESCE(ded.pagibig, 0) AS pagibig,
-    COALESCE(ded.sss_loan, 0) AS sss_loan,
-    COALESCE(ded.savings, 0) AS savings,
-    COALESCE(ded.salary_deposit, 0) AS salary_deposit,
-    0.00 AS late_deduction, -- Calculated client-side for PayrollPrint.vue consistency
-    0.00 AS undertime_deduction, -- Calculated client-side for PayrollPrint.vue consistency
+    )::NUMERIC AS gross_pay, -- Note: Overtime pay excluded, calculated client-side
+    COALESCE(ca.cash_advance_total, 0)::NUMERIC AS cash_advance,
+    COALESCE(ded.sss, 0)::NUMERIC AS sss,
+    COALESCE(ded.phic, 0)::NUMERIC AS phic,
+    COALESCE(ded.pagibig, 0)::NUMERIC AS pagibig,
+    COALESCE(ded.sss_loan, 0)::NUMERIC AS sss_loan,
+    COALESCE(ded.savings, 0)::NUMERIC AS savings,
+    COALESCE(ded.salary_deposit, 0)::NUMERIC AS salary_deposit,
+    0.00::NUMERIC AS late_deduction, -- Calculated client-side for PayrollPrint.vue consistency
+    0.00::NUMERIC AS undertime_deduction, -- Calculated client-side for PayrollPrint.vue consistency
     ROUND(
       COALESCE(ca.cash_advance_total, 0) +
       COALESCE(ded.sss, 0) +
@@ -227,13 +255,14 @@ BEGIN
       COALESCE(ded.pagibig, 0) +
       COALESCE(ded.sss_loan, 0) +
       COALESCE(ded.savings, 0) +
-      COALESCE(ded.salary_deposit, 0)
+      COALESCE(ded.salary_deposit, 0), 2
       -- Note: Late and undertime deductions excluded, calculated client-side
-    ) AS total_deductions,
+    )::NUMERIC AS total_deductions,
     ROUND(
-      (COALESCE(att.days_worked, 0) * ae.daily_rate + 
-       COALESCE(eb.benefits_total, 0) +
+      (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0) + 
+       COALESCE(al.allowances_total, 0) +
        COALESCE(tr.trips_amount, 0) +
+       COALESCE(ut.utilizations_total, 0) +
        COALESCE(hp.holiday_amount, 0)) -
       (COALESCE(ca.cash_advance_total, 0) +
        COALESCE(ded.sss, 0) +
@@ -241,17 +270,18 @@ BEGIN
        COALESCE(ded.pagibig, 0) +
        COALESCE(ded.sss_loan, 0) +
        COALESCE(ded.savings, 0) +
-       COALESCE(ded.salary_deposit, 0))
+       COALESCE(ded.salary_deposit, 0)), 2
       -- Note: Overtime, late, and undertime excluded, calculated client-side
-    ) AS net_pay
+    )::NUMERIC AS net_pay
   FROM active_employees ae
   LEFT JOIN attendance_data att ON ae.id = att.employee_id
+  LEFT JOIN allowances_data al ON ae.id = al.employee_id
   LEFT JOIN trips_data tr ON ae.id = tr.employee_id
+  LEFT JOIN utilizations_data ut ON ae.id = ut.employee_id
   -- Note: overtime_data join removed, calculated client-side
   LEFT JOIN holiday_pay_data hp ON ae.id = hp.employee_id
   LEFT JOIN cash_advance_data ca ON ae.id = ca.employee_id
   LEFT JOIN deduction_totals ded ON ae.id = ded.employee_id
-  LEFT JOIN employee_benefits_total eb ON ae.id = eb.employee_id
   ORDER BY ae.firstname, ae.lastname;
 END;
 $$;

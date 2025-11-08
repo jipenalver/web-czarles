@@ -448,6 +448,12 @@ watch(
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
                   @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('lh')">
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('ch')">
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
+                </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
                   @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
@@ -458,7 +464,13 @@ watch(
                   x 200%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
-                  x 150%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                  x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('lh')">
+                  x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('ch')">
+                  x 100%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
                   x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
@@ -467,12 +479,16 @@ watch(
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
                 {{
                   holiday.type && holiday.type.toLowerCase().includes('rh')
-                    ? getMoneyText(dailyRate * 2 * (holiday.attendance_fraction || 0))
+                    ? getMoneyText(dailyRate * 2.0 * (holiday.attendance_fraction || 0))
                     : holiday.type && holiday.type.toLowerCase().includes('snh')
-                      ? getMoneyText(dailyRate * 1.5 * (holiday.attendance_fraction || 0))
-                      : holiday.type && holiday.type.toLowerCase().includes('swh')
+                      ? getMoneyText(dailyRate * 1.3 * (holiday.attendance_fraction || 0))
+                      : holiday.type && holiday.type.toLowerCase().includes('lh')
                         ? getMoneyText(dailyRate * 1.3 * (holiday.attendance_fraction || 0))
-                        : getMoneyText(dailyRate * (holiday.attendance_fraction || 0))
+                        : holiday.type && holiday.type.toLowerCase().includes('ch')
+                          ? getMoneyText(dailyRate * 1.0 * (holiday.attendance_fraction || 0))
+                          : holiday.type && holiday.type.toLowerCase().includes('swh')
+                            ? getMoneyText(dailyRate * 1.3 * (holiday.attendance_fraction || 0))
+                            : getMoneyText(dailyRate * (holiday.attendance_fraction || 0))
                 }}
               </td>
             </tr>

@@ -63,7 +63,7 @@ export async function getPayrollYearData(
   const startDate = `${year}-01-01`
   const endDate = `${year}-12-31`
 
-  console.log(`🚀 [PAYROLL YEAR] Batch fetching year data for employee ${employeeId}, year ${year}...`)
+  console.log(`[PAYROLL YEAR] Batch fetching year data for employee ${employeeId}, year ${year}...`)
   const startTime = performance.now()
 
   try {
@@ -74,8 +74,8 @@ export async function getPayrollYearData(
     })
 
     if (error) {
-      console.error('❌ [PAYROLL YEAR] RPC Error:', error)
-      console.error('❌ [PAYROLL YEAR] Make sure to run: supabase/functions/get_payroll_year_data.sql')
+      console.error('[PAYROLL YEAR] RPC Error:', error)
+      console.error('[PAYROLL YEAR] Make sure to run: supabase/functions/get_payroll_year_data.sql')
 
       // Return empty data structure on error
       return {
@@ -91,7 +91,7 @@ export async function getPayrollYearData(
     const endTime = performance.now()
     const duration = Math.round(endTime - startTime)
 
-    console.log(`✅ [PAYROLL YEAR] Data fetched in ${duration}ms:`, {
+    console.log(`[PAYROLL YEAR] Data fetched in ${duration}ms:`, {
       trips: data.trips?.length || 0,
       holidays: data.holidays?.length || 0,
       cash_advances: data.cash_advances?.length || 0,
@@ -115,7 +115,7 @@ export async function getPayrollYearData(
     return data as PayrollYearDataResponse
 
   } catch (error) {
-    console.error('❌ [PAYROLL YEAR] Unexpected error:', error)
+    console.error('[PAYROLL YEAR] Unexpected error:', error)
 
     // Return empty data structure on error
     return {

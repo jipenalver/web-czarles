@@ -43,10 +43,10 @@ export async function processNonFieldStaffEmployees(
       employee.deductions.late = lateDeductionAmount
       employee.deductions.undertime = undertimeDeductionAmount
 
-      // Recalculate gross_pay: basic_pay + cola + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay
       const newGrossPay =
         employee.basic_pay +
-        employee.cola +
+        employee.allowance +
         clientOvertimePay +
         employee.trips_pay +
         employee.holidays_pay +

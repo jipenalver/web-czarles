@@ -12,11 +12,12 @@ import {
 import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './usePayrollPrint'
+import { usePayrollData } from './usePayrollData'
 import { fetchCashAdvances } from './computation/cashAdvance'
 import { fetchEmployeeDeductions } from './computation/benefits'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
-import { useTripsStore, type Trip } from '@/stores/trips'
+import { useTripsStore } from '@/stores/trips'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import type { CashAdvance } from '@/stores/cashAdvances'
 import { fetchHolidaysByDateString } from './computation/holidays'
@@ -81,6 +82,19 @@ const holidayDateString = computed(() => {
   const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
   return `${props.payrollData.year}-${month}`
 })
+
+// Create params for composable
+const payrollDataParams = computed(() => ({
+  employeeId: props.employeeData?.id,
+  filterDateString: filterDateString.value,
+  holidayDateString: holidayDateString.value,
+}))
+
+// Use payroll data composable for allowances data
+const {
+  monthlyAllowancesTotal,
+  loadAllowances,
+} = usePayrollData(payrollDataParams)
 
 // Use fetchEmployeeDeductions from benefits.ts
 async function updateEmployeeDeductions(employeeId: number | undefined) {
@@ -187,6 +201,9 @@ const overallEarningsTotal = useOverallEarningsTotal(
   overallOvertime,
   codaAllowance,
   employeeNonDeductions,
+  computed(() => 0), // monthlyUtilizationsTotal - not used in mini print
+  monthlyAllowancesTotal,
+  computed(() => 0), // monthlyCashAdjustmentsTotal - not used in mini print
 )
 
 // Use earnings breakdown for debugging purposes
@@ -256,7 +273,7 @@ async function updateOverallOvertime() {
 
 // Enhanced mounted hook
 onMounted(async () => {
-  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime()])
+  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances()])
   recalculateEarnings()
 })
 
@@ -270,6 +287,7 @@ watch(
     employeeDailyRate,
     dailyRate,
     codaAllowance,
+    monthlyAllowancesTotal,
   ],
   () => {
     recalculateEarnings()
@@ -286,7 +304,7 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays()])
+    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances()])
     recalculateEarnings()
   },
   { deep: true },
@@ -301,13 +319,7 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
 
-// Computed values for trips and holidays display
-const projectSiteAllowances = computed(() => {
-  return (
-    tripsStore.trips?.filter((trip) => trip.trip_location?.location?.includes('Project Site')) || []
-  )
-})
-
+// Computed values for holidays display
 // const sundayWorkTrips = computed(() => {
 //   return (
 //     tripsStore.trips?.filter((trip) => {
@@ -375,31 +387,13 @@ const specialHolidays = computed(() => {
         </v-col>
       </v-row>
 
-      <!-- Project Site Allowances -->
-      <template v-if="projectSiteAllowances.length > 0">
-        <v-row dense class="mb-1" v-for="trip in projectSiteAllowances" :key="'trip-' + trip.id">
-          <v-col cols="6" class="text-caption pa-1">Project Site Allowance</v-col>
-          <v-col cols="3" class="text-body-2 text-center pa-1"> x{{ trip.trip_no || 1 }} </v-col>
-          <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
-          </v-col>
-        </v-row>
-      </template>
-
-      <!-- Other trips (non-project site) -->
-      <template
-        v-for="trip in tripsStore.trips?.filter(
-          (t: Trip) => !t.trip_location?.location?.includes('Project Site'),
-        )"
-        :key="'other-trip-' + trip.id"
-      >
+      <!-- Consolidated Trips -->
+      <template v-if="tripsStore.trips && tripsStore.trips.length > 0">
         <v-row dense class="mb-1">
-          <v-col cols="6" class="text-caption pa-1">{{
-            trip.trip_location?.location || 'Trip'
-          }}</v-col>
-          <v-col cols="3" class="text-body-2 text-center pa-1"> x{{ trip.trip_no || 1 }} </v-col>
+          <v-col cols="6" class="text-caption pa-1">Monthly Trippings</v-col>
+          <v-col cols="3" class="pa-1"></v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat((trip.per_trip ?? 0) * (trip.trip_no ?? 1), formatCurrency) }}
+            {{ safeCurrencyFormat(tripsStore.trips.reduce((total, trip) => total + ((trip.per_trip ?? 0) * (trip.trip_no ?? 1)), 0), formatCurrency) }}
           </v-col>
         </v-row>
       </template>
@@ -447,32 +441,19 @@ const specialHolidays = computed(() => {
         </v-col>
       </v-row>
 
-      <!-- Non-deductions (benefits) -->
-      <template v-if="employeeNonDeductions.length > 0">
-        <v-row
-          dense
-          class="mb-1"
-          v-for="benefit in employeeNonDeductions"
-          :key="'benefit-' + benefit.id"
-        >
-          <v-col cols="6" class="text-caption pa-1">{{
-            benefit.benefit.benefit || 'Benefit'
-          }}</v-col>
+      <!-- Allowance -->
+      <template v-if="monthlyAllowancesTotal > 0">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">Allowance</v-col>
           <v-col cols="3" class="pa-1"></v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat(benefit.amount || 0, formatCurrency) }}
+            {{ safeCurrencyFormat(monthlyAllowancesTotal, formatCurrency) }}
           </v-col>
         </v-row>
       </template>
 
-      <!-- Monthly Trippings -->
-      <v-row dense class="mb-2">
-        <v-col cols="6" class="text-caption pa-1">Monthly Trippings</v-col>
-        <v-col cols="3" class="pa-1"></v-col>
-        <v-col cols="3" class="text-body-2 text-end pa-1">
-          {{ safeCurrencyFormat(codaAllowance, formatCurrency) }}
-        </v-col>
-      </v-row>
+
+
 
       <!-- Total -->
       <v-row dense class="mb-3">

@@ -63,11 +63,13 @@ export function useMonthlyPayroll() {
       // Create date string in format YYYY-MM-01 for calculations
       const dateStringForCalculation = createDateStringForCalculation(selectedMonth.value, selectedYear.value)
 
-      // First pass: categorize employees by field staff status
+      // First pass: categorize employees by field staff status and fetch designation
       await Promise.all(
         transformedData.map(async (employee: MonthlyPayrollRow) => {
           const emp = await employeesStore.getEmployeesById(employee.employee_id)
           employee.is_field_staff = emp?.is_field_staff || false
+          employee.designation_id = emp?.designation_id || null
+          employee.designation_name = emp?.designation?.designation || 'N/A'
         })
       )
 

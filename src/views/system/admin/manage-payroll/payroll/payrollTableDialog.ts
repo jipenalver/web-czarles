@@ -93,15 +93,15 @@ export function usePayrollTableDialog(
     }
 
     try {
-      console.log(`⚡ [YEAR DATA] Fetching all data for employee ${employeeId}, year ${year}...`)
+      console.log(`[YEAR DATA] Fetching all data for employee ${employeeId}, year ${year}...`)
       const yearStartTime = performance.now()
 
-      // ⚡ OPTIMIZATION 1: Preload attendance data for the entire year in ONE batch call
+      // OPTIMIZATION 1: Preload attendance data for the entire year in ONE batch call
       const yearStartDate = `${year}-01-01`
       const yearEndDate = `${year}-12-31`
       const { getEmployeesAttendanceBatch } = await import('./computation/computation')
 
-      // ⚡ OPTIMIZATION 2: Fetch ALL payroll data (trips, holidays, cash advances, etc) in ONE batch call
+      // OPTIMIZATION 2: Fetch ALL payroll data (trips, holidays, cash advances, etc) in ONE batch call
       const { getPayrollYearData, filterPayrollDataByMonth } = await import('./computation/payrollYearData')
 
       // Execute both batch fetches in parallel
@@ -114,7 +114,7 @@ export function usePayrollTableDialog(
 
       // Check if batch fetch succeeded
       if (attendanceBatchResult.size > 0) {
-        console.log(`✅ [BATCH] Attendance preloaded successfully`)
+        console.log(`[BATCH] Attendance preloaded successfully`)
       }
 
       // Organize payroll data by month
@@ -145,8 +145,8 @@ export function usePayrollTableDialog(
       yearDataCache.value.set(cacheKey, yearData)
 
       const yearEndTime = performance.now()
-      console.log(`✅ [YEAR DATA] All data fetched in ${Math.round(yearEndTime - yearStartTime)}ms`)
-      console.log(`📊 [YEAR DATA] API calls saved: 72+ → 3 (96% reduction!)`)
+      console.log(`[YEAR DATA] All data fetched in ${Math.round(yearEndTime - yearStartTime)}ms`)
+      console.log(`[YEAR DATA] API calls saved: 72+ → 3 (96% reduction!)`)
 
       return yearData
     } catch (error) {

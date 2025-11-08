@@ -8,11 +8,13 @@
 export interface PayrollDatabaseRow {
   employee_id: number
   employee_name: string
+  designation_id?: number | null
+  designation_name?: string
   daily_rate: number
   days_worked: number // Can be decimal for half days (e.g., 0.5, 1.5, 2.0)
   sunday_days: number
   sunday_amount: number
-  cola: number
+  allowance: number
   overtime_hrs: number
   basic_pay: number
   overtime_pay: number
@@ -36,13 +38,15 @@ export interface PayrollDatabaseRow {
 export interface MonthlyPayrollRow {
   employee_id: number
   employee_name: string
+  designation_id: number | null
+  designation_name: string
   daily_rate: number
   days_worked: number
   is_field_staff: boolean // Added to track field staff status
   hours_worked?: number // Added for field staff - stores actual hours worked
   sunday_days: number
   sunday_amount: number
-  cola: number
+  allowance: number
   overtime_hrs: number
   basic_pay: number
   overtime_pay: number
