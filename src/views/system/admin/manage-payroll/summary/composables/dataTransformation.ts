@@ -15,15 +15,15 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
     hours_worked: undefined, // Will be calculated for field staff
     sunday_days: Number(row.sunday_days) || 0,
     sunday_amount: Number(row.sunday_amount) || 0,
-    cola: Number(row.cola) || 0,
+    allowance: Number(row.allowance) || 0,
     overtime_hrs: Number(row.overtime_hrs) || 0,
-    basic_pay: Number(row.basic_pay) || 0,
+    basic_pay: 0, // Will be calculated client-side using days_worked * daily_rate
     overtime_pay: Number(row.overtime_pay) || 0,
     trips_pay: Number(row.trips_pay) || 0,
     utilizations_pay: Number(row.utilizations_pay) || 0,
     holidays_pay: Number(row.holidays_pay) || 0,
     cash_adjustment_addon: 0, // Will be calculated client-side
-    gross_pay: Number(row.gross_pay) || 0,
+    gross_pay: 0, // Will be calculated client-side
     deductions: {
       cash_advance: Number(row.cash_advance) || 0,
       sss: Number(row.sss) || 0,
@@ -35,10 +35,10 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
       late: Number(row.late_deduction) || 0,
       undertime: Number(row.undertime_deduction) || 0,
       cash_adjustment: 0, // Will be calculated client-side
-      total: Number(row.total_deductions) || 0,
+      total: 0, // Will be calculated client-side
     },
-    total_deductions: Number(row.total_deductions) || 0,
-    net_pay: Number(row.net_pay) || 0,
+    total_deductions: 0, // Will be calculated client-side
+    net_pay: 0, // Will be calculated client-side
   }))
 }
 
