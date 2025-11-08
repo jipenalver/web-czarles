@@ -18,7 +18,7 @@ const totals = computed(() => {
       days_worked: acc.days_worked + (item.days_worked || 0),
       sunday_days: acc.sunday_days + (item.sunday_days || 0),
       sunday_amount: acc.sunday_amount + (item.sunday_amount || 0),
-      cola: acc.cola + (item.cola || 0),
+      allowance: acc.allowance + (item.allowance || 0),
       overtime_hrs: acc.overtime_hrs + (item.overtime_hrs || 0),
       overtime_amount: acc.overtime_amount + (item.overtime_pay || 0),
       holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
@@ -40,7 +40,7 @@ const totals = computed(() => {
       days_worked: 0,
       sunday_days: 0,
       sunday_amount: 0,
-      cola: 0,
+      allowance: 0,
       overtime_hrs: 0,
       overtime_amount: 0,
       holidays_pay: 0,
@@ -129,7 +129,7 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--extra-narrow">{{ item.days_worked }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ item.sunday_days || 0 }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.sunday_amount || 0) }}</td>
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.cola || 0) }}</td>
+          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.allowance || 0) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ roundDecimal(item.overtime_hrs || 0, 2) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.overtime_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.holidays_pay) }}</td>
@@ -180,7 +180,7 @@ const totals = computed(() => {
             {{ formatCurrency(totals.sunday_amount) }}
           </td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
-            {{ formatCurrency(totals.cola) }}
+            {{ formatCurrency(totals.allowance) }}
           </td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
             {{ roundDecimal(totals.overtime_hrs, 2) }}
