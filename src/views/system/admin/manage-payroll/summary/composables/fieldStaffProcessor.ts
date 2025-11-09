@@ -52,17 +52,29 @@ export async function processFieldStaffEmployees(
         employee.holidays_pay +
         (employee.utilizations_pay || 0)
 
+      // Recalculate total deductions including late/undertime from SQL
+      const newTotalDeductions =
+        (employee.deductions.cash_advance || 0) +
+        (employee.deductions.sss || 0) +
+        (employee.deductions.phic || 0) +
+        (employee.deductions.pagibig || 0) +
+        (employee.deductions.sss_loan || 0) +
+        (employee.deductions.savings || 0) +
+        (employee.deductions.salary_deposit || 0) +
+        (employee.deductions.late || 0) + // From SQL calculation for field staff
+        (employee.deductions.undertime || 0) // From SQL calculation for field staff
+
       // Recalculate net_pay: gross_pay - total_deductions
-      const newNetPay = newGrossPay - employee.total_deductions
+      const newNetPay = newGrossPay - newTotalDeductions
 
       // Update the employee record with recalculated values
       employee.basic_pay = Number(newBasicPay.toFixed(2))
       employee.gross_pay = Number(newGrossPay.toFixed(2))
+      employee.total_deductions = Number(newTotalDeductions.toFixed(2))
       employee.net_pay = Number(newNetPay.toFixed(2))
 
-      // Field staff don't have late/undertime deductions (set to 0)
-      employee.deductions.late = 0
-      employee.deductions.undertime = 0
+      // Field staff late/undertime deductions are calculated in SQL function
+      // Values from SQL are preserved in employee.deductions.late and employee.deductions.undertime
     })
   )
 }

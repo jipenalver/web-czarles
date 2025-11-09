@@ -155,7 +155,7 @@ const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
 
 // Check if field staff to determine if late deduction should be shown
-const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
+const showLateDeduction = computed(() => true) // Show late/undertime deductions for both field staff and office staff
 
 // Effective work days (present days based on attendance)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)
