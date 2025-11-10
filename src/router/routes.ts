@@ -20,6 +20,7 @@ import SettingsView from '@/views/system/settings/SettingsView.vue'
 import HomeView from '@/views/landing/HomeView.vue'
 import PrivacyPolicyView from '@/views/landing/legal/PrivacyPolicyView.vue'
 import TermsConditionsView from '@/views/landing/legal/TermsConditionsView.vue'
+import ChangeLogsView from '@/views/landing/legal/ChangeLogsView.vue'
 import AboutView from '@/views/landing/AboutView.vue'
 import CompanyView from '@/views/landing/CompanyView.vue'
 import ContactView from '@/views/landing/ContactView.vue'
@@ -42,6 +43,12 @@ export const routes = [
     path: '/terms-and-conditions',
     name: 'terms-and-conditions',
     component: TermsConditionsView,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/change-logs',
+    name: 'change-logs',
+    component: ChangeLogsView,
     meta: { requiresAuth: false },
   },
   {
