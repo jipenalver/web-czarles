@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { useOverallEarningsTotal } from './overallTotal'
-import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount, convertHoursToDays, formatHoursOneDecimal } from './helpers'
+import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount, formatHoursOneDecimal } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
+import { useEmployeeDisplay, usePayrollFormatting, useHoursCalculation } from './composables/usePayrollDisplay'
+import { usePayrollWatchers } from './composables/usePayrollWatchers'
+import { getPayrollFromDate, getHolidayDateString, getMonthDateRangeFromStorage } from './composables/payrollStorage'
 import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './MiniPayrollPrint.vue'
 import PayrollPrintFooter from './PayrollPrintFooter.vue'
+import AttendanceDaysTooltip from './AttendanceDaysTooltip.vue'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
@@ -18,22 +22,23 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
-const filterDateString = computed(() => {
-  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
-  return `${props.payrollData.year}-${month}-01`
-})
+const filterDateString = computed(() =>
+  getPayrollFromDate(props.payrollData.year, props.payrollData.month)
+)
 
-const holidayDateString = computed(() => {
-  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
-  return `${props.payrollData.year}-${month}`
-})
+const holidayDateString = computed(() =>
+  getHolidayDateString(props.payrollData.year, props.payrollData.month)
+)
 
 // Create params para sa composable
-const payrollDataParams = computed(() => ({
-  employeeId: props.employeeData?.id,
-  filterDateString: filterDateString.value,
-  holidayDateString: holidayDateString.value,
-}))
+const payrollDataParams = computed(() => {
+  const params = {
+    employeeId: props.employeeData?.id,
+    filterDateString: filterDateString.value,
+    holidayDateString: holidayDateString.value,
+  }
+  return params
+})
 
 // Use payroll data composable for all data fetching
 const {
@@ -77,85 +82,20 @@ watch(
 )
 
 const monthDateRange = computed(() => {
-  try {
-    if (typeof window !== 'undefined') {
-      const from = localStorage.getItem('czarles_payroll_fromDate')
-      const to = localStorage.getItem('czarles_payroll_toDate')
-      if (from && to) {
-        const start = new Date(from)
-        const end = new Date(to)
-        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-          const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
-          return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
-        }
-      }
-    }
-  } catch {
-    /* ignore and fallback */
-  }
-  return getMonthDateRange(props.payrollData.year, props.payrollData.month)
+  const fallbackRange = getMonthDateRange(props.payrollData.year, props.payrollData.month)
+  return getMonthDateRangeFromStorage(fallbackRange)
 })
-
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-]
 
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
-const fullName = computed(() => {
-  if (!props.employeeData) return 'N/A'
-  const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
-  return `${props.employeeData.firstname}${middleName}${props.employeeData.lastname}`
-})
+// Employee display composables
+const { fullName, designation, address, dailyRate, isFieldStaff } = useEmployeeDisplay(
+  computed(() => props.employeeData)
+)
+const { formattedDate, showLateDeduction } = usePayrollFormatting()
 
-const designation = computed(() => {
-  return props.employeeData?.designation?.designation || 'N/A'
-})
-
-const address = computed(() => {
-  return props.employeeData?.address || 'N/A'
-})
-
-const formattedDate = computed(() => {
-  // Use the current system date for the printed pay slip date
-  const date = new Date()
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-})
-
-const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
-const showLateDeduction = computed(() => true) // Show late/undertime deductions for both field staff and office staff
-// const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
-const effectiveWorkDays = computed(() => presentDays?.value || 0)
-
-// Computed property to ensure holidays reactivity
-const holidaysArray = computed(() => {
-  const result = holidays.value || []
-  console.log('[PayrollPrint] holidaysArray computed:', {
-    count: result.length,
-    holidays: result
-  })
-  return result
-})
-const totalHoursWorked = computed(() => {
-  if (props.employeeData?.is_field_staff && employeeDailyRate.value > 0) {
-    const hourlyRate = employeeDailyRate.value / 8
-    return regularWorkTotal.value / hourlyRate
-  }
-  return 0
-})
 
 const payrollPrint = usePayrollPrint(
   {
@@ -173,14 +113,27 @@ const {
   formatCurrency,
   employeeDailyRate,
   regularWorkTotal,
-  presentDays,
   lateDeduction,
   monthLateDeduction,
   monthUndertimeDeduction,
   undertimeDeduction,
   computeOverallOvertimeCalculation,
   netSalary,
+  attendanceRecords,
 } = payrollPrint
+
+// Computed property to ensure holidays reactivity
+const holidaysArray = computed(() => {
+  const result = holidays.value || []
+  console.log('[PayrollPrint] holidaysArray computed:', {
+    count: result.length,
+    holidays: result,
+  })
+  return result
+})
+
+// Hours calculation for field staff
+const { totalHoursWorked } = useHoursCalculation(isFieldStaff, employeeDailyRate, regularWorkTotal)
 
 // Monthly totals from composable are already available
 
@@ -255,80 +208,34 @@ defineExpose({
   isPayrollCalculating, // Expose comprehensive loading state
 })
 
-onMounted(async () => {
-  await initializePayrollCalculations()
-})
-
-watch(
-  [
+// Setup watchers using composable
+usePayrollWatchers(
+  {
     regularWorkTotal,
-    () => tripsStore.trips,
-    holidaysArray,
+    trips: computed(() => tripsStore.trips),
+    holidays: holidaysArray,
     overallOvertime,
     employeeDailyRate,
     dailyRate,
     codaAllowance,
     employeeNonDeductions,
-  ],
-  () => {
-    recalculateEarnings()
+    employeeId: computed(() => props.employeeData?.id),
+    filterDateString,
+    holidayDateString,
+    payrollMonth: computed(() => props.payrollData?.month),
+    payrollYear: computed(() => props.payrollData?.year),
   },
-  { deep: true, immediate: true },
+  {
+    recalculateEarnings,
+    initializePayrollCalculations,
+    loadTrips,
+    fetchEmployeeHolidays,
+  }
 )
 
-watch(
-  [
-    () => props.employeeData?.id,
-    () => filterDateString.value,
-    () => props.payrollData?.month,
-    () => props.payrollData?.year,
-  ],
-  async () => {
-    await initializePayrollCalculations()
-  },
-  { deep: true },
-)
-
-watch([filterDateString, () => props.employeeData?.id], async () => {
-  await loadTrips()
+onMounted(async () => {
+  await initializePayrollCalculations()
 })
-
-watch([holidayDateString, () => props.employeeData?.id], () => {
-  fetchEmployeeHolidays()
-})
-
-// Debug logging for holidays data
-watch(
-  () => holidays.value,
-  (newHolidays) => {
-    console.log('[PayrollPrint] Holidays data updated:', {
-      count: newHolidays.length,
-      holidays: newHolidays,
-      employeeId: props.employeeData?.id,
-      holidayDateString: holidayDateString.value,
-      filterDateString: filterDateString.value
-    })
-  },
-  { deep: true, immediate: true }
-)
-
-// Debug logging for loading states (can be removed in production)
-watch(
-  () => isPayrollCalculating.value,
-  (isLoading) => {
-    console.log('[PayrollPrint] Comprehensive loading state:', isLoading, {
-      trips: isTripsLoading.value,
-      holidays: isHolidaysLoading.value,
-      overtime: isOvertimeLoading.value,
-      utilizations: isUtilizationsLoading.value,
-      allowances: isAllowancesLoading.value,
-      cashAdjustments: isCashAdjustmentsLoading.value,
-      deductions: isDeductionsLoading.value,
-      completing: isCalculationsCompleting.value
-    })
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
@@ -383,10 +290,14 @@ watch(
             <span v-else> @ {{ getMoneyText(employeeDailyRate ?? 0) }} </span>
           </td>
           <td class="pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              x {{ convertHoursToDays(totalHoursWorked) }} days
+            <span>
+              x
+              <AttendanceDaysTooltip
+                :attendance-records="attendanceRecords || []"
+                :total-hours-worked="totalHoursWorked"
+                :is-field-staff="props.employeeData?.is_field_staff"
+              />
             </span>
-            <span v-else> x {{ effectiveWorkDays }} day{{ effectiveWorkDays !== 1 ? 's' : '' }}</span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
             {{ getMoneyText(regularWorkTotal) }}
@@ -412,7 +323,7 @@ watch(
 
         <template v-else>
           <template v-if="tripsStore.trips && tripsStore.trips.length > 0">
-           <!--  <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
+            <!--  <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
@@ -427,7 +338,7 @@ watch(
               </td>
             </tr> -->
           </template>
-         <!--  <template v-else>
+          <!--  <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">
                 No trips to preview for this payroll period.
@@ -493,7 +404,7 @@ watch(
               </td>
             </tr>
           </template>
-         <!--  <template v-else>
+          <!--  <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">No holidays for this payroll period.</td>
             </tr>
@@ -510,7 +421,11 @@ watch(
         </tr>
 
         <template v-if="employeeNonDeductions.length > 0">
-          <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id" v-show="hasBenefitAmount(benefit.amount)">
+          <tr
+            v-for="benefit in employeeNonDeductions"
+            :key="'benefit-' + benefit.id"
+            v-show="hasBenefitAmount(benefit.amount)"
+          >
             <td class="border-b-thin text-center pa-2" colspan="2">
               {{ benefit.benefit.benefit || 'Other Benefit' }}
             </td>
@@ -564,7 +479,10 @@ watch(
           </td>
           <td class="pa-2"></td>
           <td class="pa-2">-</td>
-          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="cash-adjustment">
+          <td
+            class="border-b-thin border-s-sm text-end pa-2 total-cell"
+            data-total="cash-adjustment"
+          >
             {{ getMoneyText(adj.amount ?? 0) }}
           </td>
         </tr>
@@ -592,7 +510,7 @@ watch(
       </tbody>
     </v-table>
 
-  <PayrollPrintFooter :price="getMoneyText(netSalary)"></PayrollPrintFooter>
+    <PayrollPrintFooter :price="getMoneyText(netSalary)"></PayrollPrintFooter>
 
     <div id="mini-payroll-section" class="mini-payroll-hidden">
       <MiniPayrollPrint
@@ -619,6 +537,4 @@ watch(
     border: 3px solid !important;
   }
 }
-
-
 </style>

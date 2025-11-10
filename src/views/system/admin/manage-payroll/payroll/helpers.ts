@@ -36,6 +36,12 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
+export function getFormattedCurrentDate(): string {
+  const date = new Date()
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+
 /**
  * Round decimal to specified places (default 2)
  */
