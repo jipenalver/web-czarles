@@ -34,7 +34,12 @@ export function useMemosFormDialog(
     () => props.isDialogVisible,
     () => {
       isUpdate.value = props.itemData ? true : false
-      formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
+      formData.value = props.itemData
+        ? {
+            ...props.itemData,
+            employee_ids: props.itemData.employee_memos.map(({ employee_id }) => employee_id),
+          }
+        : { ...formDataDefault }
     },
   )
 
