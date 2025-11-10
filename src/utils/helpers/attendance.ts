@@ -172,7 +172,13 @@ export const getWorkHoursDecimal = (
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
   isField = false,
-) => convertTimeToDecimal(getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField))
+  isStandard = false,
+) =>
+  convertTimeToDecimal(
+    isStandard
+      ? getFieldMinutes(amTimeIn, amTimeOut) + getFieldMinutes(pmTimeIn, pmTimeOut)
+      : getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField),
+  )
 
 // 👉 Get total overtime hours as string
 export const getOvertimeHoursString = (overtimeIn: string | null, overtimeOut: string | null) =>

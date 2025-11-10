@@ -137,11 +137,7 @@ export function useUtilizationsFormDialog(
   })
 
   const computedWorkHours = computed(() => {
-    const { employee_id, am_time_in, am_time_out, pm_time_in, pm_time_out, utilization_at } =
-      formData.value
-
-    const employee = employeesStore.employees.find((emp) => emp.id === employee_id)
-    const isFieldStaff = employee?.is_field_staff || false
+    const { am_time_in, am_time_out, pm_time_in, pm_time_out, utilization_at } = formData.value
 
     const baseDate = getDateISO(utilization_at as string)
 
@@ -150,7 +146,8 @@ export function useUtilizationsFormDialog(
       getDateTimeISO(`${baseDate} ${am_time_out}`),
       getDateTimeISO(`${baseDate} ${pm_time_in}`),
       getDateTimeISO(`${baseDate} ${pm_time_out}`),
-      isFieldStaff,
+      false,
+      true,
     )
   })
 
