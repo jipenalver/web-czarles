@@ -37,6 +37,9 @@ router.beforeEach(async (to) => {
       // Check page that is going to if it is in role pages
       const isAccessible = authUserStore.authPages.includes(to.path)
 
+      // Allow access if page does not require auth
+      if (!to.meta.requiresAuth) return true
+
       // Forbid access if not in role pages and if page is not default page
       if (!isAccessible && !to.meta.isDefault) return { name: 'forbidden' }
     }

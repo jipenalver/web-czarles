@@ -27,6 +27,59 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
   return Math.max(0, Math.floor(diffMs / (1000 * 60)))
 }
 
+// 👉 Get Field minutes with penalties
+const getFieldMinutesWithPenalties = (
+  timeIn: string | Date | null,
+  timeOut: string | Date | null,
+  sessionStart: number,
+  sessionEnd: number,
+  lateAllowanceMinutes: number,
+  earlyDepartureAllowanceMinutes: number,
+) => {
+  const checkIn = parseLocalTime(timeIn as string)
+  const checkOut = parseLocalTime(timeOut as string)
+
+  if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) return 0
+
+  // ✅ Start with 4 hours (240 minutes) as base
+  let totalMinutes = 240
+
+  // Define the acceptable window
+  const acceptableStartTime = new Date(
+    checkIn.getFullYear(),
+    checkIn.getMonth(),
+    checkIn.getDate(),
+    sessionStart,
+    lateAllowanceMinutes,
+  )
+  const acceptableEndTime = new Date(
+    checkIn.getFullYear(),
+    checkIn.getMonth(),
+    checkIn.getDate(),
+    sessionEnd,
+    earlyDepartureAllowanceMinutes,
+  )
+
+  // ✅ Calculate late penalty
+  if (checkIn > acceptableStartTime) {
+    const lateMinutes = Math.floor(
+      (checkIn.getTime() - acceptableStartTime.getTime()) / (1000 * 60),
+    )
+    totalMinutes -= lateMinutes
+  }
+
+  // ✅ Calculate early departure penalty
+  if (checkOut < acceptableEndTime) {
+    const earlyMinutes = Math.floor(
+      (acceptableEndTime.getTime() - checkOut.getTime()) / (1000 * 60),
+    )
+    totalMinutes -= earlyMinutes
+  }
+
+  // ✅ Ensure we don't go below 0
+  return Math.max(0, totalMinutes)
+}
+
 // 👉 Get Office minutes with allowance
 const getOfficeMinutesWithAllowance = (
   timeIn: string | Date | null,
@@ -99,15 +152,11 @@ const getTotalMinutes = (
 
   if (isField) {
     // Field staff: Calculate total time worked
-    const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 7, 12, 20, 10) // 7am-12pm, 20min late allowance, 10min early departure allowance
+    const amMinutes = getFieldMinutesWithPenalties(amTimeIn, amTimeOut, 7, 11, 20, 50) // 7am-11am, 20min late allowance, 50min early departure allowance
 
     const pmMinutes = getOfficeMinutesWithAllowance(pmTimeIn, pmTimeOut, 13, 17) // 1pm-5pm strict
 
-    totalMinutes = amMinutes - 60 + pmMinutes // Subtract 60 minutes to 7am-12pm
-
-    // Return actual minutes worked, cap at 8 hours
-    // const actualMinutes = amMinutes + pmMinutes
-    // totalMinutes = Math.min(actualMinutes, 8 * 60) // Cap at 8 hours maximum
+    totalMinutes = amMinutes + pmMinutes
   } else {
     // Office staff: Constrain to office hours with allowances
     const amMinutes = getOfficeMinutesWithAllowance(amTimeIn, amTimeOut, 8, 12, 10, 10) // 8am-12pm, 10min late allowance, 10min early departure allowance
