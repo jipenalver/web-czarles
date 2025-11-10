@@ -72,6 +72,17 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
+                Allow access to pages that do not require authentication.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                Implement field minutes calculation with penalties for late arrivals and early
+                departures.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
                 Improved the calculation of work hours to include standard hours and fine-tuned how
                 field staff hours are handled.
               </v-list-item-title>
