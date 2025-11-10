@@ -68,7 +68,7 @@ onMounted(() => {
 
           <!-- November 10, 2025 -->
           <v-divider class="mb-4"></v-divider>
-          <h3 class="text-h6 mb-3">November 9, 2025</h3>
+          <h3 class="text-h6 mb-3">November 10, 2025</h3>
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
