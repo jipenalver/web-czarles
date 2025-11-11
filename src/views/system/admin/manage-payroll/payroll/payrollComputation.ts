@@ -161,6 +161,12 @@ export function usePayrollComputation(
   const regularWorkTotal = ref<number>(0)
   const absentDays = ref<number>(0)
   const presentDays = ref<number>(0)
+  const attendanceRecords = ref<Array<{
+    am_time_in?: string | null
+    am_time_out?: string | null
+    pm_time_in?: string | null
+    pm_time_out?: string | null
+  }>>([])
 
   async function computeRegularWorkTotal() {
     let daily = dailyRate.value
@@ -186,6 +192,10 @@ export function usePayrollComputation(
       const attendances = employeeId === 55
         ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, fromDate, toDate)
         : await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
+
+      // Store attendance records for later use
+      attendanceRecords.value = Array.isArray(attendances) ? attendances : []
+
       if (Array.isArray(attendances) && attendances.length > 0) {
         // Get employee info to check if field staff
         const emp = await employeesStore.getEmployeesById(employeeId)
@@ -504,6 +514,7 @@ export function usePayrollComputation(
     formatNumber,
     employeeDailyRate,
     isFieldStaff,
+    attendanceRecords,
 
     // Compute function for regular work total
     computeRegularWorkTotal,

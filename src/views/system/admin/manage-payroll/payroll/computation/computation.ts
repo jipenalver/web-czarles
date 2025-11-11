@@ -208,7 +208,18 @@ export async function getEmployeeAttendanceById(
   }
 
   // debug
-  //console.error('[getEmployeeAttendanceById] range:', startISO, endISO)
+  console.log('[getEmployeeAttendanceById] Fetching attendance data:', {
+    employeeId,
+    dateString,
+    fromDateISO,
+    toDateISO,
+    queryRange: {
+      startISO,
+      endISO,
+      startDate: startISO.split('T')[0],
+      endDate: endISO.split('T')[0]
+    }
+  })
 
   const { data, error } = await supabase
     .from('attendances')
@@ -227,7 +238,12 @@ export async function getEmployeeAttendanceById(
   // Deduplicate records by id (in case OR query returns duplicates for records with both AM and PM)
   const uniqueData = data ? Array.from(new Map(data.map(item => [item.id, item])).values()) : []
 
-  // console.log('getEmployeeAttendanceById data:', uniqueData)
+  console.log('[getEmployeeAttendanceById] Raw attendance records fetched:', {
+    totalRecords: data?.length || 0,
+    uniqueRecords: uniqueData.length,
+    recordIds: uniqueData.map(r => r.id)
+  })
+
   const result = Array.isArray(uniqueData)
     ? uniqueData.map((row) => {
         // Extract date from am_time_in first, fallback to pm_time_in for PM half-days
@@ -236,6 +252,20 @@ export async function getEmployeeAttendanceById(
           : row.pm_time_in
             ? row.pm_time_in.split('T')[0]
             : null
+
+        // Calculate hours for this day
+        let dayHours = 0
+        if (row.am_time_in && row.am_time_out) {
+          const amIn = new Date(`1970-01-01T${getTimeHHMM(row.am_time_in)}`)
+          const amOut = new Date(`1970-01-01T${getTimeHHMM(row.am_time_out)}`)
+          dayHours += (amOut.getTime() - amIn.getTime()) / (1000 * 60 * 60)
+        }
+        if (row.pm_time_in && row.pm_time_out) {
+          const pmIn = new Date(`1970-01-01T${getTimeHHMM(row.pm_time_in)}`)
+          const pmOut = new Date(`1970-01-01T${getTimeHHMM(row.pm_time_out)}`)
+          dayHours += (pmOut.getTime() - pmIn.getTime()) / (1000 * 60 * 60)
+        }
+
         return {
           am_time_in: getTimeHHMM(row.am_time_in),
           am_time_out: getTimeHHMM(row.am_time_out),
@@ -248,11 +278,41 @@ export async function getEmployeeAttendanceById(
           leave_reason: row.leave_reason,
           attendance_date: attendanceDate, // Extract date from timestamp
           date: attendanceDate, // Alias for compatibility with Sunday detection
+          _debug_dayHours: dayHours // Add debug info
         }
       })
     : null
 
-  // Cache the result
+  // Log detailed breakdown of processed attendance
+  if (result && result.length > 0) {
+    const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
+    const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
+
+    console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
+      employeeId,
+      totalDays: result.length,
+      daysWithAttendance,
+      totalHours: totalHours.toFixed(2),
+      averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
+      dateRange: {
+        from: fromDateISO || dateString,
+        to: toDateISO || 'end of month'
+      }
+    })
+
+    // Create detailed table of each day
+    console.table(result.map(r => ({
+      Date: r.attendance_date || r.date || 'N/A',
+      'AM In': r.am_time_in || '-',
+      'AM Out': r.am_time_out || '-',
+      'PM In': r.pm_time_in || '-',
+      'PM Out': r.pm_time_out || '-',
+      'Hours': (r._debug_dayHours || 0).toFixed(2),
+      'Leave': r.is_leave_with_pay ? 'Yes' : '-'
+    })))
+  } else {
+    console.log('[getEmployeeAttendanceById] No attendance records found for employee:', employeeId)
+  }  // Cache the result
   if (result) {
     attendanceCache.set(cacheKey, result)
     cacheMetadata.set(cacheKey, Date.now())
