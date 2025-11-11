@@ -10,13 +10,6 @@ export async function fetchHolidaysByDateString(
   dateString: string,
   employeeId?: string,
 ): Promise<HolidayWithAttendance[]> {
-  console.log('[fetchHolidaysByDateString] Starting fetch with:', {
-    dateString,
-    employeeId,
-    startDate: `${dateString}-01`,
-    endDate: getLastDateOfMonth(dateString)
-  })
-
   // Query sa holidays table gamit ang %ilike% sa holiday_at column
 
   const { data: holidays, error: holidaysError } = await supabase
@@ -31,11 +24,8 @@ export async function fetchHolidaysByDateString(
     return []
   }
 
-  console.log('[fetchHolidaysByDateString] Found holidays from database:', holidays.length)
-
   // If no employeeId, return all holidays for the dateString
   if (!employeeId) {
-    console.log('[fetchHolidaysByDateString] No employeeId, returning all holidays')
     return holidays as HolidayWithAttendance[]
   }
 
@@ -68,16 +58,6 @@ export async function fetchHolidaysByDateString(
       } as HolidayWithAttendance
     })
   )
-
-  console.log('[fetchHolidaysByDateString] Returning holidays with attendance for employee:', {
-    count: holidaysWithAttendance.length,
-    holidays: holidaysWithAttendance.map((h: HolidayWithAttendance) => ({
-      name: h.name,
-      date: h.holiday_at,
-      type: h.type,
-      attendance_fraction: h.attendance_fraction
-    }))
-  })
 
   return holidaysWithAttendance
 }

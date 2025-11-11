@@ -28,7 +28,17 @@ const cashAdjustments = ref<CashAdjustment[]>([])
 // Fetch cash adjustments with is_deduction=true
 async function fetchCashAdjustments(filterDateString: string, employeeId: number) {
   const startDate = `${filterDateString}`
-  const endDate = getLastDateOfMonth(startDate)
+
+  // Get the end date from localStorage for cross-month support, fallback to last day of month
+  let endDate = getLastDateOfMonth(startDate)
+  try {
+    const storedToDate = localStorage.getItem('czarles_payroll_toDate')
+    if (storedToDate) {
+      endDate = storedToDate
+    }
+  } catch (error) {
+    console.error('Error reading toDate from localStorage:', error)
+  }
 
   const { data, error } = await supabase
     .from('cash_adjustments')
@@ -36,7 +46,7 @@ async function fetchCashAdjustments(filterDateString: string, employeeId: number
     .eq('employee_id', employeeId)
     .eq('is_deduction', true)
     .gte('adjustment_at', startDate)
-    .lt('adjustment_at', endDate)
+    .lte('adjustment_at', endDate)
 
   if (error) {
     console.error('Error fetching cash adjustments:', error)
@@ -52,8 +62,12 @@ watch(
   async ([filterDateString, employeeId]) => {
     if (typeof employeeId === 'number' && filterDateString) {
       // kuhaon ang cash advances ug cash adjustments para sa employee ug payroll month
-      cashAdvances.value = await fetchCashAdvances(filterDateString as string, employeeId)
-      cashAdjustments.value = await fetchCashAdjustments(filterDateString as string, employeeId)
+      const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
+      const fetchedCashAdjustments = await fetchCashAdjustments(filterDateString as string, employeeId)
+
+      // Filter out dummy entries with amount: 0
+      cashAdvances.value = fetchedCashAdvances.filter(ca => ca.amount && ca.amount > 0)
+      cashAdjustments.value = fetchedCashAdjustments
     } else {
       cashAdvances.value = []
       cashAdjustments.value = []
@@ -64,7 +78,7 @@ watch(
 
 // Compute total cash advance from all ca.amount
 const totalCashAdvance = computed(() =>
-  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0),
+  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0)
 )
 
 // Compute total cash adjustments (deductions only)
@@ -82,17 +96,6 @@ const totalCashAdjustments = computed(() =>
 //   },
 //   { immediate: true }
 // )
-
-// Console warn for undertime deduction
-watch(
-  () => props.undertimeDeduction,
-  (newUndertimeDeduction) => {
-    if (newUndertimeDeduction > 0) {
-      console.warn(`[UNDERTIME DEDUCTION] Employee ${props.employeeId} - Undertime deduction: ₱${newUndertimeDeduction.toFixed(2)} (${props.monthUndertimeDeduction || 0} minutes)`)
-    }
-  },
-  { immediate: true }
-)
 
 // Setup netSalaryCalculation using useNetSalaryCalculation composable
 // Note: Cash adjustments total should be added separately to deductions

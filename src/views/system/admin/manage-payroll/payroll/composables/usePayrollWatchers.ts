@@ -34,7 +34,7 @@ export function usePayrollWatchers(
   },
   callbacks: PayrollWatcherCallbacks,
 ) {
-  // Watch for earnings recalculation
+  // Watch for earnings recalculation - removed immediate: true to prevent initial double calculation
   watch(
     [
       params.regularWorkTotal,
@@ -49,25 +49,21 @@ export function usePayrollWatchers(
     () => {
       callbacks.recalculateEarnings()
     },
-    { deep: true, immediate: true },
-  )
-
-  // Watch for full payroll initialization
-  watch(
-    [params.employeeId, params.filterDateString, params.payrollMonth, params.payrollYear],
-    async () => {
-      await callbacks.initializePayrollCalculations()
-    },
     { deep: true },
   )
 
-  // Watch for trips reload
-  watch([params.filterDateString, params.employeeId], async () => {
-    await callbacks.loadTrips()
-  })
+  // Watch for full payroll initialization - this will trigger trips and holidays reload
+  watch(
+    [params.employeeId, params.filterDateString, params.payrollMonth, params.payrollYear],
+    async (newVals, oldVals) => {
+      // Skip if this is the first run (oldVals is undefined) since onMounted already handles initialization
+      if (!oldVals) return
 
-  // Watch for holidays reload
-  watch([params.holidayDateString, params.employeeId], () => {
-    callbacks.fetchEmployeeHolidays()
-  })
+      // Only trigger if values actually changed to prevent infinite loops
+      if (JSON.stringify(newVals) !== JSON.stringify(oldVals)) {
+        await callbacks.initializePayrollCalculations()
+      }
+    },
+    { deep: true },
+  )
 }
