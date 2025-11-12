@@ -123,14 +123,7 @@ const {
 } = payrollPrint
 
 // Computed property to ensure holidays reactivity
-const holidaysArray = computed(() => {
-  const result = holidays.value || []
-  console.log('[PayrollPrint] holidaysArray computed:', {
-    count: result.length,
-    holidays: result,
-  })
-  return result
-})
+const holidaysArray = computed(() => holidays.value || [])
 
 // Hours calculation for field staff
 const { totalHoursWorked } = useHoursCalculation(isFieldStaff, employeeDailyRate, regularWorkTotal)
@@ -390,16 +383,16 @@ onMounted(async () => {
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
                 {{
                   holiday.type && holiday.type.toLowerCase().includes('rh')
-                    ? getMoneyText(dailyRate * 2.0 * (holiday.attendance_fraction || 0))
+                    ? getMoneyText(dailyRate * 1.0 * (holiday.attendance_fraction || 0))
                     : holiday.type && holiday.type.toLowerCase().includes('snh')
-                      ? getMoneyText(dailyRate * 1.3 * (holiday.attendance_fraction || 0))
+                      ? getMoneyText(dailyRate * 0.3 * (holiday.attendance_fraction || 0))
                       : holiday.type && holiday.type.toLowerCase().includes('lh')
-                        ? getMoneyText(dailyRate * 1.3 * (holiday.attendance_fraction || 0))
+                        ? getMoneyText(dailyRate * 0.3 * (holiday.attendance_fraction || 0))
                         : holiday.type && holiday.type.toLowerCase().includes('ch')
-                          ? getMoneyText(dailyRate * 1.0 * (holiday.attendance_fraction || 0))
+                          ? getMoneyText(dailyRate * 0.0 * (holiday.attendance_fraction || 0))
                           : holiday.type && holiday.type.toLowerCase().includes('swh')
-                            ? getMoneyText(dailyRate * 1.3 * (holiday.attendance_fraction || 0))
-                            : getMoneyText(dailyRate * (holiday.attendance_fraction || 0))
+                            ? getMoneyText(dailyRate * 0.3 * (holiday.attendance_fraction || 0))
+                            : getMoneyText(dailyRate * 0.0 * (holiday.attendance_fraction || 0))
                 }}
               </td>
             </tr>
@@ -523,6 +516,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* visuals paras sa mini payslip UWU */
 .mini-payroll-hidden {
   display: none;
 }

@@ -98,27 +98,18 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
   // Fetch holidays
   async function fetchEmployeeHolidays() {
     if (!params.value.employeeId) {
-      console.log('[PayrollData] fetchEmployeeHolidays: No employeeId, skipping')
       holidays.value = []
       isHolidaysLoading.value = false
       return
     }
-    console.log('[PayrollData] fetchEmployeeHolidays: Starting fetch for employee', params.value.employeeId)
     isHolidaysLoading.value = true
     try {
       const { fromDate, toDate } = getDateRangeFromStorage()
-      console.log('[PayrollData] Date range from storage:', { fromDate, toDate })
-      console.log('[PayrollData] holidayDateString:', params.value.holidayDateString)
 
       holidays.value =
         fromDate && toDate
           ? await fetchHolidaysByRange(fromDate, toDate, String(params.value.employeeId))
           : await fetchHolidaysByDateString(params.value.holidayDateString, String(params.value.employeeId))
-
-      console.log('[PayrollData] fetchEmployeeHolidays: Result', {
-        count: holidays.value.length,
-        holidays: holidays.value
-      })
     } catch (error) {
       console.error('[PayrollData] Error fetching holidays:', error)
       holidays.value = []

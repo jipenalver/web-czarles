@@ -9,7 +9,6 @@ import {
   getHolidayTypeName,
   getMonthDateRange,
 } from './helpers'
-import { type Holiday } from '@/stores/holidays'
 import { type PayrollData, type TableData } from './payrollTableDialog'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
@@ -20,7 +19,7 @@ import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import type { CashAdvance } from '@/stores/cashAdvances'
-import { fetchHolidaysByDateString } from './computation/holidays'
+import type { HolidayWithAttendance } from './computation/holidays'
 import { fetchFilteredTrips } from './computation/trips'
 
 // Props
@@ -74,11 +73,35 @@ const formattedPeriod = computed(() => {
 })
 
 const filterDateString = computed(() => {
+  // Use localStorage for cross-month support
+  try {
+    if (typeof window !== 'undefined') {
+      const fromDate = localStorage.getItem('czarles_payroll_fromDate')
+      if (fromDate) {
+        return fromDate
+      }
+    }
+  } catch (error) {
+    console.error('Error reading fromDate from localStorage:', error)
+  }
+  // Fallback to default month-based calculation
   const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
   return `${props.payrollData.year}-${month}-01`
 })
 
 const holidayDateString = computed(() => {
+  // Use localStorage for cross-month support
+  try {
+    if (typeof window !== 'undefined') {
+      const fromDate = localStorage.getItem('czarles_payroll_fromDate')
+      if (fromDate) {
+        return fromDate.substring(0, 7) // Returns YYYY-MM format
+      }
+    }
+  } catch (error) {
+    console.error('Error extracting holidayDateString:', error)
+  }
+  // Fallback to default month-based calculation
   const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
   return `${props.payrollData.year}-${month}`
 })
@@ -90,10 +113,13 @@ const payrollDataParams = computed(() => ({
   holidayDateString: holidayDateString.value,
 }))
 
-// Use payroll data composable for allowances data
+// Use payroll data composable for ALL data fetching including holidays
 const {
+  holidays,
   monthlyAllowancesTotal,
   loadAllowances,
+  fetchEmployeeHolidays,
+  // isHolidaysLoading - available but not used in mini print
 } = usePayrollData(payrollDataParams)
 
 // Use fetchEmployeeDeductions from benefits.ts
@@ -118,7 +144,9 @@ watch(
   async ([filterDateString, employeeId]) => {
     if (typeof employeeId === 'number' && filterDateString) {
       // kuhaon ang cash advances para sa employee ug payroll month
-      cashAdvances.value = await fetchCashAdvances(filterDateString as string, employeeId)
+      const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
+      // Filter out dummy entries with amount: 0
+      cashAdvances.value = fetchedCashAdvances.filter(ca => ca.amount && ca.amount > 0)
     } else {
       cashAdvances.value = []
     }
@@ -133,8 +161,7 @@ const totalCashAdvance = computed(() =>
 
 // Reactive references
 const isTripsLoading = ref(false)
-const isHolidaysLoading = ref(false)
-const holidays = ref<Holiday[]>([])
+// isHolidaysLoading and holidays are now from usePayrollData composable
 const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
@@ -188,6 +215,8 @@ const {
   presentDays,
   lateDeduction,
   monthLateDeduction,
+  monthUndertimeDeduction,
+  undertimeDeduction,
   computeOverallOvertimeCalculation,
 } = payrollPrint
 
@@ -223,6 +252,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
   lateDeduction,
   employeeDeductions,
   totalCashAdvance,
+  undertimeDeduction,
 )
 
 // Use imported safeCurrencyFormat from helpers.ts
@@ -233,25 +263,7 @@ function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
 }
 
-// Holiday fetching function
-async function fetchEmployeeHolidays() {
-  if (!props.employeeData?.id) {
-    holidays.value = []
-    return
-  }
-  isHolidaysLoading.value = true
-  try {
-    holidays.value = await fetchHolidaysByDateString(
-      holidayDateString.value,
-      String(props.employeeData.id),
-    )
-  } catch (error) {
-    console.error('Error fetching holidays:', error)
-    holidays.value = []
-  } finally {
-    isHolidaysLoading.value = false
-  }
-}
+// fetchEmployeeHolidays is now provided by usePayrollData composable
 
 // Trip loading function
 function loadTrips() {
@@ -319,22 +331,38 @@ watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
 
-// Computed values for holidays display
-// const sundayWorkTrips = computed(() => {
-//   return (
-//     tripsStore.trips?.filter((trip) => {
-//       const tripDate = new Date(trip.date)
-//       return tripDate.getDay() === 0 // Sunday
-//     }) || []
-//   )
-// })
+// Helper function to calculate holiday pay (added value only, not base rate)
+function calculateHolidayPay(holiday: HolidayWithAttendance): number {
+  const type = holiday.type?.toLowerCase() || ''
+  const fraction = holiday.attendance_fraction || 0
+  const rate = dailyRate.value || 0
 
-const regularHolidays = computed(() => {
-  return holidays.value?.filter((holiday) => holiday.type === 'regular') || []
-})
+  // Return only the premium/additional amount, not including the base 100%
+  if (type.includes('rh')) return rate * 1.0 * fraction  // 200% - 100% = 100% premium
+  if (type.includes('snh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
+  if (type.includes('lh')) return rate * 0.3 * fraction  // 130% - 100% = 30% premium
+  if (type.includes('ch')) return rate * 0.0 * fraction  // 100% - 100% = 0% premium (no additional)
+  if (type.includes('swh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
+  return rate * 0.0 * fraction // Default: no premium
+}
 
-const specialHolidays = computed(() => {
-  return holidays.value?.filter((holiday) => holiday.type === 'special') || []
+// Helper function to get holiday multiplier text
+function getHolidayMultiplier(holiday: HolidayWithAttendance): string {
+  const type = holiday.type?.toLowerCase() || ''
+  const fraction = holiday.attendance_fraction || 0
+  const halfDayText = fraction === 0.5 ? ' (Half)' : ''
+
+  if (type.includes('rh')) return `200%${halfDayText}`
+  if (type.includes('snh')) return `130%${halfDayText}`
+  if (type.includes('lh')) return `130%${halfDayText}`
+  if (type.includes('ch')) return `100%${halfDayText}`
+  if (type.includes('swh')) return `130%${halfDayText}`
+  return `100%${halfDayText}`
+}
+
+// Computed values for holidays display - filter only holidays with attendance
+const displayableHolidays = computed(() => {
+  return holidays.value?.filter((holiday) => (holiday.attendance_fraction || 0) > 0) || []
 })
 
 // Debug logging (uncomment for debugging)
@@ -398,28 +426,17 @@ const specialHolidays = computed(() => {
         </v-row>
       </template>
 
-      <!-- Holiday Work (Special) -->
-      <template v-if="specialHolidays.length > 0">
-        <v-row dense class="mb-1" v-for="holiday in specialHolidays" :key="'special-' + holiday.id">
-          <v-col cols="6" class="text-caption pa-1"
-            >Holiday Work ({{ getHolidayTypeName(holiday.type || '') }})</v-col
-          >
-          <v-col cols="3" class="text-body-2 text-center pa-1">1</v-col>
-          <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat(dailyRate * 1.3, formatCurrency) }}
+      <!-- Holiday Work (All Types) -->
+      <template v-if="displayableHolidays.length > 0">
+        <v-row dense class="mb-1" v-for="holiday in displayableHolidays" :key="'holiday-' + holiday.id">
+          <v-col cols="6" class="text-caption pa-1">
+            {{ holiday.name }} ({{ getHolidayTypeName(holiday.type || '') }})
           </v-col>
-        </v-row>
-      </template>
-
-      <!-- Holiday Work (Regular) -->
-      <template v-if="regularHolidays.length > 0">
-        <v-row dense class="mb-1" v-for="holiday in regularHolidays" :key="'regular-' + holiday.id">
-          <v-col cols="6" class="text-caption pa-1"
-            >Holiday Work ({{ getHolidayTypeName(holiday.type || '') }})</v-col
-          >
-          <v-col cols="3" class="text-body-2 text-center pa-1">1</v-col>
+          <v-col cols="3" class="text-body-2 text-center pa-1">
+            {{ getHolidayMultiplier(holiday) }}
+          </v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat(dailyRate * 2, formatCurrency) }}
+            {{ safeCurrencyFormat(calculateHolidayPay(holiday), formatCurrency) }}
           </v-col>
         </v-row>
       </template>
@@ -485,6 +502,24 @@ const specialHolidays = computed(() => {
           </v-col>
           <v-col cols="6" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat(lateDeduction, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
+
+      <!-- Undertime Deduction -->
+      <template v-if="showLateDeduction && undertimeDeduction > 0">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">
+            Undertime Deduction
+            <span
+              v-if="monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0"
+              class="text-caption ms-1"
+            >
+              ({{ monthUndertimeDeduction }} min.)
+            </span>
+          </v-col>
+          <v-col cols="6" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(undertimeDeduction, formatCurrency) }}
           </v-col>
         </v-row>
       </template>
