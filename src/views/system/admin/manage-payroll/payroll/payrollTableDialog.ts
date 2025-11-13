@@ -691,17 +691,15 @@ export function usePayrollTableDialog(
     () => props.isDialogVisible,
     async (isVisible) => {
       if (isVisible) {
-        // Initialize crossMonthConfig from employee data when dialog opens
-        const hasPayrollDates = Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+        // TODO: Crossmonth calculation disabled - always use default (full month) for table data
+        // Initialize crossMonthConfig as disabled for now
         crossMonthConfig.value = {
-          crossMonthEnabled: hasPayrollDates,
-          dayFrom: props.itemData?.payroll_start ?? null,
-          dayTo: props.itemData?.payroll_end ?? null,
+          crossMonthEnabled: false, // TODO: Change to: Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+          dayFrom: null, // TODO: Change to: props.itemData?.payroll_start ?? null
+          dayTo: null, // TODO: Change to: props.itemData?.payroll_end ?? null
         }
 
-        console.log('[DIALOG OPEN] Initialized crossMonthConfig:', crossMonthConfig.value)
-
-        // update time ug load data pag open
+        console.log('[DIALOG OPEN] Initialized crossMonthConfig (DISABLED):', crossMonthConfig.value)        // update time ug load data pag open
         await updateCurrentTime()
         // Update year filter based sa employee hired_at
         if (props.itemData?.hired_at) {
