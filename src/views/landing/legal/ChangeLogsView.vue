@@ -66,6 +66,36 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- November 12, 2025 -->
+          <v-divider class="mb-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 12, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title>
+                Improved payroll management by remembering selected date ranges using local storage,
+                so users can easily return to their last viewed period.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>
+                Enhanced holiday calculations to ensure more accurate pay and leave processing
+                during special dates.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 11, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 11, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title>
+                Added new attendance tracking and display features within payroll management,
+                allowing better visibility of employee attendance details.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- November 10, 2025 -->
           <v-divider class="mb-4"></v-divider>
           <h3 class="text-h6 mb-3">November 10, 2025</h3>
