@@ -52,6 +52,13 @@ interface CashAdvance {
   [key: string]: unknown
 }
 
+// Interface for crossmonth configuration
+interface CrossMonthConfig {
+  crossMonthEnabled: boolean
+  dayFrom: number | null
+  dayTo: number | null
+}
+
 // Composable para sa Payroll Table Dialog
 export function usePayrollTableDialog(
   props: {
@@ -63,6 +70,13 @@ export function usePayrollTableDialog(
   // Store instances
   // const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
+
+  // Track crossmonth configuration
+  const crossMonthConfig = ref<CrossMonthConfig>({
+    crossMonthEnabled: false,
+    dayFrom: null,
+    dayTo: null,
+  })
 
   // Type for year data cache
   type YearData = {
@@ -158,7 +172,8 @@ export function usePayrollTableDialog(
   // Async payroll data generator using overallTotal composables
   const generatePayrollData = async (
     monthIndex: number,
-    yearData?: Awaited<ReturnType<typeof fetchYearData>>
+    yearData?: Awaited<ReturnType<typeof fetchYearData>>,
+    customDateRange?: { fromDate: string; toDate: string } | null
   ): Promise<TableData> => {
     const employeeId = props.itemData?.id
     const year = tableFilters.value.year
@@ -271,10 +286,26 @@ export function usePayrollTableDialog(
       // Calculate total attendance minutes for the month
       const filterDateString = `${dateString}-01` // Format: "YYYY-MM-01"
       const isFieldStaff = employeeData?.is_field_staff || false
+
+      // Use custom date range if provided (for crossmonth), otherwise use full month
+      const fromDateForAttendance = customDateRange?.fromDate
+      const toDateForAttendance = customDateRange?.toDate
+
+      if (fromDateForAttendance && toDateForAttendance) {
+        console.log(`[CROSSMONTH] Calculating attendance for ${monthName} with custom range:`, {
+          from: fromDateForAttendance,
+          to: toDateForAttendance,
+          monthName,
+          employeeId,
+        })
+      }
+
       const attendanceMinutes = await getTotalMinutesForMonth(
         filterDateString,
         employeeId,
         isFieldStaff,
+        fromDateForAttendance,
+        toDateForAttendance,
       )
 
       // Console log the attendance minutes result
@@ -575,9 +606,11 @@ export function usePayrollTableDialog(
   const loadPayrollData = async (): Promise<void> => {
     tableOptions.value.isLoading = true
     try {
-      // Guard: if data already loaded for this employee/year/months, skip refetch
+      // Guard: if data already loaded for this employee/year/months/crossmonth config, skip refetch
       const employeeId = props.itemData?.id ?? null
-      const monthsKey = availableMonths.value.join(',')
+      const crossMonthKey = `${crossMonthConfig.value.crossMonthEnabled}-${crossMonthConfig.value.dayFrom}-${crossMonthConfig.value.dayTo}`
+      const monthsKey = `${availableMonths.value.join(',')}-${crossMonthKey}`
+
       if (
         tableData.value.length > 0 &&
         lastLoaded.value.employeeId === employeeId &&
@@ -585,9 +618,12 @@ export function usePayrollTableDialog(
         lastLoaded.value.monthsKey === monthsKey
       ) {
         // already loaded, avoid refetch
+        console.log('[LOAD] Skipping reload - data already loaded with same config')
         tableOptions.value.isLoading = false
         return
       }
+
+      console.log('[LOAD] Loading payroll data with config:', { employeeId, year: tableFilters.value.year, crossMonthConfig: crossMonthConfig.value })
 
       if (!employeeId) {
         tableData.value = []
@@ -599,10 +635,28 @@ export function usePayrollTableDialog(
 
       const yearData = await fetchYearData(employeeId, tableFilters.value.year)
 
+      // Import helpers for date range calculation
+      const { getDateRangeForMonth, monthNames: helperMonthNames } = await import('./helpers')
+
       // Generate payroll for each month using cached year data
-      const payrollPromises = availableMonths.value.map((monthIndex) =>
-        generatePayrollData(monthIndex, yearData)
-      )
+      const payrollPromises = availableMonths.value.map((monthIndex) => {
+        // Calculate date range for this month if crossmonth is enabled
+        let dateRange: { fromDate: string; toDate: string } | null = null
+
+        if (crossMonthConfig.value.crossMonthEnabled &&
+            crossMonthConfig.value.dayFrom &&
+            crossMonthConfig.value.dayTo) {
+          const monthName = helperMonthNames[monthIndex]
+          dateRange = getDateRangeForMonth(
+            tableFilters.value.year,
+            monthName,
+            crossMonthConfig.value.dayFrom,
+            crossMonthConfig.value.dayTo,
+          )
+        }
+
+        return generatePayrollData(monthIndex, yearData, dateRange)
+      })
 
       tableData.value = await Promise.all(payrollPromises)
       // Update cache marker so subsequent opens/changes don't refetch unnecessarily
@@ -637,6 +691,16 @@ export function usePayrollTableDialog(
     () => props.isDialogVisible,
     async (isVisible) => {
       if (isVisible) {
+        // Initialize crossMonthConfig from employee data when dialog opens
+        const hasPayrollDates = Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+        crossMonthConfig.value = {
+          crossMonthEnabled: hasPayrollDates,
+          dayFrom: props.itemData?.payroll_start ?? null,
+          dayTo: props.itemData?.payroll_end ?? null,
+        }
+
+        console.log('[DIALOG OPEN] Initialized crossMonthConfig:', crossMonthConfig.value)
+
         // update time ug load data pag open
         await updateCurrentTime()
         // Update year filter based sa employee hired_at
@@ -735,6 +799,48 @@ export function usePayrollTableDialog(
     emit('update:isDialogVisible', false)
   }
 
+  // Action: reload table data with crossmonth configuration
+  const reloadTableData = async (config?: CrossMonthConfig): Promise<void> => {
+    console.log('[CROSSMONTH] Reloading table data with config:', config)
+
+    if (config) {
+      // Update crossmonth configuration
+      crossMonthConfig.value = { ...config }
+
+      if (config.crossMonthEnabled && config.dayFrom && config.dayTo) {
+        // For each month, we'll calculate based on the crossmonth days
+        // Store the base days in localStorage for computation to use
+        console.log('[CROSSMONTH] Enabled with days:', { from: config.dayFrom, to: config.dayTo })
+        try {
+          localStorage.setItem('czarles_payroll_crossMonthEnabled', 'true')
+          localStorage.setItem('czarles_payroll_dayFrom', String(config.dayFrom))
+          localStorage.setItem('czarles_payroll_dayTo', String(config.dayTo))
+        } catch {
+          /* ignore storage errors */
+        }
+      } else {
+        // Clear crossmonth settings
+        console.log('[CROSSMONTH] Disabled, clearing settings')
+        try {
+          localStorage.removeItem('czarles_payroll_crossMonthEnabled')
+          localStorage.removeItem('czarles_payroll_dayFrom')
+          localStorage.removeItem('czarles_payroll_dayTo')
+          localStorage.removeItem('czarles_payroll_fromDate')
+          localStorage.removeItem('czarles_payroll_toDate')
+        } catch {
+          /* ignore storage errors */
+        }
+      }
+    }
+
+    // Clear cache to force reload with new settings
+    lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
+    yearDataCache.value.clear()
+
+    // Reload payroll data
+    await loadPayrollData()
+  }
+
   // Expose state ug actions
   return {
     tableOptions,
@@ -753,5 +859,6 @@ export function usePayrollTableDialog(
   onFilterDate,
   onView,
     onDialogClose,
+    reloadTableData,
   }
 }

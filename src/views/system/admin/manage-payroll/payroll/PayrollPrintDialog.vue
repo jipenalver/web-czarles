@@ -146,17 +146,6 @@ watch(
         progress-color="primary"
       ></LoadingDialog>
 
-      <!-- Loading overlay para sa data reload and calculations -->
-      <LoadingDialog
-        v-model:is-visible="isAnyLoading"
-        :title="isReloadingData ? 'Refreshing Data...' : 'Calculating Payroll...'"
-        :subtitle="isReloadingData ? 'Loading latest payroll information' : 'Processing employee data and computations'"
-        :description="isReloadingData ? 'Please wait while we update the data' : 'This may take a few moments while we calculate all payroll components'"
-        :progress-size="64"
-        :progress-width="4"
-        :progress-color="isReloadingData ? 'success' : 'primary'"
-      ></LoadingDialog>
-
       <template #append>
         <v-btn
           variant="text"

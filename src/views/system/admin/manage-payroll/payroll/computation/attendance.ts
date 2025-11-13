@@ -186,6 +186,8 @@ export const getTotalMinutesForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
   isField = false,
+  fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
@@ -193,9 +195,10 @@ export const getTotalMinutesForMonth = async (
   try {
     // Fetch tanan attendance records para sa specific month
     // Use special function for employee 55, regular function for others
+    // If custom date range is provided, pass it to the query function
     const attendances = employeeId === 55
       ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
-      : await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+      : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
 
     // console.log(`[getTotalMinutesForMonth] Debug info:`, {
     //   employeeId,
@@ -246,6 +249,8 @@ export const getTotalMinutesForMonth = async (
 export const getPaidLeaveDaysForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
+  fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
@@ -255,7 +260,7 @@ export const getPaidLeaveDaysForMonth = async (
     // Use special function for employee 55, regular function for others
     const attendancesResult = employeeId === 55
       ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
-      : await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+      : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
     const attendances: AttendanceRecord[] = attendancesResult || []
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -348,10 +353,10 @@ export const getSundayDutyDaysForMonth = async (
       }
     })
 
-    console.error(
+ /*    console.error(
       `[getSundayDutyDaysForMonth] Total Sunday duty days for employee ${employeeId} in month ${dateStringForQuery}:`,
       sundayDutyCounter,
-    )
+    ) */
     return sundayDutyCounter
   } catch (error) {
     console.error('Error sa getSundayDutyDaysForMonth:', error)

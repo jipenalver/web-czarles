@@ -12,6 +12,7 @@ import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './MiniPayrollPrint.vue'
 import PayrollPrintFooter from './PayrollPrintFooter.vue'
 import AttendanceDaysTooltip from './AttendanceDaysTooltip.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
@@ -163,11 +164,21 @@ async function initializePayrollCalculations() {
   try {
     // Call composable initialization with overtime callback
     await initializeDataCalculations(computeOverallOvertimeCalculation)
-    // Load Sunday duty data
-    await loadSundayDuty(dailyRate.value)
+
+    // Load Sunday duty data - ensure dailyRate is available
+    if (dailyRate.value > 0) {
+      await loadSundayDuty(dailyRate.value)
+    } else {
+      console.warn('[PayrollPrint] Skipping Sunday duty load - dailyRate not available:', dailyRate.value)
+      // Reset Sunday values if rate not available
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
+    }
+
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
+    // Don't rethrow - let component continue with partial data
   }
 }
 
@@ -178,11 +189,20 @@ async function reloadAllFunctions() {
     reactiveTotalEarnings.value = 0
     // Call composable reload with overtime callback
     await reloadAllData(computeOverallOvertimeCalculation)
-    // Reload Sunday duty data
-    await loadSundayDuty(dailyRate.value)
+
+    // Reload Sunday duty data - ensure dailyRate is available
+    if (dailyRate.value > 0) {
+      await loadSundayDuty(dailyRate.value)
+    } else {
+      console.warn('[PayrollPrint] Skipping Sunday duty reload - dailyRate not available:', dailyRate.value)
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
+    }
+
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
+    // Don't rethrow - let component continue with partial data
   }
 }
 
@@ -235,12 +255,38 @@ usePayrollWatchers(
   }
 )
 
+// Track if initial load is complete to prevent dialog from showing again
+const hasCompletedInitialLoad = ref(false)
+
+// Only show loading dialog during initial calculations, not subsequent loads
+const showLoadingDialog = computed(() => {
+  return isCalculationsCompleting.value && !hasCompletedInitialLoad.value
+})
+
+// Watch for when initial calculations complete
+watch(() => isCalculationsCompleting.value, (isCompleting) => {
+  if (!isCompleting && !hasCompletedInitialLoad.value) {
+    hasCompletedInitialLoad.value = true
+  }
+})
+
 onMounted(async () => {
   await initializePayrollCalculations()
 })
 </script>
 
 <template>
+  <!-- Loading overlay for initial payroll calculations only -->
+  <LoadingDialog
+    v-model:is-visible="showLoadingDialog"
+    title="Calculating Payroll..."
+    subtitle="Processing employee data and computations"
+    description="This may take a few moments while we calculate all payroll components"
+    :progress-size="64"
+    :progress-width="4"
+    progress-color="primary"
+  ></LoadingDialog>
+
   <v-container fluid class="pa-4 payroll-main-content">
     <v-row dense no-gutters>
       <v-col cols="12" sm="9" class="d-flex justify-center align-center">
@@ -536,9 +582,9 @@ onMounted(async () => {
 
 <style scoped>
 /* visuals paras sa mini payslip UWU */
-/* .mini-payroll-hidden {
+.mini-payroll-hidden {
   display: none;
-} */
+}
 
 .thick-border {
   border: 1px solid !important;
