@@ -5,6 +5,7 @@ import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
 import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
 import { fetchEmployeeDeductions } from './computation/benefits'
+import { getSundayDutyDaysForMonth } from './computation/attendance'
 import { supabase } from '@/utils/supabase'
 import { getLastDateOfMonth } from './helpers'
 import type { EmployeeDeduction } from '@/stores/benefits'
@@ -33,6 +34,8 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
   const employeeDeductions = ref<EmployeeDeduction[]>([])
   const employeeNonDeductions = ref<EmployeeDeduction[]>([])
   const overallOvertime = ref<number>(0)
+  const sundayDutyDays = ref<number>(0)
+  const sundayDutyAmount = ref<number>(0)
 
   // Loading states
   const isTripsLoading = ref(false)
@@ -42,6 +45,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
   const isCashAdjustmentsLoading = ref(false)
   const isDeductionsLoading = ref(false)
   const isOvertimeLoading = ref(false)
+  const isSundayLoading = ref(false)
   const isCalculationsCompleting = ref(false)
 
   // Comprehensive loading state
@@ -54,6 +58,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       isCashAdjustmentsLoading.value ||
       isDeductionsLoading.value ||
       isOvertimeLoading.value ||
+      isSundayLoading.value ||
       isCalculationsCompleting.value
     )
   })
@@ -196,6 +201,31 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     }
   }
 
+  // Fetch Sunday duty days and calculate amount
+  async function loadSundayDuty(dailyRate: number) {
+    if (!params.value.employeeId) {
+      isSundayLoading.value = false
+      return
+    }
+    isSundayLoading.value = true
+    try {
+      const days = await getSundayDutyDaysForMonth(
+        params.value.filterDateString,
+        params.value.employeeId
+      )
+      sundayDutyDays.value = days
+      // Sunday amount: only the 30% premium (0.3x daily rate per Sunday worked)
+      // The base daily rate is already included in regular work calculation
+      sundayDutyAmount.value = days * dailyRate * 0.3
+    } catch (error) {
+      console.error('[PayrollData] Error loading Sunday duty:', error)
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
+    } finally {
+      isSundayLoading.value = false
+    }
+  }
+
   // Fetch employee deductions
   async function updateEmployeeDeductions(employeeId: number | undefined) {
     isDeductionsLoading.value = true
@@ -226,6 +256,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       isAllowancesLoading.value = true
       isCashAdjustmentsLoading.value = true
       isDeductionsLoading.value = true
+      isSundayLoading.value = true
 
       // Reset all data
       holidays.value = []
@@ -235,6 +266,8 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       cashAdjustmentsAdditions.value = []
       employeeDeductions.value = []
       employeeNonDeductions.value = []
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
 
       // Fetch employee deductions first
       if (params.value.employeeId) {
@@ -271,6 +304,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       isAllowancesLoading.value = false
       isCashAdjustmentsLoading.value = false
       isDeductionsLoading.value = false
+      isSundayLoading.value = false
       isCalculationsCompleting.value = false
     }
   }
@@ -287,6 +321,8 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       cashAdjustmentsAdditions.value = []
       employeeDeductions.value = []
       employeeNonDeductions.value = []
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
 
       isTripsLoading.value = true
       isHolidaysLoading.value = true
@@ -295,6 +331,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       isAllowancesLoading.value = true
       isCashAdjustmentsLoading.value = true
       isDeductionsLoading.value = true
+      isSundayLoading.value = true
 
       await initializePayrollCalculations(computeOvertimeCallback)
     } catch (error) {
@@ -341,6 +378,8 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     employeeDeductions,
     employeeNonDeductions,
     overallOvertime,
+    sundayDutyDays,
+    sundayDutyAmount,
     tripsStore,
 
     // Loading states
@@ -351,6 +390,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     isCashAdjustmentsLoading,
     isDeductionsLoading,
     isOvertimeLoading,
+    isSundayLoading,
     isCalculationsCompleting,
     isPayrollCalculating,
 
@@ -365,6 +405,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     loadUtilizations,
     loadAllowances,
     loadCashAdjustments,
+    loadSundayDuty,
     fetchEmployeeHolidays,
     updateEmployeeDeductions,
     initializePayrollCalculations,

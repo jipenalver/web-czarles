@@ -348,10 +348,10 @@ export const getSundayDutyDaysForMonth = async (
       }
     })
 
-    /* console.log(
+    console.error(
       `[getSundayDutyDaysForMonth] Total Sunday duty days for employee ${employeeId} in month ${dateStringForQuery}:`,
       sundayDutyCounter,
-    ) */
+    )
     return sundayDutyCounter
   } catch (error) {
     console.error('Error sa getSundayDutyDaysForMonth:', error)

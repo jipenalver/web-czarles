@@ -47,6 +47,8 @@ const {
   cashAdjustmentsAdditions,
   employeeDeductions,
   employeeNonDeductions,
+  sundayDutyDays,
+  sundayDutyAmount,
   isTripsLoading,
   isHolidaysLoading,
   isUtilizationsLoading,
@@ -54,6 +56,7 @@ const {
   isCashAdjustmentsLoading,
   isDeductionsLoading,
   isOvertimeLoading,
+  isSundayLoading,
   isCalculationsCompleting,
   isPayrollCalculating,
   monthlyTrippingsTotal,
@@ -64,6 +67,7 @@ const {
   loadUtilizations,
   loadAllowances,
   loadCashAdjustments,
+  loadSundayDuty,
   fetchEmployeeHolidays,
   updateEmployeeDeductions,
   initializePayrollCalculations: initializeDataCalculations,
@@ -142,6 +146,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   monthlyUtilizationsTotal,
   monthlyAllowancesTotal,
   monthlyCashAdjustmentsTotal,
+  sundayDutyAmount,
 )
 
 const displayTotalEarnings = computed(() => {
@@ -153,24 +158,28 @@ function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
 }
 
-// Wrapper function para sa full initialization including overtime
+// Wrapper function para sa full initialization including overtime and Sunday duty
 async function initializePayrollCalculations() {
   try {
     // Call composable initialization with overtime callback
     await initializeDataCalculations(computeOverallOvertimeCalculation)
+    // Load Sunday duty data
+    await loadSundayDuty(dailyRate.value)
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
   }
 }
 
-// Wrapper function para sa full reload including overtime
+// Wrapper function para sa full reload including overtime and Sunday duty
 async function reloadAllFunctions() {
   try {
     tripsStore.trips = []
     reactiveTotalEarnings.value = 0
     // Call composable reload with overtime callback
     await reloadAllData(computeOverallOvertimeCalculation)
+    // Reload Sunday duty data
+    await loadSundayDuty(dailyRate.value)
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
@@ -308,6 +317,7 @@ onMounted(async () => {
               <span v-else-if="isCashAdjustmentsLoading">Loading cash adjustments data...</span>
               <span v-else-if="isHolidaysLoading">Loading holidays data...</span>
               <span v-else-if="isOvertimeLoading">Calculating overtime...</span>
+              <span v-else-if="isSundayLoading">Calculating Sunday duty...</span>
               <span v-else-if="isDeductionsLoading">Loading deductions...</span>
               <span v-else>Loading payroll data...</span>
             </div>
@@ -410,6 +420,15 @@ onMounted(async () => {
           <td class="pa-2">{{ formatHoursOneDecimal(overallOvertime) }} hours</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             {{ getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime) }}
+          </td>
+        </tr>
+
+        <tr v-show="sundayDutyDays > 0">
+          <td class="border-b-thin text-center pa-2" colspan="2">Sunday Duty Premium</td>
+          <td class="pa-2">@ {{ getMoneyText(dailyRate ?? 0) }}</td>
+          <td class="pa-2">({{ sundayDutyDays }} day<span v-if="sundayDutyDays > 1">s</span>)</td>
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="sunday">
+            {{ getMoneyText(sundayDutyAmount) }}
           </td>
         </tr>
 
@@ -517,9 +536,9 @@ onMounted(async () => {
 
 <style scoped>
 /* visuals paras sa mini payslip UWU */
-.mini-payroll-hidden {
+/* .mini-payroll-hidden {
   display: none;
-}
+} */
 
 .thick-border {
   border: 1px solid !important;

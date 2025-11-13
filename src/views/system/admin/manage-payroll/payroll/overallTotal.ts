@@ -18,6 +18,7 @@ export function useOverallEarningsTotal(
   monthlyUtilizationsTotal?: ComputedRef<number>,
   monthlyAllowancesTotal?: ComputedRef<number>,
   monthlyCashAdjustmentsTotal?: ComputedRef<number>,
+  sundayDutyAmount?: Ref<number>,
   /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<number> {
   return computed(() => {
@@ -88,6 +89,11 @@ export function useOverallEarningsTotal(
     // 9. Add monthly cash adjustments (additions/earnings)
     if (monthlyCashAdjustmentsTotal) {
       total += Number(monthlyCashAdjustmentsTotal.value) || 0
+    }
+
+    // 10. Add Sunday duty amount (1.3x daily rate for Sundays worked)
+    if (sundayDutyAmount) {
+      total += Number(sundayDutyAmount.value) || 0
     }
 
     return total
