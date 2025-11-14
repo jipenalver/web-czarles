@@ -447,25 +447,29 @@ export function onView(options: {
 
   chosenMonth.value = String(item.month)
 
-  if (dayFrom.value === null || dayFrom.value === undefined) {
-    dayFrom.value = 1
-  }
-
-  if (dayTo.value === null || dayTo.value === undefined) {
-    try {
-      const tf = tableFilters && tableFilters.value
-      const year =
-        tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
-      dayTo.value = getLastDayOfMonth(Number(year), chosenMonth.value)
-    } catch {
-      dayTo.value = getLastDayOfMonth(new Date().getFullYear(), chosenMonth.value)
-    }
-  }
-
   const tfYear =
     tableFilters && tableFilters.value && typeof tableFilters.value['year'] === 'number'
       ? (tableFilters.value['year'] as number)
       : new Date().getFullYear()
+
+  // When crossmonth is NOT enabled, use standard full month (1 to last day)
+  if (!crossMonthEnabled.value) {
+    dayFrom.value = 1
+    dayTo.value = getLastDayOfMonth(tfYear, chosenMonth.value)
+  } else {
+    // When crossmonth IS enabled, keep the current values if they exist
+    // Otherwise, set defaults for crossmonth (previous month's last day to current month's day before last)
+    if (dayFrom.value === null || dayFrom.value === undefined) {
+      // Default to 26 for crossmonth "from" day
+      dayFrom.value = 26
+    }
+
+    if (dayTo.value === null || dayTo.value === undefined) {
+      // Default to 25 for crossmonth "to" day
+      dayTo.value = 25
+    }
+  }
+
   const dateString = getMonthYearAsDateString(tfYear, chosenMonth.value)
   const yearMonth = getYearMonthString(dateString)
   try {
@@ -476,18 +480,26 @@ export function onView(options: {
 
   const range = crossMonthEnabled.value
     ? getDateRangeForMonth(
-        tableFilters?.value?.year as number | undefined,
+        tfYear,
         chosenMonth.value,
         dayFrom.value,
         dayTo.value,
       )
     : getDateRangeForMonthNoCross(
-        tableFilters?.value?.year as number | undefined,
+        tfYear,
         chosenMonth.value,
         dayFrom.value,
         dayTo.value,
       )
-  console.log('[PAYROLL] Selected date range for view:', { range, chosenMonth: chosenMonth.value })
+
+  console.log('[PAYROLL] Selected date range for view:', {
+    range,
+    chosenMonth: chosenMonth.value,
+    crossMonthEnabled: crossMonthEnabled.value,
+    dayFrom: dayFrom.value,
+    dayTo: dayTo.value
+  })
+
   try {
     if (typeof window !== 'undefined' && range) {
       localStorage.setItem('czarles_payroll_fromDate', (range as { fromDate: string }).fromDate)

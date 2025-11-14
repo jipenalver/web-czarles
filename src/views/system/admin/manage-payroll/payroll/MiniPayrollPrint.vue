@@ -116,8 +116,11 @@ const payrollDataParams = computed(() => ({
 // Use payroll data composable for ALL data fetching including holidays
 const {
   holidays,
+  sundayDutyDays,
+  sundayDutyAmount,
   monthlyAllowancesTotal,
   loadAllowances,
+  loadSundayDuty,
   fetchEmployeeHolidays,
   // isHolidaysLoading - available but not used in mini print
 } = usePayrollData(payrollDataParams)
@@ -233,6 +236,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   computed(() => 0), // monthlyUtilizationsTotal - not used in mini print
   monthlyAllowancesTotal,
   computed(() => 0), // monthlyCashAdjustmentsTotal - not used in mini print
+  sundayDutyAmount,
 )
 
 // Use earnings breakdown for debugging purposes
@@ -285,7 +289,7 @@ async function updateOverallOvertime() {
 
 // Enhanced mounted hook
 onMounted(async () => {
-  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances()])
+  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances(), loadSundayDuty(dailyRate.value)])
   recalculateEarnings()
 })
 
@@ -300,6 +304,7 @@ watch(
     dailyRate,
     codaAllowance,
     monthlyAllowancesTotal,
+    sundayDutyAmount,
   ],
   () => {
     recalculateEarnings()
@@ -316,7 +321,7 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances()])
+    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances(), loadSundayDuty(dailyRate.value)])
     recalculateEarnings()
   },
   { deep: true },
@@ -457,6 +462,19 @@ const displayableHolidays = computed(() => {
           <template v-else>-</template>
         </v-col>
       </v-row>
+
+      <!-- Sunday Duty Premium -->
+      <template v-if="sundayDutyDays > 0">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">Sunday Duty Premium</v-col>
+          <v-col cols="3" class="text-body-2 text-center pa-1">
+            30% ({{ sundayDutyDays }}d)
+          </v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(sundayDutyAmount, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
 
       <!-- Allowance -->
       <template v-if="monthlyAllowancesTotal > 0">

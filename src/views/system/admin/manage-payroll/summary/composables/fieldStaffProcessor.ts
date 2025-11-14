@@ -1,4 +1,4 @@
-import { getTotalMinutesForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
+import { getTotalMinutesForMonth, getSundayDutyDaysForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
 import { calculateOvertimeHours } from './overtimeCalculations'
 import { calculateDaysWorked } from './daysWorkedCalculations'
 import type { MonthlyPayrollRow } from './types'
@@ -27,6 +27,16 @@ export async function processFieldStaffEmployees(
       )
       employee.hours_worked = totalWorkMinutes / 60 // Convert minutes to hours
 
+      // Calculate Sunday duty days and amount
+      const sundayDays = await getSundayDutyDaysForMonth(
+        dateStringForCalculation,
+        employee.employee_id
+      )
+      employee.sunday_days = sundayDays
+      // Sunday amount is 30% premium (0.3x daily rate per Sunday worked)
+      // Base daily rate is already counted in regular work
+      employee.sunday_amount = sundayDays * employee.daily_rate * 0.3
+
       // Calculate client-side overtime hours (matches PayrollPrint.vue)
       const clientOvertimeHours = await calculateOvertimeHours(
         employee.employee_id,
@@ -43,14 +53,15 @@ export async function processFieldStaffEmployees(
       // Formula: (hours worked * hourly rate) where hourly rate = daily rate / 8
       const newBasicPay = employee.hours_worked * hourlyRate
 
-      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay + sunday_amount
       const newGrossPay =
         newBasicPay +
         employee.allowance +
         clientOvertimePay +
         employee.trips_pay +
         employee.holidays_pay +
-        (employee.utilizations_pay || 0)
+        (employee.utilizations_pay || 0) +
+        employee.sunday_amount
 
       // Recalculate total deductions including late/undertime from SQL
       const newTotalDeductions =

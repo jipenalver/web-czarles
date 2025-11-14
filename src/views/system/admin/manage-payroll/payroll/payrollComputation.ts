@@ -201,8 +201,16 @@ export function usePayrollComputation(
         const emp = await employeesStore.getEmployeesById(employeeId)
         const isFieldStaff = emp?.is_field_staff || undefined
 
+        // Read persisted from/to dates for crossmonth calculations if available
+        let fromDateForAttendance: string | undefined = undefined
+        let toDateForAttendance: string | undefined = undefined
+        if (typeof window !== 'undefined') {
+          fromDateForAttendance = localStorage.getItem('czarles_payroll_fromDate') || undefined
+          toDateForAttendance = localStorage.getItem('czarles_payroll_toDate') || undefined
+        }
+
         // Get paid leave days para sa month
-        const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId)
+        const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId, fromDateForAttendance, toDateForAttendance)
         /*  console.log(
           `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
           paidLeaveDays,
@@ -221,6 +229,8 @@ export function usePayrollComputation(
               dateStringForCalculation, // filterDateString format: "YYYY-MM-01"
               employeeId,
               true, // isField = true
+              fromDateForAttendance, // Pass custom date range if available
+              toDateForAttendance,
             )
           }
 

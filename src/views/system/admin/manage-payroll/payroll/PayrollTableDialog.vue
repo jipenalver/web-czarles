@@ -34,12 +34,12 @@ const tableHeaders: TableHeader[] = [
     sortable: false,
     align: 'start',
   },
-  {
-    title: 'Basic Salary',
-    key: 'basic_salary',
-    sortable: false,
-    align: 'start',
-  },
+  // {
+  //   title: 'Basic Salary',
+  //   key: 'basic_salary',
+  //   sortable: false,
+  //   align: 'start',
+  // },
   {
     title: 'Gross Pay',
     key: 'gross_pay',
@@ -73,6 +73,7 @@ const {
   isCurrentEmployeeFieldStaff,
   onView: baseOnView,
   onDialogClose,
+  // reloadTableData, // TODO: Currently disabled - crossmonth calculation needs to be fixed
 } = usePayrollTableDialog(props, emit)
 
 // Variable para isave ang month na gipili sa client
@@ -231,6 +232,51 @@ watch(
   { immediate: true },
 )
 
+// TODO: Crossmonth calculation for table data - currently disabled due to wrong calculations
+// The crossmonth toggle only affects the PayrollPrint dialog, not the table data
+// Table data always uses default (full month) calculation
+//
+// Watch for crossmonth toggle or day range changes to reload table data
+// Use a flag to skip the initial trigger
+// const hasInitiallyLoaded = ref(false) // TODO: Re-enable when crossmonth calculation is fixed
+
+// DISABLED: Crossmonth watcher for table reload - causes incorrect calculations
+// watch(
+//   () => [crossMonthEnabled.value, dayFrom.value, dayTo.value],
+//   async () => {
+//     // Skip first trigger (initial load)
+//     if (!hasInitiallyLoaded.value) {
+//       hasInitiallyLoaded.value = true
+//       return
+//     }
+
+//     if (props.isDialogVisible && typeof reloadTableData === 'function') {
+//       // Pass the current crossmonth state and day range to reload
+//       await reloadTableData({
+//         crossMonthEnabled: crossMonthEnabled.value,
+//         dayFrom: dayFrom.value,
+//         dayTo: dayTo.value,
+//       })
+//     }
+//   },
+//   { deep: true },
+// )
+
+// DISABLED: Dialog visibility watcher for crossmonth sync
+// watch(
+//   () => props.isDialogVisible,
+//   async (isVisible) => {
+//     if (isVisible && hasInitiallyLoaded.value && typeof reloadTableData === 'function') {
+//       // Sync the crossmonth configuration when dialog opens
+//       await reloadTableData({
+//         crossMonthEnabled: crossMonthEnabled.value,
+//         dayFrom: dayFrom.value,
+//         dayTo: dayTo.value,
+//       })
+//     }
+//   },
+// )
+
 // Compute the sum of net_pay + attendance calculation for field staff (delegates to helper)
 const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPayHelper(item)
 
@@ -339,7 +385,7 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
               {{ item.month }}
             </v-btn>
           </template>
-          <template #item.basic_salary="{ item }">
+          <!-- <template #item.basic_salary="{ item }">
             <div class="d-flex align-center ga-2">
               <span v-if="isCurrentEmployeeFieldStaff"
                 >{{
@@ -351,7 +397,7 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
               </span>
               <span v-else>{{ getMoneyText(item.basic_salary) }}</span>
             </div>
-          </template>
+          </template> -->
           <template #item.gross_pay="{ item }">
             {{ getMoneyText(item.gross_pay) }}
           </template>
