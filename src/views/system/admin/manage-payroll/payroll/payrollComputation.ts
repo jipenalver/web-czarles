@@ -133,17 +133,20 @@ export function usePayrollComputation(
   // Employee daily rate
   const employeeDailyRate = ref<number>(dailyRate.value)
   const isFieldStaff = ref<boolean>(false)
+  const isAdmin = ref<boolean>(false)
 
   // Update employee daily rate when employeeId changes
   const updateEmployeeDailyRate = async () => {
     if (!employeeId) {
       employeeDailyRate.value = dailyRate.value
       isFieldStaff.value = false
+      isAdmin.value = false
       return
     }
     const emp = await employeesStore.getEmployeesById(employeeId)
     employeeDailyRate.value = emp?.daily_rate || dailyRate.value
     isFieldStaff.value = emp?.is_field_staff || false
+    isAdmin.value = emp?.is_admin || false
   }
 
   // Watch for employeeId changes and update daily rate
@@ -156,14 +159,18 @@ export function usePayrollComputation(
   const monthUndertimeDeduction = ref<number>(0)
 
   // Late deduction formula: (dailyrate / 8 hours / 60 minutes) * total late minutes
+  // Admin employees should not have late deductions
   const lateDeduction = computed(() => {
+    if (isAdmin.value) return 0
     //compute ang deduction base sa total late minutes
     const perMinuteRate = (dailyRate.value || 0) / 8 / 60
     return perMinuteRate * (monthLateDeduction.value || 0)
   })
 
   // Undertime deduction formula: (dailyrate / 8 hours / 60 minutes) * total undertime minutes
+  // Admin employees should not have undertime deductions
   const undertimeDeduction = computed(() => {
+    if (isAdmin.value) return 0
     //compute ang deduction base sa total undertime minutes
     const perMinuteRate = (dailyRate.value || 0) / 8 / 60
     return perMinuteRate * (monthUndertimeDeduction.value || 0)
@@ -200,8 +207,13 @@ export function usePayrollComputation(
         toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
       }
 
-      // Use special function for employee 55, regular function for others
-      const attendances = employeeId === 55
+      // Get employee info to check if admin or field staff
+      const emp = await employeesStore.getEmployeesById(employeeId)
+      const isAdmin = emp?.is_admin || false
+      const isFieldStaffValue = emp?.is_field_staff || undefined
+
+      // Use special function for admin employees, regular function for others
+      const attendances = isAdmin
         ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, fromDate, toDate)
         : await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
 
@@ -209,9 +221,7 @@ export function usePayrollComputation(
       attendanceRecords.value = Array.isArray(attendances) ? attendances : []
 
       if (Array.isArray(attendances) && attendances.length > 0) {
-        // Get employee info to check if field staff
-        const emp = await employeesStore.getEmployeesById(employeeId)
-        const isFieldStaff = emp?.is_field_staff || undefined
+        const isFieldStaff = isFieldStaffValue
 
         // Read persisted from/to dates for crossmonth calculations if available
         let fromDateForAttendance: string | undefined = undefined
@@ -523,6 +533,7 @@ export function usePayrollComputation(
     formatNumber,
     employeeDailyRate,
     isFieldStaff,
+    isAdmin,
     attendanceRecords,
 
     // Compute function for regular work total

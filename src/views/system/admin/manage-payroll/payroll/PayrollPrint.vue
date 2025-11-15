@@ -96,10 +96,10 @@ const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
 // Employee display composables
-const { fullName, designation, address, dailyRate, isFieldStaff } = useEmployeeDisplay(
+const { fullName, designation, address, dailyRate, isFieldStaff, isAdmin } = useEmployeeDisplay(
   computed(() => props.employeeData)
 )
-const { formattedDate, showLateDeduction } = usePayrollFormatting()
+const { formattedDate, showLateDeduction } = usePayrollFormatting(isAdmin)
 
 const grossSalary = computed(() => 0)
 

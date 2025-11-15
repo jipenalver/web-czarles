@@ -10,7 +10,8 @@ export async function calculateLateAndUndertimeDeductions(
   employeeId: number,
   dateStringForCalculation: string,
   dailyRate: number,
-  isFieldStaff: boolean
+  isFieldStaff: boolean,
+  isAdmin: boolean = false
 ): Promise<{ lateDeductionAmount: number; undertimeDeductionAmount: number }> {
   // Field staff late/undertime deductions are calculated server-side in SQL function
   if (isFieldStaff) {
@@ -19,7 +20,7 @@ export async function calculateLateAndUndertimeDeductions(
 
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
-    const attendances = employeeId === 55
+    const attendances = isAdmin
       ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7))
       : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7))
 

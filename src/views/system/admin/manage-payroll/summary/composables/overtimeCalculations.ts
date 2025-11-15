@@ -6,11 +6,12 @@ import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeO
  */
 export async function calculateOvertimeHours(
   employeeId: number,
-  dateStringForCalculation: string
+  dateStringForCalculation: string,
+  isAdmin: boolean = false
 ): Promise<number> {
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
-    const attendances = employeeId === 55
+    const attendances = isAdmin
       ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7))
       : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7))
 
