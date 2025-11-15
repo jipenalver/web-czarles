@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatCurrency, roundDecimal, convertHoursToDays } from '@/views/system/admin/manage-payroll/payroll/helpers'
+import { formatCurrency, roundDecimal } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { type MonthlyPayrollRow } from '../composables/types'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
 import DaysWorkedTooltip from './DaysWorkedTooltip.vue'
@@ -45,30 +45,19 @@ const filteredItems = computed(() => {
 // Items with client-side calculations
 const itemsWithCalculations = computed(() => {
   return filteredItems.value.map(item => {
-    // Calculate effective days worked and basic pay based on staff type
-    // This matches PayrollPrint.vue calculation logic
-    let effectiveDaysWorked = 0
-    let basicPay = 0
+    // Use the basic_pay already calculated in the processor (fieldStaffProcessor or nonFieldStaffProcessor)
+    // Both field staff and office staff now use days_worked × daily_rate
+    const basicPay = item.basic_pay || 0
+    const effectiveDaysWorked = item.days_worked || 0
 
-    if (item.is_field_staff) {
-      // For field staff: use hours_worked directly to calculate basic pay
-      // This matches PayrollPrint: regularWorkTotal = totalWorkHours * hourlyRate
-      const totalWorkHours = item.hours_worked || 0
-      const hourlyRate = (item.daily_rate || 0) / 8
-      basicPay = totalWorkHours * hourlyRate
-      // Display days as converted hours (for consistency with PayrollPrint display)
-      effectiveDaysWorked = convertHoursToDays(totalWorkHours)
-    } else {
-      // For office staff: use days_worked directly
-      effectiveDaysWorked = item.days_worked || 0
-      basicPay = effectiveDaysWorked * (item.daily_rate || 0)
-    }    // Calculate gross pay safely
-    // Note: sunday_amount is NOT included because Sunday premiums are already factored into basic pay/daily work
+    // Calculate gross pay safely
+    // Include sunday_amount as it's a separate premium (30% of daily rate per Sunday worked)
     const grossPay = basicPay +
                     (item.allowance || 0) +
                     (item.overtime_pay || 0) +
                     (item.trips_pay || 0) +
                     (item.holidays_pay || 0) +
+                    (item.sunday_amount || 0) +
                     (item.utilizations_pay || 0) +
                     (item.cash_adjustment_addon || 0)
 

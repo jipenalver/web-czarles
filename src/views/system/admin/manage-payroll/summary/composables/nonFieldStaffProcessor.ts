@@ -50,6 +50,11 @@ export async function processNonFieldStaffEmployees(
       const clientOvertimePay = clientOvertimeHours * (hourlyRate * 1.25)
       employee.overtime_pay = clientOvertimePay
 
+      // Calculate basic_pay based on days_worked (matching PayrollPrint.vue and field staff logic)
+      // Both office and field staff use: basic_pay = days_worked × daily_rate
+      const newBasicPay = employee.days_worked * employee.daily_rate
+      employee.basic_pay = newBasicPay
+
       // Calculate client-side late and undertime deductions (matches PayrollPrint.vue)
       const { lateDeductionAmount, undertimeDeductionAmount } = await calculateLateAndUndertimeDeductions(
         employee.employee_id,
@@ -64,14 +69,15 @@ export async function processNonFieldStaffEmployees(
       employee.deductions.late = lateDeductionAmount
       employee.deductions.undertime = undertimeDeductionAmount
 
-      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay
-      // Note: sunday_amount is NOT included because Sunday premiums are already factored into basic pay
+      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + sunday_amount + utilizations_pay
+      // Sunday amount is the 30% premium for Sundays worked (separate from basic pay)
       const newGrossPay =
-        employee.basic_pay +
+        newBasicPay +
         employee.allowance +
         clientOvertimePay +
         employee.trips_pay +
         (employee.holidays_pay || 0) +
+        employee.sunday_amount +
         (employee.utilizations_pay || 0)
       employee.gross_pay = Number(newGrossPay.toFixed(2))
 

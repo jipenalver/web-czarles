@@ -218,9 +218,27 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
 
     isSundayLoading.value = true
     try {
+      // Get cross-month dates from localStorage for accurate Sunday calculation
+      let fromDate: string | undefined
+      let toDate: string | undefined
+      try {
+        if (typeof window !== 'undefined') {
+          const storedFrom = localStorage.getItem('czarles_payroll_fromDate')
+          const storedTo = localStorage.getItem('czarles_payroll_toDate')
+          if (storedFrom && storedTo) {
+            fromDate = storedFrom
+            toDate = storedTo
+          }
+        }
+      } catch (error) {
+        console.error('[PayrollData] Error reading cross-month dates from localStorage:', error)
+      }
+
       const days = await getSundayDutyDaysForMonth(
         params.value.filterDateString,
-        params.value.employeeId
+        params.value.employeeId,
+        fromDate,
+        toDate
       )
       sundayDutyDays.value = days
       // Sunday amount: only the 30% premium (0.3x daily rate per Sunday worked)
