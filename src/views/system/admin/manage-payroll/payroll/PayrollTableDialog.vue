@@ -11,10 +11,8 @@ import {
   getDateRangeForMonth,
   getDateRangeForMonthNoCross,
   getLastDayOfMonth,
-  calculateFieldStaffNetPay as calculateFieldStaffNetPayHelper,
   onView as onViewHelper,
 } from './helpers'
-import { getMoneyText } from '@/utils/helpers/others'
 import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
@@ -31,30 +29,6 @@ const tableHeaders: TableHeader[] = [
   {
     title: 'Month',
     key: 'month',
-    sortable: false,
-    align: 'start',
-  },
-  // {
-  //   title: 'Basic Salary',
-  //   key: 'basic_salary',
-  //   sortable: false,
-  //   align: 'start',
-  // },
-  {
-    title: 'Gross Pay',
-    key: 'gross_pay',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Deductions',
-    key: 'deductions',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Net Pay',
-    key: 'net_pay',
     sortable: false,
     align: 'start',
   },
@@ -277,14 +251,6 @@ watch(
 //   },
 // )
 
-// Compute the sum of net_pay + attendance calculation for field staff (delegates to helper)
-const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPayHelper(item)
-
-/**
- * Compute a date range for the given year + monthName using optional from/to day numbers.
- * Returns { fromDate, toDate, totalDays } where dates are YYYY-MM-DD and totalDays is inclusive.
- */
-// (moved getDateRangeForMonth to shared helpers.ts)
 </script>
 
 <template>
@@ -384,33 +350,6 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
             <v-btn class="text-decoration-underline" variant="text" @click="onView(item)">
               {{ item.month }}
             </v-btn>
-          </template>
-          <!-- <template #item.basic_salary="{ item }">
-            <div class="d-flex align-center ga-2">
-              <span v-if="isCurrentEmployeeFieldStaff"
-                >{{
-                  getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8))
-                }}
-                <span class="text-caption text-grey"
-                  >({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span
-                >
-              </span>
-              <span v-else>{{ getMoneyText(item.basic_salary) }}</span>
-            </div>
-          </template> -->
-          <template #item.gross_pay="{ item }">
-            {{ getMoneyText(item.gross_pay) }}
-          </template>
-          <template #item.deductions="{ item }">
-            {{ getMoneyText(item.deductions) }}
-          </template>
-          <template #item.net_pay="{ item }">
-            <span v-if="isCurrentEmployeeFieldStaff">
-              {{ getMoneyText(calculateFieldStaffNetPay(item)) }}
-            </span>
-            <span v-else>
-              {{ getMoneyText(item.net_pay) }}
-            </span>
           </template>
         </v-data-table>
       </v-card-text>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData, type TableData as TableDialogData } from './payrollTableDialog'
+import { type TableData as PayrollTableData } from './payrollComputation'
 import { usePayrollPrintDialog } from './payrollPrintDialog'
 import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
@@ -13,8 +14,11 @@ const props = defineProps<{
   isDialogVisible: boolean
   payrollData: PayrollData
   employeeData: Employee
-  tableData: TableData
+  tableData: TableDialogData
 }>()
+
+// Create an empty PayrollTableData object for PayrollPrint component
+const payrollTableData: PayrollTableData = {}
 
 const emit = defineEmits(['update:isDialogVisible'])
 
@@ -183,7 +187,7 @@ watch(
           :key="payrollPrintKey"
           :employee-data="props.employeeData"
           :payroll-data="props.payrollData"
-          :table-data="props.tableData"
+          :table-data="payrollTableData"
         ></PayrollPrint>
       </v-card-text>
 

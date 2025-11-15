@@ -1,5 +1,5 @@
 import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
-import { getTotalMinutesForMonth, getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
+import { getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { useEmployeesStore } from '@/stores/employees'
 import { computed, type Ref, ref, watch } from 'vue'
 
@@ -79,7 +79,6 @@ export function usePayrollComputation(
   payrollMonth?: string,
   payrollYear?: number,
   dateString?: string,
-  filterDateString?: Ref<string>,
 ) {
   // Initialize employees store
   const employeesStore = useEmployeesStore()
@@ -217,27 +216,7 @@ export function usePayrollComputation(
         ) */
 
         if (isFieldStaff) {
-          // For field staff, use getTotalMinutesForMonth to calculate actual work hours for the entire month
-          let totalWorkMinutes = 0
-
-          // Get filterDateString value, fallback to usedDateString if not provided
-          const dateStringForCalculation = filterDateString?.value || usedDateString
-
-          if (dateStringForCalculation) {
-            // Use getTotalMinutesForMonth to get total minutes worked for the entire month
-            totalWorkMinutes = await getTotalMinutesForMonth(
-              dateStringForCalculation, // filterDateString format: "YYYY-MM-01"
-              employeeId,
-              true, // isField = true
-              fromDateForAttendance, // Pass custom date range if available
-              toDateForAttendance,
-            )
-          }
-
-          // For field staff, calculate pay based on actual hours worked
-          const totalWorkHours = totalWorkMinutes / 60 // Convert minutes to hours
-          const hourlyRate = daily / 8
-          regularWorkTotal.value = totalWorkHours * hourlyRate
+          // For field staff, use same calculation as office staff (days worked × daily rate)
 
           // Set present days based on days with attendance (including half days) + paid leave days
           let employeePresentDays = 0
@@ -278,6 +257,9 @@ export function usePayrollComputation(
 
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
+
+          // For field staff, calculate pay based on present days (same as office staff)
+          regularWorkTotal.value = (daily ?? 0) * employeePresentDays
 
           // Calculate field staff late and undertime with specific thresholds
           const { lateMinutes, undertimeMinutes } = calculateFieldStaffLateUndertime(attendances)

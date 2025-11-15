@@ -9,7 +9,8 @@ import {
   getHolidayTypeName,
   getMonthDateRange,
 } from './helpers'
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData } from './payrollTableDialog'
+import { type TableData } from './payrollComputation'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
 import { fetchCashAdvances } from './computation/cashAdvance'

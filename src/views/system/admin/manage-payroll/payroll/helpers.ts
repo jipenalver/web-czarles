@@ -509,7 +509,8 @@ export function onView(options: {
     /* ignore */
   }
 
-  baseOnView({ ...item, dateString })
+  // baseOnView only needs the month property from TableData
+  baseOnView(item)
 }
 
 // ============================================================================

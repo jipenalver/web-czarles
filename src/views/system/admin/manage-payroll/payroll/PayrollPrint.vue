@@ -2,7 +2,8 @@
 import { useOverallEarningsTotal } from './overallTotal'
 import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount, formatHoursOneDecimal } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData } from './payrollTableDialog'
+import { type TableData } from './payrollComputation'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
 import { useEmployeeDisplay, usePayrollFormatting, useHoursCalculation } from './composables/usePayrollDisplay'
@@ -100,7 +101,7 @@ const { fullName, designation, address, dailyRate, isFieldStaff } = useEmployeeD
 )
 const { formattedDate, showLateDeduction } = usePayrollFormatting()
 
-const grossSalary = computed(() => props.tableData?.gross_pay || 0)
+const grossSalary = computed(() => 0)
 
 const payrollPrint = usePayrollPrint(
   {
@@ -324,18 +325,10 @@ onMounted(async () => {
         <tr>
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              Actual Hours Worked for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            </span>
-            <span v-else>
-              Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            </span>
+            Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
           </td>
           <td class="pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              @ {{ getMoneyText((employeeDailyRate ?? 0) / 8) }}/hr
-            </span>
-            <span v-else> @ {{ getMoneyText(employeeDailyRate ?? 0) }} </span>
+            @ {{ getMoneyText(employeeDailyRate ?? 0) }}
           </td>
           <td class="pa-2">
             <span>
