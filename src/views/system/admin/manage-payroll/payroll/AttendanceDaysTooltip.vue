@@ -18,7 +18,8 @@ const props = defineProps<{
   isFieldStaff?: boolean
 }>()
 
-const shouldHideHours = computed(() => !props.isFieldStaff)
+// Hide hours for all staff types since both now use days-based calculation
+const shouldHideHours = computed(() => true)
 
 // Calculate full days and half days count
 const attendanceStats = computed(() => {
@@ -61,7 +62,15 @@ const attendanceStats = computed(() => {
       attendance.pm_time_out !== undefined &&
       attendance.pm_time_out !== ''
 
-    const date = attendance.attendance_date || attendance.date || 'N/A'
+    // Format date as "Nov 15" or "Oct 1" for compact display
+    const dateValue = attendance.attendance_date || attendance.date
+    let date = 'N/A'
+    if (dateValue) {
+      const d = new Date(dateValue)
+      const month = d.toLocaleDateString('en-US', { month: 'short' })
+      const day = d.getDate()
+      date = `${month} ${day}`
+    }
     const hours = (attendance._debug_dayHours || 0).toFixed(1)
 
     if (hasAmData && hasPmData) {
