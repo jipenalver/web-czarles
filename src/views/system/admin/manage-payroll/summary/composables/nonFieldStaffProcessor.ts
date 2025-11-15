@@ -9,21 +9,27 @@ import type { MonthlyPayrollRow } from './types'
  */
 export async function processNonFieldStaffEmployees(
   nonFieldStaffEmployees: MonthlyPayrollRow[],
-  dateStringForCalculation: string
+  dateStringForCalculation: string,
+  fromDate?: string,
+  toDate?: string
 ): Promise<void> {
   await Promise.all(
     nonFieldStaffEmployees.map(async (employee: MonthlyPayrollRow) => {
       // Calculate accurate days worked using client-side logic (matches PayrollPrint.vue)
       const accurateDaysWorked = await calculateDaysWorked(
         employee.employee_id,
-        dateStringForCalculation
+        dateStringForCalculation,
+        fromDate,
+        toDate
       )
       employee.days_worked = Number(accurateDaysWorked.toFixed(1))
 
       // Calculate Sunday duty days and amount
       const sundayDays = await getSundayDutyDaysForMonth(
         dateStringForCalculation,
-        employee.employee_id
+        employee.employee_id,
+        fromDate,
+        toDate
       )
       employee.sunday_days = sundayDays
       // Sunday amount is 30% premium (0.3x daily rate per Sunday worked)
@@ -33,36 +39,40 @@ export async function processNonFieldStaffEmployees(
       // Calculate client-side overtime hours (matches PayrollPrint.vue)
       const clientOvertimeHours = await calculateOvertimeHours(
         employee.employee_id,
-        dateStringForCalculation
+        dateStringForCalculation,
+        fromDate,
+        toDate
       )
       employee.overtime_hrs = clientOvertimeHours
 
       // Calculate overtime pay: overtime hours * (hourly rate * 1.25)
       const hourlyRate = employee.daily_rate / 8
       const clientOvertimePay = clientOvertimeHours * (hourlyRate * 1.25)
-      employee.overtime_pay = Number(clientOvertimePay.toFixed(2))
+      employee.overtime_pay = clientOvertimePay
 
       // Calculate client-side late and undertime deductions (matches PayrollPrint.vue)
       const { lateDeductionAmount, undertimeDeductionAmount } = await calculateLateAndUndertimeDeductions(
         employee.employee_id,
         dateStringForCalculation,
         employee.daily_rate,
-        false // non-field staff
+        false, // non-field staff
+        fromDate,
+        toDate
       )
 
       // Update deductions with client-side calculated values
       employee.deductions.late = lateDeductionAmount
       employee.deductions.undertime = undertimeDeductionAmount
 
-      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay + sunday_amount
+      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+      // Note: sunday_amount is NOT included because Sunday premiums are already factored into basic pay
       const newGrossPay =
         employee.basic_pay +
         employee.allowance +
         clientOvertimePay +
         employee.trips_pay +
-        employee.holidays_pay +
-        (employee.utilizations_pay || 0) +
-        employee.sunday_amount
+        (employee.holidays_pay || 0) +
+        (employee.utilizations_pay || 0)
       employee.gross_pay = Number(newGrossPay.toFixed(2))
 
       // Recalculate total_deductions and net_pay with new late/undertime values

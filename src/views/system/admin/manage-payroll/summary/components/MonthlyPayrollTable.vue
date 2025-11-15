@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { formatCurrency, roundDecimal, convertHoursToDays } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { type MonthlyPayrollRow } from '../composables/types'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
+import DaysWorkedTooltip from './DaysWorkedTooltip.vue'
 
 const props = defineProps<{
   items: MonthlyPayrollRow[]
@@ -13,6 +14,9 @@ const props = defineProps<{
   selectedDesignation: number | null
   selectedMonth?: string
   selectedYear?: number
+  crossMonthEnabled?: boolean
+  dayFrom?: number | null
+  dayTo?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -59,12 +63,13 @@ const itemsWithCalculations = computed(() => {
       effectiveDaysWorked = item.days_worked || 0
       basicPay = effectiveDaysWorked * (item.daily_rate || 0)
     }    // Calculate gross pay safely
+    // Note: sunday_amount is NOT included because Sunday premiums are already factored into basic pay/daily work
     const grossPay = basicPay +
                     (item.allowance || 0) +
                     (item.overtime_pay || 0) +
                     (item.trips_pay || 0) +
-                    (item.utilizations_pay || 0) +
                     (item.holidays_pay || 0) +
+                    (item.utilizations_pay || 0) +
                     (item.cash_adjustment_addon || 0)
 
     // Calculate total deductions safely
@@ -239,7 +244,13 @@ const totals = computed(() => {
 
             <!-- Payable Columns -->
             <td class="text-center border">
-              {{ roundDecimal(item.effective_days_worked || 0, 2) }} days
+              <DaysWorkedTooltip
+                :days-worked="item.effective_days_worked || 0"
+                :basic-pay="item.basic_pay || 0"
+                :daily-rate="item.daily_rate || 0"
+                :is-field-staff="item.is_field_staff"
+                :hours-worked="item.hours_worked"
+              />
             </td>
             <td class="text-center border">{{ item.sunday_days || 0 }}</td>
             <td class="text-center border">{{ formatCurrency(item.sunday_amount || 0) }}</td>
@@ -283,7 +294,7 @@ const totals = computed(() => {
 
             <!-- Net Pay -->
             <td class="text-end font-weight-bold text-success border">
-              {{ formatCurrency(item.net_pay) }}
+              {{ Math.round(item.net_pay).toLocaleString('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}
             </td>
           </tr>
 
@@ -349,7 +360,7 @@ const totals = computed(() => {
 
             <!-- Net Pay Total -->
             <td class="text-end font-weight-bold text-success border">
-              {{ formatCurrency(totals.net_pay) }}
+              {{ Math.round(totals.net_pay).toLocaleString('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}
             </td>
           </tr>
         </tbody>

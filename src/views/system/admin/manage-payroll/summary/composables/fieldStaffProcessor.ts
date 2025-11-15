@@ -8,14 +8,18 @@ import type { MonthlyPayrollRow } from './types'
  */
 export async function processFieldStaffEmployees(
   fieldStaffEmployees: MonthlyPayrollRow[],
-  dateStringForCalculation: string
+  dateStringForCalculation: string,
+  fromDate?: string,
+  toDate?: string
 ): Promise<void> {
   await Promise.all(
     fieldStaffEmployees.map(async (employee: MonthlyPayrollRow) => {
       // Calculate accurate days worked using client-side logic (matches PayrollPrint.vue)
       const accurateDaysWorked = await calculateDaysWorked(
         employee.employee_id,
-        dateStringForCalculation
+        dateStringForCalculation,
+        fromDate,
+        toDate
       )
       employee.days_worked = Number(accurateDaysWorked.toFixed(1))
 
@@ -23,14 +27,18 @@ export async function processFieldStaffEmployees(
       const totalWorkMinutes = await getTotalMinutesForMonth(
         dateStringForCalculation,
         employee.employee_id,
-        true // isField = true
+        true, // isField = true
+        fromDate,
+        toDate
       )
       employee.hours_worked = totalWorkMinutes / 60 // Convert minutes to hours
 
       // Calculate Sunday duty days and amount
       const sundayDays = await getSundayDutyDaysForMonth(
         dateStringForCalculation,
-        employee.employee_id
+        employee.employee_id,
+        fromDate,
+        toDate
       )
       employee.sunday_days = sundayDays
       // Sunday amount is 30% premium (0.3x daily rate per Sunday worked)
@@ -40,28 +48,30 @@ export async function processFieldStaffEmployees(
       // Calculate client-side overtime hours (matches PayrollPrint.vue)
       const clientOvertimeHours = await calculateOvertimeHours(
         employee.employee_id,
-        dateStringForCalculation
+        dateStringForCalculation,
+        fromDate,
+        toDate
       )
       employee.overtime_hrs = clientOvertimeHours
 
       // Calculate overtime pay: overtime hours * (hourly rate * 1.25)
       const hourlyRate = employee.daily_rate / 8
       const clientOvertimePay = clientOvertimeHours * (hourlyRate * 1.25)
-      employee.overtime_pay = Number(clientOvertimePay.toFixed(2))
+      employee.overtime_pay = clientOvertimePay
 
       // Recalculate basic_pay based on actual hours worked
       // Formula: (hours worked * hourly rate) where hourly rate = daily rate / 8
       const newBasicPay = employee.hours_worked * hourlyRate
 
-      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay + sunday_amount
+      // Recalculate gross_pay: basic_pay + allowance + overtime_pay + trips_pay + holidays_pay + utilizations_pay
+      // Note: sunday_amount is NOT included because Sunday premiums are already factored into basic pay
       const newGrossPay =
         newBasicPay +
         employee.allowance +
         clientOvertimePay +
         employee.trips_pay +
-        employee.holidays_pay +
-        (employee.utilizations_pay || 0) +
-        employee.sunday_amount
+        (employee.holidays_pay || 0) +
+        (employee.utilizations_pay || 0)
 
       // Recalculate total deductions including late/undertime from SQL
       const newTotalDeductions =

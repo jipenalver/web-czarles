@@ -1,9 +1,12 @@
--- Drop the existing function first to allow changing the return type
+-- Drop the existing function signatures to allow changing parameters
 DROP FUNCTION IF EXISTS compute_monthly_payroll(TEXT, INTEGER);
+DROP FUNCTION IF EXISTS compute_monthly_payroll(TEXT, INTEGER, DATE, DATE);
 
 CREATE OR REPLACE FUNCTION compute_monthly_payroll(
   p_month TEXT,
-  p_year INTEGER
+  p_year INTEGER,
+  p_from_date DATE DEFAULT NULL,
+  p_to_date DATE DEFAULT NULL
 )
 RETURNS TABLE (
   employee_id INTEGER,
@@ -60,8 +63,14 @@ BEGIN
   END;
 
   -- Calculate date range
-  v_start_date := make_date(p_year, v_month_index, 1);
-  v_end_date := (v_start_date + INTERVAL '1 month' - INTERVAL '1 day')::DATE;
+  -- If custom dates provided, use them; otherwise use full month
+  IF p_from_date IS NOT NULL AND p_to_date IS NOT NULL THEN
+    v_start_date := p_from_date;
+    v_end_date := p_to_date;
+  ELSE
+    v_start_date := make_date(p_year, v_month_index, 1);
+    v_end_date := (v_start_date + INTERVAL '1 month' - INTERVAL '1 day')::DATE;
+  END IF;
 
   RETURN QUERY
   WITH 
@@ -178,19 +187,19 @@ BEGIN
     GROUP BY u.employee_id
   ),
   
-  -- Calculate holiday pay per employee (only for days with attendance)
+  -- Calculate holiday pay per employee (only PREMIUM amount, not including base pay)
   holiday_pay_data AS (
     SELECT 
       a.employee_id,
       COALESCE(SUM(
         ae.daily_rate * 
         CASE 
-          WHEN LOWER(h.type) LIKE '%rh%' THEN 2.0        -- Regular Holiday: 200%
-          WHEN LOWER(h.type) LIKE '%snh%' THEN 1.3       -- Special Non-Working Holiday: 130%
-          WHEN LOWER(h.type) LIKE '%lh%' THEN 1.3        -- Local Holiday: 130%
-          WHEN LOWER(h.type) LIKE '%ch%' THEN 1.0        -- Company Holiday: 100%
-          WHEN LOWER(h.type) LIKE '%swh%' THEN 1.3       -- Special Working Holiday: 130%
-          ELSE 1.0
+          WHEN LOWER(h.type) LIKE '%rh%' THEN 1.0        -- Regular Holiday: 100% premium (200% - 100% base)
+          WHEN LOWER(h.type) LIKE '%snh%' THEN 0.3       -- Special Non-Working Holiday: 30% premium (130% - 100% base)
+          WHEN LOWER(h.type) LIKE '%lh%' THEN 0.3        -- Local Holiday: 30% premium (130% - 100% base)
+          WHEN LOWER(h.type) LIKE '%ch%' THEN 0.0        -- Company Holiday: 0% premium (100% - 100% base)
+          WHEN LOWER(h.type) LIKE '%swh%' THEN 0.3       -- Special Working Holiday: 30% premium (130% - 100% base)
+          ELSE 0.0
         END *
         -- Apply day fraction based on attendance (full day or half day)
         CASE 
@@ -273,9 +282,8 @@ BEGIN
       (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0)) + 
       COALESCE(al.allowances_total, 0) +
       COALESCE(tr.trips_amount, 0) +
-      COALESCE(ut.utilizations_total, 0) +
-      COALESCE(hp.holiday_amount, 0), 2
-    )::NUMERIC AS gross_pay, -- Note: Overtime pay excluded, calculated client-side
+      COALESCE(ut.utilizations_total, 0), 2
+    )::NUMERIC AS gross_pay, -- Note: holidays_pay excluded (premiums in basic_pay), overtime_pay calculated client-side, cash_adjustment added client-side
     COALESCE(ca.cash_advance_total, 0)::NUMERIC AS cash_advance,
     COALESCE(ded.sss, 0)::NUMERIC AS sss,
     COALESCE(ded.phic, 0)::NUMERIC AS phic,
@@ -315,8 +323,7 @@ BEGIN
       (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0) + 
        COALESCE(al.allowances_total, 0) +
        COALESCE(tr.trips_amount, 0) +
-       COALESCE(ut.utilizations_total, 0) +
-       COALESCE(hp.holiday_amount, 0)) -
+       COALESCE(ut.utilizations_total, 0)) -
       (COALESCE(ca.cash_advance_total, 0) +
        COALESCE(ded.sss, 0) +
        COALESCE(ded.phic, 0) +
@@ -346,5 +353,9 @@ BEGIN
 END;
 $$;
 
--- Usage example:
+-- Usage examples:
+-- Standard full month calculation:
 -- SELECT * FROM compute_monthly_payroll('October', 2025);
+
+-- Cross-month calculation (Day 26 of Sept to Day 25 of Oct):
+-- SELECT * FROM compute_monthly_payroll('October', 2025, '2025-09-26', '2025-10-25');

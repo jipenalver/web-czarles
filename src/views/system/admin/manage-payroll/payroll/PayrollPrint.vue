@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useOverallEarningsTotal } from './overallTotal'
-import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount, formatHoursOneDecimal } from './helpers'
+import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
 import { type PayrollData } from './payrollTableDialog'
 import { type TableData } from './payrollComputation'
@@ -456,7 +456,7 @@ onMounted(async () => {
         <tr v-show="overallOvertime > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ formatHoursOneDecimal(overallOvertime) }} hours</td>
+          <td class="pa-2">{{ overallOvertime.toFixed(2) }} hours</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             {{ getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime) }}
           </td>

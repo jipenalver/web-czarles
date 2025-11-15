@@ -8,20 +8,22 @@ import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55 } from '@
 export async function calculateDaysWorked(
   employeeId: number,
   dateStringForCalculation: string,
+  fromDate?: string,
+  toDate?: string,
   isAdmin: boolean = false
 ): Promise<number> {
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
     const attendances = isAdmin
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7))
-      : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7))
+      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
+      : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       return 0
     }
 
     // Get paid leave days
-    const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId)
+    const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
 
     let employeePresentDays = 0
 
