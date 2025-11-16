@@ -9,7 +9,8 @@ import {
   getHolidayTypeName,
   getMonthDateRange,
 } from './helpers'
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData } from './payrollTableDialog'
+import { type TableData } from './payrollComputation'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
 import { fetchCashAdvances } from './computation/cashAdvance'
@@ -183,9 +184,11 @@ const designation = computed(() => {
 // Payroll calculation computeds
 const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
 const grossSalary = computed(() => props.tableData?.gross_pay || 0)
+const isAdmin = computed(() => props.employeeData?.is_admin || false)
 
 // Check if field staff to determine if late deduction should be shown
-const showLateDeduction = computed(() => true) // Show late/undertime deductions for both field staff and office staff
+// Admin employees should not have late/undertime deductions
+const showLateDeduction = computed(() => !isAdmin.value)
 
 // Effective work days (present days based on attendance)
 const effectiveWorkDays = computed(() => presentDays?.value || 0)

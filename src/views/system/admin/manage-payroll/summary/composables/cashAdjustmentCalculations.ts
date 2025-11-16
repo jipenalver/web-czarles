@@ -1,33 +1,46 @@
 import { supabase } from '@/utils/supabase'
 
 /**
- * Fetch cash adjustments for an employee in a specific month/year
+ * Fetch cash adjustments for an employee in a specific month/year or date range
  * Returns { addOnAmount, deductionAmount }
+ * @param fromDate Optional start date in YYYY-MM-DD format for cross-month filtering
+ * @param toDate Optional end date in YYYY-MM-DD format for cross-month filtering
  */
 export async function getCashAdjustmentsForEmployee(
   employeeId: number,
   selectedMonth: string,
-  selectedYear: number
+  selectedYear: number,
+  fromDate?: string,
+  toDate?: string
 ): Promise<{ addOnAmount: number; deductionAmount: number }> {
   try {
-    // Convert month name to month index
-    const monthIndex = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ].indexOf(selectedMonth)
+    let startDateString: string
+    let endDateString: string
 
-    if (monthIndex === -1) {
-      console.error('[getCashAdjustmentsForEmployee] Invalid month:', selectedMonth)
-      return { addOnAmount: 0, deductionAmount: 0 }
+    // Use provided date range if available, otherwise calculate from month/year
+    if (fromDate && toDate) {
+      startDateString = fromDate
+      endDateString = toDate
+    } else {
+      // Convert month name to month index
+      const monthIndex = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ].indexOf(selectedMonth)
+
+      if (monthIndex === -1) {
+        console.error('[getCashAdjustmentsForEmployee] Invalid month:', selectedMonth)
+        return { addOnAmount: 0, deductionAmount: 0 }
+      }
+
+      // Calculate date range for the month
+      const startDate = new Date(selectedYear, monthIndex, 1)
+      const endDate = new Date(selectedYear, monthIndex + 1, 0, 23, 59, 59, 999) // Last day of month
+
+      // Format dates as YYYY-MM-DD for Supabase query
+      startDateString = startDate.toISOString().split('T')[0]
+      endDateString = endDate.toISOString().split('T')[0]
     }
-
-    // Calculate date range for the month
-    const startDate = new Date(selectedYear, monthIndex, 1)
-    const endDate = new Date(selectedYear, monthIndex + 1, 0, 23, 59, 59, 999) // Last day of month
-
-    // Format dates as YYYY-MM-DD for Supabase query
-    const startDateString = startDate.toISOString().split('T')[0]
-    const endDateString = endDate.toISOString().split('T')[0]
 
     // Fetch cash adjustments for the employee within the date range
     const { data, error } = await supabase

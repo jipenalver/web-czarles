@@ -319,6 +319,8 @@ export function isSunday(dateString: string): boolean {
 export const getSundayDutyDaysForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
+  fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
@@ -327,8 +329,8 @@ export const getSundayDutyDaysForMonth = async (
     // Fetch tanan attendance records para sa specific month
     // Use special function for employee 55, regular function for others
     const attendancesResult = employeeId === 55
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
-      : await getEmployeeAttendanceById(employeeId, dateStringForQuery)
+      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery, fromDateISO, toDateISO)
+      : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
     const attendances: AttendanceRecord[] = attendancesResult || []
 
     if (!Array.isArray(attendances) || attendances.length === 0) {

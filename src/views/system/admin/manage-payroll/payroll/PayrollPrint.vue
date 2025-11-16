@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useOverallEarningsTotal } from './overallTotal'
-import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount, formatHoursOneDecimal } from './helpers'
+import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData } from './payrollTableDialog'
+import { type TableData } from './payrollComputation'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
 import { useEmployeeDisplay, usePayrollFormatting, useHoursCalculation } from './composables/usePayrollDisplay'
@@ -95,12 +96,12 @@ const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
 // Employee display composables
-const { fullName, designation, address, dailyRate, isFieldStaff } = useEmployeeDisplay(
+const { fullName, designation, address, dailyRate, isFieldStaff, isAdmin } = useEmployeeDisplay(
   computed(() => props.employeeData)
 )
-const { formattedDate, showLateDeduction } = usePayrollFormatting()
+const { formattedDate, showLateDeduction } = usePayrollFormatting(isAdmin)
 
-const grossSalary = computed(() => props.tableData?.gross_pay || 0)
+const grossSalary = computed(() => 0)
 
 const payrollPrint = usePayrollPrint(
   {
@@ -324,18 +325,10 @@ onMounted(async () => {
         <tr>
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              Actual Hours Worked for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            </span>
-            <span v-else>
-              Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            </span>
+            Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
           </td>
           <td class="pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              @ {{ getMoneyText((employeeDailyRate ?? 0) / 8) }}/hr
-            </span>
-            <span v-else> @ {{ getMoneyText(employeeDailyRate ?? 0) }} </span>
+            @ {{ getMoneyText(employeeDailyRate ?? 0) }}
           </td>
           <td class="pa-2">
             <span>
@@ -463,7 +456,7 @@ onMounted(async () => {
         <tr v-show="overallOvertime > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ formatHoursOneDecimal(overallOvertime) }} hours</td>
+          <td class="pa-2">{{ overallOvertime.toFixed(2) }} hours</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             {{ getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime) }}
           </td>

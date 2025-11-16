@@ -37,25 +37,27 @@ export function useOverallEarningsTotal(
       }, 0) || 0
     total += tripsEarnings
 
-    // 3. Holiday earnings with different multipliers based on type
+    // 3. Holiday earnings with additional pay multipliers (not total pay)
+    // Note: Regular work already includes base pay, so holiday pay is the ADDITIONAL amount
     const holidayEarnings =
       holidays.value?.reduce((sum, holiday) => {
         const baseRate = Number(dailyRate.value) || 0
         const type = holiday.type?.toLowerCase() || ''
         const attendanceFraction = Number(holiday.attendance_fraction) || 0
 
-        let multiplier = 1
+        let additionalMultiplier = 0
         if (type.includes('rh'))
-          multiplier = 2.0 // Regular Holiday - 200%
+          additionalMultiplier = 1.0 // Regular Holiday - 100% additional (200% total - 100% already in regular)
         else if (type.includes('snh'))
-          multiplier = 1.3 // Special Non-working Holiday - 130%
+          additionalMultiplier = 0.3 // Special Non-working Holiday - 30% additional (130% total - 100% already in regular)
         else if (type.includes('lh'))
-          multiplier = 1.3 // Local Holiday - 130%
+          additionalMultiplier = 0.3 // Local Holiday - 30% additional (130% total - 100% already in regular)
         else if (type.includes('ch'))
-          multiplier = 1.0 // Company Holiday - 100%
-        else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday - 130%
+          additionalMultiplier = 0.0 // Company Holiday - 0% additional (100% already in regular)
+        else if (type.includes('swh'))
+          additionalMultiplier = 0.3 // Special Working Holiday - 30% additional (130% total - 100% already in regular)
 
-        return sum + (baseRate * multiplier * attendanceFraction)
+        return sum + (baseRate * additionalMultiplier * attendanceFraction)
       }, 0) || 0
     total += holidayEarnings
 

@@ -25,14 +25,16 @@ export function useMonthlyPayroll() {
   /**
    * Load payroll data using Supabase function for base calculations,
    * then apply client-side late/undertime calculations for PayrollPrint.vue consistency
+   * @param fromDate Optional start date in YYYY-MM-DD format for cross-month filtering
+   * @param toDate Optional end date in YYYY-MM-DD format for cross-month filtering
    */
-  async function loadMonthlyPayroll() {
+  async function loadMonthlyPayroll(fromDate?: string, toDate?: string) {
     if (!selectedMonth.value || !selectedYear.value) {
       return
     }
 
-    // Check if we already have data for this month/year
-    const cacheKey = `${selectedMonth.value}-${selectedYear.value}`
+    // Check if we already have data for this month/year/date range
+    const cacheKey = `${selectedMonth.value}-${selectedYear.value}-${fromDate || 'full'}-${toDate || 'full'}`
     if (lastLoadedKey.value === cacheKey && monthlyPayrollData.value.length > 0) {
       // Data already loaded, skip reload
       return
@@ -42,10 +44,24 @@ export function useMonthlyPayroll() {
 
     try {
       // Call Supabase function to compute monthly payroll
-      const { data, error } = await supabase.rpc('compute_monthly_payroll', {
+      // Pass optional date range for cross-month filtering
+      const rpcParams: {
+        p_month: string
+        p_year: number
+        p_from_date?: string
+        p_to_date?: string
+      } = {
         p_month: selectedMonth.value,
         p_year: selectedYear.value,
-      })
+      }
+
+      // Add date range parameters if provided
+      if (fromDate && toDate) {
+        rpcParams.p_from_date = fromDate
+        rpcParams.p_to_date = toDate
+      }
+
+      const { data, error } = await supabase.rpc('compute_monthly_payroll', rpcParams)
 
       if (error) {
         console.error('Error calling compute_monthly_payroll:', error)
@@ -70,7 +86,9 @@ export function useMonthlyPayroll() {
         const nonFieldStaffIds = nonFieldStaffEmployees.map(emp => emp.employee_id)
         const attendanceBatch = await getEmployeesAttendanceBatch(
           nonFieldStaffIds,
-          dateStringForCalculation
+          dateStringForCalculation,
+          fromDate,
+          toDate
         )
 
         // Store batch attendance data in cache for potential future use
@@ -80,10 +98,10 @@ export function useMonthlyPayroll() {
       }
 
       // Process field staff employees with special calculations
-      await processFieldStaffEmployees(fieldStaffEmployees, dateStringForCalculation)
+      await processFieldStaffEmployees(fieldStaffEmployees, dateStringForCalculation, fromDate, toDate)
 
       // Process non-field staff employees with late/undertime calculations
-      await processNonFieldStaffEmployees(nonFieldStaffEmployees, dateStringForCalculation)
+      await processNonFieldStaffEmployees(nonFieldStaffEmployees, dateStringForCalculation, fromDate, toDate)
 
       // Combine field staff and non-field staff employees
       const finalData = [...fieldStaffEmployees, ...nonFieldStaffEmployees]
@@ -94,7 +112,9 @@ export function useMonthlyPayroll() {
           const { addOnAmount, deductionAmount } = await getCashAdjustmentsForEmployee(
             employee.employee_id,
             selectedMonth.value,
-            selectedYear.value
+            selectedYear.value,
+            fromDate,
+            toDate
           )
 
           // Update employee with cash adjustment values

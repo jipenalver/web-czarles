@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { usePayrollTableDialog, type TableData } from './payrollTableDialog'
-import { type TableHeader } from '@/utils/helpers/tables'
 import PayrollPrintDialog from './PayrollPrintDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { type Employee } from '@/stores/employees'
@@ -11,10 +10,8 @@ import {
   getDateRangeForMonth,
   getDateRangeForMonthNoCross,
   getLastDayOfMonth,
-  calculateFieldStaffNetPay as calculateFieldStaffNetPayHelper,
   onView as onViewHelper,
 } from './helpers'
-import { getMoneyText } from '@/utils/helpers/others'
 import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
@@ -25,42 +22,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:isDialogVisible'])
 
-const { smAndDown, mdAndDown } = useDisplay()
+const { mdAndDown } = useDisplay()
 
-const tableHeaders: TableHeader[] = [
-  {
-    title: 'Month',
-    key: 'month',
-    sortable: false,
-    align: 'start',
-  },
-  // {
-  //   title: 'Basic Salary',
-  //   key: 'basic_salary',
-  //   sortable: false,
-  //   align: 'start',
-  // },
-  {
-    title: 'Gross Pay',
-    key: 'gross_pay',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Deductions',
-    key: 'deductions',
-    sortable: false,
-    align: 'start',
-  },
-  {
-    title: 'Net Pay',
-    key: 'net_pay',
-    sortable: false,
-    align: 'start',
-  },
-]
-
-// tableData now uses actual payroll computation from overallTotal.ts composables
 const {
   tableOptions,
   tableFilters,
@@ -73,22 +36,16 @@ const {
   isCurrentEmployeeFieldStaff,
   onView: baseOnView,
   onDialogClose,
-  // reloadTableData, // TODO: Currently disabled - crossmonth calculation needs to be fixed
 } = usePayrollTableDialog(props, emit)
 
-// Variable para isave ang month na gipili sa client
 const chosenMonth = ref<string>('')
 
-// Day-only selectors (month is selected via the table rows)
-// Initialize gamit ang payroll_start ug payroll_end from employee data
 const dayFrom = ref<number | null>(props.itemData?.payroll_start ?? null)
 const dayTo = ref<number | null>(props.itemData?.payroll_end ?? null)
-// Cross-month is checked by default ONLY if payroll_start ug payroll_end naa
 const crossMonthEnabled = ref<boolean>(
   Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
 )
 
-// Compute days in the currently chosen month (chosenMonth set when clicking a month row)
 const daysInSelectedMonth = computed(() => {
   const tf = tableFilters.value as Record<string, unknown> | undefined
   const maybeYear =
@@ -99,7 +56,6 @@ const daysInSelectedMonth = computed(() => {
   return new Date(Number(maybeYear), idx + 1, 0).getDate()
 })
 
-// Day options for the previous month (From Day should reference previous month)
 const daysInPreviousMonth = computed(() => {
   const tf = tableFilters.value as Record<string, unknown> | undefined
   const maybeYear =
@@ -120,54 +76,41 @@ const dayOptionsTo = computed(() =>
   Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
 )
 
-// (Day-only selects — month is selected via the table rows)
+function getDaysInMonth(monthName: string): number {
+  const tf = tableFilters.value as Record<string, unknown> | undefined
+  const year = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+  const monthIndex = monthNames.findIndex((m) => m === monthName)
+  const idx = monthIndex >= 0 ? monthIndex : 0
+  return new Date(Number(year), idx + 1, 0).getDate()
+}
 
-// Watch para ma-update ang day values from employee's payroll_start ug payroll_end
 watch(
   () => props.itemData,
   (newData) => {
-    // console.log('🔍 PayrollTableDialog - Employee Data:', {
-    //   employeeId: newData?.id,
-    //   employeeName: `${newData?.firstname || ''} ${newData?.lastname || ''}`,
-    //   payroll_start: newData?.payroll_start,
-    //   payroll_end: newData?.payroll_end,
-    //   fullData: newData
-    // })
-
-    // Set ang payroll_start ug payroll_end kung naa
     if (newData?.payroll_start !== undefined && newData?.payroll_start !== null) {
       dayFrom.value = newData.payroll_start
-      // console.log('✅ Set dayFrom to:', newData.payroll_start)
     } else {
       dayFrom.value = null
-      // console.log('⚠️ No payroll_start found')
     }
 
     if (newData?.payroll_end !== undefined && newData?.payroll_end !== null) {
       dayTo.value = newData.payroll_end
-      // console.log('✅ Set dayTo to:', newData.payroll_end)
     } else {
       dayTo.value = null
-      // console.log('⚠️ No payroll_end found')
     }
 
-    // Enable crossmonth ONLY if both payroll_start ug payroll_end naa
     crossMonthEnabled.value = Boolean(newData?.payroll_start && newData?.payroll_end)
-    // console.log('📊 Final values:', { dayFrom: dayFrom.value, dayTo: dayTo.value, crossMonthEnabled: crossMonthEnabled.value })
   },
   { immediate: true },
 )
 
-// When cross-month is toggled off, clear both inputs; when enabled, set defaults from employee data
 watch(
   () => crossMonthEnabled.value,
   (enabled) => {
     if (!enabled) {
-      // Simply clear both inputs
       dayFrom.value = null
       dayTo.value = null
     } else {
-      // Set defaults from employee data when enabling
       if (dayFrom.value === null || dayFrom.value === undefined)
         dayFrom.value = props.itemData?.payroll_start ?? daysInPreviousMonth.value
       if (dayTo.value === null || dayTo.value === undefined)
@@ -177,7 +120,6 @@ watch(
   { immediate: true },
 )
 
-// onView: delegate complex behavior to helper while keeping the component API
 function onView(item: TableData) {
   onViewHelper({
     item,
@@ -190,7 +132,6 @@ function onView(item: TableData) {
   })
 }
 
-// Persist selected from/to days to localStorage when changed (or clear when null)
 watch(
   () => [dayFrom.value, dayTo.value],
   ([newFrom, newTo]) => {
@@ -198,7 +139,6 @@ watch(
     const year =
       tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
 
-    // If both cleared, remove persisted values
     if ((newFrom === null || newFrom === undefined) && (newTo === null || newTo === undefined)) {
       try {
         localStorage.removeItem('czarles_payroll_fromDate')
@@ -209,9 +149,7 @@ watch(
       return
     }
 
-    // Build range using helpers and persist
     const from = newFrom ?? (crossMonthEnabled.value ? daysInPreviousMonth.value : 1)
-    // If cross-month is enabled, 'to' defaults to current month's last day; otherwise last day of chosen month
     const to =
       newTo ??
       (crossMonthEnabled.value
@@ -232,59 +170,6 @@ watch(
   { immediate: true },
 )
 
-// TODO: Crossmonth calculation for table data - currently disabled due to wrong calculations
-// The crossmonth toggle only affects the PayrollPrint dialog, not the table data
-// Table data always uses default (full month) calculation
-//
-// Watch for crossmonth toggle or day range changes to reload table data
-// Use a flag to skip the initial trigger
-// const hasInitiallyLoaded = ref(false) // TODO: Re-enable when crossmonth calculation is fixed
-
-// DISABLED: Crossmonth watcher for table reload - causes incorrect calculations
-// watch(
-//   () => [crossMonthEnabled.value, dayFrom.value, dayTo.value],
-//   async () => {
-//     // Skip first trigger (initial load)
-//     if (!hasInitiallyLoaded.value) {
-//       hasInitiallyLoaded.value = true
-//       return
-//     }
-
-//     if (props.isDialogVisible && typeof reloadTableData === 'function') {
-//       // Pass the current crossmonth state and day range to reload
-//       await reloadTableData({
-//         crossMonthEnabled: crossMonthEnabled.value,
-//         dayFrom: dayFrom.value,
-//         dayTo: dayTo.value,
-//       })
-//     }
-//   },
-//   { deep: true },
-// )
-
-// DISABLED: Dialog visibility watcher for crossmonth sync
-// watch(
-//   () => props.isDialogVisible,
-//   async (isVisible) => {
-//     if (isVisible && hasInitiallyLoaded.value && typeof reloadTableData === 'function') {
-//       // Sync the crossmonth configuration when dialog opens
-//       await reloadTableData({
-//         crossMonthEnabled: crossMonthEnabled.value,
-//         dayFrom: dayFrom.value,
-//         dayTo: dayTo.value,
-//       })
-//     }
-//   },
-// )
-
-// Compute the sum of net_pay + attendance calculation for field staff (delegates to helper)
-const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPayHelper(item)
-
-/**
- * Compute a date range for the given year + monthName using optional from/to day numbers.
- * Returns { fromDate, toDate, totalDays } where dates are YYYY-MM-DD and totalDays is inclusive.
- */
-// (moved getDateRangeForMonth to shared helpers.ts)
 </script>
 
 <template>
@@ -366,53 +251,51 @@ const calculateFieldStaffNetPay = (item: TableData) => calculateFieldStaffNetPay
       </template>
 
       <v-card-text>
-        <!-- Field Staff Debug Information -->
+        <v-progress-linear v-if="tableOptions.isLoading" indeterminate></v-progress-linear>
 
-        <!-- eslint-disable vue/valid-v-slot -->
-        <v-data-table
-          v-model:items-per-page="tableOptions.itemsPerPage"
-          v-model:page="tableOptions.page"
-          v-model:sort-by="tableOptions.sortBy"
-          :loading="tableOptions.isLoading"
-          :headers="tableHeaders"
-          :items="tableData"
-          :items-per-page-options="[6, 12]"
-          :hide-default-header="smAndDown"
-          :mobile="smAndDown"
-        >
-          <template #item.month="{ item }">
-            <v-btn class="text-decoration-underline" variant="text" @click="onView(item)">
-              {{ item.month }}
-            </v-btn>
-          </template>
-          <!-- <template #item.basic_salary="{ item }">
-            <div class="d-flex align-center ga-2">
-              <span v-if="isCurrentEmployeeFieldStaff"
-                >{{
-                  getMoneyText(((item.attendanceMinutes || 0) / 60) * (item.employeeDailyRate / 8))
-                }}
-                <span class="text-caption text-grey"
-                  >({{ ((item.attendanceMinutes || 0) / 60).toFixed(2) }} hrs)</span
+        <v-row v-else>
+          <v-col
+            v-for="item in tableData"
+            :key="item.month"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="3"
+          >
+            <v-card
+              class="month-card"
+              hover
+              @click="onView(item)"
+            >
+              <v-card-text class="text-center pa-6">
+                <v-icon size="48" class="mb-3" color="primary">
+                  mdi-calendar-month
+                </v-icon>
+                <div class="text-h6 font-weight-bold mb-2">
+                  {{ item.month }}
+                </div>
+                <v-chip
+                  v-if="crossMonthEnabled && (dayFrom || dayTo)"
+                  color="primary"
+                  variant="tonal"
+                  size="small"
+
                 >
-              </span>
-              <span v-else>{{ getMoneyText(item.basic_salary) }}</span>
-            </div>
-          </template> -->
-          <template #item.gross_pay="{ item }">
-            {{ getMoneyText(item.gross_pay) }}
-          </template>
-          <template #item.deductions="{ item }">
-            {{ getMoneyText(item.deductions) }}
-          </template>
-          <template #item.net_pay="{ item }">
-            <span v-if="isCurrentEmployeeFieldStaff">
-              {{ getMoneyText(calculateFieldStaffNetPay(item)) }}
-            </span>
-            <span v-else>
-              {{ getMoneyText(item.net_pay) }}
-            </span>
-          </template>
-        </v-data-table>
+                  Day {{ dayFrom || props.itemData?.payroll_start || '?' }} - {{ dayTo || props.itemData?.payroll_end || '?' }}
+                </v-chip>
+                <v-chip
+                  v-else
+                  color="secondary"
+                  variant="tonal"
+                  size="small"
+
+                >
+                  Day 1 - {{ getDaysInMonth(item.month) }}
+                </v-chip>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-card-text>
 
       <v-divider></v-divider>

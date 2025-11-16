@@ -29,22 +29,26 @@ export function useEmployeeDisplay(employeeData: ComputedRef<Employee | null>) {
 
   const isFieldStaff = computed(() => employeeData.value?.is_field_staff || false)
 
+  const isAdmin = computed(() => employeeData.value?.is_admin || false)
+
   return {
     fullName,
     designation,
     address,
     dailyRate,
     isFieldStaff,
+    isAdmin,
   }
 }
 
 /**
  * General display formatting composable
  */
-export function usePayrollFormatting() {
+export function usePayrollFormatting(isAdmin?: ComputedRef<boolean>) {
   const formattedDate = computed(() => getFormattedCurrentDate())
 
-  const showLateDeduction = computed(() => true)
+  // Admin employees should not have late/undertime deductions
+  const showLateDeduction = computed(() => !(isAdmin?.value ?? false))
 
   return {
     formattedDate,
