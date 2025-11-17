@@ -66,20 +66,103 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- November 16, 2025 -->
+          <v-divider class="mb-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 16, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Improved payroll print handling by passing date filters more cleanly for
+                easier maintenance.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Unified payroll calculations for field and office staff and improved
+                late/undertime rules for more consistent results.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Added better cross-month filtering and improved tooltips for displaying
+                days worked.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Added admin support in payroll and adjusted calculations to handle
+                admin-specific logic.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 15, 2025 -->
+          <v-divider class="mb-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 15, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Removed unused table columns and improved how month selection is displayed.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Improved holiday earnings and refined attendance logging for field
+                personnel.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Updated day tooltips to hide hour values and improved formatting for
+                clarity.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Streamlined payroll data processing and cleaned up type imports for better
+                maintainability.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 14, 2025 -->
+          <v-divider class="mb-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 14, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Updated Sunday duty label and adjusted payroll dialogs to disable
+                cross-month calculations where unnecessary.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added cross-month payroll calculations along with improved loading
+                indicators.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added Sunday duty calculations and display for better tracking of weekend
+                work.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- November 12, 2025 -->
           <v-divider class="mb-4"></v-divider>
           <h3 class="text-h6 mb-3">November 12, 2025</h3>
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title>
-                Improved payroll management by remembering selected date ranges using local storage,
-                so users can easily return to their last viewed period.
+                (Feature) Improved payroll management by remembering selected date ranges using
+                local storage, allowing users to easily return to their last viewed period.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title>
-                Enhanced holiday calculations to ensure more accurate pay and leave processing
-                during special dates.
+                (Feature) Enhanced holiday calculations to ensure more accurate pay and leave
+                processing during special dates.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -90,8 +173,8 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title>
-                Added new attendance tracking and display features within payroll management,
-                allowing better visibility of employee attendance details.
+                (Feature) Added attendance tracking and display components in payroll management for
+                better visibility of employee attendance details.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -102,13 +185,13 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Allow access to pages that do not require authentication.
+                (Feature) Allowed access to public pages that do not require authentication.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Implement field minutes calculation with penalties for late arrivals and early
-                departures.
+                (Feature) Implemented automatic calculation of late and early departure penalties
+                based on field minutes.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -119,14 +202,14 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Improved the calculation of work hours to include standard hours and fine-tuned how
-                field staff hours are handled.
+                (Feature) Improved work hour calculations to include standard hours and refined how
+                field staff hours are processed.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Enhanced Memo form setup to automatically include employee IDs when creating or
-                updating records.
+                (Feature) Enhanced Memo form setup to automatically include employee IDs when
+                creating or updating records.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -137,31 +220,31 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Updated payroll deductions for late and undertime entries so that field staff
-                calculations are now processed directly on the server for better accuracy.
+                (Feature) Updated payroll deductions for late and undertime entries, ensuring field
+                staff calculations are now processed server-side for higher accuracy.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Refined the payroll layout for better visibility and readability of smaller details.
+                (Feature) Refined payroll layout for improved visibility and readability of details.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Added new features to handle employee allowances and improved how total earnings are
-                computed.
+                (Feature) Added new allowance handling features and improved total earnings
+                computation.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Adjusted gross pay calculations to use allowances instead of COLA for all staff
-                types.
+                (Feature) Updated gross pay calculations to use allowances instead of COLA across
+                all staff types.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Improved the overall accuracy of payroll data by updating both client and
-                server-side calculations.
+                (Bugfix) Enhanced payroll accuracy by updating both client‑side and server‑side
+                calculations.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -172,25 +255,25 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Cleaned up report generation and improved the clarity of on-screen messages for
-                payroll reports.
+                (Bugfix) Cleaned up report generation and improved clarity of on‑screen report
+                messages.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Added new job position fields and improved how data is displayed in payroll
-                summaries.
+                (Feature) Added new job position fields and improved payroll summary display
+                formatting.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Enhanced holiday handling in payroll to ensure correct pay rates for different
-                holiday types.
+                (Feature) Enhanced holiday processing to ensure correct pay rates for each holiday
+                type.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Updated designation and form fields for better consistency in data entry.
+                (Bugfix) Updated designation and form fields for more consistent data entry.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -201,19 +284,19 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Added support for cash adjustments in payroll, now fully reflected in monthly
-                processing.
+                (Feature) Added cash adjustment support in payroll, now fully integrated into
+                monthly calculations.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Optimized how payroll data is loaded, reducing processing time for both field and
-                non-field employees.
+                (Feature) Optimized payroll data loading to reduce processing time for field and
+                office staff.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Introduced a faster data fetching method to gather all payroll-related details in a
+                (Feature) Introduced faster data fetching to retrieve all payroll information in a
                 single step.
               </v-list-item-title>
             </v-list-item>
@@ -225,14 +308,14 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Simplified cross-month payroll handling and improved data refresh when toggling
-                months.
+                (Bugfix) Simplified cross‑month payroll handling and improved data refresh behavior
+                when switching months.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Enhanced payroll computation for field staff by improving how total worked hours are
-                recorded and reflected in pay.
+                (Feature) Improved field staff payroll calculations by refining how total work hours
+                are computed and displayed.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -243,24 +326,25 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Combined multiple cash advance records into a single summary for clearer payroll
-                display.
+                (Feature) Consolidated multiple cash advance records into a single summary for
+                clearer payroll display.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Improved attendance validation and fetching for more reliable payroll calculations.
+                (Feature) Improved attendance validation and data fetching for more reliable payroll
+                results.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Enhanced how holidays and half-day attendances are included in payroll to ensure
-                complete accuracy.
+                (Feature) Enhanced processing of holidays and half‑day attendance to ensure full
+                accuracy.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Fixed how overtime hours are recalculated after reloading payroll data.
+                (Bugfix) Fixed overtime recalculation issues when payroll data is refreshed.
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -271,14 +355,14 @@ onMounted(() => {
           <v-list density="comfortable">
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Added utilization details to payroll summaries for better insight into employee
-                activities.
+                (Feature) Added utilization details to payroll summaries for improved insights on
+                employee activities.
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
               <v-list-item-title class="text-wrap">
-                Improved how attendance records are processed to include half-day entries for better
-                accuracy.
+                (Feature) Enhanced attendance processing to properly include half‑day entries for
+                better accuracy.
               </v-list-item-title>
             </v-list-item>
           </v-list>
