@@ -25,12 +25,12 @@ const emit = defineEmits(['update:isDialogVisible'])
 const { mdAndDown } = useDisplay()
 
 const { formAction, isPrinting, onPrint, onDialogClose } = usePayrollPrintDialog(
-  {
+  () => ({
     isDialogVisible: props.isDialogVisible,
     itemId: props.employeeData?.id,
     employeeData: props.employeeData,
     payrollData: props.payrollData
-  },
+  }),
   emit
 )
 
