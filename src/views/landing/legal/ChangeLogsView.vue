@@ -66,6 +66,36 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- November 19, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 19, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Fixed an issue on hours displayed on utilizations expanded row not matching
+                the actual logged time for employee.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Fixed an issue where rectified attendance entries were not being properly
+                saved when modified by an admin user.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 17, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 17, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Filename correction for payroll export to ensure proper file naming based
+                on employee.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- November 16, 2025 -->
           <v-divider class="mb-4"></v-divider>
           <h3 class="text-h6 mb-3">November 16, 2025</h3>
