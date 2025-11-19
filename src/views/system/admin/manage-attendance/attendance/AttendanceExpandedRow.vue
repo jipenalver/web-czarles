@@ -11,6 +11,7 @@ import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
 import { useAttendanceTable } from './attendanceTable'
 import { useEmployeesStore } from '@/stores/employees'
+import { getAvatarText } from '@/utils/helpers/others'
 import { getTime } from '@/utils/helpers/dates'
 import { useDisplay } from 'vuetify'
 import { computed } from 'vue'
@@ -100,6 +101,36 @@ const isFieldStaff = computed(() => {
             {{ props.itemData.is_pm_out_rectified ? 'Rectified' : 'Not Rectified' }}
           </v-chip>
         </v-col>
+
+        <v-col
+          cols="12"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
+          <span class="text-body-2 font-weight-bold me-2">Last Rectified By:</span>
+          <div class="d-flex align-center">
+            <v-avatar
+              v-if="props.itemData.user_avatar"
+              :image="props.itemData.user_avatar"
+              color="primary"
+              size="small"
+            ></v-avatar>
+
+            <v-avatar v-else color="primary" size="small">
+              <span class="text-caption">
+                {{
+                  props.itemData.user_fullname ? getAvatarText(props.itemData.user_fullname) : 'N/A'
+                }}
+              </span>
+            </v-avatar>
+
+            <p class="text-body-2 ms-2">
+              {{ props.itemData.user_fullname || 'Not Available' }}
+            </p>
+          </div>
+        </v-col>
+
+        <v-divider class="my-3" thickness="1"></v-divider>
 
         <v-col
           cols="12"

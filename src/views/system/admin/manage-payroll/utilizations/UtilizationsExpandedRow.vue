@@ -6,10 +6,8 @@ import {
   getWorkHoursString,
 } from '@/utils/helpers/attendance'
 import { type Utilization } from '@/stores/utilizations'
-import { useEmployeesStore } from '@/stores/employees'
 import { getTime } from '@/utils/helpers/dates'
 import { useDisplay } from 'vuetify'
-import { computed } from 'vue'
 
 const props = defineProps<{
   columnsLength: number
@@ -17,13 +15,6 @@ const props = defineProps<{
 }>()
 
 const { mobile } = useDisplay()
-
-const employeesStore = useEmployeesStore()
-
-const isFieldStaff = computed(() => {
-  const employee = employeesStore.employees.find((emp) => emp.id === props.itemData.employee_id)
-  return employee?.is_field_staff || false
-})
 </script>
 
 <template>
@@ -91,7 +82,8 @@ const isFieldStaff = computed(() => {
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
-                isFieldStaff,
+                false,
+                true,
               )
             }}
 
@@ -102,7 +94,8 @@ const isFieldStaff = computed(() => {
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
-                  isFieldStaff,
+                  false,
+                  true,
                 )
               }})
             </span>

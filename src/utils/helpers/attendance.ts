@@ -212,7 +212,13 @@ export const getWorkHoursString = (
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
   isField = false,
-) => convertTimeToString(getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField))
+  isStandard = false,
+) =>
+  convertTimeToString(
+    isStandard
+      ? getFieldMinutes(amTimeIn, amTimeOut) + getFieldMinutes(pmTimeIn, pmTimeOut)
+      : getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField),
+  )
 
 // 👉 Get total work hours (AM + PM) in decimal
 export const getWorkHoursDecimal = (

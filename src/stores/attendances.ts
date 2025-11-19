@@ -31,6 +31,9 @@ export type Attendance = {
   is_leave_with_pay: boolean
   leave_type: string | null
   leave_reason: string
+  user_id: string
+  user_avatar: string | null
+  user_fullname: string
 }
 
 export type AttendanceImage = {

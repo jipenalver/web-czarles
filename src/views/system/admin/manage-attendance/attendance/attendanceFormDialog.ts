@@ -8,6 +8,7 @@ import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref, watch } from 'vue'
 
 export function useAttendanceFormDialog(
@@ -19,6 +20,7 @@ export function useAttendanceFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const authUserStore = useAuthUserStore()
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
 
@@ -90,6 +92,9 @@ export function useAttendanceFormDialog(
       is_am_out_rectified: formCheckBox.value.isRectifyAMTimeOut ? true : undefined,
       is_pm_in_rectified: formCheckBox.value.isRectifyPMTimeIn ? true : undefined,
       is_pm_out_rectified: formCheckBox.value.isRectifyPMTimeOut ? true : undefined,
+      user_id: authUserStore.userData?.id as string,
+      user_avatar: authUserStore.userData?.avatar || null,
+      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
     }
 
     const { data, error } = isUpdate.value
