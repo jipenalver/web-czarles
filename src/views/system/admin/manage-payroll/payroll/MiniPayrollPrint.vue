@@ -18,10 +18,12 @@ import { fetchEmployeeDeductions } from './computation/benefits'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
+import { useCashAdjustmentsStore, type CashAdjustment } from '@/stores/cashAdjustments'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import type { CashAdvance } from '@/stores/cashAdvances'
 import type { HolidayWithAttendance } from './computation/holidays'
 import { fetchFilteredTrips } from './computation/trips'
+import { getLastDateOfMonth } from './helpers'
 
 // Props
 const props = defineProps<{
@@ -30,11 +32,13 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
-// Pinia store for employees
+// Pinia stores
 // const employeesStore = useEmployeesStore()
+const cashAdjustmentsStore = useCashAdjustmentsStore()
 const employeeDeductions = ref<EmployeeDeduction[]>([])
 const employeeNonDeductions = ref<EmployeeDeduction[]>([])
 const cashAdvances = ref<CashAdvance[]>([])
+const cashAdjustments = ref<CashAdjustment[]>([])
 
 // Constants
 const monthNames = [
@@ -124,6 +128,9 @@ const {
   loadSundayDuty,
   fetchEmployeeHolidays,
   // isHolidaysLoading - available but not used in mini print
+  cashAdjustmentsAdditions,
+  monthlyCashAdjustmentsTotal,
+  loadCashAdjustments,
 } = usePayrollData(payrollDataParams)
 
 // Use fetchEmployeeDeductions from benefits.ts
@@ -131,6 +138,34 @@ async function updateEmployeeDeductions(employeeId: number | undefined) {
   const result = await fetchEmployeeDeductions(employeeId)
   employeeDeductions.value = result.deductions
   employeeNonDeductions.value = result.nonDeductions
+}
+
+// Fetch cash adjustments (deductions only) using store
+async function fetchCashAdjustmentsDeductions(filterDateString: string, employeeId: number) {
+  const startDate = `${filterDateString}`
+
+  // Get the end date from localStorage for cross-month support, fallback to last day of month
+  let endDate = getLastDateOfMonth(startDate)
+  try {
+    const storedToDate = localStorage.getItem('czarles_payroll_toDate')
+    if (storedToDate) {
+      endDate = storedToDate
+    }
+  } catch (error) {
+    console.error('Error reading toDate from localStorage:', error)
+  }
+
+  // Convert dates to Date objects for store filter
+  const adjustmentDates = [new Date(startDate), new Date(endDate)]
+
+  // Fetch using store with filters
+  await cashAdjustmentsStore.getCashAdjustmentsExport(
+    { page: 1, itemsPerPage: -1, sortBy: [] },
+    { employee_id: employeeId, adjustment_at: adjustmentDates }
+  )
+
+  // Filter for deductions only (is_deduction = true)
+  return cashAdjustmentsStore.cashAdjustmentsExport.filter(adj => adj.is_deduction === true)
 }
 
 // Watch for employeeId changes to fetch deductions
@@ -142,17 +177,21 @@ watch(
   { immediate: true },
 )
 
-// Fetch cash advances when employeeId or filterDateString changes
+// Fetch cash advances and cash adjustments when employeeId or filterDateString changes
 watch(
   () => [filterDateString.value, props.employeeData?.id],
   async ([filterDateString, employeeId]) => {
     if (typeof employeeId === 'number' && filterDateString) {
-      // kuhaon ang cash advances para sa employee ug payroll month
+      // kuhaon ang cash advances ug cash adjustments para sa employee ug payroll month
       const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
+      const fetchedCashAdjustments = await fetchCashAdjustmentsDeductions(filterDateString as string, employeeId)
+
       // Filter out dummy entries with amount: 0
       cashAdvances.value = fetchedCashAdvances.filter(ca => ca.amount && ca.amount > 0)
+      cashAdjustments.value = fetchedCashAdjustments
     } else {
       cashAdvances.value = []
+      cashAdjustments.value = []
     }
   },
   { immediate: true },
@@ -161,6 +200,11 @@ watch(
 // Compute total cash advance from all ca.amount
 const totalCashAdvance = computed(() =>
   cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0),
+)
+
+// Compute total cash adjustments (deductions only)
+const totalCashAdjustments = computed(() =>
+  cashAdjustments.value.reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0),
 )
 
 // Reactive references
@@ -238,7 +282,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   employeeNonDeductions,
   computed(() => 0), // monthlyUtilizationsTotal - not used in mini print
   monthlyAllowancesTotal,
-  computed(() => 0), // monthlyCashAdjustmentsTotal - not used in mini print
+  monthlyCashAdjustmentsTotal,
   sundayDutyAmount,
 )
 
@@ -258,7 +302,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
   showLateDeduction,
   lateDeduction,
   employeeDeductions,
-  totalCashAdvance,
+  computed(() => totalCashAdvance.value + totalCashAdjustments.value), // Combine both cash deductions
   undertimeDeduction,
 )
 
@@ -292,7 +336,7 @@ async function updateOverallOvertime() {
 
 // Enhanced mounted hook
 onMounted(async () => {
-  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances(), loadSundayDuty(dailyRate.value)])
+  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
   recalculateEarnings()
 })
 
@@ -324,7 +368,7 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances(), loadSundayDuty(dailyRate.value)])
+    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
     recalculateEarnings()
   },
   { deep: true },
@@ -490,6 +534,17 @@ const displayableHolidays = computed(() => {
         </v-row>
       </template>
 
+      <!-- Cash Adjustments (Additions) -->
+      <template v-if="cashAdjustmentsAdditions && cashAdjustmentsAdditions.length > 0">
+        <v-row dense class="mb-1" v-for="adj in cashAdjustmentsAdditions" :key="'cashadjustment-add-' + adj.id">
+          <v-col cols="6" class="text-caption pa-1">{{ adj.name || 'Cash Adjustment' }}
+            <span v-if="adj.remarks" class="text-caption font-weight-bold ms-1">({{ adj.remarks }})</span>
+          </v-col>
+          <v-col cols="3" class="pa-1"></v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">{{ safeCurrencyFormat(adj.amount || 0, formatCurrency) }}</v-col>
+        </v-row>
+      </template>
+
 
 
 
@@ -566,6 +621,21 @@ const displayableHolidays = computed(() => {
           </v-col>
           <v-col cols="6" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat(ca.amount || 0, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
+
+      <!-- Cash Adjustments (Deductions) -->
+      <template v-for="adj in cashAdjustments" :key="'cashadjustment-' + adj.id">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">
+            {{ adj.name || 'Cash Adjustment' }}
+            <span v-if="adj.remarks" class="text-caption font-weight-bold ms-1">
+              ({{ adj.remarks }})
+            </span>
+          </v-col>
+          <v-col cols="6" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(adj.amount || 0, formatCurrency) }}
           </v-col>
         </v-row>
       </template>
