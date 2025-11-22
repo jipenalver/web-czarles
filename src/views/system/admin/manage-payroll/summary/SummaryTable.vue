@@ -110,6 +110,24 @@ const searchQuery = ref('')
 // Designation filter state
 const selectedDesignation = ref<number | null>(null)
 
+// Filtered items based on search query and designation
+const filteredMonthlyPayrollData = computed(() => {
+  let filtered = monthlyPayrollData.value
+
+  // Filter by designation
+  if (selectedDesignation.value !== null) {
+    filtered = filtered.filter((item) => item.designation_id === selectedDesignation.value)
+  }
+
+  // Filter by search query
+  if (searchQuery.value && searchQuery.value.trim() !== '') {
+    const query = searchQuery.value.toLowerCase().trim()
+    filtered = filtered.filter((item) => item.employee_name.toLowerCase().includes(query))
+  }
+
+  return filtered
+})
+
 // Reset to first page when data changes or search query changes
 watch(monthlyPayrollData, () => {
   currentPage.value = 1
@@ -151,7 +169,7 @@ const handleExportPDF = async () => {
 
     <!-- PDF Component (Hidden) -->
     <MonthlyPayrollPDF
-      :items="monthlyPayrollData"
+      :items="filteredMonthlyPayrollData"
       :selected-month="selectedMonth"
       :selected-year="selectedYear"
     />
@@ -167,7 +185,7 @@ const handleExportPDF = async () => {
               variant="text"
               size="small"
               v-bind="props"
-              :disabled="monthlyPayrollData.length === 0"
+              :disabled="filteredMonthlyPayrollData.length === 0"
             ></v-btn>
           </template>
           <v-list density="compact">
@@ -302,7 +320,7 @@ const handleExportPDF = async () => {
       <!-- Table Section -->
       <MonthlyPayrollTable
         v-if="monthlyPayrollData.length > 0"
-        :items="monthlyPayrollData"
+        :items="filteredMonthlyPayrollData"
         :loading="loading"
         :search-query="searchQuery"
         :selected-designation="selectedDesignation"
