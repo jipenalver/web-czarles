@@ -24,27 +24,10 @@ const emit = defineEmits<{
   'update:itemsPerPage': [value: number]
 }>()
 
-// Filtered items based on search query and designation
-const filteredItems = computed(() => {
-  let filtered = props.items
-
-  // Filter by designation
-  if (props.selectedDesignation !== null) {
-    filtered = filtered.filter((item) => item.designation_id === props.selectedDesignation)
-  }
-
-  // Filter by search query
-  if (props.searchQuery && props.searchQuery.trim() !== '') {
-    const query = props.searchQuery.toLowerCase().trim()
-    filtered = filtered.filter((item) => item.employee_name.toLowerCase().includes(query))
-  }
-
-  return filtered
-})
-
 // Items with client-side calculations
+// Note: Items are now pre-filtered in parent component (SummaryTable.vue)
 const itemsWithCalculations = computed(() => {
-  return filteredItems.value.map(item => {
+  return props.items.map(item => {
     // Use the basic_pay already calculated in the processor (fieldStaffProcessor or nonFieldStaffProcessor)
     // Both field staff and office staff now use days_worked × daily_rate
     const basicPay = item.basic_pay || 0
@@ -373,12 +356,12 @@ const totals = computed(() => {
     </v-card-text>
 
     <!-- Pagination -->
-    <v-divider v-if="filteredItems.length > 0"></v-divider>
+    <v-divider v-if="itemsWithCalculations.length > 0"></v-divider>
     <MonthlyPayrollPagination
-      v-if="filteredItems.length > 0"
+      v-if="itemsWithCalculations.length > 0"
       :current-page="currentPage"
       :items-per-page="itemsPerPage"
-      :total-items="filteredItems.length"
+      :total-items="itemsWithCalculations.length"
       @update:current-page="emit('update:currentPage', $event)"
       @update:items-per-page="emit('update:itemsPerPage', $event)"
     />

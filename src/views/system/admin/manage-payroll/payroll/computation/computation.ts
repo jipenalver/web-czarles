@@ -15,6 +15,7 @@ export interface AttendanceRecord {
   pm_time_out: string | null
   overtime_in: string | null
   overtime_out: string | null
+  is_overtime_applied?: boolean
   is_leave_with_pay?: boolean
   leave_type?: string
   leave_reason?: string
@@ -103,9 +104,9 @@ export async function getEmployeesAttendanceBatch(
     })
 
     if (error) {
-      console.error('[BATCH] RPC Error:', error)
-      console.error('[BATCH] Function might not exist. Run: supabase/functions/get_attendance_batch.sql')
-      console.error('[BATCH] Parameters:', { numericIds, startISO, endISO })
+      // console.error('[BATCH] RPC Error:', error)
+      // console.error('[BATCH] Function might not exist. Run: supabase/functions/get_attendance_batch.sql')
+      // console.error('[BATCH] Parameters:', { numericIds, startISO, endISO })
       return new Map()
     }
 
@@ -208,29 +209,29 @@ export async function getEmployeeAttendanceById(
   }
 
   // debug
-  console.log('[getEmployeeAttendanceById] Fetching attendance data:', {
-    employeeId,
-    dateString,
-    fromDateISO,
-    toDateISO,
-    queryRange: {
-      startISO,
-      endISO,
-      startDate: startISO.split('T')[0],
-      endDate: endISO.split('T')[0]
-    }
-  })
+  // console.log('[getEmployeeAttendanceById] Fetching attendance data:', {
+  //   employeeId,
+  //   dateString,
+  //   fromDateISO,
+  //   toDateISO,
+  //   queryRange: {
+  //     startISO,
+  //     endISO,
+  //     startDate: startISO.split('T')[0],
+  //     endDate: endISO.split('T')[0]
+  //   }
+  // })
 
   const { data, error } = await supabase
     .from('attendances')
     .select(
-      'id, am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_leave_with_pay, leave_type, leave_reason',
+      'id, am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_overtime_applied, is_leave_with_pay, leave_type, leave_reason',
     )
     .eq('employee_id', employeeId)
-    .or(`and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(pm_time_in.gte.${startISO},pm_time_in.lt.${endISO})`)
+    .or(`and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(pm_time_in.gte.${startISO},pm_time_in.lt.${endISO}),and(overtime_in.gte.${startISO},overtime_in.lt.${endISO})`)
     .order('created_at', { ascending: false })
   if (error) {
-    console.error('getEmployeeAttendanceById error:', error)
+    // console.error('getEmployeeAttendanceById error:', error)
     return null
   }
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
@@ -238,11 +239,11 @@ export async function getEmployeeAttendanceById(
   // Deduplicate records by id (in case OR query returns duplicates for records with both AM and PM)
   const uniqueData = data ? Array.from(new Map(data.map(item => [item.id, item])).values()) : []
 
-  console.log('[getEmployeeAttendanceById] Raw attendance records fetched:', {
-    totalRecords: data?.length || 0,
-    uniqueRecords: uniqueData.length,
-    recordIds: uniqueData.map(r => r.id)
-  })
+  // console.log('[getEmployeeAttendanceById] Raw attendance records fetched:', {
+  //   totalRecords: data?.length || 0,
+  //   uniqueRecords: uniqueData.length,
+  //   recordIds: uniqueData.map(r => r.id)
+  // })
 
   const result = Array.isArray(uniqueData)
     ? uniqueData.map((row) => {
@@ -273,6 +274,7 @@ export async function getEmployeeAttendanceById(
           pm_time_out: getTimeHHMM(row.pm_time_out),
           overtime_in: getTimeHHMM(row.overtime_in),
           overtime_out: getTimeHHMM(row.overtime_out),
+          is_overtime_applied: row.is_overtime_applied,
           is_leave_with_pay: row.is_leave_with_pay,
           leave_type: row.leave_type,
           leave_reason: row.leave_reason,
@@ -284,35 +286,35 @@ export async function getEmployeeAttendanceById(
     : null
 
   // Log detailed breakdown of processed attendance
-  if (result && result.length > 0) {
-    const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
-    const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
+  // if (result && result.length > 0) {
+  //   const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
+  //   const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
 
-    console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
-      employeeId,
-      totalDays: result.length,
-      daysWithAttendance,
-      totalHours: totalHours.toFixed(2),
-      averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
-      dateRange: {
-        from: fromDateISO || dateString,
-        to: toDateISO || 'end of month'
-      }
-    })
+  //   console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
+  //     employeeId,
+  //     totalDays: result.length,
+  //     daysWithAttendance,
+  //     totalHours: totalHours.toFixed(2),
+  //     averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
+  //     dateRange: {
+  //       from: fromDateISO || dateString,
+  //       to: toDateISO || 'end of month'
+  //     }
+  //   })
 
-    // Create detailed table of each day
-    console.table(result.map(r => ({
-      Date: r.attendance_date || r.date || 'N/A',
-      'AM In': r.am_time_in || '-',
-      'AM Out': r.am_time_out || '-',
-      'PM In': r.pm_time_in || '-',
-      'PM Out': r.pm_time_out || '-',
-      'Hours': (r._debug_dayHours || 0).toFixed(2),
-      'Leave': r.is_leave_with_pay ? 'Yes' : '-'
-    })))
-  } else {
-    console.log('[getEmployeeAttendanceById] No attendance records found for employee:', employeeId)
-  }  // Cache the result
+  //   // Create detailed table of each day
+  //   console.table(result.map(r => ({
+  //     Date: r.attendance_date || r.date || 'N/A',
+  //     'AM In': r.am_time_in || '-',
+  //     'AM Out': r.am_time_out || '-',
+  //     'PM In': r.pm_time_in || '-',
+  //     'PM Out': r.pm_time_out || '-',
+  //     'Hours': (r._debug_dayHours || 0).toFixed(2),
+  //     'Leave': r.is_leave_with_pay ? 'Yes' : '-'
+  //   })))
+  // } else {
+  //   console.log('[getEmployeeAttendanceById] No attendance records found for employee:', employeeId)
+  // }  // Cache the result
   if (result) {
     attendanceCache.set(cacheKey, result)
     cacheMetadata.set(cacheKey, Date.now())
@@ -328,17 +330,38 @@ export function getEmployeeByIdemp(id: number): Employee | undefined {
 }
 
 // Helper function to compute overtime hours between two time strings (HH:MM)
+// Handles overnight shifts (e.g., 5:00 PM to 1:00 AM next day)
 export function computeOvertimeHours(
   overtimeIn: string | null,
   overtimeOut: string | null,
 ): number {
-  if (!overtimeIn || !overtimeOut) return 0
+  if (!overtimeIn || !overtimeOut) {
+    // console.log('[computeOvertimeHours] Missing overtime in/out:', { overtimeIn, overtimeOut })
+    return 0
+  }
+
   // parse time strings to Date objects (use today as date)
   const today = getDateISO(new Date()) || new Date().toISOString().split('T')[0]
   const inDate = new Date(`${today}T${overtimeIn}:00`)
   const outDate = new Date(`${today}T${overtimeOut}:00`)
-  const diffMs = outDate.getTime() - inDate.getTime()
+
+  let diffMs = outDate.getTime() - inDate.getTime()
+
+  // Handle overnight shifts: if end time is earlier than start time, add 24 hours
+  if (diffMs < 0) {
+    // console.log('[computeOvertimeHours] Detected overnight shift:', { overtimeIn, overtimeOut })
+    diffMs += 24 * 60 * 60 * 1000 // Add 24 hours in milliseconds
+  }
+
   const diffHours = diffMs / (1000 * 60 * 60)
+
+  // console.log('[computeOvertimeHours] Calculated overtime:', {
+  //   overtimeIn,
+  //   overtimeOut,
+  //   hours: diffHours.toFixed(2),
+  //   isOvernight: diffMs >= 24 * 60 * 60 * 1000
+  // })
+
   return diffHours > 0 ? diffHours : 0
 }
 
@@ -349,6 +372,13 @@ export async function computeOverallOvertimeCalculation(
   fromDateISO?: string,
   toDateISO?: string,
 ): Promise<number> {
+  // console.log('[computeOverallOvertimeCalculation] Starting calculation:', {
+  //   employeeId,
+  //   dateString,
+  //   fromDateISO,
+  //   toDateISO,
+  // })
+
   let usedDateString = dateString
   if (!usedDateString && typeof window !== 'undefined') {
     usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
@@ -362,20 +392,82 @@ export async function computeOverallOvertimeCalculation(
     usedTo =
       usedTo || (localStorage.getItem('czarles_payroll_toDate') as string | null) || undefined
   }
+
+  // console.log('[computeOverallOvertimeCalculation] Resolved parameters:', {
+  //   employeeId,
+  //   usedDateString,
+  //   usedFrom,
+  //   usedTo,
+  // })
+
   if (employeeId && usedDateString) {
     // Use special function for employee 55, regular function for others
     const attendances = employeeId === 55
       ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, usedFrom, usedTo)
       : await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
+
+    // console.log('[computeOverallOvertimeCalculation] Fetched attendances:', {
+    //   employeeId,
+    //   attendanceCount: attendances?.length || 0,
+    //   isEmployee55: employeeId === 55,
+    // })
+
     if (Array.isArray(attendances) && attendances.length > 0) {
       // sum all overtime hours for the month
       let totalOvertime = 0
+      const overtimeDetails: Array<{ date: string; overtimeIn: string | null; overtimeOut: string | null; hours: number; isApplied: boolean }> = []
+
       attendances.forEach((a) => {
-        totalOvertime += computeOvertimeHours(a.overtime_in, a.overtime_out)
+        // Only count overtime if is_overtime_applied is true
+        if (a.is_overtime_applied !== true) {
+          return
+        }
+
+        const hours = computeOvertimeHours(a.overtime_in, a.overtime_out)
+        totalOvertime += hours
+
+        if (hours > 0) {
+          overtimeDetails.push({
+            date: a.attendance_date || a.date || 'N/A',
+            overtimeIn: a.overtime_in,
+            overtimeOut: a.overtime_out,
+            hours,
+            isApplied: a.is_overtime_applied || false,
+          })
+        }
       })
 
+      // console.log('[computeOverallOvertimeCalculation] OVERTIME BREAKDOWN:', {
+      //   employeeId,
+      //   totalDays: attendances.length,
+      //   daysWithOvertime: overtimeDetails.length,
+      //   totalOvertimeHours: totalOvertime.toFixed(2),
+      // })
+
+      if (overtimeDetails.length > 0) {
+        // console.table(overtimeDetails.map(d => ({
+        //   Date: d.date,
+        //   'OT In': d.overtimeIn || '-',
+        //   'OT Out': d.overtimeOut || '-',
+        //   'Hours': d.hours.toFixed(2),
+        //   'Applied': d.isApplied ? 'Yes' : 'No',
+        // })))
+      } else {
+        // console.log('[computeOverallOvertimeCalculation] No overtime records with is_overtime_applied=true found for date range:', {
+        //   fromDate: usedFrom,
+        //   toDate: usedTo,
+        // })
+      }
+
       return totalOvertime
+    } else {
+      // console.log('[computeOverallOvertimeCalculation] No attendances found for employee:', employeeId)
     }
+  } else {
+    // console.log('[computeOverallOvertimeCalculation] Missing required parameters:', {
+    //   hasEmployeeId: !!employeeId,
+    //   hasDateString: !!usedDateString,
+    // })
   }
 
   return 0

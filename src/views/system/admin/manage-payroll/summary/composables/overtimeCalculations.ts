@@ -22,8 +22,14 @@ export async function calculateOvertimeHours(
     }
 
     // Calculate total overtime hours using the same logic as PayrollPrint.vue
+    // Only count overtime when is_overtime_applied is true (matching computation.ts logic)
     let totalOvertimeHours = 0
     attendances.forEach((attendance) => {
+      // Filter: only count overtime when approved (is_overtime_applied === true)
+      if (attendance.is_overtime_applied !== true) {
+        return
+      }
+
       const overtimeHours = computeOvertimeHours(attendance.overtime_in, attendance.overtime_out)
       totalOvertimeHours += overtimeHours
     })

@@ -105,7 +105,14 @@ export function usePayrollComputation(
       fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
       toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
     }
-    return await computeOverallOvertimeCalculation(employeeId, dateString, fromDate, toDate)
+    const overtimeResult = await computeOverallOvertimeCalculation(employeeId, dateString, fromDate, toDate)
+    // console.log(`[OVERTIME CALCULATION] Employee ${employeeId}:`, {
+    //   dateString,
+    //   fromDate,
+    //   toDate,
+    //   overtimeHours: overtimeResult,
+    // })
+    return overtimeResult
   }
   // const employeesStore = useEmployeesStore()
   // const attendancesStore = useAttendancesStore()
@@ -195,7 +202,7 @@ export function usePayrollComputation(
     let usedDateString = dateString
     if (!usedDateString && typeof window !== 'undefined') {
       usedDateString = localStorage.getItem('czarles_payroll_dateString') || undefined
-      //console.log(`[computeRegularWorkTotal] Using dateString: ${usedDateString}`)
+      // console.log(`[computeRegularWorkTotal] Using dateString: ${usedDateString}`)
     }
 
     if (employeeId && usedDateString) {
@@ -233,18 +240,18 @@ export function usePayrollComputation(
 
         // Get paid leave days para sa month
         const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId, fromDateForAttendance, toDateForAttendance)
-        /*  console.log(
-          `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
-          paidLeaveDays,
-        ) */
+        // console.log(
+        //   `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
+        //   paidLeaveDays,
+        // )
 
         if (isFieldStaff) {
           // For field staff, use same calculation as office staff (days worked × daily rate)
 
           // Set present days based on days with attendance (including half days) + paid leave days
           let employeePresentDays = 0
-          let fullDays = 0
-          let halfDays = 0
+          // let fullDays = 0
+          // let halfDays = 0
           attendances.forEach((attendance) => {
             // Check if both AM time-in and time-out are present and not empty strings
             const hasAmData =
@@ -267,20 +274,20 @@ export function usePayrollComputation(
             // Full day: both AM and PM data are available
             if (hasAmData && hasPmData) {
               employeePresentDays += 1
-              fullDays += 1
+              // fullDays += 1
             }
             // Half day: only AM data or only PM data is available
             else if (hasAmData || hasPmData) {
               employeePresentDays += 0.5
-              halfDays += 1
+              // halfDays += 1
             }
           })
 
           // Add paid leave days to present days para field staff
           employeePresentDays += paidLeaveDays
-          console.log(
-            `[FIELD STAFF DAYS] Employee ${employeeId} - Full days: ${fullDays}, Half days: ${halfDays} (=${halfDays * 0.5}), Paid leave: ${paidLeaveDays}, Total: ${employeePresentDays}, Daily rate: ${daily}, Regular work: ₱${(daily ?? 0) * employeePresentDays}`,
-          )
+          // console.log(
+          //   `[FIELD STAFF DAYS] Employee ${employeeId} - Full days: ${fullDays}, Half days: ${halfDays} (=${halfDays * 0.5}), Paid leave: ${paidLeaveDays}, Total: ${employeePresentDays}, Daily rate: ${daily}, Regular work: ₱${(daily ?? 0) * employeePresentDays}`,
+          // )
 
           presentDays.value = employeePresentDays
           absentDays.value = Math.max(0, workDays.value - employeePresentDays)
@@ -294,10 +301,10 @@ export function usePayrollComputation(
           monthUndertimeDeduction.value = undertimeMinutes
 
           if (lateMinutes > 0) {
-            console.warn(`[FIELD STAFF LATE] Employee ${employeeId} - Late minutes: ${lateMinutes} (AM: 7:21+, PM: 1:01+)`)
+            //console.warn(`[FIELD STAFF LATE] Employee ${employeeId} - Late minutes: ${lateMinutes} (AM: 7:21+, PM: 1:01+)`)
           }
           if (undertimeMinutes > 0) {
-            console.warn(`[FIELD STAFF UNDERTIME] Employee ${employeeId} - Undertime minutes: ${undertimeMinutes} (AM: <11:49, PM: <4:59)`)
+            //console.warn(`[FIELD STAFF UNDERTIME] Employee ${employeeId} - Undertime minutes: ${undertimeMinutes} (AM: <11:49, PM: <4:59)`)
           }
         } else {
           // For office staff, use existing logic with Friday/Saturday special rules
@@ -327,27 +334,27 @@ export function usePayrollComputation(
               const lateMinutes = getExcessMinutes(amStartTime, attendance.am_time_in)
               totalLateAM += lateMinutes
 
-              //console.error(`[LATE AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amStartTime}, Actual: ${attendance.am_time_in}, Late: ${lateMinutes} minutes`)
+              // console.error(`[LATE AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amStartTime}, Actual: ${attendance.am_time_in}, Late: ${lateMinutes} minutes`)
             }
             if (attendance.pm_time_in) {
               const lateMinutes = getExcessMinutes(pmStartTime, attendance.pm_time_in)
               totalLatePM += lateMinutes
-              //console.error(`[LATE PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmStartTime}, Actual: ${attendance.pm_time_in}, Late: ${lateMinutes} minutes`)
+              // console.error(`[LATE PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmStartTime}, Actual: ${attendance.pm_time_in}, Late: ${lateMinutes} minutes`)
             }
 
             // Calculate undertime minutes
             if (attendance.am_time_out) {
               const undertimeMinutes = getUndertimeMinutes(amEndTime, attendance.am_time_out)
-              /*  if (undertimeMinutes > 0) {
-                console.warn(`[UNDERTIME AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amEndTime}, Actual: ${attendance.am_time_out}, Undertime: ${undertimeMinutes} minutes`)
-              } */
+              // if (undertimeMinutes > 0) {
+              //   console.warn(`[UNDERTIME AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amEndTime}, Actual: ${attendance.am_time_out}, Undertime: ${undertimeMinutes} minutes`)
+              // }
               totalUndertimeAM += undertimeMinutes
             }
             if (attendance.pm_time_out) {
               const undertimeMinutes = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
-              /*  if (undertimeMinutes > 0) {
-                console.warn(`[UNDERTIME PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmEndTime}, Actual: ${attendance.pm_time_out}, Undertime: ${undertimeMinutes} minutes`)
-              } */
+              // if (undertimeMinutes > 0) {
+              //   console.warn(`[UNDERTIME PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmEndTime}, Actual: ${attendance.pm_time_out}, Undertime: ${undertimeMinutes} minutes`)
+              // }
               totalUndertimePM += undertimeMinutes
             }
           })
@@ -356,9 +363,9 @@ export function usePayrollComputation(
           monthUndertimeDeduction.value = totalUndertimeAM + totalUndertimePM
 
           // Log total undertime summary
-          /* if (monthUndertimeDeduction.value > 0) {
-            console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
-          } */
+          // if (monthUndertimeDeduction.value > 0) {
+          //   console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
+          // }
 
           // Check attendance data for present/absent days calculation including half days
           let employeePresentDays = 0
@@ -407,9 +414,9 @@ export function usePayrollComputation(
 
           // Add paid leave days to present days para office staff
           employeePresentDays += paidLeaveDays
-          /*  console.log(
-            `[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
-          ) */
+          // console.log(
+          //   `[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
+          // )
 
           // Calculate absent days: total working days minus present days (including paid leave)
           const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
@@ -449,11 +456,22 @@ export function usePayrollComputation(
   })
 
   // Overtime calculations
-  const overtimeHours = computed(() => tableData.value?.overtime_hours || 0)
+  const overtimeHours = computed(() => {
+    const hours = tableData.value?.overtime_hours || 0
+    // console.log(`[OVERTIME HOURS] Employee ${employeeId}:`, hours)
+    return hours
+  })
   const overtimePay = computed(() => {
     const hourlyRate = dailyRate.value / 8
     const overtimeRate = hourlyRate * 1.25
-    return overtimeHours.value * overtimeRate
+    const pay = overtimeHours.value * overtimeRate
+    // console.log(`[OVERTIME PAY] Employee ${employeeId}:`, {
+    //   hourlyRate: hourlyRate.toFixed(2),
+    //   overtimeRate: overtimeRate.toFixed(2),
+    //   overtimeHours: overtimeHours.value,
+    //   overtimePay: pay.toFixed(2),
+    // })
+    return pay
   })
   const totalEarnings = computed(() => totalGrossSalary.value + overtimePay.value)
 
