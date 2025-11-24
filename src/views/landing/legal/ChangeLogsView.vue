@@ -66,6 +66,36 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- November 23, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 23, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Enhanced the payroll summary with new filtering options and added more
+                detailed calculations for utilizations and cash adjustments.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Added full support for cash adjustments in payroll printing, including both
+                deductions and additions.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 22, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 22, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Integrate overtime setting by adding an field to attendance records and
+                updated overtime calculations accordingly.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- November 19, 2025 -->
           <v-divider class="my-4"></v-divider>
           <h3 class="text-h6 mb-3">November 19, 2025</h3>
