@@ -4,7 +4,9 @@ import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/summary/pdf/M
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayroll'
 import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summary/pdf/monthlyPayrollPDF'
 import { monthNames, getDateRangeForMonth } from '@/views/system/admin/manage-payroll/payroll/helpers'
+import { calculateDaysWorkedForAdminByAmOnly } from './composables/daysWorkedCalculations'
 import { useDesignationsStore } from '@/stores/designations'
+import { useEmployeesStore } from '@/stores/employees'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { ref, watch, onMounted, computed } from 'vue'
@@ -29,6 +31,9 @@ const { isLoadingPDF, onExport } = useMonthlyPayrollPDF()
 
 // Use designations store
 const designationsStore = useDesignationsStore()
+
+// Use employees store
+const employeesStore = useEmployeesStore()
 
 // Computed properties for day options
 const daysInSelectedMonth = computed(() => {
@@ -57,6 +62,7 @@ const dayOptionsTo = computed(() =>
 onMounted(async () => {
   selectedMonth.value = monthNames[new Date().getMonth()]
   await designationsStore.getDesignations()
+  await employeesStore.getEmployees() // Load employees to get admin status
 })
 
 // Watch for cross-month toggle
@@ -127,6 +133,74 @@ const filteredMonthlyPayrollData = computed(() => {
 
   return filtered
 })
+
+// Compute days worked for admin employees when data or date range changes
+watch(
+  [monthlyPayrollData, selectedMonth, selectedYear, dayFrom, dayTo, crossMonthEnabled],
+  async () => {
+    if (!Array.isArray(monthlyPayrollData.value) || monthlyPayrollData.value.length === 0) return
+
+    // Ensure employees are loaded
+    if (employeesStore.employees.length === 0) {
+      await employeesStore.getEmployees()
+    }
+
+    // Determine date string for calculation (use selected month/year)
+    const monthIdx = monthNames.indexOf(selectedMonth.value)
+    const yearVal = selectedYear.value || new Date().getFullYear()
+    const monthVal = monthIdx >= 0 ? monthIdx + 1 : new Date().getMonth() + 1
+    const monthStr = `${yearVal}-${String(monthVal).padStart(2, '0')}-01`
+
+    // Optional from/to if cross-month is enabled
+    let fromDate: string | undefined
+    let toDate: string | undefined
+    if (crossMonthEnabled.value && dayFrom.value && dayTo.value) {
+      const range = getDateRangeForMonth(yearVal, selectedMonth.value, dayFrom.value, dayTo.value)
+      fromDate = range.fromDate
+      toDate = range.toDate
+    }
+
+    // For each payroll item, check if employee is admin and compute days_worked_calculated
+    await Promise.all(
+      monthlyPayrollData.value.map(async (item: { employee_id?: number; id?: number; days_worked_calculated?: number | null; is_admin?: boolean }) => {
+        try {
+          const employeeId = item.employee_id || item.id
+          if (!employeeId) return
+
+          // Find the employee in the store to get the is_admin flag
+          const employee = employeesStore.employees.find(emp => emp.id === employeeId)
+
+          if (employee?.is_admin) {
+            // Set the is_admin flag on the item for use in MonthlyPayrollTable
+            item.is_admin = true
+
+            console.log(`[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`)
+
+            const days = await calculateDaysWorkedForAdminByAmOnly(
+              employeeId,
+              monthStr,
+              fromDate,
+              toDate
+            )
+            item.days_worked_calculated = days
+
+            console.log(`[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`)
+          } else {
+            // Set is_admin to false for non-admin employees
+            item.is_admin = false
+            // Leave existing value or undefined for non-admins
+            item.days_worked_calculated = item.days_worked_calculated ?? null
+          }
+        } catch {
+          // ignore per-item errors
+          item.days_worked_calculated = item.days_worked_calculated ?? null
+          item.is_admin = false
+        }
+      })
+    )
+  },
+  { immediate: true }
+)
 
 // Reset to first page when data changes or search query changes
 watch(monthlyPayrollData, () => {
