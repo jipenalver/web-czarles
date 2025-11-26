@@ -198,7 +198,7 @@ async function initializePayrollCalculations() {
     if (dailyRate.value > 0) {
       await loadSundayDuty(dailyRate.value)
     } else {
-      console.warn('[PayrollPrint] Skipping Sunday duty load - dailyRate not available:', dailyRate.value)
+      // console.warn('[PayrollPrint] Skipping Sunday duty load - dailyRate not available:', dailyRate.value)
       // Reset Sunday values if rate not available
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
@@ -223,7 +223,7 @@ async function reloadAllFunctions() {
     if (dailyRate.value > 0) {
       await loadSundayDuty(dailyRate.value)
     } else {
-      console.warn('[PayrollPrint] Skipping Sunday duty reload - dailyRate not available:', dailyRate.value)
+      // console.warn('[PayrollPrint] Skipping Sunday duty reload - dailyRate not available:', dailyRate.value)
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
     }
@@ -301,8 +301,8 @@ watch(() => isCalculationsCompleting.value, (isCompleting) => {
 
 // Debug: Watch for deduction value changes
 watch([monthLateDeduction, monthUndertimeDeduction, lateDeduction, undertimeDeduction],
-  ([late, undertime, lateAmount, undertimeAmount]) => {
-    console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
+  () => {
+    // console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
   }, { immediate: true }
 )
 

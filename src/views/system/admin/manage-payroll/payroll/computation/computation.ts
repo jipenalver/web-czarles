@@ -293,31 +293,31 @@ export async function getEmployeeAttendanceById(
 
   // Log detailed breakdown of processed attendance
   if (result && result.length > 0) {
-    const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
-    const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
+    // const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
+    // const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
 
-     console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
-      employeeId,
-      totalDays: result.length,
-      daysWithAttendance,
-       totalHours: totalHours.toFixed(2),
-      averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
-      dateRange: {
-        from: fromDateISO || dateString,
-        to: toDateISO || 'end of month'
-       }
-     })
+    //  console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
+    //   employeeId,
+    //   totalDays: result.length,
+    //   daysWithAttendance,
+    //    totalHours: totalHours.toFixed(2),
+    //   averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
+    //   dateRange: {
+    //     from: fromDateISO || dateString,
+    //     to: toDateISO || 'end of month'
+    //    }
+    //  })
 
     // Create detailed table of each day
-    console.table(result.map(r => ({
-      Date: r.attendance_date || r.date || 'N/A',
-      'AM In': r.am_time_in || '-',
-      'AM Out': r.am_time_out || '-',
-      'PM In': r.pm_time_in || '-',
-      'PM Out': r.pm_time_out || '-',
-      'Hours': (r._debug_dayHours || 0).toFixed(2),
-      'Leave': r.is_leave_with_pay ? 'Yes' : '-'
-    })))
+    // console.table(result.map(r => ({
+    //   Date: r.attendance_date || r.date || 'N/A',
+    //   'AM In': r.am_time_in || '-',
+    //   'AM Out': r.am_time_out || '-',
+    //   'PM In': r.pm_time_in || '-',
+    //   'PM Out': r.pm_time_out || '-',
+    //   'Hours': (r._debug_dayHours || 0).toFixed(2),
+    //   'Leave': r.is_leave_with_pay ? 'Yes' : '-'
+    // })))
   } else {
     // console.log('[getEmployeeAttendanceById] No attendance records found for employee:', employeeId)
   }
@@ -558,8 +558,8 @@ export async function getEmployeeAttendanceForEmployee55(
           const pmOutDate = new Date(pmInDate.getTime() + 4 * 60 * 60 * 1000)
           pmTimeOut = `${pmOutDate.getHours().toString().padStart(2, '0')}:${pmOutDate.getMinutes().toString().padStart(2, '0')}`
 
-        } catch (error) {
-          console.warn('Error parsing am_time_in for employee 55:', error)
+        } catch {
+          // console.warn('Error parsing am_time_in for employee 55:', error)
           // Use default times if parsing fails
         }
       }

@@ -113,13 +113,13 @@ watch(
 // Debug logging for loading states coordination
 watch(
   () => [isReloadingData.value, isPayrollLoading.value, isAnyLoading.value],
-  ([reloading, payrollLoading, anyLoading]) => {
-    console.log('[PayrollPrintDialog] Loading states:', {
-      reloading,
-      payrollLoading,
-      anyLoading,
-      hasPayrollRef: !!payrollPrintRef.value
-    })
+  () => {
+    // console.log('[PayrollPrintDialog] Loading states:', {
+    //   reloading,
+    //   payrollLoading,
+    //   anyLoading,
+    //   hasPayrollRef: !!payrollPrintRef.value
+    // })
   },
   { immediate: true }
 )

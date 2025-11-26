@@ -177,12 +177,12 @@ export function usePayrollTableDialog(
         lastLoaded.value.monthsKey === monthsKey
       ) {
         // already loaded, avoid refetch
-        console.log('[LOAD] Skipping reload - data already loaded with same config')
+        // console.log('[LOAD] Skipping reload - data already loaded with same config')
         tableOptions.value.isLoading = false
         return
       }
 
-      console.log('[LOAD] Loading payroll data with config:', { employeeId, year: tableFilters.value.year })
+      // console.log('[LOAD] Loading payroll data with config:', { employeeId, year: tableFilters.value.year })
 
       if (!employeeId) {
         tableData.value = []
@@ -233,7 +233,8 @@ export function usePayrollTableDialog(
           dayTo: null, // TODO: Change to: props.itemData?.payroll_end ?? null
         }
 
-        console.log('[DIALOG OPEN] Initialized crossMonthConfig (DISABLED):', crossMonthConfig.value)        // update time ug load data pag open
+        // console.log('[DIALOG OPEN] Initialized crossMonthConfig (DISABLED):', crossMonthConfig.value)
+        // update time ug load data pag open
         await updateCurrentTime()
         // Update year filter based sa employee hired_at
         if (props.itemData?.hired_at) {
@@ -331,7 +332,7 @@ export function usePayrollTableDialog(
 
   // Action: reload table data with crossmonth configuration
   const reloadTableData = async (config?: CrossMonthConfig): Promise<void> => {
-    console.log('[CROSSMONTH] Reloading table data with config:', config)
+    // console.log('[CROSSMONTH] Reloading table data with config:', config)
 
     if (config) {
       // Update crossmonth configuration
@@ -340,7 +341,7 @@ export function usePayrollTableDialog(
       if (config.crossMonthEnabled && config.dayFrom && config.dayTo) {
         // For each month, we'll calculate based on the crossmonth days
         // Store the base days in localStorage for computation to use
-        console.log('[CROSSMONTH] Enabled with days:', { from: config.dayFrom, to: config.dayTo })
+        // console.log('[CROSSMONTH] Enabled with days:', { from: config.dayFrom, to: config.dayTo })
         try {
           localStorage.setItem('czarles_payroll_crossMonthEnabled', 'true')
           localStorage.setItem('czarles_payroll_dayFrom', String(config.dayFrom))
@@ -350,7 +351,7 @@ export function usePayrollTableDialog(
         }
       } else {
         // Clear crossmonth settings
-        console.log('[CROSSMONTH] Disabled, clearing settings')
+        // console.log('[CROSSMONTH] Disabled, clearing settings')
         try {
           localStorage.removeItem('czarles_payroll_crossMonthEnabled')
           localStorage.removeItem('czarles_payroll_dayFrom')

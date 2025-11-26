@@ -128,16 +128,16 @@ const attendanceStats = computed(() => {
 
     // Console log the late and undertime data for each day
     if (hasLateness) {
-      console.log(`[ATTENDANCE LATE/UNDERTIME] ${date} (${dateValue}):`, {
-        amLate: amLate > 0 ? `${amLate} minutes` : 'None',
-        pmLate: pmLate > 0 ? `${pmLate} minutes` : 'None',
-        amUndertime: amUndertime > 0 ? `${amUndertime} minutes` : 'None',
-        pmUndertime: pmUndertime > 0 ? `${pmUndertime} minutes` : 'None',
-        timeIn: { am: attendance.am_time_in, pm: attendance.pm_time_in },
-        timeOut: { am: attendance.am_time_out, pm: attendance.pm_time_out },
-        expectedTimes: { amStart: amStartTime, pmStart: pmStartTime, amEnd: amEndTime, pmEnd: pmEndTime },
-        dayType: isFriSat ? 'Friday/Saturday' : 'Weekday'
-      })
+      // console.log(`[ATTENDANCE LATE/UNDERTIME] ${date} (${dateValue}):`, {
+      //   amLate: amLate > 0 ? `${amLate} minutes` : 'None',
+      //   pmLate: pmLate > 0 ? `${pmLate} minutes` : 'None',
+      //   amUndertime: amUndertime > 0 ? `${amUndertime} minutes` : 'None',
+      //   pmUndertime: pmUndertime > 0 ? `${pmUndertime} minutes` : 'None',
+      //   timeIn: { am: attendance.am_time_in, pm: attendance.pm_time_in },
+      //   timeOut: { am: attendance.am_time_out, pm: attendance.pm_time_out },
+      //   expectedTimes: { amStart: amStartTime, pmStart: pmStartTime, amEnd: amEndTime, pmEnd: pmEndTime },
+      //   dayType: isFriSat ? 'Friday/Saturday' : 'Weekday'
+      // })
     }
 
     if (hasAmData && hasPmData) {
@@ -222,15 +222,15 @@ const totals = computed(() => {
     totalUndertimeMinutes += record.amUndertime + record.pmUndertime
   })
 
-  console.warn(`[TOOLTIP TOTALS] Late: ${totalLateMinutes} minutes, Undertime: ${totalUndertimeMinutes} minutes`)
-  console.warn(`[TOOLTIP DATA DEBUG] Total attendance records: ${props.attendanceRecords.length}, Processed records: ${records.length}`)
-  console.warn(`[TOOLTIP ATTENDANCE DATA]`, props.attendanceRecords.map(r => ({
-    date: r.attendance_date || r.date,
-    amIn: r.am_time_in,
-    amOut: r.am_time_out,
-    pmIn: r.pm_time_in,
-    pmOut: r.pm_time_out
-  })))
+  // console.warn(`[TOOLTIP TOTALS] Late: ${totalLateMinutes} minutes, Undertime: ${totalUndertimeMinutes} minutes`)
+  // console.warn(`[TOOLTIP DATA DEBUG] Total attendance records: ${props.attendanceRecords.length}, Processed records: ${records.length}`)
+  // console.warn(`[TOOLTIP ATTENDANCE DATA]`, props.attendanceRecords.map(r => ({
+  //   date: r.attendance_date || r.date,
+  //   amIn: r.am_time_in,
+  //   amOut: r.am_time_out,
+  //   pmIn: r.pm_time_in,
+  //   pmOut: r.pm_time_out
+  // })))
 
   return {
     totalLateMinutes,

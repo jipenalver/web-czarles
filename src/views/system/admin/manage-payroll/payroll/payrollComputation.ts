@@ -166,7 +166,7 @@ export function usePayrollComputation(
       attendanceRecords.value = Array.isArray(attendances) ? attendances : []
 
       // Debug: Log main calculation data
-      console.warn(`[MAIN PAYROLL DEBUG] Employee ${employeeId} - Total attendance records: ${Array.isArray(attendances) ? attendances.length : 0}`)
+      // console.warn(`[MAIN PAYROLL DEBUG] Employee ${employeeId} - Total attendance records: ${Array.isArray(attendances) ? attendances.length : 0}`)
 
       if (Array.isArray(attendances) && attendances.length > 0) {
         // Read persisted from/to dates for crossmonth calculations if available
@@ -249,9 +249,9 @@ export function usePayrollComputation(
         monthUndertimeDeduction.value = totalUndertimeAM + totalUndertimePM
 
         // Debug: Log main calculation results
-        console.warn(`[MAIN PAYROLL CALCULATION] Employee ${employeeId} - Processed ${attendances.length} records`)
-        console.warn(`[MAIN PAYROLL TOTALS] Late: ${totalLateAM + totalLatePM} minutes (AM: ${totalLateAM}, PM: ${totalLatePM})`)
-        console.warn(`[MAIN PAYROLL TOTALS] Undertime: ${totalUndertimeAM + totalUndertimePM} minutes (AM: ${totalUndertimeAM}, PM: ${totalUndertimePM})`)
+        // console.warn(`[MAIN PAYROLL CALCULATION] Employee ${employeeId} - Processed ${attendances.length} records`)
+        // console.warn(`[MAIN PAYROLL TOTALS] Late: ${totalLateAM + totalLatePM} minutes (AM: ${totalLateAM}, PM: ${totalLatePM})`)
+        // console.warn(`[MAIN PAYROLL TOTALS] Undertime: ${totalUndertimeAM + totalUndertimePM} minutes (AM: ${totalUndertimeAM}, PM: ${totalUndertimePM})`)
 
         // Log total undertime summary
         // if (monthUndertimeDeduction.value > 0) {
