@@ -607,9 +607,9 @@ onMounted(async () => {
 
 <style scoped>
 /* visuals paras sa mini payslip UWU */
-/* .mini-payroll-hidden {
+.mini-payroll-hidden {
   display: none;
-} */
+}
 
 .thick-border {
   border: 1px solid !important;
