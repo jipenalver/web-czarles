@@ -1,19 +1,6 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55 } from './computation'
+import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, type AttendanceRecord } from './computation'
 // this script is naka connect sa computation.ts file IMPORTANT
 // 👉 Get total paid leave days para sa employee sa specific month
-// Attendance type definition para klaro ang properties
-type AttendanceRecord = {
-  am_time_in: string | null
-  am_time_out: string | null
-  pm_time_in: string | null
-  pm_time_out: string | null
-  overtime_in: string | null
-  overtime_out: string | null
-  is_leave_with_pay?: boolean
-  leave_type?: string
-  leave_reason?: string
-  date?: string
-}
 // 👉 Get Field minutes worked (handles overnight shifts) - Time-only calculation
 const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | null) => {
   // console.log('[getFieldMinutes] Input:', { timeIn, timeOut })

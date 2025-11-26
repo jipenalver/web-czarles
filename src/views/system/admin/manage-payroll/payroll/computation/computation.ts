@@ -19,8 +19,8 @@ export interface AttendanceRecord {
   is_leave_with_pay?: boolean
   leave_type?: string
   leave_reason?: string
-  attendance_date?: string
-  date?: string // Alias for attendance_date for compatibility
+  attendance_date?: string | null
+  date?: string | null // Alias for attendance_date for compatibility
 }
 
 // Cache for storing attendance data to reduce duplicate API calls
@@ -69,33 +69,33 @@ export async function getEmployeesAttendanceBatch(
   fromDateISO?: string,
   toDateISO?: string,
 ): Promise<Map<number, AttendanceRecord[]>> {
-  // Calculate date range (same logic as getEmployeeAttendanceById)
-  let startISO: string
-  let endISO: string
+  // Calculate date range for filtering
+  let startDate: string
+  let endDate: string
 
   if (fromDateISO && toDateISO) {
-    const start = fromDateISO.includes('T')
-      ? new Date(fromDateISO)
-      : new Date(`${fromDateISO}T00:00:00`)
-    const endBase = toDateISO.includes('T')
-      ? new Date(toDateISO)
-      : new Date(`${toDateISO}T23:59:59`)
-    startISO = start.toISOString()
-    endISO = endBase.toISOString()
+    // Use the provided ISO dates, extract just the date part (YYYY-MM-DD)
+    startDate = fromDateISO.includes('T') ? fromDateISO.split('T')[0] : fromDateISO
+    endDate = toDateISO.includes('T') ? toDateISO.split('T')[0] : toDateISO
   } else {
+    // fallback to using dateString (format: YYYY-MM-DD or YYYY-MM)
     const parts = dateString.split('-')
     const year = parseInt(parts[0])
     const month = parseInt(parts[1])
     const startOfMonth = new Date(year, month - 1, 1)
-    const endOfMonth = new Date(year, month, 0, 23, 59, 59)
-    startISO = startOfMonth.toISOString()
-    endISO = endOfMonth.toISOString()
+    const endOfMonth = new Date(year, month, 0)
+    startDate = startOfMonth.toISOString().split('T')[0]
+    endDate = endOfMonth.toISOString().split('T')[0]
   }
 
   // Convert all employee IDs to numbers
   const numericIds = employeeIds.map((id) => Number(id))
 
   try {
+    // Convert date strings to ISO format for RPC function
+    const startISO = new Date(`${startDate}T00:00:00`).toISOString()
+    const endISO = new Date(`${endDate}T23:59:59`).toISOString()
+
     // Call the RPC function for batch fetching
     const { data, error } = await supabase.rpc('get_attendance_batch', {
       p_employee_ids: numericIds,
@@ -127,19 +127,28 @@ export async function getEmployeesAttendanceBatch(
 
       // Convert to final format
       deduplicatedByEmployee.forEach((recordsMap, empId) => {
-        const records: AttendanceRecord[] = Array.from(recordsMap.values()).map((row: Record<string, unknown>) => ({
-          am_time_in: (row.am_time_in as string) || null,
-          am_time_out: (row.am_time_out as string) || null,
-          pm_time_in: (row.pm_time_in as string) || null,
-          pm_time_out: (row.pm_time_out as string) || null,
-          overtime_in: (row.overtime_in as string) || null,
-          overtime_out: (row.overtime_out as string) || null,
-          is_leave_with_pay: row.is_leave_with_pay as boolean | undefined,
-          leave_type: row.leave_type as string | undefined,
-          leave_reason: row.leave_reason as string | undefined,
-          attendance_date: row.attendance_date as string | undefined,
-          date: row.attendance_date as string | undefined, // Alias for compatibility
-        }))
+        const records: AttendanceRecord[] = Array.from(recordsMap.values()).map((row: Record<string, unknown>) => {
+          // Extract date from am_time_in first, fallback to pm_time_in for PM half-days
+          const attendanceDate = row.am_time_in
+            ? (row.am_time_in as string).split('T')[0]
+            : row.pm_time_in
+              ? (row.pm_time_in as string).split('T')[0]
+              : null
+
+          return {
+            am_time_in: (row.am_time_in as string) || null,
+            am_time_out: (row.am_time_out as string) || null,
+            pm_time_in: (row.pm_time_in as string) || null,
+            pm_time_out: (row.pm_time_out as string) || null,
+            overtime_in: (row.overtime_in as string) || null,
+            overtime_out: (row.overtime_out as string) || null,
+            is_leave_with_pay: row.is_leave_with_pay as boolean | undefined,
+            leave_type: row.leave_type as string | undefined,
+            leave_reason: row.leave_reason as string | undefined,
+            attendance_date: attendanceDate,
+            date: attendanceDate, // Alias for compatibility
+          }
+        })
         grouped.set(empId, records)
 
         // Update cache for each employee
@@ -177,21 +186,14 @@ export async function getEmployeeAttendanceById(
     return cachedData
   }
 
-  // query sa attendance records para sa given employee ug range
-  // If explicit from/to ISO dates are provided, use them. They should be YYYY-MM-DD (date-only) or full ISO.
-  let startISO: string
-  let endISO: string
+  // Calculate date range for filtering by attendance_date
+  let startDate: string
+  let endDate: string
 
   if (fromDateISO && toDateISO) {
-    // normalize to start of fromDate and exclusive end of toDate (add one day)
-    const start = fromDateISO.includes('T')
-      ? new Date(fromDateISO)
-      : new Date(`${fromDateISO}T00:00:00`)
-    const endBase = toDateISO.includes('T')
-      ? new Date(toDateISO)
-      : new Date(`${toDateISO}T23:59:59`)
-    startISO = start.toISOString()
-    endISO = endBase.toISOString()
+    // Use the provided ISO dates, extract just the date part (YYYY-MM-DD)
+    startDate = fromDateISO.includes('T') ? fromDateISO.split('T')[0] : fromDateISO
+    endDate = toDateISO.includes('T') ? toDateISO.split('T')[0] : toDateISO
   } else {
     // fallback to using dateString (format: YYYY-MM-DD or YYYY-MM)
     // Extract year and month from dateString
@@ -199,13 +201,13 @@ export async function getEmployeeAttendanceById(
     const year = parseInt(parts[0])
     const month = parseInt(parts[1])
 
-    // Create start of month (first day at 00:00:00)
+    // Create start of month (first day)
     const startOfMonth = new Date(year, month - 1, 1)
-    // Create end of month (last day at 23:59:59)
-    const endOfMonth = new Date(year, month, 0, 23, 59, 59)
+    // Create end of month (last day)
+    const endOfMonth = new Date(year, month, 0)
 
-    startISO = startOfMonth.toISOString()
-    endISO = endOfMonth.toISOString()
+    startDate = startOfMonth.toISOString().split('T')[0]
+    endDate = endOfMonth.toISOString().split('T')[0]
   }
 
   // debug
@@ -215,12 +217,14 @@ export async function getEmployeeAttendanceById(
   //   fromDateISO,
   //   toDateISO,
   //   queryRange: {
-  //     startISO,
-  //     endISO,
-  //     startDate: startISO.split('T')[0],
-  //     endDate: endISO.split('T')[0]
+  //     startDate,
+  //     endDate
   //   }
   // })
+
+  // Convert dates to ISO format for filtering
+  const startISO = new Date(`${startDate}T00:00:00`).toISOString()
+  const endISO = new Date(`${endDate}T23:59:59`).toISOString()
 
   const { data, error } = await supabase
     .from('attendances')
@@ -228,8 +232,10 @@ export async function getEmployeeAttendanceById(
       'id, am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_overtime_applied, is_leave_with_pay, leave_type, leave_reason',
     )
     .eq('employee_id', employeeId)
-    .or(`and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(pm_time_in.gte.${startISO},pm_time_in.lt.${endISO}),and(overtime_in.gte.${startISO},overtime_in.lt.${endISO})`)
-    .order('created_at', { ascending: false })
+    .or(
+      `and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(am_time_in.is.null,pm_time_in.gte.${startISO},pm_time_in.lt.${endISO})`,
+    )
+    .order('am_time_in', { ascending: false })
   if (error) {
     // console.error('getEmployeeAttendanceById error:', error)
     return null
@@ -286,35 +292,37 @@ export async function getEmployeeAttendanceById(
     : null
 
   // Log detailed breakdown of processed attendance
-  // if (result && result.length > 0) {
-  //   const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
-  //   const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
+  if (result && result.length > 0) {
+    const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
+    const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
 
-  //   console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
-  //     employeeId,
-  //     totalDays: result.length,
-  //     daysWithAttendance,
-  //     totalHours: totalHours.toFixed(2),
-  //     averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
-  //     dateRange: {
-  //       from: fromDateISO || dateString,
-  //       to: toDateISO || 'end of month'
-  //     }
-  //   })
+     console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
+      employeeId,
+      totalDays: result.length,
+      daysWithAttendance,
+       totalHours: totalHours.toFixed(2),
+      averageHoursPerDay: daysWithAttendance > 0 ? (totalHours / daysWithAttendance).toFixed(2) : '0.00',
+      dateRange: {
+        from: fromDateISO || dateString,
+        to: toDateISO || 'end of month'
+       }
+     })
 
-  //   // Create detailed table of each day
-  //   console.table(result.map(r => ({
-  //     Date: r.attendance_date || r.date || 'N/A',
-  //     'AM In': r.am_time_in || '-',
-  //     'AM Out': r.am_time_out || '-',
-  //     'PM In': r.pm_time_in || '-',
-  //     'PM Out': r.pm_time_out || '-',
-  //     'Hours': (r._debug_dayHours || 0).toFixed(2),
-  //     'Leave': r.is_leave_with_pay ? 'Yes' : '-'
-  //   })))
-  // } else {
-  //   console.log('[getEmployeeAttendanceById] No attendance records found for employee:', employeeId)
-  // }  // Cache the result
+    // Create detailed table of each day
+    console.table(result.map(r => ({
+      Date: r.attendance_date || r.date || 'N/A',
+      'AM In': r.am_time_in || '-',
+      'AM Out': r.am_time_out || '-',
+      'PM In': r.pm_time_in || '-',
+      'PM Out': r.pm_time_out || '-',
+      'Hours': (r._debug_dayHours || 0).toFixed(2),
+      'Leave': r.is_leave_with_pay ? 'Yes' : '-'
+    })))
+  } else {
+    // console.log('[getEmployeeAttendanceById] No attendance records found for employee:', employeeId)
+  }
+
+  // Cache the result
   if (result) {
     attendanceCache.set(cacheKey, result)
     cacheMetadata.set(cacheKey, Date.now())
