@@ -28,10 +28,12 @@ const emit = defineEmits<{
 // Note: Items are now pre-filtered in parent component (SummaryTable.vue)
 const itemsWithCalculations = computed(() => {
   return props.items.map(item => {
-    // Use the basic_pay already calculated in the processor (fieldStaffProcessor or nonFieldStaffProcessor)
-    // Both field staff and office staff now use days_worked × daily_rate
-    const basicPay = item.basic_pay || 0
-    const effectiveDaysWorked = item.days_worked || 0
+    // Use days_worked_calculated for admin employees, fallback to days_worked for regular employees
+    const effectiveDaysWorked = (item.days_worked_calculated ?? item.days_worked) || 0
+
+    // Recalculate basic_pay based on effective days worked
+    // For admin employees, this will use the new admin-specific calculation
+    const basicPay = effectiveDaysWorked * (item.daily_rate || 0)
 
     // Calculate gross pay safely
     // Include sunday_amount as it's a separate premium (30% of daily rate per Sunday worked)
@@ -222,6 +224,7 @@ const totals = computed(() => {
                 :daily-rate="item.daily_rate || 0"
                 :is-field-staff="item.is_field_staff"
                 :hours-worked="item.hours_worked"
+                :is-admin="item.is_admin"
               />
             </td>
             <td class="text-center border">{{ item.sunday_days || 0 }}</td>

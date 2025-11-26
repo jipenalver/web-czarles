@@ -131,6 +131,30 @@ const {
 // Computed property to ensure holidays reactivity
 const holidaysArray = computed(() => holidays.value || [])
 
+// Function to calculate holiday amount based on type
+const calculateHolidayAmount = (holiday: { type?: string | null; attendance_fraction?: number }) => {
+  const rate = dailyRate.value || 0
+  const fraction = holiday.attendance_fraction || 0
+
+  if (!holiday.type) return 0
+
+  const type = holiday.type.toLowerCase()
+
+  if (type.includes('rh')) {
+    return rate * 1.0 * fraction
+  } else if (type.includes('snh')) {
+    return rate * 0.3 * fraction
+  } else if (type.includes('lh')) {
+    return rate * 0.3 * fraction
+  } else if (type.includes('ch')) {
+    return rate * 0.0 * fraction
+  } else if (type.includes('swh')) {
+    return rate * 0.3 * fraction
+  }
+
+  return rate * 0.0 * fraction
+}
+
 // Hours calculation for field staff
 const { totalHoursWorked } = useHoursCalculation(isFieldStaff, employeeDailyRate, regularWorkTotal)
 
@@ -389,7 +413,11 @@ onMounted(async () => {
           </template> -->
 
           <template v-if="holidaysArray.length > 0">
-            <tr v-for="holiday in holidaysArray" :key="'holiday-' + holiday.id">
+            <tr
+              v-for="holiday in holidaysArray"
+              :key="'holiday-' + holiday.id"
+              v-show="calculateHolidayAmount(holiday) > 0"
+            >
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ holiday.name }} ({{ getHolidayTypeName(holiday.type ?? undefined) }})
@@ -430,19 +458,7 @@ onMounted(async () => {
                 </span>
               </td>
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
-                {{
-                  holiday.type && holiday.type.toLowerCase().includes('rh')
-                    ? getMoneyText(dailyRate * 1.0 * (holiday.attendance_fraction || 0))
-                    : holiday.type && holiday.type.toLowerCase().includes('snh')
-                      ? getMoneyText(dailyRate * 0.3 * (holiday.attendance_fraction || 0))
-                      : holiday.type && holiday.type.toLowerCase().includes('lh')
-                        ? getMoneyText(dailyRate * 0.3 * (holiday.attendance_fraction || 0))
-                        : holiday.type && holiday.type.toLowerCase().includes('ch')
-                          ? getMoneyText(dailyRate * 0.0 * (holiday.attendance_fraction || 0))
-                          : holiday.type && holiday.type.toLowerCase().includes('swh')
-                            ? getMoneyText(dailyRate * 0.3 * (holiday.attendance_fraction || 0))
-                            : getMoneyText(dailyRate * 0.0 * (holiday.attendance_fraction || 0))
-                }}
+                {{ getMoneyText(calculateHolidayAmount(holiday)) }}
               </td>
             </tr>
           </template>

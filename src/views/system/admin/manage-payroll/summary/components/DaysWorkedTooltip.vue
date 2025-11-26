@@ -8,6 +8,7 @@ const props = defineProps<{
   dailyRate: number
   isFieldStaff: boolean
   hoursWorked?: number
+  isAdmin?: boolean
 }>()
 
 // Calculate breakdown for tooltip
@@ -34,7 +35,11 @@ const breakdown = computed(() => {
     </template>
     <div class="pa-2">
       <div class="text-caption font-weight-bold mb-2">
-        {{ isFieldStaff ? 'Field Staff Calculation' : 'Office Staff Calculation' }}
+        {{ isAdmin ? 'Admin Staff Calculation' : isFieldStaff ? 'Field Staff Calculation' : 'Office Staff Calculation' }}
+      </div>
+      <div v-if="isAdmin" class="text-caption mb-1 text-orange-lighten-1">
+        <v-icon icon="mdi-shield-account" size="x-small" class="me-1"></v-icon>
+        <span class="font-weight-medium">Admin: AM time-in counts as full day</span>
       </div>
       <div v-if="breakdown.hoursInfo !== undefined" class="text-caption mb-1 text-grey-lighten-1">
         <span>Hours Worked:</span>

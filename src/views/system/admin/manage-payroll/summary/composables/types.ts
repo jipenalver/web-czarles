@@ -44,7 +44,9 @@ export interface MonthlyPayrollRow {
   daily_rate: number
   days_worked: number
   is_field_staff: boolean // Added to track field staff status
+  is_admin?: boolean // Added to track admin staff status
   hours_worked?: number // Added for field staff - stores actual hours worked
+  days_worked_calculated?: number | null // Added for admin-specific calculation
   sunday_days: number
   sunday_amount: number
   allowance: number

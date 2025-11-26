@@ -1,5 +1,5 @@
 import { getPaidLeaveDaysForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55 } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import { getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 
 /**
  * Calculate accurate days worked using client-side attendance logic
@@ -9,14 +9,11 @@ export async function calculateDaysWorked(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string,
-  isAdmin: boolean = false
+  toDate?: string
 ): Promise<number> {
   try {
-    // Get attendance data using the same logic as PayrollPrint.vue
-    const attendances = isAdmin
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
-      : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
+    // Get attendance data using standard fetch for all employees
+    const attendances = await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       return 0
@@ -63,6 +60,57 @@ export async function calculateDaysWorked(
     return employeePresentDays
   } catch (error) {
     console.error('[calculateDaysWorked] Error calculating days worked:', error)
+    return 0
+  }
+}
+
+/**
+ * Calculate days worked for admin employees where only AM time-in counts as a full day.
+ * Counts any non-empty am_time_in as 1 day (regardless of am_time_out), plus paid leave days.
+ */
+export async function calculateDaysWorkedForAdminByAmOnly(
+  employeeId: number,
+  dateStringForCalculation: string,
+  fromDate?: string,
+  toDate?: string
+): Promise<number> {
+  try {
+    // Use standard attendance fetch but apply admin-specific logic
+    const attendances = await getEmployeeAttendanceById(
+      employeeId,
+      dateStringForCalculation.substring(0, 7),
+      fromDate,
+      toDate
+    )
+
+    if (!Array.isArray(attendances) || attendances.length === 0) {
+      // still get paid leave days in case there are none
+      const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
+      return paidLeaveDays || 0
+    }
+
+    // Get paid leave days
+    const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
+
+    let employeePresentDays = 0
+
+    attendances.forEach((attendance) => {
+      const hasAmTimeIn =
+        attendance.am_time_in !== null &&
+        attendance.am_time_in !== undefined &&
+        attendance.am_time_in !== ''
+
+      if (hasAmTimeIn) {
+        // Count as full day when AM time-in is present
+        employeePresentDays += 1
+      }
+    })
+
+    employeePresentDays += paidLeaveDays
+
+    return employeePresentDays
+  } catch (error) {
+    console.error('[calculateDaysWorkedForAdminByAmOnly] Error calculating days worked for admin:', error)
     return 0
   }
 }
