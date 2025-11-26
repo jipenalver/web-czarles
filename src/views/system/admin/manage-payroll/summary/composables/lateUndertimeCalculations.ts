@@ -63,6 +63,7 @@ function calculateUnifiedLateUndertime(
  * Calculate client-side late and undertime deductions using PayrollPrint.vue logic
  * Returns { lateDeductionAmount, undertimeDeductionAmount }
  * Supports both field staff and office staff calculations
+ * Admin employees are exempt from both late and undertime deductions
  */
 export async function calculateLateAndUndertimeDeductions(
   employeeId: number,
@@ -94,8 +95,10 @@ export async function calculateLateAndUndertimeDeductions(
     // Convert minutes to monetary deductions using same formula as PayrollPrint.vue
     // Formula: (dailyRate / 8 hours / 60 minutes) * total minutes
     const perMinuteRate = dailyRate / 8 / 60
-    const lateDeductionAmount = perMinuteRate * totalLateMinutes
-    const undertimeDeductionAmount = perMinuteRate * totalUndertimeMinutes
+
+    // Admin employees are exempt from both late and undertime deductions
+    const lateDeductionAmount = isAdmin ? 0 : perMinuteRate * totalLateMinutes
+    const undertimeDeductionAmount = isAdmin ? 0 : perMinuteRate * totalUndertimeMinutes
 
     return {
       lateDeductionAmount: Number(lateDeductionAmount.toFixed(2)),
