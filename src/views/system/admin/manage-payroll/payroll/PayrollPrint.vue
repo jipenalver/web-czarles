@@ -51,6 +51,7 @@ const {
   employeeNonDeductions,
   sundayDutyDays,
   sundayDutyAmount,
+
   isTripsLoading,
   isHolidaysLoading,
   isUtilizationsLoading,
@@ -178,6 +179,9 @@ const overallEarningsTotal = useOverallEarningsTotal(
 const displayTotalEarnings = computed(() => {
   return overallEarningsTotal.value || 0
 })
+
+// Helper function to format Sunday duty text
+
 
 // Recalculate earnings function
 function recalculateEarnings() {
@@ -490,7 +494,10 @@ onMounted(async () => {
         <tr v-show="sundayDutyDays > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Sunday Work</td>
           <td class="pa-2">@ {{ getMoneyText(dailyRate ?? 0) }}</td>
-          <td class="pa-2">({{ sundayDutyDays }} day<span v-if="sundayDutyDays > 1">s</span>)</td>
+          <td class="pa-2">
+            {{ sundayDutyDays }} day<span v-if="sundayDutyDays > 1">s</span>
+            <!--<span v-if="formatSundayDutyText" class="text-caption ml-1">{{ formatSundayDutyText }}</span>-->
+          </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="sunday">
             {{ getMoneyText(sundayDutyAmount) }}
           </td>
@@ -600,9 +607,9 @@ onMounted(async () => {
 
 <style scoped>
 /* visuals paras sa mini payslip UWU */
-.mini-payroll-hidden {
+/* .mini-payroll-hidden {
   display: none;
-}
+} */
 
 .thick-border {
   border: 1px solid !important;
