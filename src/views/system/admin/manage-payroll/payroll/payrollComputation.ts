@@ -21,68 +21,7 @@ export interface TableData {
   other_deductions?: number
 }
 
-/**
- * Calculate field staff late and undertime minutes using allowance-based approach
- * Similar to office staff but with field staff-specific time rules:
- * AM: 7:00-11:00 with 20min late allowance and 50min early departure allowance
- * PM: 1:00-5:00 strict (no allowances)
- */
-function calculateFieldStaffLateUndertime(attendances: Array<{ am_time_in?: string | null; pm_time_in?: string | null; am_time_out?: string | null; pm_time_out?: string | null }>): { lateMinutes: number; undertimeMinutes: number } {
-  let totalLateMinutes = 0
-  let totalUndertimeMinutes = 0
 
-  attendances.forEach((attendance) => {
-    // AM Session: 7:00 AM - 11:00 AM with allowances
-    if (attendance.am_time_in && attendance.am_time_out) {
-      const amTimeIn = new Date(`1970-01-01T${attendance.am_time_in}`)
-      const amTimeOut = new Date(`1970-01-01T${attendance.am_time_out}`)
-
-      // AM start: 7:00 AM + 20min allowance = 7:20 AM
-      const amStartWithAllowance = new Date('1970-01-01T07:20:00')
-
-      // AM end: 11:00 AM - 50min allowance = 10:10 AM
-      const amEndWithAllowance = new Date('1970-01-01T10:10:00')
-
-      // Calculate late (after 7:20 AM)
-      if (amTimeIn > amStartWithAllowance) {
-        const lateMinutes = Math.floor((amTimeIn.getTime() - amStartWithAllowance.getTime()) / (1000 * 60))
-        totalLateMinutes += lateMinutes
-      }
-
-      // Calculate undertime (before 10:10 AM)
-      if (amTimeOut < amEndWithAllowance) {
-        const undertimeMinutes = Math.floor((amEndWithAllowance.getTime() - amTimeOut.getTime()) / (1000 * 60))
-        totalUndertimeMinutes += undertimeMinutes
-      }
-    }
-
-    // PM Session: 1:00 PM - 5:00 PM (strict, no allowances)
-    if (attendance.pm_time_in && attendance.pm_time_out) {
-      const pmTimeIn = new Date(`1970-01-01T${attendance.pm_time_in}`)
-      const pmTimeOut = new Date(`1970-01-01T${attendance.pm_time_out}`)
-
-      // PM start: 1:00 PM (strict)
-      const pmStartThreshold = new Date('1970-01-01T13:00:00')
-
-      // PM end: 5:00 PM (strict)
-      const pmEndThreshold = new Date('1970-01-01T17:00:00')
-
-      // Calculate late (after 1:00 PM)
-      if (pmTimeIn > pmStartThreshold) {
-        const lateMinutes = Math.floor((pmTimeIn.getTime() - pmStartThreshold.getTime()) / (1000 * 60))
-        totalLateMinutes += lateMinutes
-      }
-
-      // Calculate undertime (before 5:00 PM)
-      if (pmTimeOut < pmEndThreshold) {
-        const undertimeMinutes = Math.floor((pmEndThreshold.getTime() - pmTimeOut.getTime()) / (1000 * 60))
-        totalUndertimeMinutes += undertimeMinutes
-      }
-    }
-  })
-
-  return { lateMinutes: totalLateMinutes, undertimeMinutes: totalUndertimeMinutes }
-}
 
 export function usePayrollComputation(
   dailyRate: Ref<number>,
@@ -214,22 +153,22 @@ export function usePayrollComputation(
         toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
       }
 
-      // Get employee info to check if admin or field staff
+      // Get employee info to check if admin
       const emp = await employeesStore.getEmployeesById(employeeId)
       const isAdmin = emp?.is_admin || false
-      const isFieldStaffValue = emp?.is_field_staff || undefined
 
       // Use special function for admin employees, regular function for others
       const attendances = isAdmin
         ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, fromDate, toDate)
         : await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
 
-      // Store attendance records for later use
+          // Store attendance records for later use
       attendanceRecords.value = Array.isArray(attendances) ? attendances : []
 
-      if (Array.isArray(attendances) && attendances.length > 0) {
-        const isFieldStaff = isFieldStaffValue
+      // Debug: Log main calculation data
+      console.warn(`[MAIN PAYROLL DEBUG] Employee ${employeeId} - Total attendance records: ${Array.isArray(attendances) ? attendances.length : 0}`)
 
+      if (Array.isArray(attendances) && attendances.length > 0) {
         // Read persisted from/to dates for crossmonth calculations if available
         let fromDateForAttendance: string | undefined = undefined
         let toDateForAttendance: string | undefined = undefined
@@ -245,188 +184,123 @@ export function usePayrollComputation(
         //   paidLeaveDays,
         // )
 
-        if (isFieldStaff) {
-          // For field staff, use same calculation as office staff (days worked × daily rate)
 
-          // Set present days based on days with attendance (including half days) + paid leave days
-          let employeePresentDays = 0
-          // let fullDays = 0
-          // let halfDays = 0
-          attendances.forEach((attendance) => {
-            // Check if both AM time-in and time-out are present and not empty strings
-            const hasAmData =
-              attendance.am_time_in !== null &&
-              attendance.am_time_in !== undefined &&
-              attendance.am_time_in !== '' &&
-              attendance.am_time_out !== null &&
-              attendance.am_time_out !== undefined &&
-              attendance.am_time_out !== ''
 
-            // Check if both PM time-in and time-out are present and not empty strings
-            const hasPmData =
-              attendance.pm_time_in !== null &&
-              attendance.pm_time_in !== undefined &&
-              attendance.pm_time_in !== '' &&
-              attendance.pm_time_out != null &&
-              attendance.pm_time_out != undefined &&
-              attendance.pm_time_out !== ''
+        // Use unified late/undertime calculation for both field staff and office staff
+        // This logic matches the AttendanceDaysTooltip.vue calculation
+        let totalLateAM = 0
+        let totalLatePM = 0
+        let totalUndertimeAM = 0
+        let totalUndertimePM = 0
 
-            // Full day: both AM and PM data are available
-            if (hasAmData && hasPmData) {
-              employeePresentDays += 1
-              // fullDays += 1
-            }
-            // Half day: only AM data or only PM data is available
-            else if (hasAmData || hasPmData) {
-              employeePresentDays += 0.5
-              // halfDays += 1
-            }
-          })
+        attendances.forEach((attendance, /* index */) => {
+          const attendanceDate = attendance.attendance_date
+          const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
+          const isFieldStaff = emp?.is_field_staff || false
 
-          // Add paid leave days to present days para field staff
-          employeePresentDays += paidLeaveDays
-          // console.log(
-          //   `[FIELD STAFF DAYS] Employee ${employeeId} - Full days: ${fullDays}, Half days: ${halfDays} (=${halfDays * 0.5}), Paid leave: ${paidLeaveDays}, Total: ${employeePresentDays}, Daily rate: ${daily}, Regular work: ₱${(daily ?? 0) * employeePresentDays}`,
-          // )
+          // Determine time rules based on staff type and day of week
+          let amStartTime, pmStartTime, amEndTime, pmEndTime
 
-          presentDays.value = employeePresentDays
-          absentDays.value = Math.max(0, workDays.value - employeePresentDays)
-
-          // For field staff, calculate pay based on present days (same as office staff)
-          regularWorkTotal.value = (daily ?? 0) * employeePresentDays
-
-          // Calculate field staff late and undertime with specific thresholds
-          const { lateMinutes, undertimeMinutes } = calculateFieldStaffLateUndertime(attendances)
-          monthLateDeduction.value = lateMinutes
-          monthUndertimeDeduction.value = undertimeMinutes
-
-          if (lateMinutes > 0) {
-            //console.warn(`[FIELD STAFF LATE] Employee ${employeeId} - Late minutes: ${lateMinutes} (AM: 7:21+, PM: 1:01+)`)
+          if (isFieldStaff) {
+            // Field staff time rules: 7:20 AM start, 11:50 AM end, PM same as office
+            amStartTime = '07:20'
+            pmStartTime = isFriSat ? '13:00' : '13:00'
+            amEndTime = '11:50'
+            pmEndTime = isFriSat ? '16:30' : '17:00'
+          } else {
+            // Office staff time rules: 8:12 AM start
+            amStartTime = isFriSat ? '08:12' : '08:12'
+            pmStartTime = isFriSat ? '13:00' : '13:00' // PM start time remains the same
+            amEndTime = isFriSat ? '11:50' : '11:50' // AM end time adjusted for undertime deduction
+            pmEndTime = isFriSat ? '16:30' : '17:00' // PM end time changes for Fri/Sat
           }
-          if (undertimeMinutes > 0) {
-            //console.warn(`[FIELD STAFF UNDERTIME] Employee ${employeeId} - Undertime minutes: ${undertimeMinutes} (AM: <11:49, PM: <4:59)`)
+
+          // Calculate late minutes
+          if (attendance.am_time_in) {
+            const lateMinutes = getExcessMinutes(amStartTime, attendance.am_time_in)
+            totalLateAM += lateMinutes
+
+            // console.error(`[LATE AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amStartTime}, Actual: ${attendance.am_time_in}, Late: ${lateMinutes} minutes`)
           }
-        } else {
-          // For office staff, use existing logic with Friday/Saturday special rules
-          /* const allAmTimeIn = attendances.map((a) => a.am_time_in)
-          const allPmTimeIn = attendances.map((a) => a.pm_time_in)
-          const allAmTimeOut = attendances.map((a) => a.am_time_out)
-          const allPmTimeOut = attendances.map((a) => a.pm_time_out) */
+          if (attendance.pm_time_in) {
+            const lateMinutes = getExcessMinutes(pmStartTime, attendance.pm_time_in)
+            totalLatePM += lateMinutes
+            // console.error(`[LATE PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmStartTime}, Actual: ${attendance.pm_time_in}, Late: ${lateMinutes} minutes`)
+          }
 
-          // Compute late minutes for each amTimeIn and pmTimeIn, and sum for month_late deduction
-          let totalLateAM = 0
-          let totalLatePM = 0
-          let totalUndertimeAM = 0
-          let totalUndertimePM = 0
+          // Calculate undertime minutes
+          if (attendance.am_time_out) {
+            const undertimeMinutes = getUndertimeMinutes(amEndTime, attendance.am_time_out)
+            // if (undertimeMinutes > 0) {
+            //   console.warn(`[UNDERTIME AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amEndTime}, Actual: ${attendance.am_time_out}, Undertime: ${undertimeMinutes} minutes`)
+            // }
+            totalUndertimeAM += undertimeMinutes
+          }
+          if (attendance.pm_time_out) {
+            const undertimeMinutes = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
+            // if (undertimeMinutes > 0) {
+            //   console.warn(`[UNDERTIME PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmEndTime}, Actual: ${attendance.pm_time_out}, Undertime: ${undertimeMinutes} minutes`)
+            // }
+            totalUndertimePM += undertimeMinutes
+          }
+        })
 
-          attendances.forEach((attendance, /* index */) => {
-            const attendanceDate = attendance.attendance_date
-            const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
+        monthLateDeduction.value = totalLateAM + totalLatePM
+        monthUndertimeDeduction.value = totalUndertimeAM + totalUndertimePM
 
-            // Determine time rules based on day of week
-            const amStartTime = isFriSat ? '08:12' : '08:12'
-            const pmStartTime = isFriSat ? '13:00' : '13:00' // PM start time remains the same
-            const amEndTime = isFriSat ? '11:50' : '11:50' // AM end time adjusted for undertime deduction
-            const pmEndTime = isFriSat ? '16:30' : '17:00' // PM end time changes for Fri/Sat
+        // Debug: Log main calculation results
+        console.warn(`[MAIN PAYROLL CALCULATION] Employee ${employeeId} - Processed ${attendances.length} records`)
+        console.warn(`[MAIN PAYROLL TOTALS] Late: ${totalLateAM + totalLatePM} minutes (AM: ${totalLateAM}, PM: ${totalLatePM})`)
+        console.warn(`[MAIN PAYROLL TOTALS] Undertime: ${totalUndertimeAM + totalUndertimePM} minutes (AM: ${totalUndertimeAM}, PM: ${totalUndertimePM})`)
 
-            // Calculate late minutes
-            if (attendance.am_time_in) {
-              const lateMinutes = getExcessMinutes(amStartTime, attendance.am_time_in)
-              totalLateAM += lateMinutes
+        // Log total undertime summary
+        // if (monthUndertimeDeduction.value > 0) {
+        //   console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
+        // }
 
-              // console.error(`[LATE AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amStartTime}, Actual: ${attendance.am_time_in}, Late: ${lateMinutes} minutes`)
-            }
-            if (attendance.pm_time_in) {
-              const lateMinutes = getExcessMinutes(pmStartTime, attendance.pm_time_in)
-              totalLatePM += lateMinutes
-              // console.error(`[LATE PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmStartTime}, Actual: ${attendance.pm_time_in}, Late: ${lateMinutes} minutes`)
-            }
+        // Calculate present/absent days for both field staff and office staff
+        // This logic is now unified and moved outside the staff type conditional
+        let employeePresentDays = 0
 
-            // Calculate undertime minutes
-            if (attendance.am_time_out) {
-              const undertimeMinutes = getUndertimeMinutes(amEndTime, attendance.am_time_out)
-              // if (undertimeMinutes > 0) {
-              //   console.warn(`[UNDERTIME AM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${amEndTime}, Actual: ${attendance.am_time_out}, Undertime: ${undertimeMinutes} minutes`)
-              // }
-              totalUndertimeAM += undertimeMinutes
-            }
-            if (attendance.pm_time_out) {
-              const undertimeMinutes = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
-              // if (undertimeMinutes > 0) {
-              //   console.warn(`[UNDERTIME PM] Employee ${employeeId} - Date: ${attendanceDate}, Expected: ${pmEndTime}, Actual: ${attendance.pm_time_out}, Undertime: ${undertimeMinutes} minutes`)
-              // }
-              totalUndertimePM += undertimeMinutes
-            }
-          })
+        attendances.forEach((attendance) => {
+          // Check if both AM time-in and time-out are present and not empty strings
+          const hasAmData =
+            attendance.am_time_in !== null &&
+            attendance.am_time_in !== undefined &&
+            attendance.am_time_in !== '' &&
+            attendance.am_time_out !== null &&
+            attendance.am_time_out !== undefined &&
+            attendance.am_time_out !== ''
 
-          monthLateDeduction.value = totalLateAM + totalLatePM
-          monthUndertimeDeduction.value = totalUndertimeAM + totalUndertimePM
+          // Check if both PM time-in and time-out are present and not empty strings
+          const hasPmData =
+            attendance.pm_time_in !== null &&
+            attendance.pm_time_in !== undefined &&
+            attendance.pm_time_in !== '' &&
+            attendance.pm_time_out != null &&
+            attendance.pm_time_out != undefined &&
+            attendance.pm_time_out !== ''
 
-          // Log total undertime summary
-          // if (monthUndertimeDeduction.value > 0) {
-          //   console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
-          // }
+          // Full day: both AM and PM data are available
+          if (hasAmData && hasPmData) {
+            employeePresentDays += 1
+          }
+          // Half day: only AM data or only PM data is available
+          else if (hasAmData || hasPmData) {
+            employeePresentDays += 0.5
+          }
+        })
 
-          // Check attendance data for present/absent days calculation including half days
-          let employeePresentDays = 0
-          // let fullDaysCount = 0
-          // let halfDaysCount = 0
+        // Add paid leave days to present days (for both staff types)
+        employeePresentDays += paidLeaveDays
 
-          attendances.forEach((attendance) => {
-            // Check if both AM time-in and time-out are present and not empty strings
-            const hasAmData =
-              attendance.am_time_in !== null &&
-              attendance.am_time_in !== undefined &&
-              attendance.am_time_in !== '' &&
-              attendance.am_time_out !== null &&
-              attendance.am_time_out !== undefined &&
-              attendance.am_time_out !== ''
+        // Calculate absent days: total working days minus present days (including paid leave)
+        const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
 
-            // Check if both PM time-in and time-out are present and not empty strings
-            const hasPmData =
-              attendance.pm_time_in !== null &&
-              attendance.pm_time_in !== undefined &&
-              attendance.pm_time_in !== '' &&
-              attendance.pm_time_out != null &&
-              attendance.pm_time_out != undefined &&
-              attendance.pm_time_out !== ''
-
-            // const attendanceDate = attendance.attendance_date
-
-            // Full day: both AM and PM data are available
-            if (hasAmData && hasPmData) {
-              employeePresentDays += 1
-              // fullDaysCount++
-            }
-            // Half day: only AM data or only PM data is available
-            else if (hasAmData || hasPmData) {
-              employeePresentDays += 0.5
-              // halfDaysCount++
-              // const timeType = hasAmData ? 'AM' : 'PM'
-              // console.error(`[HALF DAY ${timeType}] Employee ${employeeId} - Date: ${attendanceDate}, AM: ${hasAmData ? 'Complete' : 'Missing'}, PM: ${hasPmData ? 'Complete' : 'Missing'}`)
-            }
-          })
-
-          // Log summary para sa half days
-          // if (halfDaysCount > 0) {
-          //   console.error(`[HALF DAYS SUMMARY] Employee ${employeeId} - Total Full Days: ${fullDaysCount}, Total Half Days: ${halfDaysCount}, Total Present Days (with half days): ${employeePresentDays}`)
-          // }
-
-          // Add paid leave days to present days para office staff
-          employeePresentDays += paidLeaveDays
-          // console.log(
-          //   `[computeRegularWorkTotal] Office staff - actual present: ${employeePresentDays - paidLeaveDays}, paid leave: ${paidLeaveDays}, total present: ${employeePresentDays}`,
-          // )
-
-          // Calculate absent days: total working days minus present days (including paid leave)
-          const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
-
-          presentDays.value = employeePresentDays
-          absentDays.value = totalAbsentDays
-
-          // Calculate regular work total using present days (which includes half days)
-          regularWorkTotal.value = (daily ?? 0) * employeePresentDays
-        }
+        // Set final values for both staff types
+        presentDays.value = employeePresentDays
+        absentDays.value = totalAbsentDays
+        regularWorkTotal.value = (daily ?? 0) * employeePresentDays
 
         // Update daily rate from employee data if available
         if (emp) {

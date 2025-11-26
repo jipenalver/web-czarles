@@ -60,9 +60,10 @@ export async function processNonFieldStaffEmployees(
         employee.employee_id,
         dateStringForCalculation,
         employee.daily_rate,
-        false, // non-field staff
+        false, // isFieldStaff = false
         fromDate,
-        toDate
+        toDate,
+        employee.is_admin || false // isAdmin parameter
       )
 
       // Update deductions with client-side calculated values

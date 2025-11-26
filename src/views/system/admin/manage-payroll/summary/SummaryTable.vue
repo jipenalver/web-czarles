@@ -160,41 +160,48 @@ watch(
       toDate = range.toDate
     }
 
-    // For each payroll item, check if employee is admin and compute days_worked_calculated
+    // For each payroll item, check if employee is admin/field staff and compute days_worked_calculated
     await Promise.all(
-      monthlyPayrollData.value.map(async (item: { employee_id?: number; id?: number; days_worked_calculated?: number | null; is_admin?: boolean }) => {
+      monthlyPayrollData.value.map(async (item: { employee_id?: number; id?: number; days_worked_calculated?: number | null; is_admin?: boolean; is_field_staff?: boolean }) => {
         try {
           const employeeId = item.employee_id || item.id
           if (!employeeId) return
 
-          // Find the employee in the store to get the is_admin flag
+          // Find the employee in the store to get the flags
           const employee = employeesStore.employees.find(emp => emp.id === employeeId)
 
-          if (employee?.is_admin) {
-            // Set the is_admin flag on the item for use in MonthlyPayrollTable
-            item.is_admin = true
+          // Set employee flags for proper late/undertime calculation
+          if (employee) {
+            item.is_admin = employee.is_admin || false
+            item.is_field_staff = employee.is_field_staff || false
 
-            console.log(`[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`)
+            if (employee.is_admin) {
+              console.log(`[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`)
 
-            const days = await calculateDaysWorkedForAdminByAmOnly(
-              employeeId,
-              monthStr,
-              fromDate,
-              toDate
-            )
-            item.days_worked_calculated = days
+              const days = await calculateDaysWorkedForAdminByAmOnly(
+                employeeId,
+                monthStr,
+                fromDate,
+                toDate
+              )
+              item.days_worked_calculated = days
 
-            console.log(`[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`)
+              console.log(`[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`)
+            } else {
+              // Leave existing value or undefined for non-admins
+              item.days_worked_calculated = item.days_worked_calculated ?? null
+            }
           } else {
-            // Set is_admin to false for non-admin employees
+            // Employee not found in store, set defaults
             item.is_admin = false
-            // Leave existing value or undefined for non-admins
+            item.is_field_staff = false
             item.days_worked_calculated = item.days_worked_calculated ?? null
           }
         } catch {
           // ignore per-item errors
           item.days_worked_calculated = item.days_worked_calculated ?? null
           item.is_admin = false
+          item.is_field_staff = false
         }
       })
     )

@@ -295,6 +295,13 @@ watch(() => isCalculationsCompleting.value, (isCompleting) => {
   }
 })
 
+// Debug: Watch for deduction value changes
+watch([monthLateDeduction, monthUndertimeDeduction, lateDeduction, undertimeDeduction],
+  ([late, undertime, lateAmount, undertimeAmount]) => {
+    console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
+  }, { immediate: true }
+)
+
 onMounted(async () => {
   await initializePayrollCalculations()
 })
@@ -361,6 +368,8 @@ onMounted(async () => {
                 :attendance-records="attendanceRecords || []"
                 :total-hours-worked="totalHoursWorked"
                 :is-field-staff="props.employeeData?.is_field_staff"
+                :month-late-deduction="monthLateDeduction"
+                :month-undertime-deduction="monthUndertimeDeduction"
               />
             </span>
           </td>
