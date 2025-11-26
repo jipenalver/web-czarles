@@ -8,7 +8,7 @@ import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, getExces
  * Office staff: 8:12 AM start, 11:50 AM end, PM varies by day
  */
 function calculateUnifiedLateUndertime(
-  attendances: Array<{ am_time_in?: string | null; pm_time_in?: string | null; am_time_out?: string | null; pm_time_out?: string | null; attendance_date?: string }>,
+  attendances: Array<{ am_time_in?: string | null; pm_time_in?: string | null; am_time_out?: string | null; pm_time_out?: string | null; attendance_date?: string | null }>,
   isFieldStaff: boolean
 ): { lateMinutes: number; undertimeMinutes: number } {
   let totalLateMinutes = 0
