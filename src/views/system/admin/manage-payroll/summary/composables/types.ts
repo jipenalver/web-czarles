@@ -22,6 +22,7 @@ export interface PayrollDatabaseRow {
   trips_pay: number
   utilizations_pay: number
   holidays_pay: number
+  benefits_pay: number
   gross_pay: number
   cash_advance: number
   sss: number
@@ -56,6 +57,7 @@ export interface MonthlyPayrollRow {
   trips_pay: number
   utilizations_pay: number
   holidays_pay: number
+  benefits_pay: number
   cash_adjustment_addon: number // Cash adjustment add-ons (is_deduction = false)
   gross_pay: number
   deductions: {
@@ -81,6 +83,7 @@ export interface MonthlyPayrollTotals {
   trips_pay: number
   utilizations_pay: number
   holidays_pay: number
+  benefits_pay: number
   cash_adjustment_addon: number
   gross_pay: number
   total_deductions: number
