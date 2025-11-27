@@ -1,6 +1,7 @@
 import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
 import { getEmployeesAttendanceBatch } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import { useEmployeesStore } from '@/stores/employees'
 
 // Import modular components
 import type { MonthlyPayrollRow, MonthlyPayrollTotals } from './types'
@@ -21,6 +22,9 @@ export function useMonthlyPayroll() {
 
   // Cache to prevent reloading same month/year
   const lastLoadedKey = ref<string>('')
+
+  // Employees store for admin flags
+  const employeesStore = useEmployeesStore()
 
   /**
    * Load payroll data using Supabase function for base calculations,
@@ -72,11 +76,26 @@ export function useMonthlyPayroll() {
       // Note: is_field_staff, late_deduction and undertime_deduction now come from SQL function
       const transformedData = transformPayrollData(data)
 
+      // Ensure employees are loaded before setting admin flags
+      if (employeesStore.employees.length === 0) {
+        await employeesStore.getEmployees()
+      }
+
+      // Set admin and field staff flags before processing to ensure correct late deduction calculations
+      transformedData.forEach(item => {
+        const employee = employeesStore.employees.find(emp => emp.id === item.employee_id)
+        if (employee) {
+          item.is_admin = employee.is_admin || false
+          // is_field_staff already comes from SQL function, but ensure consistency
+          item.is_field_staff = employee.is_field_staff || false
+        } else {
+          item.is_admin = false
+          // Keep is_field_staff from SQL function if employee not found in store
+        }
+      })
+
       // Create date string in format YYYY-MM-01 for calculations
       const dateStringForCalculation = createDateStringForCalculation(selectedMonth.value, selectedYear.value)
-
-      // Field staff status now comes from SQL function, no need to fetch from employees store
-      // Late and undertime deductions for field staff are calculated in SQL function
 
       // Separate employees by type
       const { fieldStaff: fieldStaffEmployees, nonFieldStaff: nonFieldStaffEmployees } = separateEmployeesByType(transformedData)

@@ -66,16 +66,15 @@ export async function processFieldStaffEmployees(
       const newBasicPay = employee.days_worked * employee.daily_rate
 
       // Calculate client-side late and undertime deductions for field staff
-      // Field staff uses specific thresholds with allowances:
-      // AM: 7:00 + 20min allowance = 7:20 late threshold, 11:00 - 50min = 10:10 undertime threshold
-      // PM: 1:00 PM strict late, 5:00 PM strict undertime
+      // Field staff uses updated unified time rules: 7:20 AM start, 11:50 AM end
       const { lateDeductionAmount, undertimeDeductionAmount } = await calculateLateAndUndertimeDeductions(
         employee.employee_id,
         dateStringForCalculation,
         employee.daily_rate,
-        true, // isField = true for field staff thresholds
+        true, // isFieldStaff = true
         fromDate,
-        toDate
+        toDate,
+        employee.is_admin || false // isAdmin parameter
       )
 
       // Update deductions with client-side calculated values

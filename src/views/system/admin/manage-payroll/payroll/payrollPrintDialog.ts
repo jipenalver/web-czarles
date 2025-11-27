@@ -35,13 +35,13 @@ export function usePayrollPrintDialog(
     const formattedMonth = month.toLowerCase().replace(/\s+/g, '-')
     const filename = `${employeeName}-${formattedMonth}-${year}-payroll.pdf`
 
-    console.log('[PayrollPrintDialog] Generating filename:', {
-      employeeName,
-      month,
-      year,
-      filename,
-      fullEmployeeData: props.employeeData
-    })
+    // console.log('[PayrollPrintDialog] Generating filename:', {
+    //   employeeName,
+    //   month,
+    //   year,
+    //   filename,
+    //   fullEmployeeData: props.employeeData
+    // })
 
     return filename
   }

@@ -123,6 +123,7 @@ const {
   holidays,
   sundayDutyDays,
   sundayDutyAmount,
+  sundayDutyRecords, // New: Sunday duty records with fractions
   monthlyAllowancesTotal,
   loadAllowances,
   loadSundayDuty,
@@ -285,6 +286,24 @@ const overallEarningsTotal = useOverallEarningsTotal(
   monthlyCashAdjustmentsTotal,
   sundayDutyAmount,
 )
+
+// Helper function to format Sunday duty text
+const formatSundayDutyText = computed(() => {
+  if (!sundayDutyRecords.value || sundayDutyRecords.value.length === 0) return ''
+
+  const fullDays = sundayDutyRecords.value.filter(r => r.attendance_fraction === 1.0).length
+  const halfDays = sundayDutyRecords.value.filter(r => r.attendance_fraction === 0.5).length
+
+  const parts: string[] = []
+  if (fullDays > 0) {
+    parts.push(`${fullDays}fd`)
+  }
+  if (halfDays > 0) {
+    parts.push(`${halfDays}hd`)
+  }
+
+  return parts.length > 0 ? `(${parts.join(', ')})` : ''
+})
 
 // Use earnings breakdown for debugging purposes
 // const earningsBreakdown = useEarningsBreakdown(
@@ -515,7 +534,7 @@ const displayableHolidays = computed(() => {
         <v-row dense class="mb-1">
           <v-col cols="6" class="text-caption pa-1">Sunday Duty Premium</v-col>
           <v-col cols="3" class="text-body-2 text-center pa-1">
-            30% ({{ sundayDutyDays }}d)
+            30% {{ formatSundayDutyText || `(${sundayDutyDays}d)` }}
           </v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat(sundayDutyAmount, formatCurrency) }}

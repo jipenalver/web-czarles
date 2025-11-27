@@ -51,6 +51,7 @@ const {
   employeeNonDeductions,
   sundayDutyDays,
   sundayDutyAmount,
+
   isTripsLoading,
   isHolidaysLoading,
   isUtilizationsLoading,
@@ -179,6 +180,9 @@ const displayTotalEarnings = computed(() => {
   return overallEarningsTotal.value || 0
 })
 
+// Helper function to format Sunday duty text
+
+
 // Recalculate earnings function
 function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
@@ -194,7 +198,7 @@ async function initializePayrollCalculations() {
     if (dailyRate.value > 0) {
       await loadSundayDuty(dailyRate.value)
     } else {
-      console.warn('[PayrollPrint] Skipping Sunday duty load - dailyRate not available:', dailyRate.value)
+      // console.warn('[PayrollPrint] Skipping Sunday duty load - dailyRate not available:', dailyRate.value)
       // Reset Sunday values if rate not available
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
@@ -219,7 +223,7 @@ async function reloadAllFunctions() {
     if (dailyRate.value > 0) {
       await loadSundayDuty(dailyRate.value)
     } else {
-      console.warn('[PayrollPrint] Skipping Sunday duty reload - dailyRate not available:', dailyRate.value)
+      // console.warn('[PayrollPrint] Skipping Sunday duty reload - dailyRate not available:', dailyRate.value)
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
     }
@@ -295,6 +299,13 @@ watch(() => isCalculationsCompleting.value, (isCompleting) => {
   }
 })
 
+// Debug: Watch for deduction value changes
+watch([monthLateDeduction, monthUndertimeDeduction, lateDeduction, undertimeDeduction],
+  () => {
+    // console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
+  }, { immediate: true }
+)
+
 onMounted(async () => {
   await initializePayrollCalculations()
 })
@@ -361,6 +372,8 @@ onMounted(async () => {
                 :attendance-records="attendanceRecords || []"
                 :total-hours-worked="totalHoursWorked"
                 :is-field-staff="props.employeeData?.is_field_staff"
+                :month-late-deduction="monthLateDeduction"
+                :month-undertime-deduction="monthUndertimeDeduction"
               />
             </span>
           </td>
@@ -481,7 +494,10 @@ onMounted(async () => {
         <tr v-show="sundayDutyDays > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Sunday Work</td>
           <td class="pa-2">@ {{ getMoneyText(dailyRate ?? 0) }}</td>
-          <td class="pa-2">({{ sundayDutyDays }} day<span v-if="sundayDutyDays > 1">s</span>)</td>
+          <td class="pa-2">
+            {{ sundayDutyDays }} day<span v-if="sundayDutyDays > 1">s</span>
+            <!--<span v-if="formatSundayDutyText" class="text-caption ml-1">{{ formatSundayDutyText }}</span>-->
+          </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="sunday">
             {{ getMoneyText(sundayDutyAmount) }}
           </td>

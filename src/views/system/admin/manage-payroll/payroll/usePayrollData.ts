@@ -5,7 +5,7 @@ import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
 import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
 import { fetchEmployeeDeductions } from './computation/benefits'
-import { getSundayDutyDaysForMonth } from './computation/attendance'
+import { getSundayDutyRecordsForMonth, type SundayDutyRecord } from './computation/attendance'
 import { supabase } from '@/utils/supabase'
 import { getLastDateOfMonth } from './helpers'
 import type { EmployeeDeduction } from '@/stores/benefits'
@@ -36,6 +36,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
   const overallOvertime = ref<number>(0)
   const sundayDutyDays = ref<number>(0)
   const sundayDutyAmount = ref<number>(0)
+  const sundayDutyRecords = ref<SundayDutyRecord[]>([]) // New: Sunday duty records with fractions
 
   // Loading states
   const isTripsLoading = ref(false)
@@ -207,6 +208,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     if (!params.value.employeeId) {
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
+      sundayDutyRecords.value = []
       isSundayLoading.value = false
       return
     }
@@ -234,20 +236,28 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
         console.error('[PayrollData] Error reading cross-month dates from localStorage:', error)
       }
 
-      const days = await getSundayDutyDaysForMonth(
+      // Fetch Sunday duty records with fractions
+      const records = await getSundayDutyRecordsForMonth(
         params.value.filterDateString,
         params.value.employeeId,
         fromDate,
         toDate
       )
-      sundayDutyDays.value = days
-      // Sunday amount: only the 30% premium (0.3x daily rate per Sunday worked)
+
+      sundayDutyRecords.value = records
+
+      // Calculate total days (sum of fractions)
+      const totalDays = records.reduce((sum, record) => sum + record.attendance_fraction, 0)
+      sundayDutyDays.value = totalDays
+
+      // Sunday amount: only the 30% premium (0.3x daily rate per fraction worked)
       // The base daily rate is already included in regular work calculation
-      sundayDutyAmount.value = days * (dailyRate || 0) * 0.3
+      sundayDutyAmount.value = totalDays * (dailyRate || 0) * 0.3
     } catch (error) {
       console.error('[PayrollData] Error loading Sunday duty:', error)
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
+      sundayDutyRecords.value = []
     } finally {
       isSundayLoading.value = false
     }
@@ -296,6 +306,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       employeeNonDeductions.value = []
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
+      sundayDutyRecords.value = []
 
       // Fetch employee deductions first
       if (params.value.employeeId) {
@@ -331,6 +342,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       cashAdjustmentsAdditions.value = []
       employeeDeductions.value = []
       employeeNonDeductions.value = []
+      sundayDutyRecords.value = []
     } finally {
       // CRITICAL: Ensure ALL loading states are reset to false, even on error
       isTripsLoading.value = false
@@ -360,6 +372,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       employeeNonDeductions.value = []
       sundayDutyDays.value = 0
       sundayDutyAmount.value = 0
+      sundayDutyRecords.value = []
 
       isTripsLoading.value = true
       isHolidaysLoading.value = true
@@ -417,6 +430,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     overallOvertime,
     sundayDutyDays,
     sundayDutyAmount,
+    sundayDutyRecords, // New: Sunday duty records with fractions
     tripsStore,
 
     // Loading states

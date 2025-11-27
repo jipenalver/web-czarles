@@ -1,19 +1,6 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55 } from './computation'
+import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, type AttendanceRecord } from './computation'
 // this script is naka connect sa computation.ts file IMPORTANT
 // 👉 Get total paid leave days para sa employee sa specific month
-// Attendance type definition para klaro ang properties
-type AttendanceRecord = {
-  am_time_in: string | null
-  am_time_out: string | null
-  pm_time_in: string | null
-  pm_time_out: string | null
-  overtime_in: string | null
-  overtime_out: string | null
-  is_leave_with_pay?: boolean
-  leave_type?: string
-  leave_reason?: string
-  date?: string
-}
 // 👉 Get Field minutes worked (handles overnight shifts) - Time-only calculation
 const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | null) => {
   // console.log('[getFieldMinutes] Input:', { timeIn, timeOut })
@@ -315,13 +302,19 @@ export function isSunday(dateString: string): boolean {
   return dayOfWeek === 0
 }
 
-// 👉 Get total Sunday duty days para sa employee sa specific month
-export const getSundayDutyDaysForMonth = async (
+// Type for Sunday duty with attendance fraction
+export type SundayDutyRecord = {
+  date: string
+  attendance_fraction: number // 0, 0.5, or 1.0
+}
+
+// 👉 Get Sunday duty records with fractions para sa employee sa specific month
+export const getSundayDutyRecordsForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
   fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
   toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
-): Promise<number> => {
+): Promise<SundayDutyRecord[]> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
 
@@ -334,32 +327,73 @@ export const getSundayDutyDaysForMonth = async (
     const attendances: AttendanceRecord[] = attendancesResult || []
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
-      return 0
+      return []
     }
 
-    let sundayDutyCounter = 0
+    const sundayDutyRecords: SundayDutyRecord[] = []
 
     // Iterate through all attendance records and check if the date is Sunday
     attendances.forEach((attendance) => {
       // Check if attendance has a date and if it's a Sunday
       if (attendance.date && isSunday(attendance.date)) {
-        // Additional check: only count if there's actual time-in recorded
+        // Check if there's actual time-in recorded
         if (attendance.am_time_in || attendance.pm_time_in) {
-          sundayDutyCounter++
-          /* console.log(`[getSundayDutyDaysForMonth] Sunday duty found:`, {
+          let attendance_fraction = 0
+
+          // Calculate fraction based on AM/PM attendance
+          const hasAM = attendance.am_time_in && attendance.am_time_out
+          const hasPM = attendance.pm_time_in && attendance.pm_time_out
+
+          if (hasAM && hasPM) {
+            attendance_fraction = 1.0 // Full day
+          } else if (hasAM || hasPM) {
+            attendance_fraction = 0.5 // Half day
+          }
+
+          if (attendance_fraction > 0) {
+            sundayDutyRecords.push({
+              date: attendance.date,
+              attendance_fraction
+            })
+          }
+
+          /* console.log(`[getSundayDutyRecordsForMonth] Sunday duty found:`, {
             date: attendance.date,
+            attendance_fraction,
             am_time_in: attendance.am_time_in,
+            am_time_out: attendance.am_time_out,
             pm_time_in: attendance.pm_time_in,
+            pm_time_out: attendance.pm_time_out,
           }) */
         }
       }
     })
 
- /*    console.error(
-      `[getSundayDutyDaysForMonth] Total Sunday duty days for employee ${employeeId} in month ${dateStringForQuery}:`,
-      sundayDutyCounter,
+ /*    console.log(
+      `[getSundayDutyRecordsForMonth] Sunday duty records for employee ${employeeId} in month ${dateStringForQuery}:`,
+      sundayDutyRecords,
     ) */
-    return sundayDutyCounter
+    return sundayDutyRecords
+  } catch (error) {
+    console.error('Error sa getSundayDutyRecordsForMonth:', error)
+    return []
+  }
+}
+
+// 👉 Get total Sunday duty days para sa employee sa specific month (backward compatibility)
+export const getSundayDutyDaysForMonth = async (
+  filterDateString: string, // Format: "YYYY-MM-01"
+  employeeId: number,
+  fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
+): Promise<number> => {
+  try {
+    const sundayRecords = await getSundayDutyRecordsForMonth(filterDateString, employeeId, fromDateISO, toDateISO)
+
+    // Sum up all attendance fractions to get total days
+    const totalDays = sundayRecords.reduce((sum, record) => sum + record.attendance_fraction, 0)
+
+    return totalDays
   } catch (error) {
     console.error('Error sa getSundayDutyDaysForMonth:', error)
     return 0
