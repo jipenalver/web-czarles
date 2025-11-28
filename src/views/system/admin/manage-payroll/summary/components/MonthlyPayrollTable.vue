@@ -44,6 +44,7 @@ const itemsWithCalculations = computed(() => {
                     (item.holidays_pay || 0) +
                     (item.sunday_amount || 0) +
                     (item.utilizations_pay || 0) +
+                    (item.benefits_pay || 0) +
                     (item.cash_adjustment_addon || 0)
 
     // Calculate total deductions safely
@@ -100,6 +101,7 @@ const totals = computed(() => {
         holidays_pay: acc.holidays_pay + (item.holidays_pay || 0),
         trips_pay: acc.trips_pay + (item.trips_pay || 0),
         utilizations_pay: acc.utilizations_pay + (item.utilizations_pay || 0),
+        benefits_pay: acc.benefits_pay + (item.benefits_pay || 0),
         cash_adjustment_addon: acc.cash_adjustment_addon + (item.cash_adjustment_addon || 0),
         basic_pay: acc.basic_pay + (item.basic_pay || 0),
         gross_pay: acc.gross_pay + (item.gross_pay || 0),
@@ -127,6 +129,7 @@ const totals = computed(() => {
       holidays_pay: 0,
       trips_pay: 0,
       utilizations_pay: 0,
+      benefits_pay: 0,
       cash_adjustment_addon: 0,
       basic_pay: 0,
       gross_pay: 0,
@@ -157,7 +160,7 @@ const totals = computed(() => {
           <!-- Main Header Row - Level 1 -->
           <tr>
             <th rowspan="3" class="text-center font-weight-bold border">Employee Name</th>
-            <th colspan="11" class="text-center font-weight-bold text-uppercase text-info border">
+            <th colspan="12" class="text-center font-weight-bold text-uppercase text-info border">
               PAYABLE
             </th>
             <th colspan="9" class="text-center font-weight-bold text-uppercase text-error border">
@@ -179,7 +182,7 @@ const totals = computed(() => {
             <th rowspan="2" class="text-center text-caption border">Holiday Pay</th>
             <th rowspan="2" class="text-center text-caption border">Monthly Tripping</th>
             <th rowspan="2" class="text-center text-caption border">Utilization</th>
-            <th colspan="1" class="text-center font-weight-medium border">Others</th>
+            <th colspan="2" class="text-center font-weight-medium border">Others</th>
             <th rowspan="2" class="text-center text-caption border font-weight-bold">Gross Pay</th>
 
             <!-- Deduction Sub-columns -->
@@ -202,6 +205,7 @@ const totals = computed(() => {
             <th class="text-center text-caption border">Amount</th>
 
             <!-- Other Details -->
+            <th class="text-center text-caption border">Benefits</th>
             <th class="text-center text-caption border">Adjustments</th>
 
             <!-- Others Details -->
@@ -235,6 +239,7 @@ const totals = computed(() => {
             <td class="text-center border">{{ formatCurrency(item.holidays_pay) }}</td>
             <td class="text-center border">{{ formatCurrency(item.trips_pay) }}</td>
             <td class="text-center border">{{ formatCurrency(item.utilizations_pay) }}</td>
+            <td class="text-center border">{{ formatCurrency(item.benefits_pay || 0) }}</td>
             <td class="text-center border">{{ formatCurrency(item.cash_adjustment_addon || 0) }}</td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(item.gross_pay) }}</td>
 
@@ -295,6 +300,7 @@ const totals = computed(() => {
             </td>
             <td class="text-center font-weight-bold border">{{ formatCurrency(totals.trips_pay) }}</td>
             <td class="text-center font-weight-bold border">{{ formatCurrency(totals.utilizations_pay) }}</td>
+            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.benefits_pay) }}</td>
             <td class="text-center font-weight-bold border">{{ formatCurrency(totals.cash_adjustment_addon) }}</td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(totals.gross_pay) }}</td>
 
