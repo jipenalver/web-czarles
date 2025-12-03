@@ -22,6 +22,7 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
     trips_pay: Number(row.trips_pay) || 0,
     utilizations_pay: Number(row.utilizations_pay) || 0,
     holidays_pay: Number(row.holidays_pay) || 0,
+    benefits_pay: Number(row.benefits_pay) || 0,
     cash_adjustment_addon: 0, // Will be calculated client-side
     gross_pay: 0, // Will be calculated client-side
     deductions: {

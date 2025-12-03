@@ -48,14 +48,14 @@ const {
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row>
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="5">
               <v-row dense>
                 <v-col cols="12">
                   <h2 class="text-body-1 font-weight-black mb-3 ms-2">Add-ons</h2>
                 </v-col>
 
                 <template v-for="(benefit, index) in benefitsStore.addons" :key="benefit.id">
-                  <v-col cols="12" sm="8">
+                  <v-col cols="12">
                     <v-text-field
                       v-model="formAddons.amount[index]"
                       prepend-inner-icon="mdi-currency-php"
@@ -64,7 +64,7 @@ const {
                     ></v-text-field>
                   </v-col>
 
-                  <v-col cols="12" sm="4">
+                  <v-col v-if="false" cols="12" sm="4">
                     <v-switch
                       v-model="formAddons.is_quincena[index]"
                       class="ms-2"
@@ -85,7 +85,7 @@ const {
                 </v-col>
 
                 <template v-for="(benefit, index) in benefitsStore.deductions" :key="benefit.id">
-                  <v-col cols="12" sm="8">
+                  <v-col cols="12">
                     <v-text-field
                       v-model="formDeductions.amount[index]"
                       prepend-inner-icon="mdi-currency-php"
@@ -94,7 +94,7 @@ const {
                     ></v-text-field>
                   </v-col>
 
-                  <v-col cols="12" sm="4">
+                  <v-col v-if="false" cols="12" sm="4">
                     <v-switch
                       v-model="formDeductions.is_quincena[index]"
                       class="ms-2"
@@ -112,7 +112,7 @@ const {
               </v-row>
             </v-col>
 
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="7">
               <EmployeeLogs
                 :item-id="props.itemId"
                 type="benefits"

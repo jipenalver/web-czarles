@@ -25,6 +25,7 @@ RETURNS TABLE (
   trips_pay NUMERIC,
   utilizations_pay NUMERIC,
   holidays_pay NUMERIC,
+  benefits_pay NUMERIC,
   gross_pay NUMERIC,
   cash_advance NUMERIC,
   sss NUMERIC,
@@ -258,6 +259,15 @@ BEGIN
       COALESCE(SUM(edwb.amount) FILTER (WHERE edwb.is_deduction = true AND LOWER(edwb.benefit) LIKE '%salary%' AND LOWER(edwb.benefit) LIKE '%deposit%'), 0) AS salary_deposit
     FROM employee_deductions_with_benefits edwb
     GROUP BY edwb.employee_id
+  ),
+  
+  -- Calculate benefits (non-deductions) totals
+  benefits_totals AS (
+    SELECT 
+      edwb.employee_id,
+      COALESCE(SUM(edwb.amount) FILTER (WHERE edwb.is_deduction = false), 0) AS benefits_total
+    FROM employee_deductions_with_benefits edwb
+    GROUP BY edwb.employee_id
   )
   
   -- Final computation
@@ -278,11 +288,13 @@ BEGIN
     COALESCE(tr.trips_amount, 0)::NUMERIC AS trips_pay,
     COALESCE(ut.utilizations_total, 0)::NUMERIC AS utilizations_pay,
     COALESCE(hp.holiday_amount, 0)::NUMERIC AS holidays_pay,
+    COALESCE(ben.benefits_total, 0)::NUMERIC AS benefits_pay,
     ROUND(
       (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0)) + 
       COALESCE(al.allowances_total, 0) +
       COALESCE(tr.trips_amount, 0) +
-      COALESCE(ut.utilizations_total, 0), 2
+      COALESCE(ut.utilizations_total, 0) +
+      COALESCE(ben.benefits_total, 0), 2
     )::NUMERIC AS gross_pay, -- Note: holidays_pay excluded (premiums in basic_pay), overtime_pay calculated client-side, cash_adjustment added client-side
     COALESCE(ca.cash_advance_total, 0)::NUMERIC AS cash_advance,
     COALESCE(ded.sss, 0)::NUMERIC AS sss,
@@ -323,7 +335,8 @@ BEGIN
       (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0) + 
        COALESCE(al.allowances_total, 0) +
        COALESCE(tr.trips_amount, 0) +
-       COALESCE(ut.utilizations_total, 0)) -
+       COALESCE(ut.utilizations_total, 0) +
+       COALESCE(ben.benefits_total, 0)) -
       (COALESCE(ca.cash_advance_total, 0) +
        COALESCE(ded.sss, 0) +
        COALESCE(ded.phic, 0) +
@@ -349,6 +362,7 @@ BEGIN
   LEFT JOIN holiday_pay_data hp ON ae.id = hp.employee_id
   LEFT JOIN cash_advance_data ca ON ae.id = ca.employee_id
   LEFT JOIN deduction_totals ded ON ae.id = ded.employee_id
+  LEFT JOIN benefits_totals ben ON ae.id = ben.employee_id
   ORDER BY ae.firstname, ae.lastname;
 END;
 $$;

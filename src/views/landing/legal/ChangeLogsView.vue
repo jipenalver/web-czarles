@@ -66,6 +66,59 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- November 27, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 27, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Fixed formatting issues affecting the visibility of the mini payroll view.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added support for Sunday duty records, including fractional values for
+                more precise payroll results.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 26, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 26, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Exempted admin employees from late and undertime deductions in payroll
+                calculations.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Unified late and undertime rules for both field and office staff for more
+                consistent payroll computation.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 25, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 25, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Added holiday amount calculation and updated how holiday values are
+                displayed in Payroll Print.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Improved payroll handling for admin employees with more accurate day-based
+                calculations and clearer tooltips.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- November 23, 2025 -->
           <v-divider class="my-4"></v-divider>
           <h3 class="text-h6 mb-3">November 23, 2025</h3>
