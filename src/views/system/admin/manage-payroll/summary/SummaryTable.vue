@@ -3,6 +3,7 @@ import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/summary/com
 import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/summary/pdf/MonthlyPayrollPDF.vue'
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayroll'
 import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summary/pdf/monthlyPayrollPDF'
+import { useMonthlyPayrollCSV } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayrollCSV'
 import { monthNames, getDateRangeForMonth } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { calculateDaysWorkedForAdminByAmOnly } from './composables/daysWorkedCalculations'
 import { useDesignationsStore } from '@/stores/designations'
@@ -26,8 +27,11 @@ const {
   refreshMonthlyPayroll,
 } = useMonthlyPayroll()
 
-// Use PDF composable
+//  Use PDF composable
 const { isLoadingPDF, onExport } = useMonthlyPayrollPDF()
+
+// Use CSV composable
+const { isExporting, generatePayrollCSV } = useMonthlyPayrollCSV()
 
 // Use designations store
 const designationsStore = useDesignationsStore()
@@ -230,6 +234,19 @@ const handleExportPDF = async () => {
     selectedYear: selectedYear.value,
   })
 }
+
+// CSV Export handler
+const handleExportCSV = () => {
+  menuOpen.value = false
+  generatePayrollCSV(
+    filteredMonthlyPayrollData.value,
+    selectedMonth.value,
+    selectedYear.value,
+    crossMonthEnabled.value,
+    dayFrom.value,
+    dayTo.value
+  )
+}
 </script>
 
 <template>
@@ -245,6 +262,14 @@ const handleExportPDF = async () => {
       v-model:is-visible="isLoadingPDF"
       title="Generating PDF..."
       subtitle="Please wait while we create your payroll report"
+      description="This may take a few moments"
+    />
+
+    <!-- Loading Dialog for CSV -->
+    <LoadingDialog
+      v-model:is-visible="isExporting"
+      title="Generating CSV..."
+      subtitle="Please wait while we prepare your CSV file"
       description="This may take a few moments"
     />
 
@@ -270,6 +295,12 @@ const handleExportPDF = async () => {
             ></v-btn>
           </template>
           <v-list density="compact">
+            <v-list-item @click="handleExportCSV" :disabled="isExporting">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-file-delimited"></v-icon>
+              </template>
+              <v-list-item-title>Export to CSV</v-list-item-title>
+            </v-list-item>
             <v-list-item @click="handleExportPDF" :disabled="isLoadingPDF">
               <template v-slot:prepend>
                 <v-icon icon="mdi-file-pdf-box"></v-icon>
