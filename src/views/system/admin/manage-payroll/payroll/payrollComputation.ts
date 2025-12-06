@@ -1,4 +1,4 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
+import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes, type AttendanceRecord } from './computation/computation'
 import { getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
 import { useEmployeesStore } from '@/stores/employees'
@@ -127,12 +127,7 @@ export function usePayrollComputation(
   const regularWorkTotal = ref<number>(0)
   const absentDays = ref<number>(0)
   const presentDays = ref<number>(0)
-  const attendanceRecords = ref<Array<{
-    am_time_in?: string | null
-    am_time_out?: string | null
-    pm_time_in?: string | null
-    pm_time_out?: string | null
-  }>>([])
+  const attendanceRecords = ref<AttendanceRecord[]>([])
 
   async function computeRegularWorkTotal() {
     let daily = dailyRate.value

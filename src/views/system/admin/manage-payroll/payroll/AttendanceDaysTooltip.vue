@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { formatHoursOneDecimal } from './helpers'
-import { getExcessMinutes, getUndertimeMinutes } from './computation/computation'
+import { getExcessMinutes, getUndertimeMinutes, type AttendanceRecord as BaseAttendanceRecord } from './computation/computation'
 import { isFridayOrSaturday } from './computation/attendance'
 
-interface AttendanceRecord {
-  am_time_in?: string | null
-  am_time_out?: string | null
-  pm_time_in?: string | null
-  pm_time_out?: string | null
-  attendance_date?: string
-  date?: string
+// Extend AttendanceRecord to include optional debug field
+interface AttendanceRecord extends BaseAttendanceRecord {
   _debug_dayHours?: number
 }
 

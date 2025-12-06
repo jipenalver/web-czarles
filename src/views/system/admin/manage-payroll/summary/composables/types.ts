@@ -2,6 +2,12 @@
  * Types and interfaces for monthly payroll computation
  */
 
+// Import AttendanceRecord from computation module to ensure type compatibility
+import type { AttendanceRecord } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+
+// Re-export for convenience
+export type { AttendanceRecord }
+
 /**
  * Interface for database function response row
  */
@@ -37,6 +43,14 @@ export interface PayrollDatabaseRow {
   net_pay: number
 }
 
+export interface Holiday {
+  id?: number
+  holiday_at?: string
+  type?: string | null
+  description?: string
+  attendance_fraction?: number
+}
+
 export interface MonthlyPayrollRow {
   employee_id: number
   employee_name: string
@@ -48,6 +62,8 @@ export interface MonthlyPayrollRow {
   is_admin?: boolean // Added to track admin staff status
   hours_worked?: number // Added for field staff - stores actual hours worked
   days_worked_calculated?: number | null // Added for admin-specific calculation
+  attendance_records?: AttendanceRecord[] // Added for AttendanceDaysTooltip
+  holidays?: Holiday[] // Added for holiday tracking in tooltip
   sunday_days: number
   sunday_amount: number
   allowance: number

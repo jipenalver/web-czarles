@@ -1,9 +1,69 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { formatCurrency, roundDecimal } from '@/views/system/admin/manage-payroll/payroll/helpers'
-import { type MonthlyPayrollRow } from '../composables/types'
+import { type MonthlyPayrollRow, type AttendanceRecord, type Holiday } from '../composables/types'
 import MonthlyPayrollPagination from './MonthlyPayrollPagination.vue'
-import DaysWorkedTooltip from './DaysWorkedTooltip.vue'
+import AttendanceDaysTooltip from '@/views/system/admin/manage-payroll/payroll/AttendanceDaysTooltip.vue'
+
+/**
+ * Calculate employee present days from attendance records
+ * This matches the PayrollPrint.vue calculation logic
+ */
+function calculateEmployeePresentDays(
+  attendanceRecords: AttendanceRecord[],
+  holidays: Holiday[]
+): number {
+  if (!attendanceRecords || attendanceRecords.length === 0) {
+    return 0
+  }
+
+  let employeePresentDays = 0
+
+  attendanceRecords.forEach((attendance) => {
+    // Check if both AM time-in and time-out are present and not empty strings
+    const hasAmData =
+      attendance.am_time_in !== null &&
+      attendance.am_time_in !== undefined &&
+      attendance.am_time_in !== '' &&
+      attendance.am_time_out !== null &&
+      attendance.am_time_out !== undefined &&
+      attendance.am_time_out !== ''
+
+    // Check if both PM time-in and time-out are present and not empty strings
+    const hasPmData =
+      attendance.pm_time_in !== null &&
+      attendance.pm_time_in !== undefined &&
+      attendance.pm_time_in !== '' &&
+      attendance.pm_time_out !== null &&
+      attendance.pm_time_out !== undefined &&
+      attendance.pm_time_out !== ''
+
+    // Check if this attendance date is a Regular Holiday
+    const attendanceDate = attendance.attendance_date || attendance.date
+    const holiday = holidays?.find(h => {
+      if (!h.holiday_at || !attendanceDate) return false
+      const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
+      const attDate = new Date(attendanceDate).toISOString().split('T')[0]
+      return holidayDate === attDate
+    })
+    const isRegularHoliday = holiday?.type?.toUpperCase().includes('RH') || false
+
+    // For Regular Holidays: any attendance = full day
+    if (isRegularHoliday && (hasAmData || hasPmData)) {
+      employeePresentDays += 1
+    }
+    // Full day: both AM and PM data are available
+    else if (hasAmData && hasPmData) {
+      employeePresentDays += 1
+    }
+    // Half day: only AM data or only PM data is available
+    else if (hasAmData || hasPmData) {
+      employeePresentDays += 0.5
+    }
+  })
+
+  return employeePresentDays
+}
 
 const props = defineProps<{
   items: MonthlyPayrollRow[]
@@ -28,11 +88,20 @@ const emit = defineEmits<{
 // Note: Items are now pre-filtered in parent component (SummaryTable.vue)
 const itemsWithCalculations = computed(() => {
   return props.items.map(item => {
-    // Use days_worked_calculated for admin employees, fallback to days_worked for regular employees
-    const effectiveDaysWorked = (item.days_worked_calculated ?? item.days_worked) || 0
+    // Calculate employee present days from attendance records (matches PayrollPrint.vue logic)
+    // This includes full days, half days, and Regular Holiday special treatment
+    const calculatedPresentDays = calculateEmployeePresentDays(
+      item.attendance_records || [],
+      item.holidays || []
+    )
+
+    // Use calculated present days if we have attendance records, otherwise fall back to existing logic
+    const effectiveDaysWorked = calculatedPresentDays > 0
+      ? calculatedPresentDays
+      : (item.days_worked_calculated ?? item.days_worked) || 0
 
     // Recalculate basic_pay based on effective days worked
-    // For admin employees, this will use the new admin-specific calculation
+    // This now matches PayrollPrint.vue calculation: daily_rate * employeePresentDays
     const basicPay = effectiveDaysWorked * (item.daily_rate || 0)
 
     // Calculate gross pay safely
@@ -222,13 +291,13 @@ const totals = computed(() => {
 
             <!-- Payable Columns -->
             <td class="text-center border">
-              <DaysWorkedTooltip
-                :days-worked="item.effective_days_worked || 0"
-                :basic-pay="item.basic_pay || 0"
-                :daily-rate="item.daily_rate || 0"
+              <AttendanceDaysTooltip
+                :attendance-records="item.attendance_records || []"
+                :total-hours-worked="item.hours_worked || 0"
                 :is-field-staff="item.is_field_staff"
-                :hours-worked="item.hours_worked"
-                :is-admin="item.is_admin"
+                :month-late-deduction="item.deductions.late || 0"
+                :month-undertime-deduction="item.deductions.undertime || 0"
+                :holidays="item.holidays || []"
               />
             </td>
             <td class="text-center border">{{ item.sunday_days || 0 }}</td>
