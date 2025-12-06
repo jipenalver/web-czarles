@@ -372,8 +372,10 @@ onMounted(async () => {
                 :attendance-records="attendanceRecords || []"
                 :total-hours-worked="totalHoursWorked"
                 :is-field-staff="props.employeeData?.is_field_staff"
+                :is-admin="props.employeeData?.is_admin"
                 :month-late-deduction="monthLateDeduction"
                 :month-undertime-deduction="monthUndertimeDeduction"
+                :holidays="holidaysArray"
               />
             </span>
           </td>
@@ -455,7 +457,7 @@ onMounted(async () => {
               </td>
               <td class="pa-2">
                 <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">
-                  x 200%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                  x 200%
                 </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
                   x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>

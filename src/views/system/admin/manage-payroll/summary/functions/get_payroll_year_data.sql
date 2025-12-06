@@ -60,6 +60,12 @@ BEGIN
           'created_at', h.created_at,
           'attendance_fraction', COALESCE(
             CASE
+              -- For Regular Holidays (RH), any attendance record = full day
+              WHEN UPPER(h.type) LIKE '%RH%' AND (
+                a.am_time_in IS NOT NULL OR a.am_time_out IS NOT NULL OR
+                a.pm_time_in IS NOT NULL OR a.pm_time_out IS NOT NULL
+              ) THEN 1.0
+              -- For other holidays, normal calculation
               WHEN a.am_time_in IS NOT NULL AND a.pm_time_in IS NOT NULL THEN 1.0
               WHEN a.am_time_in IS NOT NULL OR a.pm_time_in IS NOT NULL THEN 0.5
               ELSE 0.0

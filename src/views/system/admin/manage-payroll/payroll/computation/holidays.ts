@@ -11,12 +11,15 @@ export async function fetchHolidaysByDateString(
   employeeId?: string,
 ): Promise<HolidayWithAttendance[]> {
   // Query sa holidays table gamit ang %ilike% sa holiday_at column
+  // dateString format: YYYY-MM
+  const startDate = `${dateString}-01`
+  const endDate = getLastDateOfMonth(dateString)
 
   const { data: holidays, error: holidaysError } = await supabase
     .from('holidays')
     .select()
-    .gte('holiday_at', `${dateString}-01`)
-    .lt('holiday_at', getLastDateOfMonth(dateString))
+    .gte('holiday_at', startDate)
+    .lt('holiday_at', endDate)
 
   if (holidaysError || !holidays) {
     console.error('[fetchHolidaysByDateString] Error fetching holidays:', holidaysError)
@@ -42,13 +45,26 @@ export async function fetchHolidaysByDateString(
 
       let attendance_fraction = 0
       if (attendance) {
-        const hasAM = attendance.am_time_in && attendance.am_time_out
-        const hasPM = attendance.pm_time_in && attendance.pm_time_out
+        // Check if this is a Regular Holiday (RH)
+        const isRegularHoliday = holiday.type?.toUpperCase().includes('RH')
 
-        if (hasAM && hasPM) {
-          attendance_fraction = 1.0 // Full day
-        } else if (hasAM || hasPM) {
-          attendance_fraction = 0.5 // Half day
+        // For Regular Holidays, any attendance record counts as full day
+        if (isRegularHoliday) {
+          const hasAnyAttendance = attendance.am_time_in || attendance.am_time_out ||
+                                   attendance.pm_time_in || attendance.pm_time_out
+          if (hasAnyAttendance) {
+            attendance_fraction = 1.0 // Full day for RH with any attendance
+          }
+        } else {
+          // For other holidays, use the normal calculation
+          const hasAM = attendance.am_time_in && attendance.am_time_out
+          const hasPM = attendance.pm_time_in && attendance.pm_time_out
+
+          if (hasAM && hasPM) {
+            attendance_fraction = 1.0 // Full day
+          } else if (hasAM || hasPM) {
+            attendance_fraction = 0.5 // Half day
+          }
         }
       }
 
@@ -96,13 +112,26 @@ export async function fetchHolidaysByRange(
 
       let attendance_fraction = 0
       if (attendance) {
-        const hasAM = attendance.am_time_in && attendance.am_time_out
-        const hasPM = attendance.pm_time_in && attendance.pm_time_out
+        // Check if this is a Regular Holiday (RH)
+        const isRegularHoliday = holiday.type?.toUpperCase().includes('RH')
 
-        if (hasAM && hasPM) {
-          attendance_fraction = 1.0 // Full day
-        } else if (hasAM || hasPM) {
-          attendance_fraction = 0.5 // Half day
+        // For Regular Holidays, any attendance record counts as full day
+        if (isRegularHoliday) {
+          const hasAnyAttendance = attendance.am_time_in || attendance.am_time_out ||
+                                   attendance.pm_time_in || attendance.pm_time_out
+          if (hasAnyAttendance) {
+            attendance_fraction = 1.0 // Full day for RH with any attendance
+          }
+        } else {
+          // For other holidays, use the normal calculation
+          const hasAM = attendance.am_time_in && attendance.am_time_out
+          const hasPM = attendance.pm_time_in && attendance.pm_time_out
+
+          if (hasAM && hasPM) {
+            attendance_fraction = 1.0 // Full day
+          } else if (hasAM || hasPM) {
+            attendance_fraction = 0.5 // Half day
+          }
         }
       }
 

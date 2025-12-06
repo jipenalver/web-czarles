@@ -1,7 +1,8 @@
 import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
-import { getEmployeesAttendanceBatch } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import { getEmployeesAttendanceBatch, getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 import { useEmployeesStore } from '@/stores/employees'
+import { useHolidaysStore } from '@/stores/holidays'
 
 // Import modular components
 import type { MonthlyPayrollRow, MonthlyPayrollTotals } from './types'
@@ -25,6 +26,9 @@ export function useMonthlyPayroll() {
 
   // Employees store for admin flags
   const employeesStore = useEmployeesStore()
+
+  // Holidays store for attendance tooltip
+  const holidaysStore = useHolidaysStore()
 
   /**
    * Load payroll data using Supabase function for base calculations,
@@ -124,6 +128,29 @@ export function useMonthlyPayroll() {
 
       // Combine field staff and non-field staff employees
       const finalData = [...fieldStaffEmployees, ...nonFieldStaffEmployees]
+
+      // Fetch holidays for the period
+      await holidaysStore.getHolidays()
+
+      // Fetch attendance records for each employee to populate attendance_records field
+      await Promise.all(
+        finalData.map(async (employee: MonthlyPayrollRow) => {
+          try {
+            const attendanceRecords = await getEmployeeAttendanceById(
+              employee.employee_id,
+              dateStringForCalculation.substring(0, 7),
+              fromDate,
+              toDate
+            )
+            employee.attendance_records = attendanceRecords || []
+            employee.holidays = holidaysStore.holidays
+          } catch (error) {
+            console.error(`Error fetching attendance for employee ${employee.employee_id}:`, error)
+            employee.attendance_records = []
+            employee.holidays = []
+          }
+        })
+      )
 
       // Fetch and apply cash adjustments for all employees
       await Promise.all(

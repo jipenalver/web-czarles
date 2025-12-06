@@ -90,70 +90,9 @@ BEGIN
     WHERE e.deleted_at IS NULL
   ),
   
-  -- Calculate attendance/days worked with late and undertime
-  attendance_data AS (
-    SELECT 
-      a.employee_id,
-      -- Count full days and half days
-      COALESCE(SUM(
-        CASE 
-          -- Full day: all 4 timestamps present
-          WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
-            AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 1.0
-          -- Half day AM: only AM timestamps present
-          WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
-            AND (a.pm_time_in IS NULL OR a.pm_time_out IS NULL) THEN 0.5
-          -- Half day PM: only PM timestamps present
-          WHEN (a.am_time_in IS NULL OR a.am_time_out IS NULL) 
-            AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 0.5
-          ELSE 0
-        END
-      ), 0) AS days_worked,
-      -- Calculate late minutes for field staff only
-      COALESCE(SUM(
-        CASE 
-          WHEN ae.is_field_staff = true THEN
-            CASE
-              -- AM late: after 7:20 (7:21 and later)
-              WHEN a.am_time_in IS NOT NULL AND a.am_time_in::TIME > '07:20:59' THEN
-                EXTRACT(EPOCH FROM (a.am_time_in::TIME - '07:20:59'::TIME)) / 60
-              ELSE 0
-            END +
-            CASE
-              -- PM late: after 1:00 (1:01 and later)
-              WHEN a.pm_time_in IS NOT NULL AND a.pm_time_in::TIME > '13:00:59' THEN
-                EXTRACT(EPOCH FROM (a.pm_time_in::TIME - '13:00:59'::TIME)) / 60
-              ELSE 0
-            END
-          ELSE 0 -- Non-field staff late calculation handled client-side
-        END
-      ), 0) AS late_minutes,
-      -- Calculate undertime minutes for field staff only
-      COALESCE(SUM(
-        CASE 
-          WHEN ae.is_field_staff = true THEN
-            CASE
-              -- AM undertime: before 11:49 (11:48 and earlier)
-              WHEN a.am_time_out IS NOT NULL AND a.am_time_out::TIME < '11:49:00' THEN
-                EXTRACT(EPOCH FROM ('11:49:00'::TIME - a.am_time_out::TIME)) / 60
-              ELSE 0
-            END +
-            CASE
-              -- PM undertime: before 4:59 (4:58 and earlier)
-              WHEN a.pm_time_out IS NOT NULL AND a.pm_time_out::TIME < '16:59:00' THEN
-                EXTRACT(EPOCH FROM ('16:59:00'::TIME - a.pm_time_out::TIME)) / 60
-              ELSE 0
-            END
-          ELSE 0 -- Non-field staff undertime calculation handled client-side
-        END
-      ), 0) AS undertime_minutes
-    FROM attendances a
-    INNER JOIN active_employees ae ON a.employee_id = ae.id
-    WHERE COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) BETWEEN v_start_date AND v_end_date
-    GROUP BY a.employee_id
-  ),
-  
-  -- Note: Overtime calculation removed - handled client-side for PayrollPrint.vue consistency
+  -- Note: Attendance, days worked, late, undertime, and overtime calculations
+  -- are all handled client-side for consistency across PayrollPrint.vue and SummaryTable.vue
+  -- This includes Regular Holiday (RH) logic where any attendance = full day
   
   -- Calculate allowances
   allowances_data AS (
@@ -204,6 +143,12 @@ BEGIN
         END *
         -- Apply day fraction based on attendance (full day or half day)
         CASE 
+          -- For Regular Holidays (RH), any attendance record = full day
+          WHEN LOWER(h.type) LIKE '%rh%' AND (
+            a.am_time_in IS NOT NULL OR a.am_time_out IS NOT NULL OR
+            a.pm_time_in IS NOT NULL OR a.pm_time_out IS NOT NULL
+          ) THEN 1.0
+          -- For other holidays, normal calculation
           -- Full day: all 4 timestamps present
           WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
             AND a.pm_time_in IS NOT NULL AND a.pm_time_out IS NOT NULL THEN 1.0
@@ -278,24 +223,23 @@ BEGIN
     ae.designation_name AS designation_name,
     COALESCE(ae.daily_rate, 0)::NUMERIC AS daily_rate,
     ae.is_field_staff::BOOLEAN AS is_field_staff,
-    ROUND(COALESCE(att.days_worked, 0), 1)::NUMERIC AS days_worked,
-    0::NUMERIC AS sunday_days,
-    0.00::NUMERIC AS sunday_amount,
+    0::NUMERIC AS days_worked, -- Calculated client-side
+    0::NUMERIC AS sunday_days, -- Calculated client-side
+    0.00::NUMERIC AS sunday_amount, -- Calculated client-side
     COALESCE(al.allowances_total, 0)::NUMERIC AS allowance,
-    0.00::NUMERIC AS overtime_hrs, -- Calculated client-side for PayrollPrint.vue consistency
-    ROUND(COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0), 2)::NUMERIC AS basic_pay,
-    0.00::NUMERIC AS overtime_pay, -- Calculated client-side for PayrollPrint.vue consistency
+    0.00::NUMERIC AS overtime_hrs, -- Calculated client-side
+    0.00::NUMERIC AS basic_pay, -- Calculated client-side (days_worked * daily_rate)
+    0.00::NUMERIC AS overtime_pay, -- Calculated client-side
     COALESCE(tr.trips_amount, 0)::NUMERIC AS trips_pay,
     COALESCE(ut.utilizations_total, 0)::NUMERIC AS utilizations_pay,
     COALESCE(hp.holiday_amount, 0)::NUMERIC AS holidays_pay,
     COALESCE(ben.benefits_total, 0)::NUMERIC AS benefits_pay,
     ROUND(
-      (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0)) + 
       COALESCE(al.allowances_total, 0) +
       COALESCE(tr.trips_amount, 0) +
       COALESCE(ut.utilizations_total, 0) +
       COALESCE(ben.benefits_total, 0), 2
-    )::NUMERIC AS gross_pay, -- Note: holidays_pay excluded (premiums in basic_pay), overtime_pay calculated client-side, cash_adjustment added client-side
+    )::NUMERIC AS gross_pay, -- Note: basic_pay, holidays_pay, overtime_pay, sunday_amount all calculated client-side
     COALESCE(ca.cash_advance_total, 0)::NUMERIC AS cash_advance,
     COALESCE(ded.sss, 0)::NUMERIC AS sss,
     COALESCE(ded.phic, 0)::NUMERIC AS phic,
@@ -303,18 +247,8 @@ BEGIN
     COALESCE(ded.sss_loan, 0)::NUMERIC AS sss_loan,
     COALESCE(ded.savings, 0)::NUMERIC AS savings,
     COALESCE(ded.salary_deposit, 0)::NUMERIC AS salary_deposit,
-    -- Late deduction: calculated for field staff in SQL, for non-field staff client-side
-    CASE 
-      WHEN ae.is_field_staff = true THEN
-        ROUND((COALESCE(att.late_minutes, 0) / 60) * (COALESCE(ae.daily_rate, 0) / 8), 2)
-      ELSE 0.00 -- Calculated client-side for non-field staff
-    END::NUMERIC AS late_deduction,
-    -- Undertime deduction: calculated for field staff in SQL, for non-field staff client-side  
-    CASE 
-      WHEN ae.is_field_staff = true THEN
-        ROUND((COALESCE(att.undertime_minutes, 0) / 60) * (COALESCE(ae.daily_rate, 0) / 8), 2)
-      ELSE 0.00 -- Calculated client-side for non-field staff
-    END::NUMERIC AS undertime_deduction,
+    0.00::NUMERIC AS late_deduction, -- Calculated client-side
+    0.00::NUMERIC AS undertime_deduction, -- Calculated client-side
     ROUND(
       COALESCE(ca.cash_advance_total, 0) +
       COALESCE(ded.sss, 0) +
@@ -322,18 +256,10 @@ BEGIN
       COALESCE(ded.pagibig, 0) +
       COALESCE(ded.sss_loan, 0) +
       COALESCE(ded.savings, 0) +
-      COALESCE(ded.salary_deposit, 0) +
-      -- Include late and undertime deductions for field staff
-      CASE 
-        WHEN ae.is_field_staff = true THEN
-          (COALESCE(att.late_minutes, 0) / 60) * (COALESCE(ae.daily_rate, 0) / 8) +
-          (COALESCE(att.undertime_minutes, 0) / 60) * (COALESCE(ae.daily_rate, 0) / 8)
-        ELSE 0.00 -- Calculated client-side for non-field staff
-      END, 2
-    )::NUMERIC AS total_deductions,
+      COALESCE(ded.salary_deposit, 0), 2
+    )::NUMERIC AS total_deductions, -- Note: late and undertime deductions calculated client-side
     ROUND(
-      (COALESCE(att.days_worked, 0) * COALESCE(ae.daily_rate, 0) + 
-       COALESCE(al.allowances_total, 0) +
+      (COALESCE(al.allowances_total, 0) +
        COALESCE(tr.trips_amount, 0) +
        COALESCE(ut.utilizations_total, 0) +
        COALESCE(ben.benefits_total, 0)) -
@@ -343,18 +269,10 @@ BEGIN
        COALESCE(ded.pagibig, 0) +
        COALESCE(ded.sss_loan, 0) +
        COALESCE(ded.savings, 0) +
-       COALESCE(ded.salary_deposit, 0) +
-       -- Include late and undertime deductions for field staff
-       CASE 
-         WHEN ae.is_field_staff = true THEN
-           (COALESCE(att.late_minutes, 0) / 60) * (COALESCE(ae.daily_rate, 0) / 8) +
-           (COALESCE(att.undertime_minutes, 0) / 60) * (COALESCE(ae.daily_rate, 0) / 8)
-         ELSE 0.00 -- Calculated client-side for non-field staff
-       END), 2
-      -- Note: Overtime excluded, calculated client-side
+       COALESCE(ded.salary_deposit, 0)), 2
+      -- Note: basic_pay, overtime, holidays_pay, sunday_amount, late and undertime all calculated client-side
     )::NUMERIC AS net_pay
   FROM active_employees ae
-  LEFT JOIN attendance_data att ON ae.id = att.employee_id
   LEFT JOIN allowances_data al ON ae.id = al.employee_id
   LEFT JOIN trips_data tr ON ae.id = tr.employee_id
   LEFT JOIN utilizations_data ut ON ae.id = ut.employee_id

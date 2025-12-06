@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { formatHoursOneDecimal } from './helpers'
-import { getExcessMinutes, getUndertimeMinutes } from './computation/computation'
+import { getExcessMinutes, getUndertimeMinutes, type AttendanceRecord as BaseAttendanceRecord } from './computation/computation'
 import { isFridayOrSaturday } from './computation/attendance'
 
-interface AttendanceRecord {
-  am_time_in?: string | null
-  am_time_out?: string | null
-  pm_time_in?: string | null
-  pm_time_out?: string | null
-  attendance_date?: string
-  date?: string
+// Extend AttendanceRecord to include optional debug field
+interface AttendanceRecord extends BaseAttendanceRecord {
   _debug_dayHours?: number
+}
+
+interface Holiday {
+  id?: number
+  holiday_at?: string
+  type?: string | null
+  description?: string
+  attendance_fraction?: number
 }
 
 interface AttendanceWithLateness {
@@ -27,14 +30,18 @@ interface AttendanceWithLateness {
   amUndertime: number
   pmUndertime: number
   hasLateness: boolean
+  isRegularHoliday?: boolean
+  holidayDescription?: string
 }
 
 const props = defineProps<{
   attendanceRecords: AttendanceRecord[]
   totalHoursWorked: number
   isFieldStaff?: boolean
+  isAdmin?: boolean
   monthLateDeduction?: number
   monthUndertimeDeduction?: number
+  holidays?: Holiday[]
 }>()
 
 // Hide hours for all staff types since both now use days-based calculation
@@ -57,10 +64,14 @@ const attendanceStats = computed(() => {
   const records: AttendanceWithLateness[] = []
 
   props.attendanceRecords.forEach((attendance) => {
-    const hasAmData =
+    // Check if AM time-in exists (for admin: AM time-in = full day)
+    const hasAmTimeIn =
       attendance.am_time_in !== null &&
       attendance.am_time_in !== undefined &&
-      attendance.am_time_in !== '' &&
+      attendance.am_time_in !== ''
+
+    const hasAmData =
+      hasAmTimeIn &&
       attendance.am_time_out !== null &&
       attendance.am_time_out !== undefined &&
       attendance.am_time_out !== ''
@@ -84,8 +95,18 @@ const attendanceStats = computed(() => {
     }
     const hours = (attendance._debug_dayHours || 0).toFixed(1)
 
-    // Calculate late and undertime for this attendance record
+    // Check if this date is a Regular Holiday
     const attendanceDate = attendance.attendance_date || attendance.date
+    const holiday = props.holidays?.find(h => {
+      if (!h.holiday_at || !attendanceDate) return false
+      const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
+      const attDate = new Date(attendanceDate).toISOString().split('T')[0]
+      return holidayDate === attDate
+    })
+    const isRegularHoliday = holiday?.type?.toUpperCase().includes('RH') || false
+    const holidayDescription = isRegularHoliday ? holiday?.description : undefined
+
+    // Calculate late and undertime for this attendance record
     const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
 
     // Determine time rules based on staff type and day of week
@@ -105,26 +126,28 @@ const attendanceStats = computed(() => {
       pmEndTime = isFriSat ? '16:30' : '17:00'
     }
 
-    // Calculate late minutes
+    // Calculate late minutes (skip for admin employees)
     let amLate = 0
     let pmLate = 0
     let amUndertime = 0
     let pmUndertime = 0
 
-    if (attendance.am_time_in) {
-      amLate = getExcessMinutes(amStartTime, attendance.am_time_in)
-    }
-    if (attendance.pm_time_in) {
-      pmLate = getExcessMinutes(pmStartTime, attendance.pm_time_in)
-    }
-    if (attendance.am_time_out) {
-      amUndertime = getUndertimeMinutes(amEndTime, attendance.am_time_out)
-    }
-    if (attendance.pm_time_out) {
-      pmUndertime = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
+    if (!props.isAdmin) {
+      if (attendance.am_time_in) {
+        amLate = getExcessMinutes(amStartTime, attendance.am_time_in)
+      }
+      if (attendance.pm_time_in) {
+        pmLate = getExcessMinutes(pmStartTime, attendance.pm_time_in)
+      }
+      if (attendance.am_time_out) {
+        amUndertime = getUndertimeMinutes(amEndTime, attendance.am_time_out)
+      }
+      if (attendance.pm_time_out) {
+        pmUndertime = getUndertimeMinutes(pmEndTime, attendance.pm_time_out)
+      }
     }
 
-    const hasLateness = amLate > 0 || pmLate > 0 || amUndertime > 0 || pmUndertime > 0
+    const hasLateness = !props.isAdmin && (amLate > 0 || pmLate > 0 || amUndertime > 0 || pmUndertime > 0)
 
     // Console log the late and undertime data for each day
     if (hasLateness) {
@@ -140,7 +163,12 @@ const attendanceStats = computed(() => {
       // })
     }
 
-    if (hasAmData && hasPmData) {
+    // For Regular Holidays, any attendance counts as full day
+    const hasAnyAttendance = hasAmData || hasPmData
+
+    // Check Regular Holiday first (takes priority over admin rule)
+    if (isRegularHoliday && hasAnyAttendance) {
+      // RH: Any attendance = Full day (even if only AM or PM)
       fullDaysCount += 1
       records.push({
         date,
@@ -154,7 +182,46 @@ const attendanceStats = computed(() => {
         pmLate,
         amUndertime,
         pmUndertime,
-        hasLateness
+        hasLateness,
+        isRegularHoliday: true,
+        holidayDescription
+      })
+    }
+    // Admin staff: AM time-in counts as full day
+    else if (props.isAdmin && hasAmTimeIn) {
+      fullDaysCount += 1
+      records.push({
+        date,
+        amIn: attendance.am_time_in || '-',
+        amOut: attendance.am_time_out || '-',
+        pmIn: attendance.pm_time_in || '-',
+        pmOut: attendance.pm_time_out || '-',
+        hours,
+        type: 'full',
+        amLate,
+        pmLate,
+        amUndertime,
+        pmUndertime,
+        hasLateness,
+        isRegularHoliday,
+        holidayDescription
+      })
+    } else if (hasAmData && hasPmData) {
+      fullDaysCount += 1
+      records.push({
+        date,
+        amIn: attendance.am_time_in || '-',
+        amOut: attendance.am_time_out || '-',
+        pmIn: attendance.pm_time_in || '-',
+        pmOut: attendance.pm_time_out || '-',
+        hours,
+        type: 'full',
+        amLate,
+        pmLate,
+        amUndertime,
+        pmUndertime,
+        hasLateness,
+        isRegularHoliday: false
       })
     } else if (hasAmData) {
       halfDaysCount += 1
@@ -170,7 +237,8 @@ const attendanceStats = computed(() => {
         pmLate: 0,
         amUndertime,
         pmUndertime: 0,
-        hasLateness: amLate > 0 || amUndertime > 0
+        hasLateness: amLate > 0 || amUndertime > 0,
+        isRegularHoliday: false
       })
     } else if (hasPmData) {
       halfDaysCount += 1
@@ -186,7 +254,8 @@ const attendanceStats = computed(() => {
         pmLate,
         amUndertime: 0,
         pmUndertime,
-        hasLateness: pmLate > 0 || pmUndertime > 0
+        hasLateness: pmLate > 0 || pmUndertime > 0,
+        isRegularHoliday: false
       })
     }
   })
@@ -287,7 +356,16 @@ const chunkedRecords = computed(() => {
                       {{ record!.type === 'full' ? 'Full' : record!.type === 'half-am' ? 'AM' : 'PM' }}
                     </v-chip>
                     <v-chip
-                      v-if="record!.hasLateness"
+                      v-if="record!.isRegularHoliday"
+                      size="x-small"
+                      color="blue"
+                      variant="flat"
+                      class="mr-1"
+                    >
+                      RH
+                    </v-chip>
+                    <v-chip
+                      v-if="!isAdmin && record!.hasLateness"
                       size="x-small"
                       color="error"
                       variant="flat"
@@ -297,7 +375,15 @@ const chunkedRecords = computed(() => {
                     </v-chip>
                     <span v-if="!shouldHideHours" class="hours-text">{{ record!.hours }}h</span>
                   </div>
-                  <div v-if="record!.hasLateness" class="lateness-info">
+                  <div v-if="record!.isRegularHoliday" class="holiday-info">
+                    <div class="text-blue text-xs font-italic">
+                      {{ record!.holidayDescription || 'Regular Holiday' }}
+                    </div>
+                    <div class="text-blue-lighten-2 text-xs">
+                      Counted as full day
+                    </div>
+                  </div>
+                  <div v-if="!isAdmin && record!.hasLateness" class="lateness-info">
                     <div v-if="record!.amLate > 0 || record!.pmLate > 0" class="text-red text-xs">
                       <span v-if="record!.amLate > 0">AM Late: {{ record!.amLate }}min</span>
                       <span v-if="record!.amLate > 0 && record!.pmLate > 0"> | </span>
@@ -327,13 +413,17 @@ const chunkedRecords = computed(() => {
         <div v-if="attendanceStats.halfDaysCount > 0">
           {{ attendanceStats.halfDaysCount }} half day{{ attendanceStats.halfDaysCount !== 1 ? 's' : '' }} = {{ attendanceStats.mergedHalfDays }} merged
         </div>
-        <div v-if="totals.totalLateMinutes > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0)" class="text-red">
+        <div v-if="attendanceStats.records.some(r => r.isRegularHoliday)" class="text-blue-lighten-1 mt-1">
+          <v-icon icon="mdi-information" size="x-small" class="me-1"></v-icon>
+          <strong>Note:</strong> Regular Holiday (RH) attendance with any record counts as full day
+        </div>
+        <div v-if="!isAdmin && (totals.totalLateMinutes > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0))" class="text-red">
           <strong>Late Minutes:</strong> {{ totals.totalLateMinutes }}
           <span v-if="monthLateDeduction !== undefined && monthLateDeduction !== totals.totalLateMinutes" class="text-yellow">
             (Payroll: {{ monthLateDeduction }})
           </span>
         </div>
-        <div v-if="totals.totalUndertimeMinutes > 0 || (monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0)" class="text-orange">
+        <div v-if="!isAdmin && (totals.totalUndertimeMinutes > 0 || (monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0))" class="text-orange">
           <strong>Undertime Minutes:</strong> {{ totals.totalUndertimeMinutes }}
           <span v-if="monthUndertimeDeduction !== undefined && monthUndertimeDeduction !== totals.totalUndertimeMinutes" class="text-yellow">
             (Payroll: {{ monthUndertimeDeduction }})
@@ -413,6 +503,18 @@ const chunkedRecords = computed(() => {
   font-size: 0.6rem;
   color: rgba(255, 255, 255, 0.7);
   margin-left: 2px;
+}
+
+.holiday-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 2px;
+}
+
+.holiday-info .text-xs {
+  font-size: 0.6rem;
+  line-height: 0.85;
 }
 
 .lateness-info {

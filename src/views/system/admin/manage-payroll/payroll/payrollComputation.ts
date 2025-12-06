@@ -1,5 +1,6 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes } from './computation/computation'
+import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes, type AttendanceRecord } from './computation/computation'
 import { getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
+import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
 import { useEmployeesStore } from '@/stores/employees'
 import { computed, type Ref, ref, watch } from 'vue'
 
@@ -126,12 +127,7 @@ export function usePayrollComputation(
   const regularWorkTotal = ref<number>(0)
   const absentDays = ref<number>(0)
   const presentDays = ref<number>(0)
-  const attendanceRecords = ref<Array<{
-    am_time_in?: string | null
-    am_time_out?: string | null
-    pm_time_in?: string | null
-    pm_time_out?: string | null
-  }>>([])
+  const attendanceRecords = ref<AttendanceRecord[]>([])
 
   async function computeRegularWorkTotal() {
     let daily = dailyRate.value
@@ -258,6 +254,17 @@ export function usePayrollComputation(
         //   console.warn(`[TOTAL UNDERTIME] Employee ${employeeId} - Total AM Undertime: ${totalUndertimeAM} minutes, Total PM Undertime: ${totalUndertimePM} minutes, Monthly Total: ${monthUndertimeDeduction.value} minutes`)
         // }
 
+        // Fetch holidays for the period to check for Regular Holidays
+        // Use range-based fetch if fromDate/toDate are available, otherwise use dateString
+        let holidays
+        if (fromDate && toDate) {
+          holidays = await fetchHolidaysByRange(fromDate, toDate, employeeId.toString())
+        } else {
+          // Ensure usedDateString is in YYYY-MM format
+          const dateStringYYYYMM = usedDateString.substring(0, 7) // Extract YYYY-MM from YYYY-MM-DD
+          holidays = await fetchHolidaysByDateString(dateStringYYYYMM, employeeId.toString())
+        }
+
         // Calculate present/absent days for both field staff and office staff
         // This logic is now unified and moved outside the staff type conditional
         let employeePresentDays = 0
@@ -281,8 +288,22 @@ export function usePayrollComputation(
             attendance.pm_time_out != undefined &&
             attendance.pm_time_out !== ''
 
+          // Check if this attendance date is a Regular Holiday
+          const attendanceDate = attendance.attendance_date
+          const holiday = holidays.find(h => {
+            if (!h.holiday_at || !attendanceDate) return false
+            const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
+            const attDate = new Date(attendanceDate).toISOString().split('T')[0]
+            return holidayDate === attDate
+          })
+          const isRegularHoliday = holiday?.type?.toUpperCase().includes('RH') || false
+
+          // For Regular Holidays: any attendance = full day
+          if (isRegularHoliday && (hasAmData || hasPmData)) {
+            employeePresentDays += 1
+          }
           // Full day: both AM and PM data are available
-          if (hasAmData && hasPmData) {
+          else if (hasAmData && hasPmData) {
             employeePresentDays += 1
           }
           // Half day: only AM data or only PM data is available
