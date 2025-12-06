@@ -372,6 +372,7 @@ onMounted(async () => {
                 :attendance-records="attendanceRecords || []"
                 :total-hours-worked="totalHoursWorked"
                 :is-field-staff="props.employeeData?.is_field_staff"
+                :is-admin="props.employeeData?.is_admin"
                 :month-late-deduction="monthLateDeduction"
                 :month-undertime-deduction="monthUndertimeDeduction"
                 :holidays="holidaysArray"

@@ -11,7 +11,8 @@ import AttendanceDaysTooltip from '@/views/system/admin/manage-payroll/payroll/A
  */
 function calculateEmployeePresentDays(
   attendanceRecords: AttendanceRecord[],
-  holidays: Holiday[]
+  holidays: Holiday[],
+  isAdmin: boolean = false
 ): number {
   if (!attendanceRecords || attendanceRecords.length === 0) {
     return 0
@@ -20,11 +21,15 @@ function calculateEmployeePresentDays(
   let employeePresentDays = 0
 
   attendanceRecords.forEach((attendance) => {
-    // Check if both AM time-in and time-out are present and not empty strings
-    const hasAmData =
+    // Check if AM time-in is present (for admin: AM time-in = full day)
+    const hasAmTimeIn =
       attendance.am_time_in !== null &&
       attendance.am_time_in !== undefined &&
-      attendance.am_time_in !== '' &&
+      attendance.am_time_in !== ''
+
+    // Check if both AM time-in and time-out are present and not empty strings
+    const hasAmData =
+      hasAmTimeIn &&
       attendance.am_time_out !== null &&
       attendance.am_time_out !== undefined &&
       attendance.am_time_out !== ''
@@ -48,8 +53,12 @@ function calculateEmployeePresentDays(
     })
     const isRegularHoliday = holiday?.type?.toUpperCase().includes('RH') || false
 
+    // Admin staff: AM time-in counts as full day
+    if (isAdmin && hasAmTimeIn) {
+      employeePresentDays += 1
+    }
     // For Regular Holidays: any attendance = full day
-    if (isRegularHoliday && (hasAmData || hasPmData)) {
+    else if (isRegularHoliday && (hasAmData || hasPmData)) {
       employeePresentDays += 1
     }
     // Full day: both AM and PM data are available
@@ -88,17 +97,27 @@ const emit = defineEmits<{
 // Note: Items are now pre-filtered in parent component (SummaryTable.vue)
 const itemsWithCalculations = computed(() => {
   return props.items.map(item => {
-    // Calculate employee present days from attendance records (matches PayrollPrint.vue logic)
-    // This includes full days, half days, and Regular Holiday special treatment
-    const calculatedPresentDays = calculateEmployeePresentDays(
-      item.attendance_records || [],
-      item.holidays || []
-    )
+    // For admin employees, prioritize days_worked_calculated which uses the special AM-only logic
+    // For non-admin employees, calculate from attendance records
+    let effectiveDaysWorked = 0
 
-    // Use calculated present days if we have attendance records, otherwise fall back to existing logic
-    const effectiveDaysWorked = calculatedPresentDays > 0
-      ? calculatedPresentDays
-      : (item.days_worked_calculated ?? item.days_worked) || 0
+    if (item.is_admin && item.days_worked_calculated !== null && item.days_worked_calculated !== undefined) {
+      // Admin employees: use pre-calculated value from SummaryTable.vue
+      effectiveDaysWorked = item.days_worked_calculated
+    } else {
+      // Non-admin employees: calculate from attendance records (matches PayrollPrint.vue logic)
+      // This includes full days, half days, and Regular Holiday special treatment
+      const calculatedPresentDays = calculateEmployeePresentDays(
+        item.attendance_records || [],
+        item.holidays || [],
+        item.is_admin || false
+      )
+
+      // Use calculated present days if we have attendance records, otherwise fall back to existing logic
+      effectiveDaysWorked = calculatedPresentDays > 0
+        ? calculatedPresentDays
+        : (item.days_worked_calculated ?? item.days_worked) || 0
+    }
 
     // Recalculate basic_pay based on effective days worked
     // This now matches PayrollPrint.vue calculation: daily_rate * employeePresentDays
@@ -295,6 +314,7 @@ const totals = computed(() => {
                 :attendance-records="item.attendance_records || []"
                 :total-hours-worked="item.hours_worked || 0"
                 :is-field-staff="item.is_field_staff"
+                :is-admin="item.is_admin"
                 :month-late-deduction="item.deductions.late || 0"
                 :month-undertime-deduction="item.deductions.undertime || 0"
                 :holidays="item.holidays || []"
