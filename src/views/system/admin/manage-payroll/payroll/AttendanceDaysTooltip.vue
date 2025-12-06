@@ -24,7 +24,7 @@ interface AttendanceWithLateness {
   pmIn: string
   pmOut: string
   hours: string
-  type: 'full' | 'half-am' | 'half-pm'
+  type: 'full' | 'half-am' | 'half-pm' | 'rh-no-attendance'
   amLate: number
   pmLate: number
   amUndertime: number
@@ -32,6 +32,7 @@ interface AttendanceWithLateness {
   hasLateness: boolean
   isRegularHoliday?: boolean
   holidayDescription?: string
+  hasActualAttendance?: boolean
 }
 
 const props = defineProps<{
@@ -49,19 +50,78 @@ const shouldHideHours = computed(() => true)
 
 // Calculate full days and half days count with late/undertime data
 const attendanceStats = computed(() => {
-  if (!props.attendanceRecords || props.attendanceRecords.length === 0) {
-    return {
-      fullDaysCount: 0,
-      halfDaysCount: 0,
-      mergedHalfDays: 0,
-      totalCount: 0,
-      records: []
-    }
-  }
-
   let fullDaysCount = 0
   let halfDaysCount = 0
   const records: AttendanceWithLateness[] = []
+
+  // First, add ALL Regular Holidays (regardless of attendance)
+  const processedHolidayDates = new Set<string>()
+
+  if (props.holidays && props.holidays.length > 0) {
+    const regularHolidays = props.holidays.filter(h => h.type?.toUpperCase().includes('RH'))
+
+    regularHolidays.forEach((holiday) => {
+      if (!holiday.holiday_at) return
+
+      const holidayDate = new Date(holiday.holiday_at).toISOString().split('T')[0]
+      processedHolidayDates.add(holidayDate)
+
+      // Check if there's attendance on this holiday
+      const attendanceOnHoliday = props.attendanceRecords?.find(att => {
+        const attDate = att.attendance_date || att.date
+        if (!attDate) return false
+        const attDateStr = new Date(attDate).toISOString().split('T')[0]
+        return attDateStr === holidayDate
+      })
+
+      const d = new Date(holiday.holiday_at)
+      const month = d.toLocaleDateString('en-US', { month: 'short' })
+      const day = d.getDate()
+      const date = `${month} ${day}`
+
+      const hasActualAttendance = attendanceOnHoliday ? (
+        !!attendanceOnHoliday.am_time_in ||
+        !!attendanceOnHoliday.am_time_out ||
+        !!attendanceOnHoliday.pm_time_in ||
+        !!attendanceOnHoliday.pm_time_out
+      ) : false
+
+      fullDaysCount += 1
+      records.push({
+        date,
+        amIn: attendanceOnHoliday?.am_time_in || '-',
+        amOut: attendanceOnHoliday?.am_time_out || '-',
+        pmIn: attendanceOnHoliday?.pm_time_in || '-',
+        pmOut: attendanceOnHoliday?.pm_time_out || '-',
+        hours: attendanceOnHoliday?._debug_dayHours?.toFixed(1) || '0.0',
+        type: hasActualAttendance ? 'full' : 'rh-no-attendance',
+        amLate: 0,
+        pmLate: 0,
+        amUndertime: 0,
+        pmUndertime: 0,
+        hasLateness: false,
+        isRegularHoliday: true,
+        holidayDescription: holiday.description,
+        hasActualAttendance
+      })
+    })
+  }
+
+  // Then process regular attendance records (skip Regular Holidays already processed)
+  if (!props.attendanceRecords || props.attendanceRecords.length === 0) {
+    const mergedHalfDays = Math.floor(halfDaysCount / 2)
+    const remainingHalfDays = halfDaysCount % 2
+    const totalCount = fullDaysCount + mergedHalfDays + (remainingHalfDays * 0.5)
+
+    return {
+      fullDaysCount,
+      halfDaysCount,
+      mergedHalfDays,
+      remainingHalfDays,
+      totalCount,
+      records
+    }
+  }
 
   props.attendanceRecords.forEach((attendance) => {
     // Check if AM time-in exists (for admin: AM time-in = full day)
@@ -97,6 +157,13 @@ const attendanceStats = computed(() => {
 
     // Check if this date is a Regular Holiday
     const attendanceDate = attendance.attendance_date || attendance.date
+    const attendanceDateStr = attendanceDate ? new Date(attendanceDate).toISOString().split('T')[0] : ''
+
+    // Skip if this is a Regular Holiday (already processed above)
+    if (processedHolidayDates.has(attendanceDateStr)) {
+      return
+    }
+
     const holiday = props.holidays?.find(h => {
       if (!h.holiday_at || !attendanceDate) return false
       const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
@@ -163,32 +230,9 @@ const attendanceStats = computed(() => {
       // })
     }
 
-    // For Regular Holidays, any attendance counts as full day
-    const hasAnyAttendance = hasAmData || hasPmData
-
-    // Check Regular Holiday first (takes priority over admin rule)
-    if (isRegularHoliday && hasAnyAttendance) {
-      // RH: Any attendance = Full day (even if only AM or PM)
-      fullDaysCount += 1
-      records.push({
-        date,
-        amIn: attendance.am_time_in || '-',
-        amOut: attendance.am_time_out || '-',
-        pmIn: attendance.pm_time_in || '-',
-        pmOut: attendance.pm_time_out || '-',
-        hours,
-        type: 'full',
-        amLate,
-        pmLate,
-        amUndertime,
-        pmUndertime,
-        hasLateness,
-        isRegularHoliday: true,
-        holidayDescription
-      })
-    }
+    // Regular Holidays are already handled above, so this should not execute
     // Admin staff: AM time-in counts as full day
-    else if (props.isAdmin && hasAmTimeIn) {
+    if (props.isAdmin && hasAmTimeIn) {
       fullDaysCount += 1
       records.push({
         date,
@@ -348,21 +392,22 @@ const chunkedRecords = computed(() => {
                   </div>
                   <div class="chips-row">
                     <v-chip
+                      v-if="record!.isRegularHoliday"
+                      size="x-small"
+                      :color="record!.hasActualAttendance ? 'blue' : 'blue-grey'"
+                      variant="flat"
+                      class="mr-1"
+                    >
+                      {{ record!.hasActualAttendance ? 'RH (Worked)' : 'RH (Paid)' }}
+                    </v-chip>
+                    <v-chip
+                      v-else
                       size="x-small"
                       :color="record!.type === 'full' ? 'success' : 'warning'"
                       variant="flat"
                       class="mr-1"
                     >
                       {{ record!.type === 'full' ? 'Full' : record!.type === 'half-am' ? 'AM' : 'PM' }}
-                    </v-chip>
-                    <v-chip
-                      v-if="record!.isRegularHoliday"
-                      size="x-small"
-                      color="blue"
-                      variant="flat"
-                      class="mr-1"
-                    >
-                      RH
                     </v-chip>
                     <v-chip
                       v-if="!isAdmin && record!.hasLateness"
@@ -376,11 +421,11 @@ const chunkedRecords = computed(() => {
                     <span v-if="!shouldHideHours" class="hours-text">{{ record!.hours }}h</span>
                   </div>
                   <div v-if="record!.isRegularHoliday" class="holiday-info">
-                    <div class="text-blue text-xs font-italic">
+                    <div :class="record!.hasActualAttendance ? 'text-blue' : 'text-blue-grey'" class="text-xs font-italic">
                       {{ record!.holidayDescription || 'Regular Holiday' }}
                     </div>
-                    <div class="text-blue-lighten-2 text-xs">
-                      Counted as full day
+                    <div :class="record!.hasActualAttendance ? 'text-blue-lighten-2' : 'text-blue-grey-lighten-2'" class="text-xs">
+                      {{ record!.hasActualAttendance ? 'Worked + Full day paid' : 'Full day paid (no work)' }}
                     </div>
                   </div>
                   <div v-if="!isAdmin && record!.hasLateness" class="lateness-info">
@@ -415,7 +460,7 @@ const chunkedRecords = computed(() => {
         </div>
         <div v-if="attendanceStats.records.some(r => r.isRegularHoliday)" class="text-blue-lighten-1 mt-1">
           <v-icon icon="mdi-information" size="x-small" class="me-1"></v-icon>
-          <strong>Note:</strong> Regular Holiday (RH) attendance with any record counts as full day
+          <strong>Note:</strong> RH (Regular Holiday).
         </div>
         <div v-if="!isAdmin && (totals.totalLateMinutes > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0))" class="text-red">
           <strong>Late Minutes:</strong> {{ totals.totalLateMinutes }}

@@ -127,27 +127,34 @@ BEGIN
     GROUP BY u.employee_id
   ),
   
-  -- Calculate holiday pay per employee (only PREMIUM amount, not including base pay)
+  -- Calculate holiday pay per employee
+  -- For Regular Holidays (RH):
+  --   - If employee worked (has attendance): 100% premium only (base 100% counted in basic_pay client-side)
+  --   - If employee didn't work (no attendance): 100% base pay only
+  -- For other holidays: Premium percentage based on type
   holiday_pay_data AS (
     SELECT 
       a.employee_id,
       COALESCE(SUM(
         ae.daily_rate * 
         CASE 
-          WHEN LOWER(h.type) LIKE '%rh%' THEN 1.0        -- Regular Holiday: 100% premium (200% - 100% base)
-          WHEN LOWER(h.type) LIKE '%snh%' THEN 0.3       -- Special Non-Working Holiday: 30% premium (130% - 100% base)
-          WHEN LOWER(h.type) LIKE '%lh%' THEN 0.3        -- Local Holiday: 30% premium (130% - 100% base)
-          WHEN LOWER(h.type) LIKE '%ch%' THEN 0.0        -- Company Holiday: 0% premium (100% - 100% base)
-          WHEN LOWER(h.type) LIKE '%swh%' THEN 0.3       -- Special Working Holiday: 30% premium (130% - 100% base)
-          ELSE 0.0
-        END *
-        -- Apply day fraction based on attendance (full day or half day)
-        CASE 
-          -- For Regular Holidays (RH), any attendance record = full day
+          -- Regular Holiday with attendance: 100% premium (worked)
           WHEN LOWER(h.type) LIKE '%rh%' AND (
             a.am_time_in IS NOT NULL OR a.am_time_out IS NOT NULL OR
             a.pm_time_in IS NOT NULL OR a.pm_time_out IS NOT NULL
           ) THEN 1.0
+          -- Regular Holiday without attendance: 0% (will be added from rh_paid_data)
+          WHEN LOWER(h.type) LIKE '%rh%' THEN 0.0
+          WHEN LOWER(h.type) LIKE '%snh%' THEN 0.3       -- Special Non-Working Holiday: 30% premium
+          WHEN LOWER(h.type) LIKE '%lh%' THEN 0.3        -- Local Holiday: 30% premium
+          WHEN LOWER(h.type) LIKE '%ch%' THEN 0.0        -- Company Holiday: 0% premium
+          WHEN LOWER(h.type) LIKE '%swh%' THEN 0.3       -- Special Working Holiday: 30% premium
+          ELSE 0.0
+        END *
+        -- Apply day fraction based on attendance (full day or half day)
+        CASE 
+          -- For Regular Holidays with attendance, always full day
+          WHEN LOWER(h.type) LIKE '%rh%' THEN 1.0
           -- For other holidays, normal calculation
           -- Full day: all 4 timestamps present
           WHEN a.am_time_in IS NOT NULL AND a.am_time_out IS NOT NULL 
@@ -168,6 +175,24 @@ BEGIN
       AND COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) <= v_end_date
       AND (a.am_time_in IS NOT NULL OR a.pm_time_in IS NOT NULL)
     GROUP BY a.employee_id
+  ),
+  
+  -- Calculate RH paid days (Regular Holidays without attendance)
+  -- All employees get 100% base pay for RH even if they didn't work
+  rh_paid_data AS (
+    SELECT 
+      ae.id AS employee_id,
+      COALESCE(SUM(
+        ae.daily_rate * 1.0  -- 100% base pay for RH paid days
+      ), 0) AS rh_paid_amount
+    FROM active_employees ae
+    CROSS JOIN holidays h
+    LEFT JOIN attendances a ON a.employee_id = ae.id 
+      AND COALESCE(a.am_time_in::DATE, a.pm_time_in::DATE) = h.holiday_at
+    WHERE LOWER(h.type) LIKE '%rh%'
+      AND h.holiday_at BETWEEN v_start_date AND v_end_date
+      AND a.employee_id IS NULL  -- No attendance record
+    GROUP BY ae.id
   ),
   
   -- Calculate cash advances
@@ -232,14 +257,15 @@ BEGIN
     0.00::NUMERIC AS overtime_pay, -- Calculated client-side
     COALESCE(tr.trips_amount, 0)::NUMERIC AS trips_pay,
     COALESCE(ut.utilizations_total, 0)::NUMERIC AS utilizations_pay,
-    COALESCE(hp.holiday_amount, 0)::NUMERIC AS holidays_pay,
+    (COALESCE(hp.holiday_amount, 0) + COALESCE(rhp.rh_paid_amount, 0))::NUMERIC AS holidays_pay,
     COALESCE(ben.benefits_total, 0)::NUMERIC AS benefits_pay,
     ROUND(
       COALESCE(al.allowances_total, 0) +
       COALESCE(tr.trips_amount, 0) +
       COALESCE(ut.utilizations_total, 0) +
-      COALESCE(ben.benefits_total, 0), 2
-    )::NUMERIC AS gross_pay, -- Note: basic_pay, holidays_pay, overtime_pay, sunday_amount all calculated client-side
+      COALESCE(ben.benefits_total, 0) +
+      COALESCE(rhp.rh_paid_amount, 0), 2
+    )::NUMERIC AS gross_pay, -- Note: basic_pay, holidays_pay (worked only), overtime_pay, sunday_amount all calculated client-side
     COALESCE(ca.cash_advance_total, 0)::NUMERIC AS cash_advance,
     COALESCE(ded.sss, 0)::NUMERIC AS sss,
     COALESCE(ded.phic, 0)::NUMERIC AS phic,
@@ -262,7 +288,8 @@ BEGIN
       (COALESCE(al.allowances_total, 0) +
        COALESCE(tr.trips_amount, 0) +
        COALESCE(ut.utilizations_total, 0) +
-       COALESCE(ben.benefits_total, 0)) -
+       COALESCE(ben.benefits_total, 0) +
+       COALESCE(rhp.rh_paid_amount, 0)) -
       (COALESCE(ca.cash_advance_total, 0) +
        COALESCE(ded.sss, 0) +
        COALESCE(ded.phic, 0) +
@@ -270,7 +297,7 @@ BEGIN
        COALESCE(ded.sss_loan, 0) +
        COALESCE(ded.savings, 0) +
        COALESCE(ded.salary_deposit, 0)), 2
-      -- Note: basic_pay, overtime, holidays_pay, sunday_amount, late and undertime all calculated client-side
+      -- Note: basic_pay, overtime, holidays_pay (worked only), sunday_amount, late and undertime all calculated client-side
     )::NUMERIC AS net_pay
   FROM active_employees ae
   LEFT JOIN allowances_data al ON ae.id = al.employee_id
@@ -278,6 +305,7 @@ BEGIN
   LEFT JOIN utilizations_data ut ON ae.id = ut.employee_id
   -- Note: overtime_data join removed, calculated client-side
   LEFT JOIN holiday_pay_data hp ON ae.id = hp.employee_id
+  LEFT JOIN rh_paid_data rhp ON ae.id = rhp.employee_id
   LEFT JOIN cash_advance_data ca ON ae.id = ca.employee_id
   LEFT JOIN deduction_totals ded ON ae.id = ded.employee_id
   LEFT JOIN benefits_totals ben ON ae.id = ben.employee_id
