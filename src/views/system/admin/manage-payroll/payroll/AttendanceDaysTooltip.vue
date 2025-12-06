@@ -14,6 +14,14 @@ interface AttendanceRecord {
   _debug_dayHours?: number
 }
 
+interface Holiday {
+  id?: number
+  holiday_at?: string
+  type?: string | null
+  description?: string
+  attendance_fraction?: number
+}
+
 interface AttendanceWithLateness {
   date: string
   amIn: string
@@ -27,6 +35,8 @@ interface AttendanceWithLateness {
   amUndertime: number
   pmUndertime: number
   hasLateness: boolean
+  isRegularHoliday?: boolean
+  holidayDescription?: string
 }
 
 const props = defineProps<{
@@ -35,6 +45,7 @@ const props = defineProps<{
   isFieldStaff?: boolean
   monthLateDeduction?: number
   monthUndertimeDeduction?: number
+  holidays?: Holiday[]
 }>()
 
 // Hide hours for all staff types since both now use days-based calculation
@@ -84,8 +95,18 @@ const attendanceStats = computed(() => {
     }
     const hours = (attendance._debug_dayHours || 0).toFixed(1)
 
-    // Calculate late and undertime for this attendance record
+    // Check if this date is a Regular Holiday
     const attendanceDate = attendance.attendance_date || attendance.date
+    const holiday = props.holidays?.find(h => {
+      if (!h.holiday_at || !attendanceDate) return false
+      const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
+      const attDate = new Date(attendanceDate).toISOString().split('T')[0]
+      return holidayDate === attDate
+    })
+    const isRegularHoliday = holiday?.type?.toUpperCase().includes('RH') || false
+    const holidayDescription = isRegularHoliday ? holiday?.description : undefined
+
+    // Calculate late and undertime for this attendance record
     const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
 
     // Determine time rules based on staff type and day of week
@@ -140,7 +161,11 @@ const attendanceStats = computed(() => {
       // })
     }
 
-    if (hasAmData && hasPmData) {
+    // For Regular Holidays, any attendance counts as full day
+    const hasAnyAttendance = hasAmData || hasPmData
+
+    if (isRegularHoliday && hasAnyAttendance) {
+      // RH: Any attendance = Full day (even if only AM or PM)
       fullDaysCount += 1
       records.push({
         date,
@@ -154,7 +179,26 @@ const attendanceStats = computed(() => {
         pmLate,
         amUndertime,
         pmUndertime,
-        hasLateness
+        hasLateness,
+        isRegularHoliday: true,
+        holidayDescription
+      })
+    } else if (hasAmData && hasPmData) {
+      fullDaysCount += 1
+      records.push({
+        date,
+        amIn: attendance.am_time_in || '-',
+        amOut: attendance.am_time_out || '-',
+        pmIn: attendance.pm_time_in || '-',
+        pmOut: attendance.pm_time_out || '-',
+        hours,
+        type: 'full',
+        amLate,
+        pmLate,
+        amUndertime,
+        pmUndertime,
+        hasLateness,
+        isRegularHoliday: false
       })
     } else if (hasAmData) {
       halfDaysCount += 1
@@ -170,7 +214,8 @@ const attendanceStats = computed(() => {
         pmLate: 0,
         amUndertime,
         pmUndertime: 0,
-        hasLateness: amLate > 0 || amUndertime > 0
+        hasLateness: amLate > 0 || amUndertime > 0,
+        isRegularHoliday: false
       })
     } else if (hasPmData) {
       halfDaysCount += 1
@@ -186,7 +231,8 @@ const attendanceStats = computed(() => {
         pmLate,
         amUndertime: 0,
         pmUndertime,
-        hasLateness: pmLate > 0 || pmUndertime > 0
+        hasLateness: pmLate > 0 || pmUndertime > 0,
+        isRegularHoliday: false
       })
     }
   })
@@ -287,6 +333,15 @@ const chunkedRecords = computed(() => {
                       {{ record!.type === 'full' ? 'Full' : record!.type === 'half-am' ? 'AM' : 'PM' }}
                     </v-chip>
                     <v-chip
+                      v-if="record!.isRegularHoliday"
+                      size="x-small"
+                      color="blue"
+                      variant="flat"
+                      class="mr-1"
+                    >
+                      RH
+                    </v-chip>
+                    <v-chip
                       v-if="record!.hasLateness"
                       size="x-small"
                       color="error"
@@ -296,6 +351,14 @@ const chunkedRecords = computed(() => {
                       Late
                     </v-chip>
                     <span v-if="!shouldHideHours" class="hours-text">{{ record!.hours }}h</span>
+                  </div>
+                  <div v-if="record!.isRegularHoliday" class="holiday-info">
+                    <div class="text-blue text-xs font-italic">
+                      {{ record!.holidayDescription || 'Regular Holiday' }}
+                    </div>
+                    <div class="text-blue-lighten-2 text-xs">
+                      Counted as full day
+                    </div>
                   </div>
                   <div v-if="record!.hasLateness" class="lateness-info">
                     <div v-if="record!.amLate > 0 || record!.pmLate > 0" class="text-red text-xs">
@@ -326,6 +389,10 @@ const chunkedRecords = computed(() => {
         </div>
         <div v-if="attendanceStats.halfDaysCount > 0">
           {{ attendanceStats.halfDaysCount }} half day{{ attendanceStats.halfDaysCount !== 1 ? 's' : '' }} = {{ attendanceStats.mergedHalfDays }} merged
+        </div>
+        <div v-if="attendanceStats.records.some(r => r.isRegularHoliday)" class="text-blue-lighten-1 mt-1">
+          <v-icon icon="mdi-information" size="x-small" class="me-1"></v-icon>
+          <strong>Note:</strong> Regular Holiday (RH) attendance with any record counts as full day
         </div>
         <div v-if="totals.totalLateMinutes > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0)" class="text-red">
           <strong>Late Minutes:</strong> {{ totals.totalLateMinutes }}
@@ -413,6 +480,18 @@ const chunkedRecords = computed(() => {
   font-size: 0.6rem;
   color: rgba(255, 255, 255, 0.7);
   margin-left: 2px;
+}
+
+.holiday-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 2px;
+}
+
+.holiday-info .text-xs {
+  font-size: 0.6rem;
+  line-height: 0.85;
 }
 
 .lateness-info {

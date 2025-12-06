@@ -1,5 +1,6 @@
 import { getPaidLeaveDaysForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
 import { getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import { fetchHolidaysByRange, fetchHolidaysByDateString } from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
 
 /**
  * Calculate accurate days worked using client-side attendance logic
@@ -22,10 +23,30 @@ export async function calculateDaysWorked(
     // Get paid leave days
     const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
 
+    // Fetch holidays for the date range to check for Regular Holidays
+    let holidays: Array<{ holiday_at: string; type: string | null }> = []
+    if (fromDate && toDate) {
+      holidays = await fetchHolidaysByRange(fromDate, toDate)
+    } else {
+      holidays = await fetchHolidaysByDateString(dateStringForCalculation)
+    }
+
     let employeePresentDays = 0
 
     // Use the same logic as payrollComputation.ts
     attendances.forEach((attendance) => {
+      // Get the attendance date for Regular Holiday checking
+      const attendanceDate = attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
+
+      // Check if this date is a Regular Holiday
+      const isRegularHoliday = holidays.some(
+        (h) => h.holiday_at === attendanceDate && h.type?.toUpperCase().includes('RH')
+      )
+
+      if (isRegularHoliday) {
+        console.log(`[RH Detection] Found Regular Holiday attendance on ${attendanceDate} for employee ${employeeId}`)
+      }
+
       // Check if both AM time-in and time-out are present and not empty strings
       const hasAmData =
         attendance.am_time_in !== null &&
@@ -44,8 +65,16 @@ export async function calculateDaysWorked(
         attendance.pm_time_out !== undefined &&
         attendance.pm_time_out !== ''
 
+      // Check if there's any attendance record
+      const hasAnyAttendance =
+        attendance.am_time_in || attendance.am_time_out || attendance.pm_time_in || attendance.pm_time_out
+
+      // If it's a Regular Holiday with any attendance, count as full day
+      if (isRegularHoliday && hasAnyAttendance) {
+        employeePresentDays += 1
+      }
       // Full day: both AM and PM data are available
-      if (hasAmData && hasPmData) {
+      else if (hasAmData && hasPmData) {
         employeePresentDays += 1
       }
       // Half day: only AM data or only PM data is available
@@ -67,6 +96,7 @@ export async function calculateDaysWorked(
 /**
  * Calculate days worked for admin employees where only AM time-in counts as a full day.
  * Counts any non-empty am_time_in as 1 day (regardless of am_time_out), plus paid leave days.
+ * For Regular Holidays, any attendance counts as a full day.
  */
 export async function calculateDaysWorkedForAdminByAmOnly(
   employeeId: number,
@@ -92,17 +122,46 @@ export async function calculateDaysWorkedForAdminByAmOnly(
     // Get paid leave days
     const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
 
+    // Fetch holidays for the date range to check for Regular Holidays
+    let holidays: Array<{ holiday_at: string; type: string | null }> = []
+    if (fromDate && toDate) {
+      holidays = await fetchHolidaysByRange(fromDate, toDate)
+    } else {
+      holidays = await fetchHolidaysByDateString(dateStringForCalculation)
+    }
+
     let employeePresentDays = 0
 
     attendances.forEach((attendance) => {
-      const hasAmTimeIn =
-        attendance.am_time_in !== null &&
-        attendance.am_time_in !== undefined &&
-        attendance.am_time_in !== ''
+      // Get the attendance date for Regular Holiday checking
+      const attendanceDate = attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
 
-      if (hasAmTimeIn) {
-        // Count as full day when AM time-in is present
+      // Check if this date is a Regular Holiday
+      const isRegularHoliday = holidays.some(
+        (h) => h.holiday_at === attendanceDate && h.type?.toUpperCase().includes('RH')
+      )
+
+      if (isRegularHoliday) {
+        console.log(`[RH Detection - Admin] Found Regular Holiday attendance on ${attendanceDate} for employee ${employeeId}`)
+      }
+
+      // Check if there's any attendance record
+      const hasAnyAttendance =
+        attendance.am_time_in || attendance.am_time_out || attendance.pm_time_in || attendance.pm_time_out
+
+      // If it's a Regular Holiday with any attendance, count as full day
+      if (isRegularHoliday && hasAnyAttendance) {
         employeePresentDays += 1
+      } else {
+        const hasAmTimeIn =
+          attendance.am_time_in !== null &&
+          attendance.am_time_in !== undefined &&
+          attendance.am_time_in !== ''
+
+        if (hasAmTimeIn) {
+          // Count as full day when AM time-in is present
+          employeePresentDays += 1
+        }
       }
     })
 

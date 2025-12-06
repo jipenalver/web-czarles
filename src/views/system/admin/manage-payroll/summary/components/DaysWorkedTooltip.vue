@@ -41,6 +41,10 @@ const breakdown = computed(() => {
         <v-icon icon="mdi-shield-account" size="x-small" class="me-1"></v-icon>
         <span class="font-weight-medium">Admin: AM time-in counts as full day</span>
       </div>
+      <div class="text-caption mb-1 text-blue-lighten-1">
+        <v-icon icon="mdi-calendar-star" size="x-small" class="me-1"></v-icon>
+        <span class="font-weight-medium">Regular Holiday: Any attendance = full day</span>
+      </div>
       <div v-if="breakdown.hoursInfo !== undefined" class="text-caption mb-1 text-grey-lighten-1">
         <span>Hours Worked:</span>
         <span class="ms-1">{{ roundDecimal(breakdown.hoursInfo, 2) }} hrs</span>
