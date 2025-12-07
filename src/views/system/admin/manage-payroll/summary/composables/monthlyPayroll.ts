@@ -1,8 +1,8 @@
 import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
 import { getEmployeesAttendanceBatch, getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import { fetchHolidaysByRange, fetchHolidaysByDateString } from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
 import { useEmployeesStore } from '@/stores/employees'
-import { useHolidaysStore } from '@/stores/holidays'
 
 // Import modular components
 import type { MonthlyPayrollRow, MonthlyPayrollTotals } from './types'
@@ -26,9 +26,6 @@ export function useMonthlyPayroll() {
 
   // Employees store for admin flags
   const employeesStore = useEmployeesStore()
-
-  // Holidays store for attendance tooltip
-  const holidaysStore = useHolidaysStore()
 
   /**
    * Load payroll data using Supabase function for base calculations,
@@ -129,8 +126,13 @@ export function useMonthlyPayroll() {
       // Combine field staff and non-field staff employees
       const finalData = [...fieldStaffEmployees, ...nonFieldStaffEmployees]
 
-      // Fetch holidays for the period
-      await holidaysStore.getHolidays()
+      // Fetch holidays for the period using the date range
+      let holidaysForPeriod
+      if (fromDate && toDate) {
+        holidaysForPeriod = await fetchHolidaysByRange(fromDate, toDate)
+      } else {
+        holidaysForPeriod = await fetchHolidaysByDateString(dateStringForCalculation.substring(0, 7))
+      }
 
       // Fetch attendance records for each employee to populate attendance_records field
       await Promise.all(
@@ -143,7 +145,8 @@ export function useMonthlyPayroll() {
               toDate
             )
             employee.attendance_records = attendanceRecords || []
-            employee.holidays = holidaysStore.holidays
+            // Assign filtered holidays for this period only
+            employee.holidays = holidaysForPeriod || []
           } catch (error) {
             console.error(`Error fetching attendance for employee ${employee.employee_id}:`, error)
             employee.attendance_records = []

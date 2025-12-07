@@ -39,6 +39,9 @@ export function useOverallEarningsTotal(
 
     // 3. Holiday earnings with additional pay multipliers (not total pay)
     // Note: Regular work already includes base pay, so holiday pay is the ADDITIONAL amount
+    // IMPORTANT: Regular Holidays (RH) calculation:
+    // - If employee worked (hasActualAttendance = true): Add 100% premium (base 100% is in regularWorkTotal)
+    // - If employee didn't work (hasActualAttendance = false): Add full 200% (not in regularWorkTotal)
     const holidayEarnings =
       holidays.value?.reduce((sum, holiday) => {
         const baseRate = Number(dailyRate.value) || 0
@@ -47,7 +50,8 @@ export function useOverallEarningsTotal(
 
         let additionalMultiplier = 0
         if (type.includes('rh'))
-          additionalMultiplier = 1.0 // Regular Holiday - 100% additional (200% total - 100% already in regular)
+          // Regular Holiday: 100% premium if worked, 100% base pay if didn't work
+          additionalMultiplier = holiday.hasActualAttendance ? 1.0 : 1.0
         else if (type.includes('snh'))
           additionalMultiplier = 0.3 // Special Non-working Holiday - 30% additional (130% total - 100% already in regular)
         else if (type.includes('lh'))

@@ -4,6 +4,7 @@ import { getLastDateOfMonth } from '../helpers'
 
 export type HolidayWithAttendance = Holiday & {
   attendance_fraction?: number // 0, 0.5, or 1.0
+  hasActualAttendance?: boolean // true if employee actually worked on this day
 }
 
 export async function fetchHolidaysByDateString(
@@ -43,34 +44,35 @@ export async function fetchHolidaysByDateString(
         .lt('am_time_in', `${holiday.holiday_at}T23:59:59`)
         .maybeSingle()
 
+      // Check if this is a Regular Holiday (RH)
+      const isRegularHoliday = holiday.type?.toUpperCase().includes('RH')
+
       let attendance_fraction = 0
-      if (attendance) {
-        // Check if this is a Regular Holiday (RH)
-        const isRegularHoliday = holiday.type?.toUpperCase().includes('RH')
+      let hasActualAttendance = false
 
-        // For Regular Holidays, any attendance record counts as full day
-        if (isRegularHoliday) {
-          const hasAnyAttendance = attendance.am_time_in || attendance.am_time_out ||
-                                   attendance.pm_time_in || attendance.pm_time_out
-          if (hasAnyAttendance) {
-            attendance_fraction = 1.0 // Full day for RH with any attendance
-          }
-        } else {
-          // For other holidays, use the normal calculation
-          const hasAM = attendance.am_time_in && attendance.am_time_out
-          const hasPM = attendance.pm_time_in && attendance.pm_time_out
+      // Check for actual attendance data
+      const hasAM = attendance?.am_time_in && attendance?.am_time_out
+      const hasPM = attendance?.pm_time_in && attendance?.pm_time_out
 
-          if (hasAM && hasPM) {
-            attendance_fraction = 1.0 // Full day
-          } else if (hasAM || hasPM) {
-            attendance_fraction = 0.5 // Half day
-          }
+      // For Regular Holidays: ALL employees get 1.0 fraction regardless of attendance
+      if (isRegularHoliday) {
+        attendance_fraction = 1.0 // Full day for all employees on Regular Holidays
+        hasActualAttendance = !!(hasAM || hasPM) // Track if employee actually worked
+      } else if (attendance) {
+        // For other holidays, use the normal calculation based on actual attendance
+        if (hasAM && hasPM) {
+          attendance_fraction = 1.0 // Full day
+          hasActualAttendance = true
+        } else if (hasAM || hasPM) {
+          attendance_fraction = 0.5 // Half day
+          hasActualAttendance = true
         }
       }
 
       return {
         ...holiday,
-        attendance_fraction
+        attendance_fraction,
+        hasActualAttendance
       } as HolidayWithAttendance
     })
   )
@@ -110,34 +112,35 @@ export async function fetchHolidaysByRange(
         .lt('am_time_in', `${holiday.holiday_at}T23:59:59`)
         .maybeSingle()
 
+      // Check if this is a Regular Holiday (RH)
+      const isRegularHoliday = holiday.type?.toUpperCase().includes('RH')
+
       let attendance_fraction = 0
-      if (attendance) {
-        // Check if this is a Regular Holiday (RH)
-        const isRegularHoliday = holiday.type?.toUpperCase().includes('RH')
+      let hasActualAttendance = false
 
-        // For Regular Holidays, any attendance record counts as full day
-        if (isRegularHoliday) {
-          const hasAnyAttendance = attendance.am_time_in || attendance.am_time_out ||
-                                   attendance.pm_time_in || attendance.pm_time_out
-          if (hasAnyAttendance) {
-            attendance_fraction = 1.0 // Full day for RH with any attendance
-          }
-        } else {
-          // For other holidays, use the normal calculation
-          const hasAM = attendance.am_time_in && attendance.am_time_out
-          const hasPM = attendance.pm_time_in && attendance.pm_time_out
+      // Check for actual attendance data
+      const hasAM = attendance?.am_time_in && attendance?.am_time_out
+      const hasPM = attendance?.pm_time_in && attendance?.pm_time_out
 
-          if (hasAM && hasPM) {
-            attendance_fraction = 1.0 // Full day
-          } else if (hasAM || hasPM) {
-            attendance_fraction = 0.5 // Half day
-          }
+      // For Regular Holidays: ALL employees get 1.0 fraction regardless of attendance
+      if (isRegularHoliday) {
+        attendance_fraction = 1.0 // Full day for all employees on Regular Holidays
+        hasActualAttendance = !!(hasAM || hasPM) // Track if employee actually worked
+      } else if (attendance) {
+        // For other holidays, use the normal calculation based on actual attendance
+        if (hasAM && hasPM) {
+          attendance_fraction = 1.0 // Full day
+          hasActualAttendance = true
+        } else if (hasAM || hasPM) {
+          attendance_fraction = 0.5 // Half day
+          hasActualAttendance = true
         }
       }
 
       return {
         ...holiday,
-        attendance_fraction
+        attendance_fraction,
+        hasActualAttendance
       } as HolidayWithAttendance
     })
   )

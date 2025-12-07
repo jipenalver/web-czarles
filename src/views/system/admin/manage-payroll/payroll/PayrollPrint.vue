@@ -133,7 +133,7 @@ const {
 const holidaysArray = computed(() => holidays.value || [])
 
 // Function to calculate holiday amount based on type
-const calculateHolidayAmount = (holiday: { type?: string | null; attendance_fraction?: number }) => {
+const calculateHolidayAmount = (holiday: { type?: string | null; attendance_fraction?: number; hasActualAttendance?: boolean }) => {
   const rate = dailyRate.value || 0
   const fraction = holiday.attendance_fraction || 0
 
@@ -142,7 +142,11 @@ const calculateHolidayAmount = (holiday: { type?: string | null; attendance_frac
   const type = holiday.type.toLowerCase()
 
   if (type.includes('rh')) {
-    return rate * 1.0 * fraction
+    // Regular Holidays:
+    // - If employee worked (hasActualAttendance = true): Show 100% premium only (base 100% is in regularWorkTotal)
+    // - If employee didn't work (hasActualAttendance = false): Show 100% base pay only (not in regularWorkTotal)
+    const multiplier = holiday.hasActualAttendance ? 1.0 : 1.0
+    return rate * multiplier * fraction
   } else if (type.includes('snh')) {
     return rate * 0.3 * fraction
   } else if (type.includes('lh')) {

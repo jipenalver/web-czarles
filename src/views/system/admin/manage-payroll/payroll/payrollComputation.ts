@@ -268,6 +268,16 @@ export function usePayrollComputation(
         // Calculate present/absent days for both field staff and office staff
         // This logic is now unified and moved outside the staff type conditional
         let employeePresentDays = 0
+        let regularHolidayWorkedDays = 0 // Track RH days where employee actually worked
+        let regularHolidayPaidDays = 0 // Track RH days where employee didn't work (paid only)
+
+        // Create a Set of Regular Holiday dates for efficient lookup
+        const regularHolidayDates = new Set(
+          holidays.filter(h => h.type?.toUpperCase().includes('RH')).map(h => {
+            if (!h.holiday_at) return null
+            return new Date(h.holiday_at).toISOString().split('T')[0]
+          }).filter(Boolean)
+        )
 
         attendances.forEach((attendance) => {
           // Check if both AM time-in and time-out are present and not empty strings
@@ -290,20 +300,19 @@ export function usePayrollComputation(
 
           // Check if this attendance date is a Regular Holiday
           const attendanceDate = attendance.attendance_date
-          const holiday = holidays.find(h => {
-            if (!h.holiday_at || !attendanceDate) return false
-            const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
-            const attDate = new Date(attendanceDate).toISOString().split('T')[0]
-            return holidayDate === attDate
-          })
-          const isRegularHoliday = holiday?.type?.toUpperCase().includes('RH') || false
+          const attDate = attendanceDate ? new Date(attendanceDate).toISOString().split('T')[0] : null
+          const isRegularHoliday = attDate ? regularHolidayDates.has(attDate) : false
 
-          // For Regular Holidays: any attendance = full day
+          // For Regular Holidays where employee actually worked: Count in regular work
           if (isRegularHoliday && (hasAmData || hasPmData)) {
+            // Employee worked on RH - count this in regularWorkTotal
+            regularHolidayWorkedDays += 1
             employeePresentDays += 1
+            return
           }
+
           // Full day: both AM and PM data are available
-          else if (hasAmData && hasPmData) {
+          if (hasAmData && hasPmData) {
             employeePresentDays += 1
           }
           // Half day: only AM data or only PM data is available
@@ -312,6 +321,9 @@ export function usePayrollComputation(
           }
         })
 
+        // Count RH days where employee didn't work (paid holidays)
+        regularHolidayPaidDays = regularHolidayDates.size - regularHolidayWorkedDays
+
         // Add paid leave days to present days (for both staff types)
         employeePresentDays += paidLeaveDays
 
@@ -319,8 +331,10 @@ export function usePayrollComputation(
         const totalAbsentDays = Math.max(0, workDays.value - employeePresentDays)
 
         // Set final values for both staff types
-        presentDays.value = employeePresentDays
+        // presentDays includes all RH days (worked + paid) for display purposes
+        presentDays.value = employeePresentDays + regularHolidayPaidDays
         absentDays.value = totalAbsentDays
+        // regularWorkTotal includes RH days where employee actually worked
         regularWorkTotal.value = (daily ?? 0) * employeePresentDays
 
         // Update daily rate from employee data if available
