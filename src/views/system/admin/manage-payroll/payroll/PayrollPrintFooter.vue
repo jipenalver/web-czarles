@@ -45,15 +45,13 @@ const formattedPrice = computed(() => {
 const effectiveDate = computed(() => {
   // Prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
   try {
-    // Prefer an explicit from/to range saved in localStorage
+    // Check for toDate only (removed fromDate logic)
     if (typeof window !== 'undefined') {
-      const from = localStorage.getItem('czarles_payroll_fromDate')
       const to = localStorage.getItem('czarles_payroll_toDate')
-      if (from && to) {
-        const start = new Date(from)
+      if (to) {
         const end = new Date(to)
-        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-          return `${start.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })} - ${end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}`
+        if (!isNaN(end.getTime())) {
+          return end.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
         }
       }
     }
