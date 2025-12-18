@@ -49,7 +49,7 @@ const authUserStore = useAuthUserStore()
             <h4 class="my-2">
               Contact No.:
               <b class="text-high-emphasis font-weight-black">
-                +63 {{ authUserStore.userData?.phone }}
+                {{ authUserStore.userData?.phone }}
               </b>
             </h4>
           </div>

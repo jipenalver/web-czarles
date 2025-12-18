@@ -4,6 +4,7 @@ import headerCzarles from '@/assets/images/image-header-title.png'
 import logoCzarles from '@/assets/logos/logo-czarles.png'
 import { useAuthUserStore } from '@/stores/authUser'
 import imageBg from '@/assets/images/image-bg.jpg'
+import { useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -13,6 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['isDrawerVisible', 'theme'])
 
+const router = useRouter()
 const { mobile, smAndUp } = useDisplay()
 
 const authUserStore = useAuthUserStore()
@@ -66,14 +68,22 @@ onMounted(async () => {
       <slot name="navigation"></slot>
 
       <v-main>
-        <v-img :src="imageBg" class="height-screen" cover>
+        <v-img :src="imageBg" height="100%" cover>
           <slot name="content"></slot>
         </v-img>
       </v-main>
 
-      <v-footer class="d-flex" :class="mobile ? 'justify-center' : 'justify-between'" border app>
+      <v-footer class="d-flex" :class="mobile ? 'flex-column' : 'justify-space-between'" border app>
         <div class="font-weight-bold text-center">
           Copyright © 2025 | Czarles Construction and Supplies
+        </div>
+
+        <div
+          class="font-weight-bold text-center cursor-pointer"
+          :class="mobile ? 'mt-2' : ''"
+          @click="() => router.push('/change-logs')"
+        >
+          v1.8.7
         </div>
       </v-footer>
     </v-app>

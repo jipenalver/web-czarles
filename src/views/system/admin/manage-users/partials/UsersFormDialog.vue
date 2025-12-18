@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { emailValidator, passwordValidator, requiredValidator } from '@/utils/validators'
+import {
+  emailValidator,
+  lengthMinValidator,
+  passwordValidator,
+  requiredValidator,
+} from '@/utils/validators'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useUsersFormDialog } from './usersFormDialog'
@@ -86,8 +91,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, use
                 v-model="formData.phone"
                 label="Phone"
                 prepend-inner-icon="mdi-phone"
-                prefix="+63"
-                :rules="[requiredValidator]"
+                :rules="[requiredValidator, lengthMinValidator(formData.phone as string, 11)]"
               ></v-text-field>
             </v-col>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { lengthMinValidator, requiredValidator } from '@/utils/validators'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { requiredValidator } from '@/utils/validators'
 import { useProfileForm } from './profileForm'
 
 const { formData, formAction, refVForm, onFormSubmit } = useProfileForm()
@@ -49,8 +49,7 @@ const { formData, formAction, refVForm, onFormSubmit } = useProfileForm()
           v-model="formData.phone"
           label="Phone Number"
           prepend-inner-icon="mdi-phone"
-          prefix="+63"
-          :rules="[requiredValidator]"
+          :rules="[requiredValidator, lengthMinValidator(formData.phone as string, 11)]"
         ></v-text-field>
       </v-col>
     </v-row>

@@ -29,10 +29,18 @@ export const getMoneyText = (value: string | number) => {
   }).format(Number(value))
 }
 
-// 👉 Pad String Left
-export const getPadLeftText = (value: string | number, length = 4, char = '0') => {
+// 👉 Pad String
+export const getPaddedText = (
+  value: string | number,
+  length = 4,
+  char = '0',
+  direction = 'left' as 'left' | 'right',
+) => {
   value = String(value)
   if (value.length >= length) return value
+
+  if (direction === 'right') return value + char.repeat(length - value.length)
+
   return char.repeat(length - value.length) + value
 }
 
@@ -46,9 +54,22 @@ export const getAccumulatedNumber = (object: Record<string, unknown>[], key: str
   return object.reduce((acc, cur) => acc + (isNaN(Number(cur[key])) ? 0 : Number(cur[key])), 0)
 }
 
+// 👉 Get Employee ID Number
+export const getIDNumber = (hiredAt: string, employeeId: number) => {
+  if (!hiredAt || !employeeId) return 'n/a'
+
+  const hiredDate = new Date(hiredAt)
+
+  const year = hiredDate.getFullYear().toString().slice(-2)
+
+  return `2${year}-${getPaddedText(employeeId)}`
+}
+
 // 👉 Alpha-numeric Random Code
-export const getRandomCode = (length = 6) => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+export const getRandomCode = (length = 6, isAllCaps = false) => {
+  const chars = isAllCaps
+    ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
   return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join(
     '',
@@ -118,86 +139,27 @@ export const filesExtract = (event: Event) => {
   })
 }
 
-// 👉 Fix v-date-input; prepare local dates in form
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const prepareFormDates = (formData: { [key: string]: any }, dateColumns: string[] = []) => {
-  dateColumns.forEach((dateColumn) => {
-    if (formData[dateColumn]) {
-      const dateValue = new Date(formData[dateColumn])
-      formData[dateColumn] = dateValue.toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })
-    }
-  })
+// 👉 Get File Download
+export const fileDownload = async (filePath: string, fileName: string) => {
+  const response = await fetch(filePath)
+  const blob = await response.blob()
 
-  return formData
-}
+  const blobUrl = URL.createObjectURL(blob)
 
-// 👉 Fix v-date-input; prepare local date in form
-export const prepareDate = (date: Date | string) => {
-  const dateValue = new Date(date)
-  return dateValue.toLocaleDateString('en-US', { timeZone: 'Asia/Manila' })
-}
+  const link = document.createElement('a')
+  link.href = blobUrl
+  link.download = fileName
 
-// 👉 Fix v-date-input; prepare date range
-export const prepareDateRange = (daterange: string[] | null) => {
-  if (daterange === null) return null
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 
-  const formattedDates = daterange.map((date) => getISODate(new Date(date)))
-
-  const dates =
-    formattedDates.length > 1
-      ? `${formattedDates[0]} to ${formattedDates[formattedDates.length - 1]}`
-      : formattedDates[0]
-
-  return dates
-}
-
-// 👉 Get date in ISO format without UTC conversion
-export const getISODate = (date: Date | string | null) => {
-  if (!date) return null
-
-  const dateValue = new Date(date)
-
-  // Extract components in the local timezone
-  const year = dateValue.getFullYear()
-  const month = String(dateValue.getMonth() + 1).padStart(2, '0') // Months are 0-based
-  const day = String(dateValue.getDate()).padStart(2, '0')
-
-  return `${year}-${month}-${day}`
-}
-
-// 👉 Get time in ISO format without UTC conversion
-export const getISOTime = (date: Date | string | null) => {
-  if (!date) return null
-
-  const dateValue = new Date(date)
-
-  // Extract time components in the local timezone
-  const hours = String(dateValue.getHours()).padStart(2, '0')
-  const minutes = String(dateValue.getMinutes()).padStart(2, '0')
-  const seconds = String(dateValue.getSeconds()).padStart(2, '0')
-
-  return `${hours}:${minutes}:${seconds}`
-}
-
-// 👉 Get date in YMD format from database
-export const getYMDDate = (date: string) => {
-  return date.slice(0, 10)
-}
-
-// 👉 Get Days Difference
-export const getDaysDiff = (date1: Date, date2: string, isRound = true) => {
-  const startDate = new Date(date1).getTime()
-  const endDate = new Date(date2).getTime()
-
-  const differenceInTime = endDate - startDate
-  const differenceInDay = differenceInTime / (1000 * 3600 * 24)
-
-  return isRound ? Math.round(differenceInDay) : differenceInDay
+  URL.revokeObjectURL(blobUrl)
 }
 
 // 👉 Generate CSV
 export const generateCSV = (filename: string, csvData: string) => {
-  const blob = new Blob([csvData], { type: 'text/csv; charset=utf-8' })
+  const blob = new Blob(['\uFEFF' + csvData], { type: 'text/csv; charset=utf-8' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
@@ -215,8 +177,8 @@ export const generateCSV = (filename: string, csvData: string) => {
 }
 
 // 👉 CSV Text Trimming
-export const generateCSVTrim = (string: string) => {
+export const prepareCSV = (string: string) => {
   if (typeof string !== 'string' || !string.trim()) return ''
 
-  return string.replace(/,/g, ' ').replace(/\s+/g, ' ').trim()
+  return `="${string.replace(/,/g, ' ').replace(/\s+/g, ' ').trim()}"`
 }

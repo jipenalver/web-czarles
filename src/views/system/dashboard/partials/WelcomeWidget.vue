@@ -9,7 +9,7 @@ const authUserStore = useAuthUserStore()
 </script>
 
 <template>
-  <v-card elevation="8">
+  <v-card elevation="8" min-height="175">
     <v-card-text>
       <v-row>
         <v-col class="order-2 order-sm-1 pa-4" cols="12" lg="8" sm="9">
@@ -21,8 +21,9 @@ const authUserStore = useAuthUserStore()
           </h2>
 
           <p class="mt-4">
-            We are glad to have you here. If you have any questions or concerns, please do not
-            hesitate to reach out to us.
+            We’re excited to have you onboard. If you encounter any issues or have any questions
+            about the system, feel free to reach out the technical support,
+            <b>jianchris2k14@gmail.com</b>. We're here to support you every step of the way.
           </p>
         </v-col>
 

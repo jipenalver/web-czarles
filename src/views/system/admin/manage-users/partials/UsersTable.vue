@@ -2,24 +2,25 @@
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableHeader } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
+import { getAvatarText } from '@/utils/helpers/others'
 import UsersFormDialog from './UsersFormDialog.vue'
 import { useUsersTable } from './usersTable'
 import { useDisplay } from 'vuetify'
 import { useDate } from 'vuetify'
 
 const date = useDate()
-const { mobile } = useDisplay()
+const { smAndDown } = useDisplay()
 
 const tableHeaders: TableHeader[] = [
   {
-    title: 'Email',
-    key: 'email',
+    title: 'Fullname',
+    key: 'lastname',
     sortable: false,
     align: 'start',
   },
   {
-    title: 'Fullname',
-    key: 'lastname',
+    title: 'Email',
+    key: 'email',
     sortable: false,
     align: 'start',
   },
@@ -84,8 +85,8 @@ const {
         :items="usersStore.usersTable"
         :items-length="usersStore.usersTableTotal"
         @update:options="onLoadItems"
-        :hide-default-header="mobile"
-        :mobile="mobile"
+        :hide-default-header="smAndDown"
+        :mobile="smAndDown"
       >
         <template #top>
           <v-row dense>
@@ -108,15 +109,33 @@ const {
         </template>
 
         <template #item.lastname="{ item }">
-          <span class="font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
-        </template>
+          <div
+            class="d-flex align-center my-5"
+            :class="smAndDown ? 'justify-end' : 'justify-start'"
+          >
+            <v-avatar v-if="item?.avatar" :image="item.avatar" color="primary" size="large">
+            </v-avatar>
 
-        <template #item.phone="{ item }">
-          {{ item.phone ? '+63 ' + item.phone : '' }}
+            <v-avatar v-else color="primary" size="large">
+              <span class="text-h5">
+                {{ getAvatarText(item.firstname + ' ' + item.lastname) }}
+              </span>
+            </v-avatar>
+
+            <span class="ms-2 font-weight-bold"> {{ item.lastname }}, {{ item.firstname }} </span>
+          </div>
         </template>
 
         <template #item.user_role="{ item }">
-          {{ item.user_role }}
+          <v-chip
+            v-if="item.user_role"
+            class="font-weight-bold"
+            color="secondary"
+            variant="flat"
+            size="small"
+          >
+            {{ item.user_role }}
+          </v-chip>
         </template>
 
         <template #item.created_at="{ item }">
@@ -126,7 +145,7 @@ const {
         </template>
 
         <template #item.actions="{ item }">
-          <div class="d-flex align-center" :class="mobile ? 'justify-end' : 'justify-center'">
+          <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <v-btn
               variant="text"
               density="comfortable"
@@ -145,7 +164,7 @@ const {
               @click="onDelete(item.id)"
               icon
             >
-              <v-icon icon="mdi-trash-can" color="primary"></v-icon>
+              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
               <v-tooltip activator="parent" location="top">Delete User</v-tooltip>
             </v-btn>
           </div>

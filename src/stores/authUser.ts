@@ -75,7 +75,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
   async function updateUserImage(file: File) {
     const { data, error } = await supabase.storage
       .from('czarles')
-      .upload('avatars/' + userData.value?.id + '-avatar.png', file, {
+      .upload('avatars/' + userData.value?.id + '-avatar.' + file.name.split('.').pop(), file, {
         cacheControl: '3600',
         upsert: true,
       })
@@ -97,6 +97,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
       authPages.value = data[0].pages.map((p: { page: string }) => p.page)
   }
 
+  // Expose States and Actions
   return {
     userData,
     userRole,
