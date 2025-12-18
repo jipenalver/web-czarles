@@ -64,8 +64,10 @@ export function useEmployeesTable(
     isDeductionsDialogVisible.value = true
   }
 
-  const onPayroll = (item: Employee) => {
-    itemData.value = item
+  const onPayroll = async (item: Employee) => {
+    // Fetch updated employee data para makuha ang payroll_start ug payroll_end
+    const employeeData = await employeesStore.getEmployeesById(item.id)
+    itemData.value = employeeData || item
     isPayrollDialogVisible.value = true
   }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatCurrency } from '@/views/system/admin/manage-payroll/payroll/helpers'
-import { type MonthlyPayrollRow } from '../composables/monthlyPayroll'
+import { type MonthlyPayrollRow } from '../composables/types'
 
 defineProps<{
   payrollData: MonthlyPayrollRow[]
