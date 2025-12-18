@@ -3,7 +3,7 @@ import html2pdf from 'html2pdf.js'
 import { ref, watch } from 'vue'
 
 export function usePayrollPrintDialog(
-  props: {
+  propsGetter: () => {
     isDialogVisible: boolean
     itemId?: number
     employeeData?: {
@@ -23,6 +23,10 @@ export function usePayrollPrintDialog(
 
   // Function to generate dynamic filename
   const generateFilename = () => {
+    // Get fresh props values at the time this function is called
+    const props = propsGetter()
+
+    // Access props to get current values
     const employeeName = props.employeeData?.lastname || 'employee'
     const month = props.payrollData?.month || 'unknown'
     const year = props.payrollData?.year || new Date().getFullYear()
@@ -31,11 +35,19 @@ export function usePayrollPrintDialog(
     const formattedMonth = month.toLowerCase().replace(/\s+/g, '-')
     const filename = `${employeeName}-${formattedMonth}-${year}-payroll.pdf`
 
+    // console.log('[PayrollPrintDialog] Generating filename:', {
+    //   employeeName,
+    //   month,
+    //   year,
+    //   filename,
+    //   fullEmployeeData: props.employeeData
+    // })
+
     return filename
   }
 
   watch(
-    () => props.isDialogVisible,
+    () => propsGetter().isDialogVisible,
     async () => {},
   )
   /* https://www.npmjs.com/package/html2pdf.js/v/0.9.0 */

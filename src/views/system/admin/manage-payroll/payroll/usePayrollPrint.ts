@@ -58,8 +58,7 @@ export function usePayrollPrint(
     props.employeeData?.id,
     props.payrollData.month,
     props.payrollData.year,
-    undefined, // dateString param (keeping for backward compatibility)
-    filterDateString,
+    filterDateString.value,
   )
 }
 

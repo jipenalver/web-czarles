@@ -75,7 +75,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
       .select(selectQuery)
       .order('created_at', { ascending: false })
 
-    attendances.value = getAttendanceMap(data as Attendance[])
+    attendances.value = getAttendanceMap((data as Attendance[]) ?? [])
   }
 
   async function getAttendancesExport(
@@ -90,7 +90,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { data } = await query
 
-    attendancesExport.value = getAttendanceMap(data as Attendance[])
+    attendancesExport.value = getAttendanceMap((data as Attendance[]) ?? [])
   }
 
   async function getAttendancesTable(
@@ -115,11 +115,15 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
     const { count } = await getAttendancesCount(tableFilters)
 
-    attendancesTable.value = getAttendanceMap(data as Attendance[])
+    attendancesTable.value = getAttendanceMap((data as Attendance[]) ?? [])
     attendancesTableTotal.value = count as number
   }
 
   function getAttendanceMap(attendancesList: Attendance[]) {
+    if (!attendancesList) {
+      return []
+    }
+
     return attendancesList
       .map((item) => ({
         ...item,
