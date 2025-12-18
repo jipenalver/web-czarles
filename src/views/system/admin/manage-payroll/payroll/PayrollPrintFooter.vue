@@ -41,38 +41,6 @@ const formattedPrice = computed(() => {
     return String(val)
   }
 })
-
-const effectiveDate = computed(() => {
-  // Prefer explicit prop, fallback to localStorage key set by PayrollTableDialog
-  try {
-    // Check for toDate only (removed fromDate logic)
-    if (typeof window !== 'undefined') {
-      const to = localStorage.getItem('czarles_payroll_toDate')
-      if (to) {
-        const end = new Date(to)
-        if (!isNaN(end.getTime())) {
-          return end.toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: '2-digit',
-          })
-        }
-      }
-    }
-
-    const source =
-      props.dateString ??
-      (typeof window !== 'undefined' ? localStorage.getItem('czarles_payroll_dateString') : null)
-    if (!source) return '—'
-    // source may be 'YYYY-MM' or 'YYYY-MM-DD'
-    const ds = source.length === 7 ? `${source}-01` : source
-    const d = new Date(ds)
-    if (isNaN(d.getTime())) return source
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })
-  } catch {
-    return '—'
-  }
-})
 </script>
 
 <template>
