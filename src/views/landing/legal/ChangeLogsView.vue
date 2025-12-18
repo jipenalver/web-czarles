@@ -66,6 +66,131 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- December 18, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">December 18, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Refactor) Removed leftover debug console logs from attendance and payroll
+                components.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Corrected the type definition for attendance parameters in the unified
+                late/undertime calculator.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Fixed formatting issues affecting the visibility of the mini payroll view.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added support for Sunday duty records, including fractional values for
+                more precise payroll results.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Improved attendance record handling by refining the AttendanceRecord type
+                and enhancing date interpretation.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- December 10, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">December 10, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Refactor) Removed unused effective date logic from the payroll print footer to
+                simplify maintenance.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Fixed live price updates in the payroll print footer to ensure values
+                refresh correctly.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Refactor) Cleaned up remaining effective date logic and improved template
+                formatting in the payroll print footer.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- December 8, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">December 8, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Ensured proper handling of live price updates in the payroll print footer
+                component.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- December 6–7, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">December 6–7, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Enhanced holiday payroll calculations to account for actual attendance on
+                regular holidays.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added admin-specific handling for attendance calculations and display in
+                payroll components.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Improved attendance calculations using a unified AttendanceRecord model
+                with better holiday handling.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Implemented Regular Holiday rules consistently across all payroll-related
+                attendance calculations.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- December 5, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">December 5, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added CSV export capability to the payroll summary table for easier
+                reporting.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- November 28, 2025 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">November 28, 2025</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added a payable benefits column to the payroll summary table for clearer
+                earnings breakdown.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- November 27, 2025 -->
           <v-divider class="my-4"></v-divider>
           <h3 class="text-h6 mb-3">November 27, 2025</h3>
