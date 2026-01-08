@@ -86,7 +86,11 @@ const attendanceStats = computed(() => {
         !!attendanceOnHoliday.pm_time_out
       ) : false
 
-      fullDaysCount += 1
+      // Only count as full day if employee actually worked on the holiday
+      if (hasActualAttendance) {
+        fullDaysCount += 1
+      }
+
       records.push({
         date,
         amIn: attendanceOnHoliday?.am_time_in || '-',
