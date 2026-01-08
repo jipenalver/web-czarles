@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { useOverallEarningsTotal } from './overallTotal'
-import { getHolidayTypeName, formatTripDate, getMonthDateRange } from './helpers'
+import { getHolidayTypeName, getMonthDateRange, hasBenefitAmount } from './helpers'
 import { getMoneyText } from '@/utils/helpers/others'
-import { type Holiday } from '@/stores/holidays'
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData } from './payrollTableDialog'
+import { type TableData } from './payrollComputation'
 import { usePayrollPrint } from './usePayrollPrint'
+import { usePayrollData } from './usePayrollData'
+import { useEmployeeDisplay, usePayrollFormatting, useHoursCalculation } from './composables/usePayrollDisplay'
+import { usePayrollWatchers } from './composables/usePayrollWatchers'
+import { getPayrollFromDate, getHolidayDateString, getMonthDateRangeFromStorage } from './composables/payrollStorage'
 import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './MiniPayrollPrint.vue'
 import PayrollPrintFooter from './PayrollPrintFooter.vue'
-import { fetchEmployeeDeductions } from './computation/benefits'
+import AttendanceDaysTooltip from './AttendanceDaysTooltip.vue'
+import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { computed, watch, onMounted, ref } from 'vue'
 import { type Employee } from '@/stores/employees'
 import { useTripsStore } from '@/stores/trips'
-import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
-import type { EmployeeDeduction } from '@/stores/benefits'
-import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 
 const props = defineProps<{
   employeeData: Employee | null
@@ -22,25 +24,60 @@ const props = defineProps<{
   tableData: TableData
 }>()
 
-const employeeDeductions = ref<EmployeeDeduction[]>([])
-const employeeNonDeductions = ref<EmployeeDeduction[]>([])
-const isDeductionsLoading = ref(false)
+const filterDateString = computed(() =>
+  getPayrollFromDate(props.payrollData.year, props.payrollData.month)
+)
 
-async function updateEmployeeDeductions(employeeId: number | undefined) {
-  isDeductionsLoading.value = true
-  try {
-    const result = await fetchEmployeeDeductions(employeeId)
-    employeeDeductions.value = result.deductions
-    employeeNonDeductions.value = result.nonDeductions
-  } catch (error) {
-    console.error('Error updating employee deductions:', error)
-    employeeDeductions.value = []
-    employeeNonDeductions.value = []
-  } finally {
-    isDeductionsLoading.value = false
+const holidayDateString = computed(() =>
+  getHolidayDateString(props.payrollData.year, props.payrollData.month)
+)
+
+// Create params para sa composable
+const payrollDataParams = computed(() => {
+  const params = {
+    employeeId: props.employeeData?.id,
+    filterDateString: filterDateString.value,
+    holidayDateString: holidayDateString.value,
   }
-}
+  return params
+})
 
+// Use payroll data composable for all data fetching
+const {
+  holidays,
+  overallOvertime,
+  cashAdjustmentsAdditions,
+  employeeDeductions,
+  employeeNonDeductions,
+  sundayDutyDays,
+  sundayDutyAmount,
+
+  isTripsLoading,
+  isHolidaysLoading,
+  isUtilizationsLoading,
+  isAllowancesLoading,
+  isCashAdjustmentsLoading,
+  isDeductionsLoading,
+  isOvertimeLoading,
+  isSundayLoading,
+  isCalculationsCompleting,
+  isPayrollCalculating,
+  monthlyTrippingsTotal,
+  monthlyUtilizationsTotal,
+  monthlyAllowancesTotal,
+  monthlyCashAdjustmentsTotal,
+  loadTrips,
+  loadUtilizations,
+  loadAllowances,
+  loadCashAdjustments,
+  loadSundayDuty,
+  fetchEmployeeHolidays,
+  updateEmployeeDeductions,
+  initializePayrollCalculations: initializeDataCalculations,
+  reloadAllFunctions: reloadAllData,
+} = usePayrollData(payrollDataParams)
+
+// Watch kuha sa employee deductions when employee changes
 watch(
   () => props.employeeData?.id,
   async (id) => {
@@ -52,112 +89,20 @@ watch(
 )
 
 const monthDateRange = computed(() => {
-  try {
-    if (typeof window !== 'undefined') {
-      const from = localStorage.getItem('czarles_payroll_fromDate')
-      const to = localStorage.getItem('czarles_payroll_toDate')
-      if (from && to) {
-        const start = new Date(from)
-        const end = new Date(to)
-        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-          const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
-          return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
-        }
-      }
-    }
-  } catch {
-    /* ignore and fallback */
-  }
-  return getMonthDateRange(props.payrollData.year, props.payrollData.month)
+  const fallbackRange = getMonthDateRange(props.payrollData.year, props.payrollData.month)
+  return getMonthDateRangeFromStorage(fallbackRange)
 })
 
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-]
-
-const isTripsLoading = ref(false)
-const isHolidaysLoading = ref(false)
-const isOvertimeLoading = ref(false)
-const isCalculationsCompleting = ref(false)
-const holidays = ref<Holiday[]>([])
-const overallOvertime = ref<number>(0)
 const reactiveTotalEarnings = ref(0)
 const tripsStore = useTripsStore()
 
-// Comprehensive loading state that tracks ALL calculations
-const isPayrollCalculating = computed(() => {
-  return isTripsLoading.value ||
-         isHolidaysLoading.value ||
-         isOvertimeLoading.value ||
-         isDeductionsLoading.value ||
-         isCalculationsCompleting.value
-})
+// Employee display composables
+const { fullName, designation, address, dailyRate, isFieldStaff, isAdmin } = useEmployeeDisplay(
+  computed(() => props.employeeData)
+)
+const { formattedDate, showLateDeduction } = usePayrollFormatting(isAdmin)
 
-// Expose methods and state to parent components
-defineExpose({
-  initializePayrollCalculations,
-  recalculateEarnings,
-  reloadAllFunctions,
-  loadTrips,
-  fetchEmployeeHolidays,
-  updateOverallOvertime,
-  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
-  isPayrollCalculating, // Expose comprehensive loading state
-})
-
-const fullName = computed(() => {
-  if (!props.employeeData) return 'N/A'
-  const middleName = props.employeeData.middlename ? ` ${props.employeeData.middlename} ` : ' '
-  return `${props.employeeData.firstname}${middleName}${props.employeeData.lastname}`
-})
-
-const designation = computed(() => {
-  return props.employeeData?.designation?.designation || 'N/A'
-})
-
-const address = computed(() => {
-  return props.employeeData?.address || 'N/A'
-})
-
-const formattedDate = computed(() => {
-  // Use the current system date for the printed pay slip date
-  const date = new Date()
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-})
-
-const filterDateString = computed(() => {
-  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
-  return `${props.payrollData.year}-${month}-01`
-})
-
-const holidayDateString = computed(() => {
-  const month = (monthNames.indexOf(props.payrollData.month) + 1).toString().padStart(2, '0')
-  return `${props.payrollData.year}-${month}`
-})
-
-const dailyRate = computed(() => props.employeeData?.daily_rate || 0)
-const grossSalary = computed(() => props.tableData?.gross_pay || 0)
-const showLateDeduction = computed(() => !props.employeeData?.is_field_staff)
-// const isFieldStaff = computed(() => props.employeeData?.is_field_staff || false)
-const effectiveWorkDays = computed(() => presentDays?.value || 0)
-const totalHoursWorked = computed(() => {
-  if (props.employeeData?.is_field_staff && employeeDailyRate.value > 0) {
-    const hourlyRate = employeeDailyRate.value / 8
-    return regularWorkTotal.value / hourlyRate
-  }
-  return 0
-})
+const grossSalary = computed(() => 0)
 
 const payrollPrint = usePayrollPrint(
   {
@@ -175,234 +120,213 @@ const {
   formatCurrency,
   employeeDailyRate,
   regularWorkTotal,
-  presentDays,
   lateDeduction,
   monthLateDeduction,
   monthUndertimeDeduction,
   undertimeDeduction,
   computeOverallOvertimeCalculation,
   netSalary,
+  attendanceRecords,
 } = payrollPrint
+
+// Computed property to ensure holidays reactivity
+const holidaysArray = computed(() => holidays.value || [])
+
+// Function to calculate holiday amount based on type
+const calculateHolidayAmount = (holiday: { type?: string | null; attendance_fraction?: number; hasActualAttendance?: boolean }) => {
+  const rate = dailyRate.value || 0
+  const fraction = holiday.attendance_fraction || 0
+
+  if (!holiday.type) return 0
+
+  const type = holiday.type.toLowerCase()
+
+  if (type.includes('rh')) {
+    // Regular Holidays:
+    // - If employee worked (hasActualAttendance = true): Show 100% premium only (base 100% is in regularWorkTotal)
+    // - If employee didn't work (hasActualAttendance = false): Show 100% base pay only (not in regularWorkTotal)
+    const multiplier = holiday.hasActualAttendance ? 1.0 : 1.0
+    return rate * multiplier * fraction
+  } else if (type.includes('snh')) {
+    return rate * 0.3 * fraction
+  } else if (type.includes('lh')) {
+    return rate * 0.3 * fraction
+  } else if (type.includes('ch')) {
+    return rate * 0.0 * fraction
+  } else if (type.includes('swh')) {
+    return rate * 0.3 * fraction
+  }
+
+  return rate * 0.0 * fraction
+}
+
+// Hours calculation for field staff
+const { totalHoursWorked } = useHoursCalculation(isFieldStaff, employeeDailyRate, regularWorkTotal)
+
+// Monthly totals from composable are already available
 
 const overallEarningsTotal = useOverallEarningsTotal(
   regularWorkTotal,
   computed(() => tripsStore.trips),
-  holidays,
+  holidaysArray,
   dailyRate,
   computed(() => employeeDailyRate.value),
   overallOvertime,
   codaAllowance,
   employeeNonDeductions,
+  monthlyUtilizationsTotal,
+  monthlyAllowancesTotal,
+  monthlyCashAdjustmentsTotal,
+  sundayDutyAmount,
 )
 
 const displayTotalEarnings = computed(() => {
   return overallEarningsTotal.value || 0
 })
 
-const monthlyTrippingsTotal = computed(() => {
-  return tripsStore.trips.reduce((sum, trip) => {
-    return sum + (trip.per_trip ?? 0) * (trip.trip_no ?? 1)
-  }, 0)
-})
+// Helper function to format Sunday duty text
 
+
+// Recalculate earnings function
 function recalculateEarnings() {
   reactiveTotalEarnings.value = overallEarningsTotal.value
 }
 
+// Wrapper function para sa full initialization including overtime and Sunday duty
 async function initializePayrollCalculations() {
-  isCalculationsCompleting.value = true
   try {
-    isTripsLoading.value = true
-    isHolidaysLoading.value = true
-    isOvertimeLoading.value = true
-    isDeductionsLoading.value = true
-    holidays.value = []
-    overallOvertime.value = 0
-    employeeDeductions.value = []
-    employeeNonDeductions.value = []
-    if (props.employeeData?.id) {
-      await updateEmployeeDeductions(props.employeeData.id)
+    // Call composable initialization with overtime callback
+    await initializeDataCalculations(computeOverallOvertimeCalculation)
+
+    // Load Sunday duty data - ensure dailyRate is available
+    if (dailyRate.value > 0) {
+      await loadSundayDuty(dailyRate.value)
+    } else {
+      // console.warn('[PayrollPrint] Skipping Sunday duty load - dailyRate not available:', dailyRate.value)
+      // Reset Sunday values if rate not available
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
     }
-    await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime()])
+
     recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error initializing payroll calculations:', error)
-  } finally {
-    // Ensure all individual loading states are false
-    isTripsLoading.value = false
-    isHolidaysLoading.value = false
-    isOvertimeLoading.value = false
-    isDeductionsLoading.value = false
-    isCalculationsCompleting.value = false
+    // Don't rethrow - let component continue with partial data
   }
 }
 
+// Wrapper function para sa full reload including overtime and Sunday duty
 async function reloadAllFunctions() {
-  isCalculationsCompleting.value = true
   try {
     tripsStore.trips = []
-    holidays.value = []
-    overallOvertime.value = 0
-    employeeDeductions.value = []
-    employeeNonDeductions.value = []
     reactiveTotalEarnings.value = 0
-    isTripsLoading.value = true
-    isHolidaysLoading.value = true
-    isOvertimeLoading.value = true
-    isDeductionsLoading.value = true
-    await initializePayrollCalculations()
+    // Call composable reload with overtime callback
+    await reloadAllData(computeOverallOvertimeCalculation)
+
+    // Reload Sunday duty data - ensure dailyRate is available
+    if (dailyRate.value > 0) {
+      await loadSundayDuty(dailyRate.value)
+    } else {
+      // console.warn('[PayrollPrint] Skipping Sunday duty reload - dailyRate not available:', dailyRate.value)
+      sundayDutyDays.value = 0
+      sundayDutyAmount.value = 0
+    }
+
+    recalculateEarnings()
   } catch (error) {
     console.error('[PayrollPrint] Error during comprehensive reload:', error)
-  } finally {
-    isCalculationsCompleting.value = false
-  }
-}
-
-async function fetchEmployeeHolidays() {
-  if (!props.employeeData?.id) {
-    holidays.value = []
-    isHolidaysLoading.value = false
-    return
-  }
-  try {
-    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    if (fromDate && toDate) {
-      // Use range-based fetch
-      holidays.value = await fetchHolidaysByRange(fromDate, toDate, String(props.employeeData.id))
-    } else {
-      // Fallback to month-based fetch
-      holidays.value = await fetchHolidaysByDateString(
-        holidayDateString.value,
-        String(props.employeeData.id),
-      )
-    }
-  } catch (error) {
-    console.error('Error fetching holidays:', error)
-    holidays.value = []
-  } finally {
-    isHolidaysLoading.value = false
-  }
-}
-
-async function loadTrips() {
-  if (!props.employeeData?.id) {
-    isTripsLoading.value = false
-    return
-  }
-  isTripsLoading.value = true
-  try {
-    // Prefer explicit from/to range saved in localStorage (persisted from PayrollTableDialog)
-    let fromDate: string | null = null
-    let toDate: string | null = null
-    try {
-      if (typeof window !== 'undefined') {
-        fromDate = localStorage.getItem('czarles_payroll_fromDate')
-        toDate = localStorage.getItem('czarles_payroll_toDate')
-      }
-    } catch {
-      fromDate = null
-      toDate = null
-    }
-
-    let fetchedTrips
-    if (fromDate && toDate) {
-      fetchedTrips = await fetchTripsByRange(fromDate, toDate, props.employeeData.id)
-    } else {
-      fetchedTrips = await fetchFilteredTrips(filterDateString.value, props.employeeData.id)
-    }
-
-    tripsStore.trips = fetchedTrips
-  } catch (error) {
-    console.error('[PayrollPrint] Error loading trips:', error)
-    tripsStore.trips = []
-  } finally {
-    isTripsLoading.value = false
+    // Don't rethrow - let component continue with partial data
   }
 }
 
 async function updateOverallOvertime() {
-  isOvertimeLoading.value = true
   try {
     overallOvertime.value = await computeOverallOvertimeCalculation()
   } catch (error) {
     console.error('Error calculating overtime:', error)
     overallOvertime.value = 0
-  } finally {
-    isOvertimeLoading.value = false
   }
 }
 
-onMounted(async () => {
-  await initializePayrollCalculations()
+// Expose methods and state to parent components
+defineExpose({
+  initializePayrollCalculations,
+  recalculateEarnings,
+  reloadAllFunctions,
+  loadTrips,
+  loadUtilizations,
+  loadAllowances,
+  loadCashAdjustments,
+  fetchEmployeeHolidays,
+  updateOverallOvertime,
+  updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
+  isPayrollCalculating, // Expose comprehensive loading state
 })
 
-watch(
-  [
+// Setup watchers using composable
+usePayrollWatchers(
+  {
     regularWorkTotal,
-    () => tripsStore.trips,
-    holidays,
+    trips: computed(() => tripsStore.trips),
+    holidays: holidaysArray,
     overallOvertime,
     employeeDailyRate,
     dailyRate,
     codaAllowance,
     employeeNonDeductions,
-  ],
+    employeeId: computed(() => props.employeeData?.id),
+    filterDateString,
+    holidayDateString,
+    payrollMonth: computed(() => props.payrollData?.month),
+    payrollYear: computed(() => props.payrollData?.year),
+  },
+  {
+    recalculateEarnings,
+    initializePayrollCalculations,
+    loadTrips,
+    fetchEmployeeHolidays,
+  }
+)
+
+// Track if initial load is complete to prevent dialog from showing again
+const hasCompletedInitialLoad = ref(false)
+
+// Only show loading dialog during initial calculations, not subsequent loads
+const showLoadingDialog = computed(() => {
+  return isCalculationsCompleting.value && !hasCompletedInitialLoad.value
+})
+
+// Watch for when initial calculations complete
+watch(() => isCalculationsCompleting.value, (isCompleting) => {
+  if (!isCompleting && !hasCompletedInitialLoad.value) {
+    hasCompletedInitialLoad.value = true
+  }
+})
+
+// Debug: Watch for deduction value changes
+watch([monthLateDeduction, monthUndertimeDeduction, lateDeduction, undertimeDeduction],
   () => {
-    recalculateEarnings()
-  },
-  { deep: true, immediate: true },
+    // console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
+  }, { immediate: true }
 )
 
-watch(
-  [
-    () => props.employeeData?.id,
-    () => filterDateString.value,
-    () => props.payrollData?.month,
-    () => props.payrollData?.year,
-  ],
-  async () => {
-    await initializePayrollCalculations()
-  },
-  { deep: true },
-)
-
-watch([filterDateString, () => props.employeeData?.id], async () => {
-  await loadTrips()
+onMounted(async () => {
+  await initializePayrollCalculations()
 })
-
-watch([holidayDateString, () => props.employeeData?.id], () => {
-  fetchEmployeeHolidays()
-})
-
-// Debug logging for loading states (can be removed in production)
-watch(
-  () => isPayrollCalculating.value,
-  (isLoading) => {
-    console.log('[PayrollPrint] Comprehensive loading state:', isLoading, {
-      trips: isTripsLoading.value,
-      holidays: isHolidaysLoading.value,
-      overtime: isOvertimeLoading.value,
-      deductions: isDeductionsLoading.value,
-      completing: isCalculationsCompleting.value
-    })
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
+  <!-- Loading overlay for initial payroll calculations only -->
+  <LoadingDialog
+    v-model:is-visible="showLoadingDialog"
+    title="Calculating Payroll..."
+    subtitle="Processing employee data and computations"
+    description="This may take a few moments while we calculate all payroll components"
+    :progress-size="64"
+    :progress-width="4"
+    progress-color="primary"
+  ></LoadingDialog>
+
   <v-container fluid class="pa-4 payroll-main-content">
     <v-row dense no-gutters>
       <v-col cols="12" sm="9" class="d-flex justify-center align-center">
@@ -440,24 +364,24 @@ watch(
         <tr>
           <td class="pa-2">-</td>
           <td class="border-b-thin text-center pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              Actual Hours Worked for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            </span>
-            <span v-else>
-              Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
-            </span>
+            Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
           </td>
           <td class="pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              @ {{ getMoneyText((employeeDailyRate ?? 0) / 8) }}/hr
-            </span>
-            <span v-else> @ {{ getMoneyText(employeeDailyRate ?? 0) }} </span>
+            @ {{ getMoneyText(employeeDailyRate ?? 0) }}
           </td>
           <td class="pa-2">
-            <span v-if="props.employeeData?.is_field_staff">
-              {{ totalHoursWorked.toFixed(2) }} hours
+            <span>
+              x
+              <AttendanceDaysTooltip
+                :attendance-records="attendanceRecords || []"
+                :total-hours-worked="totalHoursWorked"
+                :is-field-staff="props.employeeData?.is_field_staff"
+                :is-admin="props.employeeData?.is_admin"
+                :month-late-deduction="monthLateDeduction"
+                :month-undertime-deduction="monthUndertimeDeduction"
+                :holidays="holidaysArray"
+              />
             </span>
-            <span v-else> x {{ effectiveWorkDays }} </span>
           </td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="regular">
             {{ getMoneyText(regularWorkTotal) }}
@@ -470,8 +394,12 @@ watch(
             <div>
               <span v-if="isCalculationsCompleting">Initializing payroll calculations...</span>
               <span v-else-if="isTripsLoading">Loading trips data...</span>
+              <span v-else-if="isUtilizationsLoading">Loading utilizations data...</span>
+              <span v-else-if="isAllowancesLoading">Loading allowances data...</span>
+              <span v-else-if="isCashAdjustmentsLoading">Loading cash adjustments data...</span>
               <span v-else-if="isHolidaysLoading">Loading holidays data...</span>
               <span v-else-if="isOvertimeLoading">Calculating overtime...</span>
+              <span v-else-if="isSundayLoading">Calculating Sunday duty...</span>
               <span v-else-if="isDeductionsLoading">Loading deductions...</span>
               <span v-else>Loading payroll data...</span>
             </div>
@@ -480,7 +408,7 @@ watch(
 
         <template v-else>
           <template v-if="tripsStore.trips && tripsStore.trips.length > 0">
-            <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
+            <!--  <tr v-for="trip in tripsStore.trips" :key="'trip-' + trip.id">
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ trip.trip_location?.location || 'N/A' }} for {{ formatTripDate(trip.trip_at) }}
@@ -493,18 +421,22 @@ watch(
               >
                 {{ getMoneyText((trip.per_trip ?? 0) * (trip.trip_no ?? 1)) }}
               </td>
-            </tr>
+            </tr> -->
           </template>
-          <template v-else>
+          <!--  <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">
                 No trips to preview for this payroll period.
               </td>
             </tr>
-          </template>
+          </template> -->
 
-          <template v-if="holidays.length > 0">
-            <tr v-for="holiday in holidays" :key="'holiday-' + holiday.id">
+          <template v-if="holidaysArray.length > 0">
+            <tr
+              v-for="holiday in holidaysArray"
+              :key="'holiday-' + holiday.id"
+              v-show="calculateHolidayAmount(holiday) > 0"
+            >
               <td class="pa-2">-</td>
               <td class="border-b-thin text-center pa-2">
                 {{ holiday.name }} ({{ getHolidayTypeName(holiday.type ?? undefined) }})
@@ -516,51 +448,73 @@ watch(
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
                   @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('lh')">
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('ch')">
+                  @ {{ getMoneyText(dailyRate ?? 0) }}
+                </span>
                 <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
                   @ {{ getMoneyText(dailyRate ?? 0) }}
                 </span>
                 <span v-else> @ {{ getMoneyText(dailyRate ?? 0) }} </span>
               </td>
               <td class="pa-2">
-                <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">x 200%</span>
-                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')"
-                  >x 150%</span
-                >
-                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')"
-                  >x 130%</span
-                >
+                <span v-if="holiday.type && holiday.type.toLowerCase().includes('rh')">
+                  x 200%
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('snh')">
+                  x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('lh')">
+                  x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('ch')">
+                  x 100%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                </span>
+                <span v-else-if="holiday.type && holiday.type.toLowerCase().includes('swh')">
+                  x 130%<span v-if="holiday.attendance_fraction === 0.5"> (Half Day)</span>
+                </span>
               </td>
               <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="holiday">
-                {{
-                  holiday.type && holiday.type.toLowerCase().includes('rh')
-                    ? getMoneyText(dailyRate * 2)
-                    : holiday.type && holiday.type.toLowerCase().includes('snh')
-                      ? getMoneyText(dailyRate * 1.5)
-                      : holiday.type && holiday.type.toLowerCase().includes('swh')
-                        ? getMoneyText(dailyRate * 1.3)
-                        : getMoneyText(dailyRate)
-                }}
+                {{ getMoneyText(calculateHolidayAmount(holiday)) }}
               </td>
             </tr>
           </template>
-          <template v-else>
+          <!--  <template v-else>
             <tr>
               <td class="text-center pa-2" colspan="5">No holidays for this payroll period.</td>
             </tr>
-          </template>
+          </template> -->
         </template>
 
-        <tr>
+        <tr v-show="overallOvertime > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Overtime Work</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ getMoneyText(overallOvertime) }} / hour</td>
+          <td class="pa-2">{{ overallOvertime.toFixed(2) }} hours</td>
           <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="overtime">
             {{ getMoneyText((employeeDailyRate / 8) * 1.25 * overallOvertime) }}
           </td>
         </tr>
 
+        <tr v-show="sundayDutyDays > 0">
+          <td class="border-b-thin text-center pa-2" colspan="2">Sunday Work</td>
+          <td class="pa-2">@ {{ getMoneyText(dailyRate ?? 0) }}</td>
+          <td class="pa-2">
+            {{ sundayDutyDays }} day<span v-if="sundayDutyDays > 1">s</span>
+            <!--<span v-if="formatSundayDutyText" class="text-caption ml-1">{{ formatSundayDutyText }}</span>-->
+          </td>
+          <td class="border-b-thin border-s-sm text-end pa-2 total-cell" data-total="sunday">
+            {{ getMoneyText(sundayDutyAmount) }}
+          </td>
+        </tr>
+
         <template v-if="employeeNonDeductions.length > 0">
-          <tr v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id">
+          <tr
+            v-for="benefit in employeeNonDeductions"
+            :key="'benefit-' + benefit.id"
+            v-show="hasBenefitAmount(benefit.amount)"
+          >
             <td class="border-b-thin text-center pa-2" colspan="2">
               {{ benefit.benefit.benefit || 'Other Benefit' }}
             </td>
@@ -571,15 +525,54 @@ watch(
             </td>
           </tr>
         </template>
-        <tr>
+        <tr v-show="monthlyTrippingsTotal > 0">
           <td class="border-b-thin text-center pa-2" colspan="2">Monthly Trippings</td>
           <td class="pa-2"></td>
-          <td class="pa-2">{{ getMoneyText(monthlyTrippingsTotal) }}/month</td>
+          <td class="pa-2"></td>
           <td
             class="border-b-thin border-s-sm text-end pa-2 total-cell"
             data-total="monthly-trippings"
           >
             {{ getMoneyText(monthlyTrippingsTotal) }}
+          </td>
+        </tr>
+
+        <tr v-show="monthlyUtilizationsTotal > 0">
+          <td class="border-b-thin text-center pa-2" colspan="2">Monthly Utilizations</td>
+          <td class="pa-2"></td>
+          <td class="pa-2"></td>
+          <td
+            class="border-b-thin border-s-sm text-end pa-2 total-cell"
+            data-total="monthly-utilizations"
+          >
+            {{ getMoneyText(monthlyUtilizationsTotal) }}
+          </td>
+        </tr>
+
+        <tr v-show="monthlyAllowancesTotal > 0">
+          <td class="border-b-thin text-center pa-2" colspan="2">Allowance</td>
+          <td class="pa-2"></td>
+          <td class="pa-2"></td>
+          <td
+            class="border-b-thin border-s-sm text-end pa-2 total-cell"
+            data-total="monthly-allowances"
+          >
+            {{ getMoneyText(monthlyAllowancesTotal) }}
+          </td>
+        </tr>
+
+        <tr v-for="adj in cashAdjustmentsAdditions" :key="'cashadjustment-' + adj.id">
+          <td class="border-b-thin text-center pa-2" colspan="2">
+            {{ adj.name || 'Cash Adjustment' }}
+            <span v-if="adj.remarks" class="text-caption"> ({{ adj.remarks }})</span>
+          </td>
+          <td class="pa-2"></td>
+          <td class="pa-2">-</td>
+          <td
+            class="border-b-thin border-s-sm text-end pa-2 total-cell"
+            data-total="cash-adjustment"
+          >
+            {{ getMoneyText(adj.amount ?? 0) }}
           </td>
         </tr>
 
@@ -606,7 +599,7 @@ watch(
       </tbody>
     </v-table>
 
-  <PayrollPrintFooter :price="getMoneyText(netSalary)"></PayrollPrintFooter>
+    <PayrollPrintFooter :price="getMoneyText(netSalary)"></PayrollPrintFooter>
 
     <div id="mini-payroll-section" class="mini-payroll-hidden">
       <MiniPayrollPrint
@@ -619,6 +612,7 @@ watch(
 </template>
 
 <style scoped>
+/* visuals paras sa mini payslip UWU */
 .mini-payroll-hidden {
   display: none;
 }
@@ -633,6 +627,4 @@ watch(
     border: 3px solid !important;
   }
 }
-
-
 </style>

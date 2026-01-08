@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { type PayrollData, type TableData } from './payrollTableDialog'
+import { type PayrollData, type TableData as TableDialogData } from './payrollTableDialog'
+import { type TableData as PayrollTableData } from './payrollComputation'
 import { usePayrollPrintDialog } from './payrollPrintDialog'
 import { type Employee } from '@/stores/employees'
 import PayrollPrint from './PayrollPrint.vue'
 import { useDisplay } from 'vuetify'
 import { ref, watch, computed } from 'vue'
-import { reloadAllPayrollFunctions, manualRefreshPayroll } from './helpers'
+import { reloadAllPayrollFunctions, manualRefreshPayroll, preloadEmployeesAttendance, clearAttendanceCacheHelper } from './helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
 
@@ -13,20 +14,23 @@ const props = defineProps<{
   isDialogVisible: boolean
   payrollData: PayrollData
   employeeData: Employee
-  tableData: TableData
+  tableData: TableDialogData
 }>()
+
+// Create an empty PayrollTableData object for PayrollPrint component
+const payrollTableData: PayrollTableData = {}
 
 const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
 const { formAction, isPrinting, onPrint, onDialogClose } = usePayrollPrintDialog(
-  {
+  () => ({
     isDialogVisible: props.isDialogVisible,
     itemId: props.employeeData?.id,
     employeeData: props.employeeData,
     payrollData: props.payrollData
-  },
+  }),
   emit
 )
 
@@ -57,6 +61,8 @@ async function reloadAllPayrollFunctionsLocal() {
 }
 
 async function manualRefreshPayrollLocal() {
+  // Clear cache before refreshing to ensure fresh data
+  await clearAttendanceCacheHelper()
   await manualRefreshPayroll(payrollPrintRef, isReloadingData)
 }
 
@@ -65,6 +71,22 @@ watch(
   () => props.isDialogVisible,
   async (isVisible) => {
     if (isVisible) {
+      // Preload attendance data for current employee before loading payroll
+      if (props.employeeData?.id && props.payrollData?.month && props.payrollData?.year) {
+        const dateString = `${props.payrollData.year}-${String(new Date(`${props.payrollData.month} 1`).getMonth() + 1).padStart(2, '0')}`
+
+        // Get date range from localStorage if available
+        let fromDate: string | undefined
+        let toDate: string | undefined
+        if (typeof window !== 'undefined') {
+          fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
+          toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
+        }
+
+        // Preload attendance for the current employee
+        await preloadEmployeesAttendance([props.employeeData.id], dateString, fromDate, toDate)
+      }
+
       // Reload all functions when dialog opens
       await reloadAllPayrollFunctionsLocal()
     }
@@ -91,13 +113,13 @@ watch(
 // Debug logging for loading states coordination
 watch(
   () => [isReloadingData.value, isPayrollLoading.value, isAnyLoading.value],
-  ([reloading, payrollLoading, anyLoading]) => {
-    console.log('[PayrollPrintDialog] Loading states:', {
-      reloading,
-      payrollLoading,
-      anyLoading,
-      hasPayrollRef: !!payrollPrintRef.value
-    })
+  () => {
+    // console.log('[PayrollPrintDialog] Loading states:', {
+    //   reloading,
+    //   payrollLoading,
+    //   anyLoading,
+    //   hasPayrollRef: !!payrollPrintRef.value
+    // })
   },
   { immediate: true }
 )
@@ -126,17 +148,6 @@ watch(
         :progress-size="80"
         :progress-width="6"
         progress-color="primary"
-      ></LoadingDialog>
-
-      <!-- Loading overlay para sa data reload and calculations -->
-      <LoadingDialog
-        v-model:is-visible="isAnyLoading"
-        :title="isReloadingData ? 'Refreshing Data...' : 'Calculating Payroll...'"
-        :subtitle="isReloadingData ? 'Loading latest payroll information' : 'Processing employee data and computations'"
-        :description="isReloadingData ? 'Please wait while we update the data' : 'This may take a few moments while we calculate all payroll components'"
-        :progress-size="64"
-        :progress-width="4"
-        :progress-color="isReloadingData ? 'success' : 'primary'"
       ></LoadingDialog>
 
       <template #append>
@@ -176,7 +187,7 @@ watch(
           :key="payrollPrintKey"
           :employee-data="props.employeeData"
           :payroll-data="props.payrollData"
-          :table-data="props.tableData"
+          :table-data="payrollTableData"
         ></PayrollPrint>
       </v-card-text>
 
