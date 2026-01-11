@@ -164,6 +164,19 @@ const {
               ></v-autocomplete>
             </v-col>
 
+            <v-col class="d-flex justify-center" cols="12">
+              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Permanent Status?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-divider class="my-3"></v-divider>
+
             <v-col cols="12" sm="6">
               <v-switch v-model="formData.is_field_staff" class="ms-2" color="primary" hide-details>
                 <template #label>
@@ -175,12 +188,13 @@ const {
               </v-switch>
             </v-col>
 
-            <v-col v-if="!formData.is_field_staff" cols="12" sm="6">
+            <v-col cols="12" sm="6">
               <v-switch
                 v-model="formData.is_gps_disabled"
                 class="ms-2"
                 color="primary"
                 hide-details
+                :disabled="!formData.is_field_staff"
               >
                 <template #label>
                   Is GPS Disabled?
@@ -191,12 +205,17 @@ const {
               </v-switch>
             </v-col>
 
-            <v-col cols="12">
-              <v-switch v-model="formData.is_permanent" class="ms-2" color="primary" hide-details>
+            <v-col class="d-flex justify-center" cols="12">
+              <v-switch
+                v-model="formData.is_qr_generator"
+                class="ms-2"
+                color="primary"
+                hide-details
+              >
                 <template #label>
-                  Is Permanent Status?
+                  Is QR Generator?
                   <span class="font-weight-black ms-1">
-                    {{ formData.is_permanent ? 'Permanent' : 'Contractual' }}
+                    {{ formData.is_qr_generator ? 'Yes' : 'No' }}
                   </span>
                 </template>
               </v-switch>
