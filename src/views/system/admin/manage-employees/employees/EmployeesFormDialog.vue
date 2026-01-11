@@ -194,7 +194,7 @@ const {
                 class="ms-2"
                 color="primary"
                 hide-details
-                :disabled="!formData.is_field_staff"
+                :disabled="formData.is_field_staff"
               >
                 <template #label>
                   Is GPS Disabled?
