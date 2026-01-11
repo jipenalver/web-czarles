@@ -553,6 +553,15 @@ const displayableHolidays = computed(() => {
         </v-row>
       </template>
 
+      <!-- Employee Non-Deductions (Benefits) -->
+      <template v-if="employeeNonDeductions && employeeNonDeductions.length > 0">
+        <v-row dense class="mb-1" v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id" v-show="(benefit.amount || 0) > 0">
+          <v-col cols="6" class="text-caption pa-1">{{ benefit.benefit.benefit || 'Other Benefit' }}</v-col>
+          <v-col cols="3" class="pa-1"></v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">{{ safeCurrencyFormat(benefit.amount || 0, formatCurrency) }}</v-col>
+        </v-row>
+      </template>
+
       <!-- Cash Adjustments (Additions) -->
       <template v-if="cashAdjustmentsAdditions && cashAdjustmentsAdditions.length > 0">
         <v-row dense class="mb-1" v-for="adj in cashAdjustmentsAdditions" :key="'cashadjustment-add-' + adj.id">
