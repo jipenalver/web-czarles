@@ -4,6 +4,8 @@ import UserRolesFormDialog from './UserRolesFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useUserRolesCards } from './userRolesCards'
 
+const deleteExceptionRoles = ['Executive', 'Administrator']
+
 const {
   itemData,
   formAction,
@@ -37,7 +39,13 @@ const {
               <v-icon icon="mdi-tag-edit"></v-icon>
               <v-tooltip activator="parent" location="top">Edit Role</v-tooltip>
             </v-btn>
-            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+            <v-btn
+              variant="text"
+              density="comfortable"
+              @click="onDelete(item.id)"
+              :disabled="deleteExceptionRoles.includes(item.user_role)"
+              icon
+            >
               <v-icon icon="mdi-tag-remove" color="secondary"> </v-icon>
               <v-tooltip activator="parent" location="top">Delete Role</v-tooltip>
             </v-btn>

@@ -42,6 +42,8 @@ export type AttendanceImage = {
   created_at: string
   coordinates: string | null
   is_from_offline: boolean | null
+  qr_generator_id: number | null
+  employee: Employee
 }
 
 export type AttendanceTableFilter = {
@@ -52,7 +54,7 @@ export type AttendanceTableFilter = {
 
 export const useAttendancesStore = defineStore('attendances', () => {
   const selectQuery =
-    '*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*)'
+    '*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*, employee:qr_generator_id (id, firstname, lastname, middlename))'
 
   // States
   const attendances = ref<Attendance[]>([])
