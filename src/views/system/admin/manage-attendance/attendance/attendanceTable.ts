@@ -3,13 +3,7 @@ import {
   getOvertimeHoursDecimal,
   getWorkHoursDecimal,
 } from '@/utils/helpers/attendance'
-import {
-  getDate,
-  getDateISO,
-  getDateWithWeekday,
-  getFirstAndLastDateOfMonth,
-  getTime,
-} from '@/utils/helpers/dates'
+import { getDate, getDateISO, getDateWithWeekday, getTime } from '@/utils/helpers/dates'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { generateCSV, prepareCSV } from '@/utils/helpers/others'
@@ -49,7 +43,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   })
   const tableFilters = ref({
     employee_id: null,
-    attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    attendance_at: [new Date()] as Date[] | null,
     component_view: props.componentView,
   })
   const isDialogVisible = ref(false)
@@ -124,7 +118,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   }
 
   const onFilterDate = async (isCleared = false) => {
-    if (isCleared) tableFilters.value.attendance_at = null
+    if (isCleared) tableFilters.value.attendance_at = [new Date()]
 
     onLoadItems(tableOptions.value)
 
