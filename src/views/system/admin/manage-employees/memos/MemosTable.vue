@@ -24,6 +24,7 @@ const tableHeaders: TableHeader[] = [
   {
     title: 'Employees',
     key: 'employees',
+    sortable: false,
     align: 'start',
   },
   {
