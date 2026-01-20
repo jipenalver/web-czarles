@@ -9,25 +9,17 @@ import L from 'leaflet'
 const { mobile, lgAndUp } = useDisplay()
 
 // Computed properties for responsive classes
-const heroTitleClass = computed(() => 
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+const heroTitleClass = computed(() =>
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
 )
 
-const heroSubtitleClass = computed(() => 
-  mobile.value ? 'text-body-1' : 'text-h6'
-)
+const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
 
-const cardPadding = computed(() => 
-  mobile.value ? 'pa-4' : 'pa-6'
-)
+const cardPadding = computed(() => (mobile.value ? 'pa-4' : 'pa-6'))
 
-const formTitleClass = computed(() => 
-  mobile.value ? 'text-h6' : 'text-h6'
-)
+const formTitleClass = computed(() => (mobile.value ? 'text-h6' : 'text-h6'))
 
-const bodyTextClass = computed(() => 
-  mobile.value ? 'text-body-2' : 'text-body-1'
-)
+const bodyTextClass = computed(() => (mobile.value ? 'text-body-2' : 'text-body-1'))
 
 const mapRef = ref<HTMLDivElement | null>(null)
 const lat = 8.949607490217725
@@ -97,13 +89,28 @@ onMounted(() => {
     <template #hero>
       <div class="text-center white--text" style="max-width: 900px">
         <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
-          <h1 :class="[heroTitleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']">Contact</h1>
-          <p :class="[heroSubtitleClass, 'mb-6', 'text-white', 'font-weight-light', 'animate-slide-up', 'delay-1']">
+          <h1
+            :class="[heroTitleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']"
+          >
+            Contact
+          </h1>
+          <p
+            :class="[
+              heroSubtitleClass,
+              'mb-6',
+              'text-white',
+              'font-weight-light',
+              'animate-slide-up',
+              'delay-1',
+            ]"
+          >
             Get in touch with our team for inquiries, support, or partnerships.
           </p>
           <div class="text-caption text-white animate-slide-up delay-2">
             <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
-            <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
+            <RouterLink to="/" class="text-white text-decoration-none hover-orange"
+              >Home</RouterLink
+            >
             <v-icon size="small" class="mx-2">mdi-chevron-right</v-icon>
             <span class="text-orange-lighten-2">Contact</span>
           </div>
@@ -114,14 +121,13 @@ onMounted(() => {
     <template #content>
       <v-container class="pa-5">
         <v-row class="justify-center">
-          <v-col cols="0" lg="2"></v-col>
-          <v-col cols="12" md="6" lg="4">
+          <v-col cols="12" md="6" lg="6">
             <v-card class="pa-0 elevation-2 rounded-lg overflow-hidden">
               <div ref="mapRef" id="map" class="map" />
             </v-card>
           </v-col>
 
-          <v-col cols="12" md="6" lg="4">
+          <v-col cols="12" md="6" lg="6">
             <v-row class="mb-4" dense>
               <v-col cols="12" md="6">
                 <v-card :class="[cardPadding, 'info-card']" elevation="1">
@@ -130,7 +136,9 @@ onMounted(() => {
                   </div>
                   <div>
                     <div :class="[mobile ? 'text-caption' : 'text-caption']">Location</div>
-                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">Butuan City, Agusan del Norte, Philippines</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">
+                      Butuan City, Agusan del Norte, Philippines
+                    </div>
                   </div>
                 </v-card>
               </v-col>
@@ -142,7 +150,9 @@ onMounted(() => {
                   </div>
                   <div>
                     <div :class="[mobile ? 'text-caption' : 'text-caption']">Email</div>
-                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">czarlesconst@yahoo.com</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">
+                      czarlesconst@yahoo.com
+                    </div>
                   </div>
                 </v-card>
               </v-col>
@@ -166,7 +176,9 @@ onMounted(() => {
                   </div>
                   <div>
                     <div :class="[mobile ? 'text-caption' : 'text-caption']">Open Hours</div>
-                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">Monday–Friday: 9AM - 6PM</div>
+                    <div :class="[mobile ? 'text-caption' : 'text-body-2']">
+                      Monday–Friday: 9AM - 6PM
+                    </div>
                   </div>
                 </v-card>
               </v-col>
@@ -214,7 +226,7 @@ onMounted(() => {
                   <v-textarea
                     v-model="message"
                     label="Message"
-                    rows="5"
+                    rows="4"
                     hide-details
                     outlined
                     class="text-body-2"
@@ -234,7 +246,6 @@ onMounted(() => {
               </v-row>
             </v-card>
           </v-col>
-          <v-col cols="0" lg="2"></v-col>
         </v-row>
       </v-container>
     </template>
@@ -292,13 +303,23 @@ onMounted(() => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px) }
-  to { opacity: 1; transform: translateY(0) }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hover-orange:hover {
