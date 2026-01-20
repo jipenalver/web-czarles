@@ -52,7 +52,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          md="3"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -64,7 +64,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          md="3"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -74,7 +74,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
-          md="3"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -102,6 +102,7 @@ const { mobile } = useDisplay()
 
         <v-col
           cols="12"
+          md="3"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >

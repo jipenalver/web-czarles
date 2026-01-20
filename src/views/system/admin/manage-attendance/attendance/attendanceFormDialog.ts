@@ -65,7 +65,7 @@ export function useAttendanceFormDialog(
           am_time_out: getTime24Hour(itemData.am_time_out) as string,
           pm_time_in: getTime24Hour(itemData.pm_time_in) as string,
           pm_time_out: getTime24Hour(itemData.pm_time_out) as string,
-          date: getDate(itemData.am_time_in),
+          date: itemData.am_time_in ? getDate(itemData.am_time_in) : getDate(itemData.pm_time_in),
         }
       } else formData.value = { ...formDataDefault }
     },
