@@ -53,7 +53,7 @@ export function useOvertimeFormDialog(
         ...itemData,
         overtime_in: getTime24Hour(itemData.overtime_in) as string,
         overtime_out: getTime24Hour(itemData.overtime_out) as string,
-        date: getDate(itemData.am_time_in),
+        date: itemData.am_time_in ? getDate(itemData.am_time_in) : getDate(itemData.pm_time_in),
       }
 
       isOvertimeApplied.value = itemData.is_overtime_applied || false
