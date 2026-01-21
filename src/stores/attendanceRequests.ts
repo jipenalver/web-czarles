@@ -18,13 +18,14 @@ export type AttendanceRequest = {
   is_leave_with_pay: boolean
   leave_type: string | null
   leave_reason: string
-  leave_status: 'Pending' | 'Approved' | 'Rejected'
+  leave_status: 'pending' | 'approved' | 'rejected'
   requestor_id: string
   user_avatar: string | null
   user_fullname: string
-  overtime_status: 'Pending' | 'Approved' | 'Rejected'
+  overtime_status: 'pending' | 'approved' | 'rejected'
   overtime_in: string | null
   overtime_out: string | null
+  type: 'leave' | 'overtime'
 }
 
 export type AttendanceRequestTableFilter = {
@@ -107,10 +108,8 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
       if (startDate && endDate) query = query.or(`and(date.gte.${startDate},date.lt.${endDate})`)
     }
 
-    if (component_view === 'leave-requests')
-      query = query.not('leave_status', 'is', null).is('overtime_status', null)
-    else if (component_view === 'overtime-requests')
-      query = query.not('overtime_status', 'is', null).is('leave_status', null)
+    if (component_view === 'leave-requests') query = query.eq('type', 'leave')
+    else if (component_view === 'overtime-requests') query = query.eq('type', 'overtime')
 
     return query
   }
@@ -118,6 +117,8 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
   async function addAttendanceRequest(formData: Partial<AttendanceRequest>) {
     const preparedData = {
       ...formData,
+      leave_status: formData.type === 'leave' ? 'pending' : null,
+      overtime_status: formData.type === 'overtime' ? 'pending' : null,
       requestor_id: authUserStore.userData?.id as string,
       user_avatar: authUserStore.userData?.avatar || null,
       user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
