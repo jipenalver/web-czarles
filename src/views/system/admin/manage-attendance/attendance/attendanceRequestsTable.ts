@@ -1,5 +1,6 @@
 import { type AttendanceRequest, useAttendanceRequestsStore } from '@/stores/attendanceRequests'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
+import { getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
@@ -41,7 +42,7 @@ export function useAttendanceRequestsTable(props: {
   })
   const tableFilters = ref({
     employee_id: null,
-    attendance_at: [new Date()] as Date[] | null,
+    attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
     component_view: props.componentView,
   })
   const isLeaveDialogVisible = ref(false)
@@ -86,7 +87,7 @@ export function useAttendanceRequestsTable(props: {
   }
 
   const onFilterDate = async (isCleared = false) => {
-    if (isCleared) tableFilters.value.attendance_at = [new Date()]
+    if (isCleared) tableFilters.value.attendance_at = null
 
     onLoadItems(tableOptions.value)
   }
