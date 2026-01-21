@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
+import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
-import { prepareDateRange } from '@/utils/helpers/dates'
 import { useAuthUserStore } from './authUser'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
@@ -115,22 +116,27 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
   }
 
   async function addAttendanceRequest(formData: Partial<AttendanceRequest>) {
-    const preparedData = {
-      ...formData,
-      leave_status: formData.type === 'leave' ? 'pending' : null,
-      overtime_status: formData.type === 'overtime' ? 'pending' : null,
-      requestor_id: authUserStore.userData?.id as string,
-      user_avatar: authUserStore.userData?.avatar || null,
-      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
-    }
+    const preparedData = prepareFormDates(
+      {
+        ...formData,
+        leave_status: formData.type === 'leave' ? 'pending' : null,
+        overtime_status: formData.type === 'overtime' ? 'pending' : null,
+        requestor_id: authUserStore.userData?.id as string,
+        user_avatar: authUserStore.userData?.avatar || null,
+        user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+      },
+      ['date'],
+    )
 
     return await supabase.from('attendance_requests').insert(preparedData).select()
   }
 
   async function updateAttendanceRequest(formData: Partial<AttendanceRequest>) {
+    const { employee, ...updatedData } = prepareFormDates(formData, ['date'])
+
     return await supabase
       .from('attendance_requests')
-      .update(formData)
+      .update(updatedData)
       .eq('id', formData.id)
       .select()
   }
