@@ -5,7 +5,7 @@ import { getDateWithWeekday } from '@/utils/helpers/dates'
 // import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 // import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 // import AttendanceTimeValue from './AttendanceTimeValue.vue'
-// import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
+import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { getRandomCode } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
@@ -20,10 +20,10 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  // isLeaveDialogVisible,
+  isLeaveDialogVisible,
   // isOvertimeDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onLeave,
   onOvertime,
@@ -150,15 +150,9 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'overtime-requests'">
-              <v-btn
-                v-if="!item.is_am_leave || !item.is_pm_leave"
-                variant="text"
-                density="comfortable"
-                @click="onOvertime(item)"
-                icon
-              >
+              <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
                 <v-icon icon="mdi-clock-plus"></v-icon>
-                <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>
+                <v-tooltip activator="parent" location="top">Edit Overtime</v-tooltip>
               </v-btn>
             </template>
           </div>
@@ -167,12 +161,12 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- <LeaveFormDialog
+  <LeaveFormDialog
     v-model:is-dialog-visible="isLeaveDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></LeaveFormDialog> -->
+  ></LeaveFormDialog>
 
   <!-- <OvertimeFormDialog
     v-model:is-dialog-visible="isOvertimeDialogVisible"
