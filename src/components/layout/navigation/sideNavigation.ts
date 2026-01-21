@@ -22,7 +22,9 @@ export const adminItemsNav2: SubNavigation[] = [
 ]
 export const adminItemsNav3: SubNavigation[] = [
   ['Attendance', 'mdi-clock-in', '', '/hrms/attendance/list'],
+  ['Leave Requests', 'mdi-account-arrow-left-outline', '', '/hrms/attendance/leave-requests'],
   ['Leave Application', 'mdi-account-arrow-left', '', '/hrms/attendance/leave'],
+  ['Overtime Requests', 'mdi-clock-plus-outline', '', '/hrms/attendance/overtime-requests'],
   ['Overtime Application', 'mdi-clock-plus', '', '/hrms/attendance/overtime'],
 ]
 export const adminItemsNav4: SubNavigation[] = [
