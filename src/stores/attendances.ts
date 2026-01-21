@@ -71,11 +71,15 @@ export const useAttendancesStore = defineStore('attendances', () => {
   }
 
   // Actions
-  async function getAttendances() {
-    const { data } = await supabase
+  async function getAttendances(employee_id: number | null = null) {
+    let query = supabase
       .from('attendances')
       .select(selectQuery)
       .order('created_at', { ascending: false })
+
+    if (employee_id) query = query.eq('employee_id', employee_id)
+
+    const { data } = await query
 
     attendances.value = getAttendanceMap((data as Attendance[]) ?? [])
   }
