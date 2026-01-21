@@ -1,6 +1,7 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { prepareDateRange } from '@/utils/helpers/dates'
+import { useAuthUserStore } from './authUser'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -33,6 +34,8 @@ export type AttendanceRequestTableFilter = {
 }
 
 export const useAttendanceRequestsStore = defineStore('attendanceRequests', () => {
+  const authUserStore = useAuthUserStore()
+
   const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
 
   // States
@@ -113,7 +116,14 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
   }
 
   async function addAttendanceRequest(formData: Partial<AttendanceRequest>) {
-    return await supabase.from('attendance_requests').insert(formData).select()
+    const preparedData = {
+      ...formData,
+      requestor_id: authUserStore.userData?.id as string,
+      user_avatar: authUserStore.userData?.avatar || null,
+      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+    }
+
+    return await supabase.from('attendance_requests').insert(preparedData).select()
   }
 
   async function updateAttendanceRequest(formData: Partial<AttendanceRequest>) {
