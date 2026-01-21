@@ -33,6 +33,8 @@ export function useLeaveFormDialog(
     is_leave_with_pay: false,
     leave_type: null,
     leave_reason: '',
+    leave_status: 'pending' as 'pending' | 'approved' | 'rejected',
+    type: 'leave' as 'leave' | 'overtime',
   }
   const formData = ref<Partial<AttendanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -106,25 +108,23 @@ export function useLeaveFormDialog(
       return true
     }
 
-    if (!isUpdate.value) {
-      const attendance = attendancesStore.attendances.find(
-        (attendance) =>
-          getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
-          attendance.employee_id === formData.value.employee_id,
-      )
+    const attendance = attendancesStore.attendances.find(
+      (attendance) =>
+        getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
+        attendance.employee_id === formData.value.employee_id,
+    )
 
-      const isAttendanceComplete =
-        attendance &&
-        [
-          attendance.am_time_in,
-          attendance.am_time_out,
-          attendance.pm_time_in,
-          attendance.pm_time_out,
-        ].every((time) => time !== null)
+    const isAttendanceComplete =
+      attendance &&
+      [
+        attendance.am_time_in,
+        attendance.am_time_out,
+        attendance.pm_time_in,
+        attendance.pm_time_out,
+      ].every((time) => time !== null)
 
-      if (isAttendanceComplete)
-        return setError('Cannot apply for leave - attendance already recorded for this date.')
-    }
+    if (isAttendanceComplete)
+      return setError('Cannot apply for leave - attendance already recorded for this date.')
 
     if (!formData.value.is_am_leave && !formData.value.is_pm_leave)
       return setError('Either AM or PM leave must be selected.')
