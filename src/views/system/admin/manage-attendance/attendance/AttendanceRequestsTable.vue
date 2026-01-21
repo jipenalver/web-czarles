@@ -30,9 +30,22 @@ const {
   onFilterDate,
   onFilterItems,
   onLoadItems,
+  authUserStore,
   attendanceRequestsStore,
   employeesStore,
 } = useAttendanceRequestsTable(props)
+
+const isApprover = () => {
+  const approverRoles = ['Executive']
+
+  return approverRoles.includes(authUserStore.userRole ?? '')
+}
+
+const isSuperAdmin = () => {
+  const adminRoles = ['Super Administrator', 'Administrator']
+
+  return adminRoles.includes(authUserStore.userRole ?? '')
+}
 </script>
 
 <template>
@@ -137,8 +150,10 @@ const {
             <span class="font-weight-bold">
               {{ item.leave_type }}
             </span>
-            <span v-if="item.is_am_leave" class="text-secondary text-caption">
-              AM <span v-if="item.is_pm_leave"> & PM </span> Leave
+            <span class="text-secondary text-caption">
+              <span v-if="item.is_am_leave"> AM </span>
+              <span v-if="item.is_am_leave && item.is_pm_leave"> & </span>
+              <span v-if="item.is_pm_leave"> PM </span>
             </span>
           </div>
         </template>
@@ -186,15 +201,26 @@ const {
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <template v-if="props.componentView === 'leave-requests'">
-              <v-btn variant="text" density="comfortable" icon @click="onLeave(item)">
-                <v-icon icon="mdi-account-arrow-left"></v-icon>
-                <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
-              </v-btn>
+              <template v-if="item.leave_status === 'pending'">
+                <template v-if="isSuperAdmin() || isApprover()">
+                  <v-btn variant="text" density="comfortable" icon>
+                    <v-icon icon="mdi-list-status" color="warning"></v-icon>
+                    <v-tooltip activator="parent" location="top">Update Status</v-tooltip>
+                  </v-btn>
+                </template>
 
-              <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-                <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-                <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
-              </v-btn>
+                <template v-if="isSuperAdmin() || !isApprover()">
+                  <v-btn variant="text" density="comfortable" @click="onLeave(item)" icon>
+                    <v-icon icon="mdi-account-arrow-left"></v-icon>
+                    <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
+                  </v-btn>
+
+                  <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                    <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                    <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
+                  </v-btn>
+                </template>
+              </template>
             </template>
 
             <template v-else-if="props.componentView === 'overtime-requests'">
