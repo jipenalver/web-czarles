@@ -43,8 +43,6 @@ export function useAttendanceRequestsTable(props: {
     attendance_at: [new Date()] as Date[] | null,
     component_view: props.componentView,
   })
-  const isDialogVisible = ref(false)
-  const isViewDialogVisible = ref(false)
   const isLeaveDialogVisible = ref(false)
   const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -53,17 +51,12 @@ export function useAttendanceRequestsTable(props: {
   const formAction = ref({ ...formActionDefault })
 
   // Actions
-  const onAdd = () => {
-    itemData.value = null
-    isDialogVisible.value = true
-  }
-
   const onLeave = (item: AttendanceRequest | null = null) => {
     itemData.value = item
     isLeaveDialogVisible.value = true
   }
 
-  const onOvertime = (item: AttendanceRequest) => {
+  const onOvertime = (item: AttendanceRequest | null = null) => {
     itemData.value = item
     isOvertimeDialogVisible.value = true
   }
@@ -126,14 +119,11 @@ export function useAttendanceRequestsTable(props: {
     tableHeaders,
     tableOptions,
     tableFilters,
-    isDialogVisible,
-    isViewDialogVisible,
     isLeaveDialogVisible,
     isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
-    onAdd,
     onLeave,
     onOvertime,
     onDelete,

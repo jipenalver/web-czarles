@@ -104,6 +104,20 @@ const {
                 </v-btn>
               </v-col>
             </template>
+
+            <template v-else-if="props.componentView === 'overtime-requests'">
+              <v-col cols="12" sm="3">
+                <v-btn
+                  class="my-1"
+                  prepend-icon="mdi-clock-plus"
+                  color="primary"
+                  block
+                  @click="onOvertime(null)"
+                >
+                  Apply Overtime
+                </v-btn>
+              </v-col>
+            </template>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
@@ -158,9 +172,9 @@ const {
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></LeaveFormDialog>
+  ></LeaveFormDialog> -->
 
-  <OvertimeFormDialog
+  <!-- <OvertimeFormDialog
     v-model:is-dialog-visible="isOvertimeDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
