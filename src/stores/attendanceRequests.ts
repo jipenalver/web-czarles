@@ -119,8 +119,6 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     const preparedData = prepareFormDates(
       {
         ...formData,
-        leave_status: formData.type === 'leave' ? 'pending' : null,
-        overtime_status: formData.type === 'overtime' ? 'pending' : null,
         requestor_id: authUserStore.userData?.id as string,
         user_avatar: authUserStore.userData?.avatar || null,
         user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,

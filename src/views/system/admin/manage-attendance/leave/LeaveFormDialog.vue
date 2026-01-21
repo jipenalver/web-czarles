@@ -75,7 +75,6 @@ const {
                 label="Select Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                :readonly="isUpdate"
                 hide-actions
               ></v-date-input>
             </v-col>
