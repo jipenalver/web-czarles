@@ -4,7 +4,7 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref } from 'vue'
 
-export function useAttendanceTable(props: {
+export function useAttendanceRequestsTable(props: {
   componentView: 'leave-requests' | 'overtime-requests'
 }) {
   const attendanceRequestsStore = useAttendanceRequestsStore()
@@ -141,6 +141,7 @@ export function useAttendanceTable(props: {
     onFilterDate,
     onFilterItems,
     onLoadItems,
+    attendanceRequestsStore,
     employeesStore,
   }
 }
