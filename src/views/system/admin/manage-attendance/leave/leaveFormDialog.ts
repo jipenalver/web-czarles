@@ -52,6 +52,17 @@ export function useLeaveFormDialog(
     },
   )
 
+  watch(
+    () => formData.value.employee_id,
+    async () => {
+      formAction.value = { ...formActionDefault, formProcess: true }
+
+      await attendancesStore.getAttendances(formData.value.employee_id)
+
+      formAction.value = { ...formActionDefault, formProcess: false }
+    },
+  )
+
   // Actions
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
@@ -68,7 +79,7 @@ export function useLeaveFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Application' : 'Applied for Leave'}.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Request' : 'Applied for Leave'}.`
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,
@@ -137,7 +148,6 @@ export function useLeaveFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions
