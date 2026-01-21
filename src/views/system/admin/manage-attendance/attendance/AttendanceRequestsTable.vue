@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
 import { useAttendanceRequestsTable } from './attendanceRequestsTable'
+import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
 import { getDateWithWeekday } from '@/utils/helpers/dates'
 // import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
-// import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
-// import AttendanceTimeValue from './AttendanceTimeValue.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
-import { getRandomCode } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
@@ -58,7 +56,6 @@ const {
         @update:options="onLoadItems"
         :hide-default-header="smAndDown"
         :mobile="smAndDown"
-        show-expand
       >
         <template #top>
           <v-row dense>
@@ -133,6 +130,46 @@ const {
           <span class="font-weight-bold">
             {{ item.date ? getDateWithWeekday(item.date) : '-' }}
           </span>
+        </template>
+
+        <template #item.user_fullname="{ item }">
+          <div
+            class="d-flex align-center my-5"
+            :class="smAndDown ? 'justify-end' : 'justify-start'"
+          >
+            <v-avatar
+              v-if="item?.user_avatar"
+              :image="item.user_avatar"
+              color="primary"
+              size="large"
+            >
+            </v-avatar>
+
+            <v-avatar v-else color="primary" size="large">
+              <span class="text-h5">
+                {{ getAvatarText(item.user_fullname) }}
+              </span>
+            </v-avatar>
+
+            <span class="ms-2 font-weight-bold"> {{ item.user_fullname }} </span>
+          </div>
+        </template>
+
+        <template #item.leave_status="{ item }">
+          <v-chip
+            :color="
+              item.leave_status === 'approved'
+                ? 'success'
+                : item.leave_status === 'rejected'
+                  ? 'error'
+                  : 'warning'
+            "
+            class="font-weight-bold"
+            variant="flat"
+            size="small"
+          >
+            {{ item.leave_status.charAt(0).toUpperCase() + item.leave_status.slice(1) }}
+          </v-chip>
         </template>
 
         <template #item.actions="{ item }">
