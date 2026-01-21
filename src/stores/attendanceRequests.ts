@@ -21,6 +21,9 @@ export type AttendanceRequest = {
   requestor_id: string
   user_avatar: string | null
   user_fullname: string
+  overtime_status: 'Pending' | 'Approved' | 'Rejected'
+  overtime_in: string | null
+  overtime_out: string | null
 }
 
 export type AttendanceRequestTableFilter = {
