@@ -22,6 +22,7 @@ export function useAttendanceRequestsTable(props: {
       headers.push(
         { title: 'Leave Type', key: 'leave_type', align: 'start' },
         { title: 'Leave Reason', key: 'leave_reason', align: 'start' },
+        { title: 'Requestor', key: 'user_fullname', align: 'start' },
         { title: 'Leave Status', key: 'leave_status', align: 'center' },
       )
 
