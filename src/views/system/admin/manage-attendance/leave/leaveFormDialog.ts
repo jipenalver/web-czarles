@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  type Attendance,
-  type AttendanceTableFilter,
-  useAttendancesStore,
-} from '@/stores/attendances'
+  type AttendanceRequest,
+  type AttendanceRequestTableFilter,
+  useAttendanceRequestsStore,
+} from '@/stores/attendanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
+import { useAttendancesStore } from '@/stores/attendances'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
 import { getDate } from '@/utils/helpers/dates'
@@ -13,12 +14,13 @@ import { onMounted, ref, watch } from 'vue'
 export function useLeaveFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: Attendance | null
+    itemData: AttendanceRequest | null
     tableOptions: TableOptions
-    tableFilters: AttendanceTableFilter
+    tableFilters: AttendanceRequestTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
 
@@ -32,7 +34,7 @@ export function useLeaveFormDialog(
     leave_type: null,
     leave_reason: '',
   }
-  const formData = ref<Partial<Attendance>>({ ...formDataDefault })
+  const formData = ref<Partial<AttendanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -44,7 +46,7 @@ export function useLeaveFormDialog(
       isUpdate.value = props.itemData ? true : false
 
       if (isUpdate.value) {
-        const { employee, attendance_images, ...itemData } = props.itemData as Attendance
+        const { employee, ...itemData } = props.itemData as AttendanceRequest
         formData.value = { ...itemData }
       } else formData.value = { ...formDataDefault }
     },
@@ -54,14 +56,9 @@ export function useLeaveFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    const { date, ...newFormData } = {
-      ...formData.value,
-      am_time_in: getDate(formData.value.date as string),
-    }
-
     const { data, error } = isUpdate.value
-      ? await attendancesStore.updateAttendance(newFormData)
-      : await attendancesStore.addAttendance(newFormData)
+      ? await attendanceRequestsStore.updateAttendanceRequest(formData.value)
+      : await attendanceRequestsStore.addAttendanceRequest(formData.value)
 
     if (error) {
       formAction.value = {
@@ -73,7 +70,10 @@ export function useLeaveFormDialog(
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Application' : 'Applied for Leave'}.`
 
-      await attendancesStore.getAttendancesTable(props.tableOptions, props.tableFilters)
+      await attendanceRequestsStore.getAttendanceRequestsTable(
+        props.tableOptions,
+        props.tableFilters,
+      )
 
       setTimeout(() => {
         onFormReset()
