@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { type Attendance, type AttendanceTableFilter } from '@/stores/attendances'
+import {
+  type AttendanceRequest,
+  type AttendanceRequestTableFilter,
+} from '@/stores/attendanceRequests'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -9,9 +12,9 @@ import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Attendance | null
+  itemData: AttendanceRequest | null
   tableOptions: TableOptions
-  tableFilters: AttendanceTableFilter
+  tableFilters: AttendanceRequestTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
