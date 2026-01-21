@@ -30,7 +30,7 @@ export type AttendanceRequestTableFilter = {
 }
 
 export const useAttendanceRequestsStore = defineStore('attendanceRequests', () => {
-  const selectQuery = '*, employee:requestor_id (id, firstname, lastname, middlename)'
+  const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
 
   // States
   const attendanceRequests = ref<AttendanceRequest[]>([])
@@ -101,8 +101,10 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
       if (startDate && endDate) query = query.or(`and(date.gte.${startDate},date.lt.${endDate})`)
     }
 
-    if (component_view === 'leave-requests') query = query.is('overtime_status', null)
-    else if (component_view === 'overtime-requests') query = query.is('leave_status', null)
+    if (component_view === 'leave-requests')
+      query = query.not('leave_status', 'is', null).is('overtime_status', null)
+    else if (component_view === 'overtime-requests')
+      query = query.not('overtime_status', 'is', null).is('leave_status', null)
 
     return query
   }
