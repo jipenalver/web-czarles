@@ -132,6 +132,17 @@ const {
           </span>
         </template>
 
+        <template #item.leave_type="{ item }">
+          <div class="d-flex flex-column">
+            <span class="font-weight-bold">
+              {{ item.leave_type }}
+            </span>
+            <span v-if="item.is_am_leave" class="text-secondary text-caption">
+              AM <span v-if="item.is_pm_leave"> & PM </span> Leave
+            </span>
+          </div>
+        </template>
+
         <template #item.user_fullname="{ item }">
           <div
             class="d-flex align-center my-5"
