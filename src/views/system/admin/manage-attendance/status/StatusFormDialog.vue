@@ -43,7 +43,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useStatusF
     <v-card
       prepend-icon="mdi-list-status"
       :title="`${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} Status`"
-      :subtitle="`${itemData?.employee.firstname + ' ' + itemData?.employee.lastname}: ${getDateWithWeekday(itemData?.date as string)}`"
+      :subtitle="`${props.itemData?.employee.firstname + ' ' + props.itemData?.employee.lastname}: ${getDateWithWeekday(props.itemData?.date as string)}`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>

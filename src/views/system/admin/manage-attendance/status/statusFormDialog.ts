@@ -103,7 +103,7 @@ export function useStatusFormDialog(
             type: 'leave',
             employee_id: props.itemData?.employee_id as number,
             attendance_request_id: props.itemData?.id as number,
-            description: 'Leave Rejection Reason: ' + formData.value.reason,
+            description: formData.value.reason,
           })
         }
       }
