@@ -47,6 +47,7 @@ export function useAttendanceRequestsTable(props: {
     attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
     component_view: props.componentView,
   })
+  const isStatusDialogVisible = ref(false)
   const isLeaveDialogVisible = ref(false)
   const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -55,6 +56,11 @@ export function useAttendanceRequestsTable(props: {
   const formAction = ref({ ...formActionDefault })
 
   // Actions
+  const onStatus = (item: AttendanceRequest) => {
+    itemData.value = item
+    isStatusDialogVisible.value = true
+  }
+
   const onLeave = (item: AttendanceRequest | null = null) => {
     itemData.value = item
     isLeaveDialogVisible.value = true
@@ -123,11 +129,13 @@ export function useAttendanceRequestsTable(props: {
     tableHeaders,
     tableOptions,
     tableFilters,
+    isStatusDialogVisible,
     isLeaveDialogVisible,
     isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
+    onStatus,
     onLeave,
     onOvertime,
     onDelete,

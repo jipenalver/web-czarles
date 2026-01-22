@@ -2,9 +2,10 @@
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
 import { useAttendanceRequestsTable } from './attendanceRequestsTable'
 import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
-import { getDateWithWeekday } from '@/utils/helpers/dates'
 // import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
+import StatusFormDialog from '../status/StatusFormDialog.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
+import { getDateWithWeekday } from '@/utils/helpers/dates'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 
@@ -18,11 +19,13 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
+  isStatusDialogVisible,
   isLeaveDialogVisible,
   // isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
+  onStatus,
   onLeave,
   onOvertime,
   onDelete,
@@ -203,7 +206,7 @@ const isSuperAdmin = () => {
             <template v-if="props.componentView === 'leave-requests'">
               <template v-if="item.leave_status === 'pending'">
                 <template v-if="isSuperAdmin() || isApprover()">
-                  <v-btn variant="text" density="comfortable" icon>
+                  <v-btn variant="text" density="comfortable" icon @click="onStatus(item)">
                     <v-icon icon="mdi-list-status" color="warning"></v-icon>
                     <v-tooltip activator="parent" location="top">Update Status</v-tooltip>
                   </v-btn>
@@ -234,6 +237,13 @@ const isSuperAdmin = () => {
       </v-data-table-server>
     </v-card-text>
   </v-card>
+
+  <StatusFormDialog
+    v-model:is-dialog-visible="isStatusDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></StatusFormDialog>
 
   <LeaveFormDialog
     v-model:is-dialog-visible="isLeaveDialogVisible"
