@@ -6,6 +6,7 @@ import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
 import StatusFormDialog from '../status/StatusFormDialog.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import { getDateWithWeekday } from '@/utils/helpers/dates'
+import LogsFormDialog from '../status/logsFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 
@@ -20,12 +21,14 @@ const {
   tableOptions,
   tableFilters,
   isStatusDialogVisible,
+  isLogsDialogVisible,
   isLeaveDialogVisible,
   // isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
   onStatus,
+  onLogs,
   onLeave,
   onOvertime,
   onDelete,
@@ -206,7 +209,7 @@ const isSuperAdmin = () => {
             <template v-if="props.componentView === 'leave-requests'">
               <template v-if="item.leave_status === 'Pending'">
                 <template v-if="isSuperAdmin() || isApprover()">
-                  <v-btn variant="text" density="comfortable" icon @click="onStatus(item)">
+                  <v-btn variant="text" density="comfortable" @click="onStatus(item)" icon>
                     <v-icon icon="mdi-list-status" color="warning"></v-icon>
                     <v-tooltip activator="parent" location="top">Update Status</v-tooltip>
                   </v-btn>
@@ -223,6 +226,18 @@ const isSuperAdmin = () => {
                     <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
                   </v-btn>
                 </template>
+              </template>
+
+              <template v-if="item.leave_status === 'Rejected'">
+                <v-btn variant="text" density="comfortable" @click="onLogs(item)" icon>
+                  <v-icon icon="mdi-information-outline" color="warning"></v-icon>
+                  <v-tooltip activator="parent" location="top">Resubmit Request</v-tooltip>
+                </v-btn>
+
+                <v-btn variant="text" density="comfortable" @click="onLeave(item)" icon>
+                  <v-icon icon="mdi-account-arrow-left"></v-icon>
+                  <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
+                </v-btn>
               </template>
             </template>
 
@@ -244,6 +259,13 @@ const isSuperAdmin = () => {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></StatusFormDialog>
+
+  <LogsFormDialog
+    v-model:is-dialog-visible="isLogsDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></LogsFormDialog>
 
   <LeaveFormDialog
     v-model:is-dialog-visible="isLeaveDialogVisible"
