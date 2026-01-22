@@ -51,6 +51,8 @@ const { formAction, onFormSubmit, onFormReset } = useLogsFormDialog(props, emit)
                   props.tableFilters.component_view === 'leave-requests' ? 'leave' : 'overtime'
                 "
                 :item-id="props.itemData?.employee_id as number"
+                :attendance-request-id="props.itemData?.id as number"
+                title="Rejection Logs"
               ></EmployeeLogs>
             </v-col>
           </v-row>
