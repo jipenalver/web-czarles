@@ -109,8 +109,8 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
       if (startDate && endDate) query = query.or(`and(date.gte.${startDate},date.lt.${endDate})`)
     }
 
-    if (component_view === 'leave-requests') query = query.eq('type', 'leave')
-    else if (component_view === 'overtime-requests') query = query.eq('type', 'overtime')
+    if (component_view === 'leave-requests') query = query.eq('type', 'Leave')
+    else if (component_view === 'overtime-requests') query = query.eq('type', 'Overtime')
 
     return query
   }

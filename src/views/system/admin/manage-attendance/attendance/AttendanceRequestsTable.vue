@@ -187,9 +187,9 @@ const isSuperAdmin = () => {
         <template #item.leave_status="{ item }">
           <v-chip
             :color="
-              item.leave_status === 'approved'
+              item.leave_status === 'Approved'
                 ? 'success'
-                : item.leave_status === 'rejected'
+                : item.leave_status === 'Rejected'
                   ? 'error'
                   : 'warning'
             "
@@ -204,7 +204,7 @@ const isSuperAdmin = () => {
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <template v-if="props.componentView === 'leave-requests'">
-              <template v-if="item.leave_status === 'pending'">
+              <template v-if="item.leave_status === 'Pending'">
                 <template v-if="isSuperAdmin() || isApprover()">
                   <v-btn variant="text" density="comfortable" icon @click="onStatus(item)">
                     <v-icon icon="mdi-list-status" color="warning"></v-icon>
