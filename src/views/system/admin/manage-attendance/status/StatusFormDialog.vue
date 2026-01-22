@@ -3,6 +3,7 @@ import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
 } from '@/stores/attendanceRequests'
+import { getDateWithWeekday } from '@/utils/helpers/dates'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useStatusFormDialog } from './statusFormDialog'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -40,20 +41,24 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useStatusF
     persistent
   >
     <v-card
-      prepend-icon="mdi-account-arrow-left"
-      title="Leave Application"
-      subtitle="Apply for Employee's Leave."
+      prepend-icon="mdi-list-status"
+      :title="`${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} Status`"
+      :subtitle="`${itemData?.employee.firstname + ' ' + itemData?.employee.lastname}: ${getDateWithWeekday(itemData?.date as string)}`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
-              <v-select
+              <v-radio-group
                 v-model="formData.status"
-                label="Leave Status"
-                :items="['Pending', 'Approved', 'Rejected']"
+                label="Status"
                 :rules="[requiredValidator]"
-              ></v-select>
+                inline
+              >
+                <v-radio label="Pending" value="Pending"></v-radio>
+                <v-radio label="Approved" value="Approved"></v-radio>
+                <v-radio label="Rejected" value="Rejected"></v-radio>
+              </v-radio-group>
             </v-col>
 
             <v-col v-if="formData.status === 'Rejected'" cols="12">
