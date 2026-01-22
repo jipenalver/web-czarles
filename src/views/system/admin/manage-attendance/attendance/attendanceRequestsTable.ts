@@ -3,11 +3,13 @@ import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
 
 export function useAttendanceRequestsTable(props: {
   componentView: 'leave-requests' | 'overtime-requests'
 }) {
+  const authUserStore = useAuthUserStore()
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const employeesStore = useEmployeesStore()
 
@@ -133,6 +135,7 @@ export function useAttendanceRequestsTable(props: {
     onFilterDate,
     onFilterItems,
     onLoadItems,
+    authUserStore,
     attendanceRequestsStore,
     employeesStore,
   }
