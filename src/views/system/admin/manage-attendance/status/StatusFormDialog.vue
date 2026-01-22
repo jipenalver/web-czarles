@@ -55,14 +55,18 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useStatusF
                 :rules="[requiredValidator]"
                 inline
               >
-                <v-radio label="Pending" value="Pending"></v-radio>
-                <v-radio label="Approved" value="Approved"></v-radio>
-                <v-radio label="Rejected" value="Rejected"></v-radio>
+                <v-radio label="Approve" value="Approved"></v-radio>
+                <v-radio label="Reject" value="Rejected"></v-radio>
               </v-radio-group>
             </v-col>
 
             <v-col v-if="formData.status === 'Rejected'" cols="12">
-              <v-textarea v-model="formData.reason" label="Rejection Reason" rows="2"></v-textarea>
+              <v-textarea
+                v-model="formData.reason"
+                label="Reason"
+                rows="3"
+                :rules="[requiredValidator]"
+              ></v-textarea>
             </v-col>
           </v-row>
         </v-card-text>

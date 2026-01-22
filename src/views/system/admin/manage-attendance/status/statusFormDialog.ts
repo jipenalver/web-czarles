@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
+  useAttendanceRequestsStore,
 } from '@/stores/attendanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useAttendancesStore } from '@/stores/attendances'
+import { getDate } from '@/utils/helpers/dates'
 import { ref, watch } from 'vue'
 
 export function useStatusFormDialog(
@@ -15,6 +19,9 @@ export function useStatusFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const attendanceRequestsStore = useAttendanceRequestsStore()
+  const attendancesStore = useAttendancesStore()
+
   // States
   const formDataDefault = {
     status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
@@ -39,29 +46,63 @@ export function useStatusFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // const { data, error } = isUpdate.value
-    //   ? await attendanceRequestsStore.updateAttendanceRequest(formData.value)
-    //   : await attendanceRequestsStore.addAttendanceRequest(formData.value)
+    if (formData.value.type === 'Leave') {
+      if (formData.value.status === 'Approved') {
+        const {
+          id,
+          created_at,
+          date,
+          employee,
+          leave_status,
+          requestor_id,
+          user_avatar,
+          user_fullname,
+          overtime_status,
+          overtime_in,
+          overtime_out,
+          type,
+          ...newFormData
+        } = {
+          ...props.itemData,
+          am_time_in: getDate(props.itemData?.date as string),
+        }
 
-    // if (error) {
-    //   formAction.value = {
-    //     ...formActionDefault,
-    //     formMessage: error.message,
-    //     formStatus: 400,
-    //     formProcess: false,
-    //   }
-    // } else if (data) {
-    //   formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Request' : 'Applied for Leave'}.`
+        const { data, error } = await attendancesStore.addAttendance(newFormData)
 
-    //   // await attendanceRequestsStore.getAttendanceRequestsTable(
-    //   //   props.tableOptions,
-    //   //   props.tableFilters,
-    //   // )
+        if (error) {
+          formAction.value = {
+            ...formActionDefault,
+            formMessage: error.message,
+            formStatus: 400,
+            formProcess: false,
+          }
+        } else if (data) {
+          formAction.value.formMessage = `Approved Leave Request.`
 
-    //   setTimeout(() => {
-    //     onFormReset()
-    //   }, 1500)
-    // }
+          await attendanceRequestsStore.deleteAttendanceRequest(props.itemData?.id as number)
+        }
+      } else if (formData.value.status === 'Rejected') {
+        const { data, error } = await attendanceRequestsStore.updateAttendanceRequest({
+          ...props.itemData,
+          leave_status: formData.value.status,
+        } as AttendanceRequest)
+
+        if (error) {
+          formAction.value = {
+            ...formActionDefault,
+            formMessage: error.message,
+            formStatus: 400,
+            formProcess: false,
+          }
+        } else if (data) formAction.value.formMessage = `Rejected Leave Request.`
+      }
+    }
+
+    await attendanceRequestsStore.getAttendanceRequestsTable(props.tableOptions, props.tableFilters)
+
+    setTimeout(() => {
+      onFormReset()
+    }, 1500)
 
     formAction.value.formAlert = true
   }
