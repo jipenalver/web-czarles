@@ -17,10 +17,11 @@ export function useStatusFormDialog(
 ) {
   // States
   const formDataDefault = {
-    leave_status: 'pending' as 'pending' | 'approved' | 'rejected',
+    status: 'pending' as 'pending' | 'approved' | 'rejected',
+    reason: '',
     // type: 'leave' as 'leave' | 'overtime',
   }
-  const formData = ref<Partial<AttendanceRequest>>({ ...formDataDefault })
+  const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
 
