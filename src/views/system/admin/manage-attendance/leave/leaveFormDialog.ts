@@ -33,8 +33,8 @@ export function useLeaveFormDialog(
     is_leave_with_pay: false,
     leave_type: null,
     leave_reason: '',
-    leave_status: 'pending' as 'pending' | 'approved' | 'rejected',
-    type: 'leave' as 'leave' | 'overtime',
+    leave_status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
+    type: 'Leave' as 'Leave' | 'Overtime',
   }
   const formData = ref<Partial<AttendanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })

@@ -56,7 +56,7 @@ const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useStatusF
               ></v-select>
             </v-col>
 
-            <v-col v-if="formData.status === 'rejected'" cols="12">
+            <v-col v-if="formData.status === 'Rejected'" cols="12">
               <v-textarea v-model="formData.reason" label="Rejection Reason" rows="2"></v-textarea>
             </v-col>
           </v-row>

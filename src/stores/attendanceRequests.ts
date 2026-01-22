@@ -19,14 +19,14 @@ export type AttendanceRequest = {
   is_leave_with_pay: boolean
   leave_type: string | null
   leave_reason: string
-  leave_status: 'pending' | 'approved' | 'rejected'
+  leave_status: 'Pending' | 'Approved' | 'Rejected'
   requestor_id: string
   user_avatar: string | null
   user_fullname: string
-  overtime_status: 'pending' | 'approved' | 'rejected'
+  overtime_status: 'Pending' | 'Approved' | 'Rejected'
   overtime_in: string | null
   overtime_out: string | null
-  type: 'leave' | 'overtime'
+  type: 'Leave' | 'Overtime'
 }
 
 export type AttendanceRequestTableFilter = {

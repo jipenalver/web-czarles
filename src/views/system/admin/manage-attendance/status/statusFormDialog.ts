@@ -17,9 +17,9 @@ export function useStatusFormDialog(
 ) {
   // States
   const formDataDefault = {
-    status: 'pending' as 'pending' | 'approved' | 'rejected',
+    status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
     reason: '',
-    // type: 'leave' as 'leave' | 'overtime',
+    type: 'Leave' as 'Leave' | 'Overtime',
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -28,7 +28,10 @@ export function useStatusFormDialog(
   watch(
     () => props.isDialogVisible,
     () => {
-      formData.value = { ...formDataDefault }
+      formData.value = {
+        ...formDataDefault,
+        type: props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime',
+      }
     },
   )
 
