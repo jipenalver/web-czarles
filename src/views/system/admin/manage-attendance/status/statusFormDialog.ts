@@ -8,6 +8,7 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useAttendancesStore } from '@/stores/attendances'
 import { getDate } from '@/utils/helpers/dates'
+import { useLogsStore } from '@/stores/logs'
 import { ref, watch } from 'vue'
 
 export function useStatusFormDialog(
@@ -21,6 +22,7 @@ export function useStatusFormDialog(
 ) {
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
+  const logsStore = useLogsStore()
 
   // States
   const formDataDefault = {
@@ -94,7 +96,16 @@ export function useStatusFormDialog(
             formStatus: 400,
             formProcess: false,
           }
-        } else if (data) formAction.value.formMessage = `Rejected Leave Request.`
+        } else if (data) {
+          formAction.value.formMessage = `Rejected Leave Request.`
+
+          await logsStore.addLog({
+            type: 'leave',
+            employee_id: props.itemData?.employee_id as number,
+            attendance_request_id: props.itemData?.id as number,
+            description: 'Leave Rejection Reason: ' + formData.value.reason,
+          })
+        }
       }
     }
 

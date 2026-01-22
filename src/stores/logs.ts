@@ -12,6 +12,7 @@ export type Log = {
   user_avatar: string | null
   user_fullname: string
   employee_id: number
+  attendance_request_id: number | null
 }
 
 export const useLogsStore = defineStore('logs', () => {
