@@ -5,9 +5,12 @@ import { useDate } from 'vuetify'
 import { onMounted } from 'vue'
 
 const props = defineProps<{
-  type: 'rates' | 'benefits'
+  type: 'rates' | 'benefits' | 'leave' | 'overtime' | 'cash_advance'
+  title?: string
   itemId?: number
   maxHeight?: string
+  attendanceRequestId?: number | null
+  cashAdvanceId?: number | null
 }>()
 
 const date = useDate()
@@ -15,12 +18,18 @@ const date = useDate()
 const logsStore = useLogsStore()
 
 onMounted(async () => {
-  if (props.itemId) await logsStore.getLogsById(props.itemId, props.type)
+  if (props.itemId)
+    await logsStore.getLogsById(
+      props.itemId,
+      props.type,
+      props.attendanceRequestId,
+      props.cashAdvanceId,
+    )
 })
 </script>
 
 <template>
-  <h2 class="text-body-1 font-weight-black mb-3 ms-2">Adjustment Logs</h2>
+  <h2 class="text-body-1 font-weight-black mb-3 ms-2">{{ props.title || 'Adjustment Logs' }}</h2>
 
   <div class="overflow-x-auto" :style="{ maxHeight: props.maxHeight || '300px' }">
     <v-list lines="one" density="compact" nav>
