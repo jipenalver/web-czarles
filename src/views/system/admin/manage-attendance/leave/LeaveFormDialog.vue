@@ -160,7 +160,7 @@ const {
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Apply Leave
+            {{ isUpdate ? 'Update' : 'Submit' }} Leave
           </v-btn>
         </v-card-actions>
       </v-form>

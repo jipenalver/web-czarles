@@ -79,7 +79,7 @@ export function useStatusFormDialog(
             formProcess: false,
           }
         } else if (data) {
-          formAction.value.formMessage = `Approved Leave Request.`
+          formAction.value.formMessage = 'Approved Leave Request.'
 
           await attendanceRequestsStore.deleteAttendanceRequest(props.itemData?.id as number)
         }
@@ -97,7 +97,7 @@ export function useStatusFormDialog(
             formProcess: false,
           }
         } else if (data) {
-          formAction.value.formMessage = `Rejected Leave Request.`
+          formAction.value.formMessage = 'Rejected Leave Request.'
 
           await logsStore.addLog({
             type: 'leave',
