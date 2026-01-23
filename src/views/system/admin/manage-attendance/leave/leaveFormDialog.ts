@@ -59,7 +59,8 @@ export function useLeaveFormDialog(
     async () => {
       formAction.value = { ...formActionDefault, formProcess: true }
 
-      await attendancesStore.getAttendances(formData.value.employee_id)
+      if (formData.value.employee_id)
+        await attendancesStore.getAttendances(formData.value.employee_id)
 
       formAction.value = { ...formActionDefault, formProcess: false }
     },
@@ -125,6 +126,13 @@ export function useLeaveFormDialog(
 
     if (isAttendanceComplete)
       return setError('Cannot apply for leave - attendance already recorded for this date.')
+
+    const isAttendanceHasLeave =
+      attendance &&
+      [attendance.is_am_leave, attendance.is_pm_leave].some((isLeave) => isLeave === true)
+
+    if (isAttendanceHasLeave)
+      return setError('Cannot apply for leave - leave already recorded for this date.')
 
     if (!formData.value.is_am_leave && !formData.value.is_pm_leave)
       return setError('Either AM or PM leave must be selected.')
