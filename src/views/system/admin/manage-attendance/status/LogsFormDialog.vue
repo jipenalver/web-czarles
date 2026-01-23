@@ -39,7 +39,7 @@ const { formAction, onFormSubmit, onFormReset } = useLogsFormDialog(props, emit)
   >
     <v-card
       prepend-icon="mdi-information-outline"
-      title="Rejection Logs"
+      title="Request Logs"
       :subtitle="`${props.itemData?.employee.firstname + ' ' + props.itemData?.employee.lastname}: ${getDateWithWeekday(props.itemData?.date as string)}`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">

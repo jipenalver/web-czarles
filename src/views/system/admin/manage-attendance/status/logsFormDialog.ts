@@ -1,6 +1,7 @@
 import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
+  useAttendanceRequestsStore,
 } from '@/stores/attendanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -15,21 +16,42 @@ export function useLogsFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const attendanceRequestsStore = useAttendanceRequestsStore()
+
   // States
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
 
   // Actions
-  const onSubmit = async () => {
+  const onFormSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    // Simulate form submission delay
-  }
+    const { data, error } = await attendanceRequestsStore.updateAttendanceRequest({
+      ...props.itemData,
+      leave_status: 'Pending',
+    } as AttendanceRequest)
 
-  // Trigger Validators
-  const onFormSubmit = async () => {
-    const { valid } = await refVForm.value.validate()
-    if (valid) onSubmit()
+    if (error) {
+      formAction.value = {
+        ...formActionDefault,
+        formMessage: error.message,
+        formStatus: 400,
+        formProcess: false,
+      }
+    } else if (data) {
+      formAction.value.formMessage = `${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} request resubmitted successfully.`
+
+      await attendanceRequestsStore.getAttendanceRequestsTable(
+        props.tableOptions,
+        props.tableFilters,
+      )
+
+      setTimeout(() => {
+        onFormReset()
+      }, 1500)
+    }
+
+    formAction.value.formAlert = true
   }
 
   const onFormReset = () => {
