@@ -78,7 +78,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
       .select(selectQuery)
       .order('created_at', { ascending: false })
 
-    if (employee_id) query = query.eq('employee_id', employee_id)
+    if (employee_id) query = query.eq('employee_id', employee_id).limit(90)
 
     const { data } = await query
 
