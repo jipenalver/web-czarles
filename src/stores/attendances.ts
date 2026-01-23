@@ -34,6 +34,7 @@ export type Attendance = {
   user_id: string
   user_avatar: string | null
   user_fullname: string
+  app_version: string | null
 }
 
 export type AttendanceImage = {

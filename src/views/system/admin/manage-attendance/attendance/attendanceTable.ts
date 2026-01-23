@@ -167,6 +167,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
         ...(props.componentView === 'overtime'
           ? ['Overtime In', 'Overtime Out', 'Rendered Overtime']
           : []),
+        'App Version',
       ].join(',')
 
       const csvRows = attendancesStore.attendancesExport.map((item) => {
@@ -195,6 +196,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
             item.pm_time_out,
             item.employee.is_field_staff,
           ),
+          item.app_version ?? '',
         ]
 
         if (props.componentView === 'overtime') {
