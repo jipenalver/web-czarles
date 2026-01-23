@@ -6,7 +6,7 @@ import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
 import StatusFormDialog from '../status/StatusFormDialog.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import { getDateWithWeekday } from '@/utils/helpers/dates'
-import LogsFormDialog from '../status/logsFormDialog.vue'
+import LogsFormDialog from '../status/LogsFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
 

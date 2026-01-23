@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
-import AttendanceRequestsTable from './attendance/AttendanceRequestsTable.vue'
+import AttendanceRequestsTable from './request/AttendanceRequestsTable.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useDisplay } from 'vuetify'
