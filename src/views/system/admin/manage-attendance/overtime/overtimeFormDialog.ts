@@ -4,10 +4,10 @@ import {
   type AttendanceRequestTableFilter,
   useAttendanceRequestsStore,
 } from '@/stores/attendanceRequests'
+import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
-import { useAttendancesStore } from '@/stores/attendances'
 import { useEmployeesStore } from '@/stores/employees'
 import { onMounted, ref, watch } from 'vue'
 
@@ -30,6 +30,8 @@ export function useOvertimeFormDialog(
     employee_id: null as number | null,
     overtime_in: '',
     overtime_out: '',
+    overtime_status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
+    type: 'Overtime' as 'Leave' | 'Overtime',
   }
   const formCheckBoxDefault = {
     isRectifyOvertimeIn: false,
@@ -43,6 +45,7 @@ export function useOvertimeFormDialog(
   const isConfirmSubmitDialog = ref(false)
   const confirmTitle = ref('')
   const confirmText = ref('')
+  const attendanceData = ref<Attendance | undefined>()
 
   watch(
     () => props.isDialogVisible,
@@ -86,12 +89,13 @@ export function useOvertimeFormDialog(
       return `${baseDate} ${timeValue}`
     }
 
-    const { date, ...newFormData } = {
+    const newFormData = {
       ...formData.value,
       overtime_in: prepareTimeField(formData.value.overtime_in as string, baseDate as string),
       overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string),
-      is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn ? true : false,
-      is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut ? true : false,
+      is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn,
+      is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut,
+      attendance_id: attendanceData.value ? attendanceData.value.id : null,
     }
 
     const { data, error } = isUpdate.value
@@ -133,23 +137,32 @@ export function useOvertimeFormDialog(
       return true
     }
 
-    const attendance = attendancesStore.attendances.find(
+    attendanceData.value = attendancesStore.attendances.find(
       (attendance) =>
         getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
         attendance.employee_id === formData.value.employee_id,
     )
 
     const isAttendanceBlank =
-      attendance &&
+      attendanceData.value &&
       [
-        attendance.am_time_in,
-        attendance.am_time_out,
-        attendance.pm_time_in,
-        attendance.pm_time_out,
+        attendanceData.value.am_time_in,
+        attendanceData.value.am_time_out,
+        attendanceData.value.pm_time_in,
+        attendanceData.value.pm_time_out,
       ].some((time) => time !== null)
 
     if (!isAttendanceBlank)
       return setError('Cannot apply for overtime - attendance is not yet recorded for this date.')
+
+    const isAttendanceHasLeave =
+      attendanceData.value &&
+      [attendanceData.value.is_am_leave, attendanceData.value.is_pm_leave].every(
+        (isLeave) => isLeave === true,
+      )
+
+    if (isAttendanceHasLeave)
+      return setError('Cannot apply for overtime - full leave already recorded for this date.')
 
     if (!formData.value.overtime_in) return setError('Overtime - Time In is required.')
 
@@ -163,8 +176,6 @@ export function useOvertimeFormDialog(
     const { valid } = await refVForm.value.validate()
     if (valid) {
       if (isUpdate.value) {
-        if (onFormValidate()) return
-
         confirmTitle.value = 'Confirm Overtime Rectification'
         confirmText.value = 'Are you sure you want to update, '
         if (formCheckBox.value.isRectifyOvertimeIn) confirmText.value += ' Overtime - Time In, '
@@ -174,6 +185,8 @@ export function useOvertimeFormDialog(
         confirmTitle.value = 'Confirm Overtime Application'
         confirmText.value = 'Are you sure you want to apply overtime for this attendance?'
       }
+
+      if (onFormValidate()) return
 
       isConfirmSubmitDialog.value = true
     }
