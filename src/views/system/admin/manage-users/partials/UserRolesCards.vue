@@ -16,7 +16,7 @@ const {
   userRolesStore,
 } = useUserRolesCards()
 
-const getTaskArray = (...args: string[]) => {
+const getRolePermission = (...args: string[]) => {
   return args
     .toString()
     .split(',')
@@ -39,9 +39,11 @@ const getTaskArray = (...args: string[]) => {
         <v-card-text class="d-flex align-center justify-space-between">
           <div>
             {{
-              getTaskArray(item.is_approver ? 'Approver' : '', item.is_requestor ? 'Requestor' : '')
-                .length > 0
-                ? getTaskArray(
+              getRolePermission(
+                item.is_approver ? 'Approver' : '',
+                item.is_requestor ? 'Requestor' : '',
+              ).length > 0
+                ? getRolePermission(
                     item.is_approver ? 'Approver' : '',
                     item.is_requestor ? 'Requestor' : '',
                   )
