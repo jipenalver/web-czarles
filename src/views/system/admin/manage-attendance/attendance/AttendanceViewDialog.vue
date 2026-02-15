@@ -61,7 +61,7 @@ const { formAction, imageType, imageData, onDownload, onDialogClose } = useAtten
           <v-col cols="12" class="d-flex justify-space-between align-center">
             <strong>Employee:</strong>
             <span class="text-body-2">
-              {{ props.itemData?.employee.firstname }} {{ props.itemData?.employee.lastname }}
+              {{ props.itemData?.employee?.firstname }} {{ props.itemData?.employee?.lastname }}
             </span>
           </v-col>
 
