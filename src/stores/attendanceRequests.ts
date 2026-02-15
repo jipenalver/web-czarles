@@ -2,6 +2,7 @@
 import { getDate, prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
+import { type Attendance } from './attendances'
 import { useAuthUserStore } from './authUser'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
@@ -23,6 +24,8 @@ export type AttendanceRequest = {
   leave_type: string | null
   leave_reason: string
   leave_status: 'Pending' | 'Approved' | 'Rejected'
+  attendance_id: number | null
+  attendance: Attendance
   overtime_in: string | null
   overtime_out: string | null
   overtime_status: 'Pending' | 'Approved' | 'Rejected'
@@ -38,7 +41,8 @@ export type AttendanceRequestTableFilter = {
 export const useAttendanceRequestsStore = defineStore('attendanceRequests', () => {
   const authUserStore = useAuthUserStore()
 
-  const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
+  const selectQuery =
+    '*, employee:employee_id (id, firstname, lastname, middlename), attendance:attendance_id (*, employee:employee_id (id, firstname, lastname, middlename), attendance_images (*, employee:qr_generator_id (id, firstname, lastname, middlename)))'
 
   // States
   const attendanceRequests = ref<AttendanceRequest[]>([])
@@ -155,11 +159,10 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
       data?.map((attendance) => ({
         date: getDate(attendance.overtime_in),
         employee_id: attendance.employee_id,
-
         requestor_id: authUserStore.userData?.id as string,
         user_avatar: authUserStore.userData?.avatar || null,
         user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
-
+        attendance_id: attendance.id,
         overtime_in: attendance.overtime_in,
         overtime_out: attendance.overtime_out,
         overtime_status: 'Pending',
