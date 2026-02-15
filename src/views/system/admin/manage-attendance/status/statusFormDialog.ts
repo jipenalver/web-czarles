@@ -107,6 +107,7 @@ export function useStatusFormDialog(
         ...newFormData
       } = {
         ...props.itemData,
+        is_overtime_applied: true,
       }
 
       const { data, error } = await attendancesStore.updateAttendance(newFormData)

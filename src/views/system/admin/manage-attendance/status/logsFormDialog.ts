@@ -28,7 +28,9 @@ export function useLogsFormDialog(
 
     const { data, error } = await attendanceRequestsStore.updateAttendanceRequest({
       ...props.itemData,
-      leave_status: 'Pending',
+      ...(props.tableFilters.component_view === 'leave-requests'
+        ? { leave_status: 'Pending' }
+        : { overtime_status: 'Pending' }),
     } as AttendanceRequest)
 
     if (error) {
