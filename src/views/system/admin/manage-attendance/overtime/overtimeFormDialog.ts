@@ -192,9 +192,10 @@ export function useOvertimeFormDialog(
   // Expose State and Actions
   return {
     formData,
+    formCheckBox,
     formAction,
     refVForm,
-    formCheckBox,
+    isUpdate,
     isConfirmSubmitDialog,
     confirmTitle,
     confirmText,

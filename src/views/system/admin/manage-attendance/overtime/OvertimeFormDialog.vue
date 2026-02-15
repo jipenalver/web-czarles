@@ -23,9 +23,10 @@ const { mdAndDown } = useDisplay()
 
 const {
   formData,
+  formCheckBox,
   formAction,
   refVForm,
-  formCheckBox,
+  isUpdate,
   isConfirmSubmitDialog,
   confirmText,
   onSubmit,
@@ -51,7 +52,7 @@ const {
     <v-card
       prepend-icon="mdi-clock-plus"
       title="Overtime Application"
-      subtitle="Apply for Overtime. Check the checkboxes to modify the time."
+      :subtitle="`${isUpdate ? 'Edit Overtime' : 'Apply for Overtime'}. Check the checkboxes to modify the time.`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
