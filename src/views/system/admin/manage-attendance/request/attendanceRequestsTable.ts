@@ -74,7 +74,16 @@ export function useAttendanceRequestsTable(props: {
     isLeaveDialogVisible.value = true
   }
 
-  const onOvertime = (item: AttendanceRequest | null = null) => {
+  const onOvertime = async (item: AttendanceRequest | null = null) => {
+    if (item === null) {
+      formAction.value = { ...formActionDefault, formProcess: true }
+
+      await attendanceRequestsStore.syncOvertimeRequest(tableOptions.value, tableFilters.value)
+
+      formAction.value.formProcess = false
+      return
+    }
+
     itemData.value = item
     isOvertimeDialogVisible.value = true
   }

@@ -111,13 +111,15 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'overtime-requests'">
-              <v-col cols="12" sm="3">
+              <v-col v-if="isRequestor" cols="12" sm="3">
                 <v-btn
                   class="my-1"
                   prepend-icon="mdi-refresh"
                   color="primary"
                   block
                   @click="onOvertime(null)"
+                  :loading="formAction.formProcess"
+                  :disabled="formAction.formProcess"
                 >
                   Sync Overtime
                 </v-btn>
@@ -189,7 +191,7 @@ const {
             variant="flat"
             size="small"
           >
-            {{ item.leave_status.charAt(0).toUpperCase() + item.leave_status.slice(1) }}
+            {{ item.leave_status }}
           </v-chip>
         </template>
 
