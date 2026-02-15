@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { type UserRole } from './userRoles'
 import { supabase } from '@/utils/supabase'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
@@ -97,6 +98,12 @@ export const useAuthUserStore = defineStore('authUser', () => {
       authPages.value = data[0].pages.map((p: { page: string }) => p.page)
   }
 
+  async function getUserRole(name: string) {
+    const { data } = await supabase.from('user_roles').select('*').eq('user_role', name).single()
+
+    return data as Omit<UserRole, 'user_role_pages' | 'pages'>
+  }
+
   // Expose States and Actions
   return {
     userData,
@@ -108,5 +115,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
     updateUserInformation,
     updateUserImage,
     getAuthPages,
+    getUserRole,
   }
 })
