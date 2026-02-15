@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { getDate, prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
-import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { useAuthUserStore } from './authUser'
 import { type Employee } from './employees'
@@ -14,18 +14,18 @@ export type AttendanceRequest = {
   date: string | null
   employee_id: number | null
   employee: Employee
+  requestor_id: string
+  user_avatar: string | null
+  user_fullname: string
   is_am_leave: boolean
   is_pm_leave: boolean
   is_leave_with_pay: boolean
   leave_type: string | null
   leave_reason: string
   leave_status: 'Pending' | 'Approved' | 'Rejected'
-  requestor_id: string
-  user_avatar: string | null
-  user_fullname: string
-  overtime_status: 'Pending' | 'Approved' | 'Rejected'
   overtime_in: string | null
   overtime_out: string | null
+  overtime_status: 'Pending' | 'Approved' | 'Rejected'
   type: 'Leave' | 'Overtime'
 }
 
@@ -57,7 +57,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     const { data } = await supabase
       .from('attendance_requests')
       .select(selectQuery)
-      .order('created_at', { ascending: false })
+      .order('date', { ascending: false })
 
     attendanceRequests.value = data as AttendanceRequest[]
   }
@@ -66,11 +66,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     tableOptions: TableOptions,
     tableFilters: AttendanceRequestTableFilter,
   ) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(
-      tableOptions,
-      'created_at',
-      false,
-    )
+    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'date', false)
 
     let query = supabase
       .from('attendance_requests')
@@ -143,6 +139,54 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     return await supabase.from('attendance_requests').delete().eq('id', id).select()
   }
 
+  async function syncOvertimeRequest(
+    tableOptions: TableOptions,
+    tableFilters: AttendanceRequestTableFilter,
+  ) {
+    let query = supabase.from('attendances').select('*').eq('is_overtime_applied', false)
+
+    query = syncOverTimeRequestsFilter(query, tableFilters)
+
+    const { data } = await query
+
+    await supabase.from('attendance_requests').delete().eq('type', 'Overtime')
+
+    await supabase.from('attendance_requests').insert(
+      data?.map((attendance) => ({
+        date: getDate(attendance.overtime_in),
+        employee_id: attendance.employee_id,
+
+        requestor_id: authUserStore.userData?.id as string,
+        user_avatar: authUserStore.userData?.avatar || null,
+        user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+
+        overtime_in: attendance.overtime_in,
+        overtime_out: attendance.overtime_out,
+        overtime_status: 'Pending',
+        type: 'Overtime',
+      })),
+    )
+
+    await getAttendanceRequestsTable(tableOptions, tableFilters)
+  }
+
+  function syncOverTimeRequestsFilter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query: PostgrestFilterBuilder<any, any, any, any>,
+    { employee_id, attendance_at }: AttendanceRequestTableFilter,
+  ) {
+    if (employee_id) query = query.eq('employee_id', employee_id)
+
+    if (attendance_at) {
+      const { startDate, endDate } = prepareDateRange(attendance_at, attendance_at.length > 1)
+
+      if (startDate && endDate)
+        query = query.or(`and(overtime_in.gte.${startDate},overtime_in.lt.${endDate})`)
+    }
+
+    return query
+  }
+
   // Expose States and Actions
   return {
     attendanceRequests,
@@ -154,5 +198,6 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     addAttendanceRequest,
     updateAttendanceRequest,
     deleteAttendanceRequest,
+    syncOvertimeRequest,
   }
 })
