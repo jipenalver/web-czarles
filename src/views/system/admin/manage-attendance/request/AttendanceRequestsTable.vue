@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
+import AttendanceViewDialog from '../attendance/AttendanceViewDialog.vue'
+import AttendanceTimeValue from '../attendance/AttendanceTimeValue.vue'
 import { useAttendanceRequestsTable } from './attendanceRequestsTable'
 import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
 // import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
@@ -16,19 +18,29 @@ const props = defineProps<{
 
 const { smAndDown } = useDisplay()
 
+const statusColors = {
+  Approved: 'success',
+  Rejected: 'error',
+  Pending: 'warning',
+}
+
 const {
   tableHeaders,
   tableOptions,
   tableFilters,
   isApprover,
   isRequestor,
+  isViewDialogVisible,
   isStatusDialogVisible,
   isLogsDialogVisible,
   isLeaveDialogVisible,
   // isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
+  attendanceData,
   formAction,
+  viewType,
+  onView,
   onStatus,
   onLogs,
   onLeave,
@@ -38,6 +50,7 @@ const {
   onFilterDate,
   onFilterItems,
   onLoadItems,
+  hasAttendanceImage,
   attendanceRequestsStore,
   employeesStore,
 } = useAttendanceRequestsTable(props)
@@ -180,18 +193,49 @@ const {
 
         <template #item.leave_status="{ item }">
           <v-chip
-            :color="
-              item.leave_status === 'Approved'
-                ? 'success'
-                : item.leave_status === 'Rejected'
-                  ? 'error'
-                  : 'warning'
-            "
+            :color="statusColors[item.leave_status] || 'warning'"
             class="font-weight-bold"
             variant="flat"
             size="small"
           >
             {{ item.leave_status }}
+          </v-chip>
+        </template>
+
+        <template #item.overtime_in="{ item }">
+          <AttendanceTimeValue
+            v-if="
+              item.overtime_in &&
+              hasAttendanceImage(item.attendance.attendance_images, 'overtime_in')
+            "
+            :item-data="item.attendance"
+            attendance-type="overtime_in"
+            @click="onView(item.attendance, 'overtime_in')"
+          ></AttendanceTimeValue>
+          <span v-else>-</span>
+        </template>
+
+        <template #item.overtime_out="{ item }">
+          <AttendanceTimeValue
+            v-if="
+              item.overtime_out &&
+              hasAttendanceImage(item.attendance.attendance_images, 'overtime_out')
+            "
+            :item-data="item.attendance"
+            attendance-type="overtime_out"
+            @click="onView(item.attendance, 'overtime_out')"
+          ></AttendanceTimeValue>
+          <span v-else>-</span>
+        </template>
+
+        <template #item.overtime_status="{ item }">
+          <v-chip
+            :color="statusColors[item.overtime_status] || 'warning'"
+            class="font-weight-bold"
+            variant="flat"
+            size="small"
+          >
+            {{ item.overtime_status }}
           </v-chip>
         </template>
 
@@ -241,7 +285,7 @@ const {
 
             <template v-else-if="props.componentView === 'overtime-requests'">
               <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
-                <v-icon icon="mdi-clock-plus"></v-icon>
+                <v-icon icon="mdi-clock-edit"></v-icon>
                 <v-tooltip activator="parent" location="top">Edit Overtime</v-tooltip>
               </v-btn>
             </template>
@@ -278,6 +322,12 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></OvertimeFormDialog> -->
+
+  <AttendanceViewDialog
+    v-model:is-dialog-visible="isViewDialogVisible"
+    :item-data="attendanceData"
+    :view-type="viewType"
+  ></AttendanceViewDialog>
 
   <ConfirmFieldDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"

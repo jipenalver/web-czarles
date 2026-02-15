@@ -1,5 +1,6 @@
 import { type AttendanceRequest, useAttendanceRequestsStore } from '@/stores/attendanceRequests'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
+import { type Attendance, type AttendanceImage } from '@/stores/attendances'
 import { getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
@@ -30,7 +31,11 @@ export function useAttendanceRequestsTable(props: {
       )
 
     if (componentView === 'overtime-requests')
-      headers.push({ title: 'Overtime Status', key: 'overtime_status', align: 'center' })
+      headers.push(
+        { title: 'Overtime In', key: 'overtime_in', align: 'start' },
+        { title: 'Overtime Out', key: 'overtime_out', align: 'start' },
+        { title: 'Overtime Status', key: 'overtime_status', align: 'center' },
+      )
 
     headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
     return headers
@@ -49,6 +54,7 @@ export function useAttendanceRequestsTable(props: {
   })
   const isApprover = ref(false)
   const isRequestor = ref(false)
+  const isViewDialogVisible = ref(false)
   const isStatusDialogVisible = ref(false)
   const isLogsDialogVisible = ref(false)
   const isLeaveDialogVisible = ref(false)
@@ -56,9 +62,28 @@ export function useAttendanceRequestsTable(props: {
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<AttendanceRequest | null>(null)
+  const attendanceData = ref<Attendance | null>(null)
   const formAction = ref({ ...formActionDefault })
+  const viewType = ref<
+    'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out' | 'overtime_in' | 'overtime_out'
+  >('am_time_in')
 
   // Actions
+  const onView = (
+    item: Attendance,
+    timeType:
+      | 'am_time_in'
+      | 'am_time_out'
+      | 'pm_time_in'
+      | 'pm_time_out'
+      | 'overtime_in'
+      | 'overtime_out',
+  ) => {
+    attendanceData.value = item
+    viewType.value = timeType
+    isViewDialogVisible.value = true
+  }
+
   const onStatus = (item: AttendanceRequest) => {
     itemData.value = item
     isStatusDialogVisible.value = true
@@ -137,6 +162,10 @@ export function useAttendanceRequestsTable(props: {
     tableOptions.value.isLoading = false
   }
 
+  const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
+    return images.some((image) => image.image_type === type)
+  }
+
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
 
@@ -160,13 +189,17 @@ export function useAttendanceRequestsTable(props: {
     tableFilters,
     isApprover,
     isRequestor,
+    isViewDialogVisible,
     isStatusDialogVisible,
     isLogsDialogVisible,
     isLeaveDialogVisible,
     isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
+    attendanceData,
     formAction,
+    viewType,
+    onView,
     onStatus,
     onLogs,
     onLeave,
@@ -176,6 +209,7 @@ export function useAttendanceRequestsTable(props: {
     onFilterDate,
     onFilterItems,
     onLoadItems,
+    hasAttendanceImage,
     authUserStore,
     attendanceRequestsStore,
     employeesStore,
