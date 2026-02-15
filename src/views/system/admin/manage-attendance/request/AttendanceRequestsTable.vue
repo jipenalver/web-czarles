@@ -20,6 +20,8 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
+  isApprover,
+  isRequestor,
   isStatusDialogVisible,
   isLogsDialogVisible,
   isLeaveDialogVisible,
@@ -36,22 +38,9 @@ const {
   onFilterDate,
   onFilterItems,
   onLoadItems,
-  authUserStore,
   attendanceRequestsStore,
   employeesStore,
 } = useAttendanceRequestsTable(props)
-
-const isApprover = () => {
-  const approverRoles = ['Executive']
-
-  return approverRoles.includes(authUserStore.userRole ?? '')
-}
-
-const isSuperAdmin = () => {
-  const adminRoles = ['Super Administrator', 'Administrator']
-
-  return adminRoles.includes(authUserStore.userRole ?? '')
-}
 </script>
 
 <template>
@@ -208,14 +197,14 @@ const isSuperAdmin = () => {
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
             <template v-if="props.componentView === 'leave-requests'">
               <template v-if="item.leave_status === 'Pending'">
-                <template v-if="isSuperAdmin() || isApprover()">
+                <template v-if="isApprover">
                   <v-btn variant="text" density="comfortable" @click="onStatus(item)" icon>
                     <v-icon icon="mdi-list-status" color="warning"></v-icon>
                     <v-tooltip activator="parent" location="top">Update Status</v-tooltip>
                   </v-btn>
                 </template>
 
-                <template v-if="isSuperAdmin() || !isApprover()">
+                <template v-if="isRequestor">
                   <v-btn variant="text" density="comfortable" @click="onLeave(item)" icon>
                     <v-icon icon="mdi-account-arrow-left"></v-icon>
                     <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>

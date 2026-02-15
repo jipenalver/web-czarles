@@ -47,6 +47,8 @@ export function useAttendanceRequestsTable(props: {
     attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
     component_view: props.componentView,
   })
+  const isApprover = ref(false)
+  const isRequestor = ref(false)
   const isStatusDialogVisible = ref(false)
   const isLogsDialogVisible = ref(false)
   const isLeaveDialogVisible = ref(false)
@@ -128,6 +130,18 @@ export function useAttendanceRequestsTable(props: {
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+
+    if (authUserStore.userRole === 'Super Administrator') {
+      isApprover.value = true
+      isRequestor.value = true
+    }
+
+    if (authUserStore.userRole !== 'Super Administrator') {
+      const userRole = await authUserStore.getUserRole(authUserStore.userRole as string)
+
+      isApprover.value = userRole?.is_approver ?? false
+      isRequestor.value = userRole?.is_requestor ?? false
+    }
   })
 
   // Expose State and Actions
@@ -135,6 +149,8 @@ export function useAttendanceRequestsTable(props: {
     tableHeaders,
     tableOptions,
     tableFilters,
+    isApprover,
+    isRequestor,
     isStatusDialogVisible,
     isLogsDialogVisible,
     isLeaveDialogVisible,
