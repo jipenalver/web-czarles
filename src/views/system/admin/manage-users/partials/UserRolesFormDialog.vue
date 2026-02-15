@@ -62,6 +62,30 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } =
               <v-textarea v-model="formData.description" label="Description" rows="2"></v-textarea>
             </v-col>
 
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_approver" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Approver?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_approver ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <v-switch v-model="formData.is_requestor" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is Requestor?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_requestor ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
+
+            <v-divider class="my-3" thickness="1"></v-divider>
+
             <v-col cols="12">
               <v-list v-model:opened="openedPages" density="compact" nav>
                 <v-list-group v-for="([title, icon], i) in adminNav" :key="i" :value="title">
