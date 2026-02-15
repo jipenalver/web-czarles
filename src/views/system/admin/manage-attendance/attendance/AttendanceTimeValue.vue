@@ -4,7 +4,13 @@ import { getTime } from '@/utils/helpers/dates'
 
 const props = defineProps<{
   itemData: Attendance
-  attendanceType: 'am_time_in' | 'am_time_out' | 'pm_time_in' | 'pm_time_out'
+  attendanceType:
+    | 'am_time_in'
+    | 'am_time_out'
+    | 'pm_time_in'
+    | 'pm_time_out'
+    | 'overtime_in'
+    | 'overtime_out'
 }>()
 
 const emit = defineEmits(['click'])
@@ -29,6 +35,10 @@ const getAttendanceTime = (type: string) => {
       return props.itemData.pm_time_in
     case 'pm_time_out':
       return props.itemData.pm_time_out
+    case 'overtime_in':
+      return props.itemData.overtime_in
+    case 'overtime_out':
+      return props.itemData.overtime_out
     default:
       return null
   }
