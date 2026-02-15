@@ -12,6 +12,8 @@ export type UserRole = {
   id: number
   user_role: string
   description: string
+  is_approver: boolean
+  is_requestor: boolean
   user_role_pages: UserRolePage[]
   pages: string[]
 }
