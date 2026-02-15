@@ -28,6 +28,7 @@ const {
   refVForm,
   isUpdate,
   isConfirmSubmitDialog,
+  confirmTitle,
   confirmText,
   onSubmit,
   onFormSubmit,
@@ -139,7 +140,7 @@ const {
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmSubmitDialog"
-    title="Confirm Overtime Rectification"
+    :title="confirmTitle"
     :text="confirmText"
     @confirm="onSubmit"
   ></ConfirmDialog>
