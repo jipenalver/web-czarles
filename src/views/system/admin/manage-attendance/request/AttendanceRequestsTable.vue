@@ -5,9 +5,9 @@ import AttendanceTimeValue from '../attendance/AttendanceTimeValue.vue'
 import { useAttendanceRequestsTable } from './attendanceRequestsTable'
 import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
 import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
+import { getDateWithWeekday, getTime } from '@/utils/helpers/dates'
 import StatusFormDialog from '../status/StatusFormDialog.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
-import { getDateWithWeekday } from '@/utils/helpers/dates'
 import LogsFormDialog from '../status/LogsFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useDisplay } from 'vuetify'
@@ -225,7 +225,9 @@ const {
             attendance-type="overtime_in"
             @click="onView(item.attendance, 'overtime_in')"
           ></AttendanceTimeValue>
-          <span v-else>-</span>
+          <span v-else class="font-weight-bold">
+            {{ getTime(item.overtime_in) }}
+          </span>
         </template>
 
         <template #item.overtime_out="{ item }">
@@ -238,7 +240,9 @@ const {
             attendance-type="overtime_out"
             @click="onView(item.attendance, 'overtime_out')"
           ></AttendanceTimeValue>
-          <span v-else>-</span>
+          <span v-else class="font-weight-bold">
+            {{ getTime(item.overtime_out) }}
+          </span>
         </template>
 
         <template #item.overtime_status="{ item }">
