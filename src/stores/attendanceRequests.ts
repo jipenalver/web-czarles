@@ -28,6 +28,8 @@ export type AttendanceRequest = {
   attendance: Attendance
   overtime_in: string | null
   overtime_out: string | null
+  is_overtime_in_rectified: boolean
+  is_overtime_out_rectified: boolean
   overtime_status: 'Pending' | 'Approved' | 'Rejected'
   type: 'Leave' | 'Overtime'
 }
