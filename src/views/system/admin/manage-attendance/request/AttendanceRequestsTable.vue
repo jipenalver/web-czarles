@@ -16,7 +16,7 @@ const props = defineProps<{
   componentView: 'leave-requests' | 'overtime-requests'
 }>()
 
-const { smAndDown } = useDisplay()
+const { xs, smAndDown } = useDisplay()
 
 const statusColors = {
   Approved: 'success',
@@ -50,6 +50,7 @@ const {
   onFilterDate,
   onFilterItems,
   onLoadItems,
+  onLoadOvertimes,
   hasAttendanceImage,
   attendanceRequestsStore,
   employeesStore,
@@ -80,6 +81,20 @@ const {
       >
         <template #top>
           <v-row dense>
+            <v-col v-if="isRequestor" cols="12" sm="1" :class="xs ? 'd-flex justify-end' : ''">
+              <v-btn
+                class="my-1"
+                variant="text"
+                density="comfortable"
+                @click="onLoadOvertimes"
+                :loading="formAction.formProcess"
+                :disabled="formAction.formProcess"
+                icon
+              >
+                <v-icon icon="mdi-refresh" color="primary"></v-icon>
+              </v-btn>
+            </v-col>
+
             <v-spacer></v-spacer>
 
             <v-col cols="12" sm="4">
@@ -127,14 +142,12 @@ const {
               <v-col v-if="isRequestor" cols="12" sm="3">
                 <v-btn
                   class="my-1"
-                  prepend-icon="mdi-refresh"
+                  prepend-icon="mdi-clock-plus"
                   color="primary"
                   block
                   @click="onOvertime(null)"
-                  :loading="formAction.formProcess"
-                  :disabled="formAction.formProcess"
                 >
-                  Sync Overtime
+                  Apply Overtime
                 </v-btn>
               </v-col>
             </template>

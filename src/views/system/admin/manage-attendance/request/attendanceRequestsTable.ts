@@ -99,16 +99,7 @@ export function useAttendanceRequestsTable(props: {
     isLeaveDialogVisible.value = true
   }
 
-  const onOvertime = async (item: AttendanceRequest | null = null) => {
-    if (item === null) {
-      formAction.value = { ...formActionDefault, formProcess: true }
-
-      await attendanceRequestsStore.syncOvertimeRequest(tableOptions.value, tableFilters.value)
-
-      formAction.value.formProcess = false
-      return
-    }
-
+  const onOvertime = (item: AttendanceRequest | null = null) => {
     itemData.value = item
     isOvertimeDialogVisible.value = true
   }
@@ -162,6 +153,14 @@ export function useAttendanceRequestsTable(props: {
     tableOptions.value.isLoading = false
   }
 
+  const onLoadOvertimes = async () => {
+    formAction.value = { ...formActionDefault, formProcess: true }
+
+    await attendanceRequestsStore.syncOvertimeRequest(tableOptions.value, tableFilters.value)
+
+    formAction.value.formProcess = false
+  }
+
   const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
     return images.some((image) => image.image_type === type)
   }
@@ -209,6 +208,7 @@ export function useAttendanceRequestsTable(props: {
     onFilterDate,
     onFilterItems,
     onLoadItems,
+    onLoadOvertimes,
     hasAttendanceImage,
     authUserStore,
     attendanceRequestsStore,
