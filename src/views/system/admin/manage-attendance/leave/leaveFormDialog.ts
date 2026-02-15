@@ -132,7 +132,9 @@ export function useLeaveFormDialog(
       [attendance.is_am_leave, attendance.is_pm_leave].some((isLeave) => isLeave === true)
 
     if (isAttendanceHasLeave)
-      return setError('Cannot apply for leave - leave already recorded for this date.')
+      return setError(
+        'Cannot apply for leave - partial or full leave already recorded for this date.',
+      )
 
     if (!formData.value.is_am_leave && !formData.value.is_pm_leave)
       return setError('Either AM or PM leave must be selected.')
