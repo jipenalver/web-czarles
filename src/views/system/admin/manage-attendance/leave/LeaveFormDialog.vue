@@ -50,7 +50,7 @@ const {
     <v-card
       prepend-icon="mdi-account-arrow-left"
       title="Leave Application"
-      subtitle="Apply for Employee's Leave."
+      :subtitle="`${isUpdate ? 'Edit' : 'Apply for'} Employee's Leave Request.`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>

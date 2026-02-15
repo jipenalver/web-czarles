@@ -65,7 +65,7 @@ const {
                 item-title="label"
                 item-value="id"
                 :rules="[requiredValidator]"
-                readonly
+                :readonly="isUpdate"
               ></v-autocomplete>
             </v-col>
 
@@ -77,7 +77,6 @@ const {
                 label="Attendance Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                readonly
                 hide-actions
               ></v-date-input>
             </v-col>
@@ -131,7 +130,7 @@ const {
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Apply Overtime
+            {{ isUpdate ? 'Update' : 'Apply' }} Overtime
           </v-btn>
         </v-card-actions>
       </v-form>
