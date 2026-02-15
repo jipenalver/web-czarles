@@ -48,66 +48,107 @@ export function useStatusFormDialog(
   const onSubmit = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    if (formData.value.type === 'Leave') {
-      if (formData.value.status === 'Approved') {
-        const {
-          id,
-          created_at,
-          date,
-          employee,
-          leave_status,
-          attendance_id,
-          attendance,
-          requestor_id,
-          user_avatar,
-          user_fullname,
-          overtime_status,
-          overtime_in,
-          overtime_out,
-          type,
-          ...newFormData
-        } = {
-          ...props.itemData,
-          am_time_in: getDate(props.itemData?.date as string),
+    if (formData.value.type === 'Leave' && formData.value.status === 'Approved') {
+      const {
+        id,
+        created_at,
+        date,
+        employee,
+        leave_status,
+        requestor_id,
+        user_avatar,
+        user_fullname,
+        attendance_id,
+        attendance,
+        overtime_in,
+        overtime_out,
+        is_overtime_in_rectified,
+        is_overtime_out_rectified,
+        overtime_status,
+        type,
+        ...newFormData
+      } = {
+        ...props.itemData,
+        am_time_in: getDate(props.itemData?.date as string),
+      }
+
+      const { data, error } = await attendancesStore.addAttendance(newFormData)
+
+      if (error) {
+        formAction.value = {
+          ...formActionDefault,
+          formMessage: error.message,
+          formStatus: 400,
+          formProcess: false,
         }
+      } else if (data) {
+        formAction.value.formMessage = 'Approved Leave Request.'
 
-        const { data, error } = await attendancesStore.addAttendance(newFormData)
+        await attendanceRequestsStore.deleteAttendanceRequest(props.itemData?.id as number)
+      }
+    } else if (formData.value.type === 'Overtime' && formData.value.status === 'Approved') {
+      const {
+        created_at,
+        date,
+        employee,
+        is_am_leave,
+        is_pm_leave,
+        is_leave_with_pay,
+        leave_type,
+        leave_reason,
+        leave_status,
+        requestor_id,
+        user_avatar,
+        user_fullname,
+        attendance_id,
+        attendance,
+        overtime_status,
+        type,
+        ...newFormData
+      } = {
+        ...props.itemData,
+      }
 
-        if (error) {
-          formAction.value = {
-            ...formActionDefault,
-            formMessage: error.message,
-            formStatus: 400,
-            formProcess: false,
-          }
-        } else if (data) {
-          formAction.value.formMessage = 'Approved Leave Request.'
+      const { data, error } = await attendancesStore.updateAttendance(newFormData)
 
-          await attendanceRequestsStore.deleteAttendanceRequest(props.itemData?.id as number)
+      if (error) {
+        formAction.value = {
+          ...formActionDefault,
+          formMessage: error.message,
+          formStatus: 400,
+          formProcess: false,
         }
-      } else if (formData.value.status === 'Rejected') {
-        const { data, error } = await attendanceRequestsStore.updateAttendanceRequest({
-          ...props.itemData,
-          leave_status: formData.value.status,
-        } as AttendanceRequest)
+      } else if (data) {
+        formAction.value.formMessage = 'Approved Overtime Request.'
 
-        if (error) {
-          formAction.value = {
-            ...formActionDefault,
-            formMessage: error.message,
-            formStatus: 400,
-            formProcess: false,
-          }
-        } else if (data) {
-          formAction.value.formMessage = 'Rejected Leave Request.'
+        await attendanceRequestsStore.deleteAttendanceRequest(props.itemData?.id as number)
+      }
+    }
 
-          await logsStore.addLog({
-            type: 'leave',
-            employee_id: props.itemData?.employee_id as number,
-            attendance_request_id: props.itemData?.id as number,
-            description: formData.value.reason,
-          })
+    if (formData.value.status === 'Rejected') {
+      const { data, error } = await attendanceRequestsStore.updateAttendanceRequest({
+        ...props.itemData,
+        ...(formData.value.type === 'Leave'
+          ? { leave_status: formData.value.status }
+          : { overtime_status: formData.value.status }),
+      } as AttendanceRequest)
+
+      if (error) {
+        formAction.value = {
+          ...formActionDefault,
+          formMessage: error.message,
+          formStatus: 400,
+          formProcess: false,
         }
+      } else if (data) {
+        formAction.value.formMessage = `Rejected ${formData.value.type} Request.`
+
+        await logsStore.addLog({
+          type: formData.value.type.toLowerCase() as 'leave' | 'overtime',
+          employee_id: props.itemData?.employee_id as number,
+          attendance_request_id: props.itemData?.id as number,
+          description: formData.value.reason,
+        })
       }
     }
 
