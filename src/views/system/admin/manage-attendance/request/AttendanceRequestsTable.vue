@@ -81,19 +81,21 @@ const {
       >
         <template #top>
           <v-row dense>
-            <v-col v-if="isRequestor" cols="12" sm="1" :class="xs ? 'd-flex justify-end' : ''">
-              <v-btn
-                class="my-1"
-                variant="text"
-                density="comfortable"
-                @click="onLoadOvertimes"
-                :loading="formAction.formProcess"
-                :disabled="formAction.formProcess"
-                icon
-              >
-                <v-icon icon="mdi-refresh" color="primary"></v-icon>
-              </v-btn>
-            </v-col>
+            <template v-if="props.componentView === 'overtime-requests'">
+              <v-col v-if="isRequestor" cols="12" sm="1" :class="xs ? 'd-flex justify-end' : ''">
+                <v-btn
+                  class="my-1"
+                  variant="text"
+                  density="comfortable"
+                  @click="onLoadOvertimes"
+                  :loading="formAction.formProcess"
+                  :disabled="formAction.formProcess"
+                  icon
+                >
+                  <v-icon icon="mdi-refresh" color="primary"></v-icon>
+                </v-btn>
+              </v-col>
+            </template>
 
             <v-spacer></v-spacer>
 
