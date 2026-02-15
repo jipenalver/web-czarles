@@ -155,7 +155,13 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
     const { data } = await query
 
-    await supabase.from('attendance_requests').delete().eq('type', 'Overtime')
+    await supabase
+      .from('attendance_requests')
+      .delete()
+      .eq('type', 'Overtime')
+      .eq('overtime_status', 'Pending')
+      .eq('is_overtime_in_rectified', false)
+      .eq('is_overtime_out_rectified', false)
 
     await supabase.from('attendance_requests').insert(
       data?.map((attendance) => ({
