@@ -97,7 +97,7 @@ const {
             </v-col>
 
             <template v-if="props.componentView === 'leave-requests'">
-              <v-col cols="12" sm="3">
+              <v-col v-if="isRequestor" cols="12" sm="3">
                 <v-btn
                   class="my-1"
                   prepend-icon="mdi-account-arrow-left"
@@ -114,12 +114,12 @@ const {
               <v-col cols="12" sm="3">
                 <v-btn
                   class="my-1"
-                  prepend-icon="mdi-clock-plus"
+                  prepend-icon="mdi-refresh"
                   color="primary"
                   block
                   @click="onOvertime(null)"
                 >
-                  Apply Overtime
+                  Sync Overtime
                 </v-btn>
               </v-col>
             </template>
@@ -199,8 +199,8 @@ const {
               <template v-if="item.leave_status === 'Pending'">
                 <template v-if="isApprover">
                   <v-btn variant="text" density="comfortable" @click="onStatus(item)" icon>
-                    <v-icon icon="mdi-list-status" color="warning"></v-icon>
-                    <v-tooltip activator="parent" location="top">Update Status</v-tooltip>
+                    <v-icon icon="mdi-thumbs-up-down" color="warning"></v-icon>
+                    <v-tooltip activator="parent" location="top">Approve or Reject</v-tooltip>
                   </v-btn>
                 </template>
 
@@ -218,15 +218,22 @@ const {
               </template>
 
               <template v-if="item.leave_status === 'Rejected'">
-                <v-btn variant="text" density="comfortable" @click="onLogs(item)" icon>
-                  <v-icon icon="mdi-information-outline" color="warning"></v-icon>
-                  <v-tooltip activator="parent" location="top">Resubmit Request</v-tooltip>
-                </v-btn>
+                <template v-if="isRequestor">
+                  <v-btn variant="text" density="comfortable" @click="onLogs(item)" icon>
+                    <v-icon icon="mdi-information-outline" color="warning"></v-icon>
+                    <v-tooltip activator="parent" location="top">Resubmit Request</v-tooltip>
+                  </v-btn>
 
-                <v-btn variant="text" density="comfortable" @click="onLeave(item)" icon>
-                  <v-icon icon="mdi-account-arrow-left"></v-icon>
-                  <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
-                </v-btn>
+                  <v-btn variant="text" density="comfortable" @click="onLeave(item)" icon>
+                    <v-icon icon="mdi-account-arrow-left"></v-icon>
+                    <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
+                  </v-btn>
+
+                  <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                    <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                    <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
+                  </v-btn>
+                </template>
               </template>
             </template>
 
