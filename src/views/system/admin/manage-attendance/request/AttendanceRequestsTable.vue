@@ -4,7 +4,7 @@ import AttendanceViewDialog from '../attendance/AttendanceViewDialog.vue'
 import AttendanceTimeValue from '../attendance/AttendanceTimeValue.vue'
 import { useAttendanceRequestsTable } from './attendanceRequestsTable'
 import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
-// import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
+import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import StatusFormDialog from '../status/StatusFormDialog.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import { getDateWithWeekday } from '@/utils/helpers/dates'
@@ -34,7 +34,7 @@ const {
   isStatusDialogVisible,
   isLogsDialogVisible,
   isLeaveDialogVisible,
-  // isOvertimeDialogVisible,
+  isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   attendanceData,
@@ -263,7 +263,7 @@ const {
                 </template>
               </template>
 
-              <template v-if="item.leave_status === 'Rejected'">
+              <template v-else-if="item.leave_status === 'Rejected'">
                 <template v-if="isRequestor">
                   <v-btn variant="text" density="comfortable" @click="onLogs(item)" icon>
                     <v-icon icon="mdi-information-outline" color="warning"></v-icon>
@@ -284,10 +284,35 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'overtime-requests'">
-              <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
-                <v-icon icon="mdi-clock-edit"></v-icon>
-                <v-tooltip activator="parent" location="top">Edit Overtime</v-tooltip>
-              </v-btn>
+              <template v-if="item.overtime_status === 'Pending'">
+                <template v-if="isApprover">
+                  <v-btn variant="text" density="comfortable" @click="onStatus(item)" icon>
+                    <v-icon icon="mdi-thumbs-up-down" color="warning"></v-icon>
+                    <v-tooltip activator="parent" location="top">Approve or Reject</v-tooltip>
+                  </v-btn>
+                </template>
+
+                <template v-if="isRequestor">
+                  <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
+                    <v-icon icon="mdi-clock-edit"></v-icon>
+                    <v-tooltip activator="parent" location="top">Edit Overtime</v-tooltip>
+                  </v-btn>
+                </template>
+              </template>
+
+              <template v-else-if="item.overtime_status === 'Rejected'">
+                <template v-if="isRequestor">
+                  <v-btn variant="text" density="comfortable" @click="onLogs(item)" icon>
+                    <v-icon icon="mdi-information-outline" color="warning"></v-icon>
+                    <v-tooltip activator="parent" location="top">Resubmit Request</v-tooltip>
+                  </v-btn>
+
+                  <v-btn variant="text" density="comfortable" @click="onOvertime(item)" icon>
+                    <v-icon icon="mdi-clock-edit"></v-icon>
+                    <v-tooltip activator="parent" location="top">Edit Overtime</v-tooltip>
+                  </v-btn>
+                </template>
+              </template>
             </template>
           </div>
         </template>
@@ -316,12 +341,12 @@ const {
     :table-filters="tableFilters"
   ></LeaveFormDialog>
 
-  <!-- <OvertimeFormDialog
+  <OvertimeFormDialog
     v-model:is-dialog-visible="isOvertimeDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></OvertimeFormDialog> -->
+  ></OvertimeFormDialog>
 
   <AttendanceViewDialog
     v-model:is-dialog-visible="isViewDialogVisible"
