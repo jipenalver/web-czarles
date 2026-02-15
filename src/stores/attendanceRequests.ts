@@ -130,7 +130,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
   }
 
   async function updateAttendanceRequest(formData: Partial<AttendanceRequest>) {
-    const { employee, ...updatedData } = prepareFormDates(formData, ['date'])
+    const { employee, attendance, ...updatedData } = prepareFormDates(formData, ['date'])
 
     return await supabase
       .from('attendance_requests')

@@ -56,6 +56,8 @@ export function useStatusFormDialog(
           date,
           employee,
           leave_status,
+          attendance_id,
+          attendance,
           requestor_id,
           user_avatar,
           user_fullname,
