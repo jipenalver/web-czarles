@@ -154,11 +154,13 @@ export function useAttendanceRequestsTable(props: {
   }
 
   const onLoadOvertimes = async () => {
+    tableOptions.value.isLoading = true
     formAction.value = { ...formActionDefault, formProcess: true }
 
     await attendanceRequestsStore.syncOvertimeRequest(tableOptions.value, tableFilters.value)
 
     formAction.value.formProcess = false
+    tableOptions.value.isLoading = false
   }
 
   const hasAttendanceImage = (images: AttendanceImage[], type: string) => {
