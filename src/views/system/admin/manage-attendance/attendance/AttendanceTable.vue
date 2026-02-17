@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import ConfirmFieldDialog from '@/components/common/ConfirmFieldDialog.vue'
 import { getDateWithWeekday, getTime } from '@/utils/helpers/dates'
-import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import AttendanceExpandedRow from './AttendanceExpandedRow.vue'
 import AttendanceFormDialog from './AttendanceFormDialog.vue'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import AttendanceTimeValue from './AttendanceTimeValue.vue'
-import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { useAttendanceTable } from './attendanceTable'
 import { getRandomCode } from '@/utils/helpers/others'
@@ -24,8 +22,6 @@ const {
   tableFilters,
   isDialogVisible,
   isViewDialogVisible,
-  isLeaveDialogVisible,
-  isOvertimeDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
@@ -33,8 +29,6 @@ const {
   onAdd,
   onView,
   onUpdate,
-  onLeave,
-  onOvertime,
   onDelete,
   onConfirmDelete,
   onFilterDate,
@@ -119,19 +113,6 @@ const {
               <v-col cols="12" sm="3">
                 <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
                   Add Attendance
-                </v-btn>
-              </v-col>
-            </template>
-            <template v-else-if="props.componentView === 'leave'">
-              <v-col cols="12" sm="3">
-                <v-btn
-                  class="my-1"
-                  prepend-icon="mdi-account-arrow-left"
-                  color="primary"
-                  block
-                  @click="onLeave(null)"
-                >
-                  Apply Leave
                 </v-btn>
               </v-col>
             </template>
@@ -261,35 +242,9 @@ const {
             </template>
 
             <template v-else-if="props.componentView === 'leave'">
-              <v-btn
-                v-if="
-                  !(item.am_time_in && item.am_time_out) || !(item.pm_time_in && item.pm_time_out)
-                "
-                variant="text"
-                density="comfortable"
-                icon
-                @click="onLeave(item)"
-              >
-                <v-icon icon="mdi-account-arrow-left"></v-icon>
-                <v-tooltip activator="parent" location="top">Edit Leave</v-tooltip>
-              </v-btn>
-
               <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
                 <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
                 <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
-              </v-btn>
-            </template>
-
-            <template v-else-if="props.componentView === 'overtime'">
-              <v-btn
-                v-if="!item.is_am_leave || !item.is_pm_leave"
-                variant="text"
-                density="comfortable"
-                @click="onOvertime(item)"
-                icon
-              >
-                <v-icon icon="mdi-clock-plus"></v-icon>
-                <v-tooltip activator="parent" location="top">Apply Overtime</v-tooltip>
               </v-btn>
             </template>
           </div>
@@ -325,20 +280,6 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></AttendanceFormDialog>
-
-  <LeaveFormDialog
-    v-model:is-dialog-visible="isLeaveDialogVisible"
-    :item-data="itemData"
-    :table-options="tableOptions"
-    :table-filters="tableFilters"
-  ></LeaveFormDialog>
-
-  <OvertimeFormDialog
-    v-model:is-dialog-visible="isOvertimeDialogVisible"
-    :item-data="itemData"
-    :table-options="tableOptions"
-    :table-filters="tableFilters"
-  ></OvertimeFormDialog>
 
   <AttendanceViewDialog
     v-model:is-dialog-visible="isViewDialogVisible"
