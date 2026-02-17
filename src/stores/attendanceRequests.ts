@@ -153,30 +153,42 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
     query = syncOverTimeRequestsFilter(query, tableFilters)
 
-    const { data } = await query
+    const { data: attendances } = await query
 
-    await supabase
+    if (!attendances || attendances.length === 0) return
+
+    // Get existing attendance_requests for these attendance IDs
+    const attendanceIds = attendances.map((a) => a.id)
+    const { data: existingRequests } = await supabase
       .from('attendance_requests')
-      .delete()
-      .eq('type', 'Overtime')
-      .eq('overtime_status', 'Pending')
-      .eq('is_overtime_in_rectified', false)
-      .eq('is_overtime_out_rectified', false)
+      .select('attendance_id')
+      .in('attendance_id', attendanceIds)
 
-    await supabase.from('attendance_requests').insert(
-      data?.map((attendance) => ({
-        date: getDate(attendance.overtime_in),
-        employee_id: attendance.employee_id,
-        requestor_id: authUserStore.userData?.id as string,
-        user_avatar: authUserStore.userData?.avatar || null,
-        user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
-        attendance_id: attendance.id,
-        overtime_in: attendance.overtime_in,
-        overtime_out: attendance.overtime_out,
-        overtime_status: 'Pending',
-        type: 'Overtime',
-      })),
+    // Create a Set of existing attendance_ids for quick lookup
+    const existingAttendanceIds = new Set(existingRequests?.map((r) => r.attendance_id) || [])
+
+    // Filter out attendances that already have requests
+    const newAttendances = attendances.filter(
+      (attendance) => !existingAttendanceIds.has(attendance.id),
     )
+
+    // Only insert if there are new records
+    if (newAttendances.length > 0) {
+      await supabase.from('attendance_requests').insert(
+        newAttendances.map((attendance) => ({
+          date: getDate(attendance.overtime_in),
+          employee_id: attendance.employee_id,
+          requestor_id: authUserStore.userData?.id as string,
+          user_avatar: authUserStore.userData?.avatar || null,
+          user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+          attendance_id: attendance.id,
+          overtime_in: attendance.overtime_in,
+          overtime_out: attendance.overtime_out,
+          overtime_status: 'Pending',
+          type: 'Overtime',
+        })),
+      )
+    }
 
     await getAttendanceRequestsTable(tableOptions, tableFilters)
   }
