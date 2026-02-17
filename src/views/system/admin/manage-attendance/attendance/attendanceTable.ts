@@ -28,10 +28,12 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const getTableHeaders = (componentView: string): TableHeader[] => {
     const headers = [...baseHeaders]
 
+    if (componentView === 'attendance' || componentView === 'leave')
+      headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
+
     if (componentView === 'overtime')
       headers.push({ title: 'Overtime Applied?', key: 'is_overtime_applied', align: 'center' })
 
-    headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
     return headers
   }
   const tableHeaders = ref<TableHeader[]>(getTableHeaders(props.componentView))
@@ -48,8 +50,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   })
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)
-  const isLeaveDialogVisible = ref(false)
-  const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
@@ -82,16 +82,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const onUpdate = (item: Attendance) => {
     itemData.value = item
     isDialogVisible.value = true
-  }
-
-  const onLeave = (item: Attendance | null = null) => {
-    itemData.value = item
-    isLeaveDialogVisible.value = true
-  }
-
-  const onOvertime = (item: Attendance) => {
-    itemData.value = item
-    isOvertimeDialogVisible.value = true
   }
 
   const onDelete = (id: number) => {
@@ -230,8 +220,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     tableFilters,
     isDialogVisible,
     isViewDialogVisible,
-    isLeaveDialogVisible,
-    isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
@@ -239,8 +227,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     onAdd,
     onView,
     onUpdate,
-    onLeave,
-    onOvertime,
     onDelete,
     onConfirmDelete,
     onFilterDate,
