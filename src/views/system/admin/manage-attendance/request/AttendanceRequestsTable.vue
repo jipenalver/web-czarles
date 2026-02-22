@@ -6,6 +6,7 @@ import { useAttendanceRequestsTable } from './attendanceRequestsTable'
 import { getAvatarText, getRandomCode } from '@/utils/helpers/others'
 import OvertimeFormDialog from '../overtime/OvertimeFormDialog.vue'
 import { getDateWithWeekday, getTime } from '@/utils/helpers/dates'
+import { requestStatusColors } from '@/utils/helpers/constants'
 import StatusFormDialog from '../status/StatusFormDialog.vue'
 import LeaveFormDialog from '../leave/LeaveFormDialog.vue'
 import LogsFormDialog from '../status/LogsFormDialog.vue'
@@ -17,12 +18,6 @@ const props = defineProps<{
 }>()
 
 const { xs, smAndDown } = useDisplay()
-
-const statusColors = {
-  Approved: 'success',
-  Rejected: 'error',
-  Pending: 'warning',
-}
 
 const {
   tableHeaders,
@@ -208,7 +203,7 @@ const {
 
         <template #item.leave_status="{ item }">
           <v-chip
-            :color="statusColors[item.leave_status] || 'warning'"
+            :color="requestStatusColors[item.leave_status] || 'warning'"
             class="font-weight-bold"
             variant="flat"
             size="small"
@@ -249,7 +244,7 @@ const {
 
         <template #item.overtime_status="{ item }">
           <v-chip
-            :color="statusColors[item.overtime_status] || 'warning'"
+            :color="requestStatusColors[item.overtime_status] || 'warning'"
             class="font-weight-bold"
             variant="flat"
             size="small"

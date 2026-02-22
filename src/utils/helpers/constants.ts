@@ -29,3 +29,10 @@ export const displayHolidayTypes = {
   LH: 'Local Holiday',
   CH: 'Company Holiday',
 }
+
+// 👉 Type for Request Status
+export const requestStatusColors = {
+  Approved: 'success',
+  Rejected: 'error',
+  Pending: 'warning',
+}
