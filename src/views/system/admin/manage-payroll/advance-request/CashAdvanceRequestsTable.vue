@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCashAdvanceRequestsTable } from './cashAdvanceRequestsTable'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import { requestStatusColors } from '@/utils/helpers/constants'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { getMoneyText } from '@/utils/helpers/others'
 import { useDisplay } from 'vuetify'
@@ -13,11 +14,15 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
+  isApprover,
+  isRequestor,
   // isDialogVisible,
   isConfirmDeleteDialog,
   // itemData,
   formAction,
   onAdd,
+  onStatus,
+  onLogs,
   onUpdate,
   onDelete,
   onConfirmDelete,
@@ -110,17 +115,62 @@ const {
           </span>
         </template>
 
+        <template #item.status="{ item }">
+          <v-chip
+            :color="requestStatusColors[item.status] || 'warning'"
+            class="font-weight-bold"
+            variant="flat"
+            size="small"
+          >
+            {{ item.status }}
+          </v-chip>
+        </template>
+
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
-            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
-              <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Cash Advance</v-tooltip>
-            </v-btn>
+            <template v-if="item.status === 'Pending'">
+              <template v-if="isApprover">
+                <v-btn variant="text" density="comfortable" @click="onStatus(item)" icon>
+                  <v-icon icon="mdi-thumbs-up-down" color="warning"></v-icon>
+                  <v-tooltip activator="parent" location="top">Approve or Reject</v-tooltip>
+                </v-btn>
+              </template>
 
-            <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
-              <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
-              <v-tooltip activator="parent" location="top">Delete Cash Advance</v-tooltip>
-            </v-btn>
+              <template v-if="isRequestor">
+                <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
+                  <v-icon icon="mdi-pencil"></v-icon>
+                  <v-tooltip activator="parent" location="top">Edit Cash Advance Request</v-tooltip>
+                </v-btn>
+
+                <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                  <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                  <v-tooltip activator="parent" location="top">
+                    Delete Cash Advance Request
+                  </v-tooltip>
+                </v-btn>
+              </template>
+            </template>
+
+            <template v-else-if="item.status === 'Rejected'">
+              <template v-if="isRequestor">
+                <v-btn variant="text" density="comfortable" @click="onLogs(item)" icon>
+                  <v-icon icon="mdi-information-outline" color="warning"></v-icon>
+                  <v-tooltip activator="parent" location="top">Resubmit Request</v-tooltip>
+                </v-btn>
+
+                <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
+                  <v-icon icon="mdi-pencil"></v-icon>
+                  <v-tooltip activator="parent" location="top">Edit Cash Advance Request</v-tooltip>
+                </v-btn>
+
+                <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
+                  <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                  <v-tooltip activator="parent" location="top">
+                    Delete Cash Advance Request
+                  </v-tooltip>
+                </v-btn>
+              </template>
+            </template>
           </div>
         </template>
       </v-data-table-server>

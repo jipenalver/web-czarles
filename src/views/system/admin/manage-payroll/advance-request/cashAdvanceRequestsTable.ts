@@ -3,9 +3,11 @@ import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
 
 export function useCashAdvanceRequestsTable() {
+  const authUserStore = useAuthUserStore()
   const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
   const employeesStore = useEmployeesStore()
 
@@ -29,6 +31,10 @@ export function useCashAdvanceRequestsTable() {
     employee_id: null,
     request_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
+  const isApprover = ref(false)
+  const isRequestor = ref(false)
+  const isStatusDialogVisible = ref(false)
+  const isLogsDialogVisible = ref(false)
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
@@ -36,6 +42,16 @@ export function useCashAdvanceRequestsTable() {
   const formAction = ref({ ...formActionDefault })
 
   // Actions
+  const onStatus = (item: CashAdvanceRequest) => {
+    itemData.value = item
+    isStatusDialogVisible.value = true
+  }
+
+  const onLogs = (item: CashAdvanceRequest) => {
+    itemData.value = item
+    isLogsDialogVisible.value = true
+  }
+
   const onAdd = () => {
     itemData.value = null
     isDialogVisible.value = true
@@ -95,6 +111,18 @@ export function useCashAdvanceRequestsTable() {
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+
+    if (authUserStore.userRole === 'Super Administrator') {
+      isApprover.value = true
+      isRequestor.value = true
+    }
+
+    if (authUserStore.userRole !== 'Super Administrator') {
+      const userRole = await authUserStore.getUserRole(authUserStore.userRole as string)
+
+      isApprover.value = userRole?.is_approver ?? false
+      isRequestor.value = userRole?.is_requestor ?? false
+    }
   })
 
   // Expose State and Actions
@@ -102,11 +130,17 @@ export function useCashAdvanceRequestsTable() {
     tableHeaders,
     tableOptions,
     tableFilters,
+    isApprover,
+    isRequestor,
+    isStatusDialogVisible,
+    isLogsDialogVisible,
     isDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
     onAdd,
+    onStatus,
+    onLogs,
     onUpdate,
     onDelete,
     onConfirmDelete,
