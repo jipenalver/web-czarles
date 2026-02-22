@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { type CashAdvance, type CashAdvanceTableFilter } from '@/stores/cashAdvances'
+import {
+  type CashAdvanceRequest,
+  type CashAdvanceRequestTableFilter,
+} from '@/stores/cashAdvanceRequests'
 import { useCashAdvancesFormDialog } from './cashAdvancesFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -8,9 +11,9 @@ import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: CashAdvance | null
+  itemData: CashAdvanceRequest | null
   tableOptions: TableOptions
-  tableFilters: CashAdvanceTableFilter
+  tableFilters: CashAdvanceRequestTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -34,7 +37,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-refund" title="Cash Advance Details">
+    <v-card prepend-icon="mdi-cash-refund" title="Cash Advance Request Details">
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>

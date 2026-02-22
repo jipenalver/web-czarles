@@ -1,8 +1,8 @@
 import {
-  type CashAdvance,
-  type CashAdvanceTableFilter,
-  useCashAdvancesStore,
-} from '@/stores/cashAdvances'
+  type CashAdvanceRequest,
+  type CashAdvanceRequestTableFilter,
+  useCashAdvanceRequestsStore,
+} from '@/stores/cashAdvanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
@@ -11,13 +11,13 @@ import { onMounted, ref, watch } from 'vue'
 export function useCashAdvancesFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: CashAdvance | null
+    itemData: CashAdvanceRequest | null
     tableOptions: TableOptions
-    tableFilters: CashAdvanceTableFilter
+    tableFilters: CashAdvanceRequestTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const cashAdvancesStore = useCashAdvancesStore()
+  const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
   const employeesStore = useEmployeesStore()
 
   // States
@@ -26,8 +26,9 @@ export function useCashAdvancesFormDialog(
     amount: undefined,
     description: '',
     request_at: new Date(),
+    status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
   }
-  const formData = ref<Partial<CashAdvance>>({ ...formDataDefault })
+  const formData = ref<Partial<CashAdvanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -45,8 +46,8 @@ export function useCashAdvancesFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await cashAdvancesStore.updateCashAdvance(formData.value)
-      : await cashAdvancesStore.addCashAdvance(formData.value)
+      ? await cashAdvanceRequestsStore.updateCashAdvanceRequest(formData.value)
+      : await cashAdvanceRequestsStore.addCashAdvanceRequest(formData.value)
 
     if (error) {
       formAction.value = {
@@ -56,9 +57,12 @@ export function useCashAdvancesFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Advance.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Advance Request.`
 
-      await cashAdvancesStore.getCashAdvancesTable(props.tableOptions, props.tableFilters)
+      await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
+        props.tableOptions,
+        props.tableFilters,
+      )
 
       setTimeout(() => {
         onFormReset()
