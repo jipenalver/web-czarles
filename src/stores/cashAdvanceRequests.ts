@@ -1,27 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { type CashAdvance, type CashAdvanceTableFilter } from './cashAdvances'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
-import { type Employee } from './employees'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type CashAdvanceRequest = {
-  id: number
-  created_at: string
-  request_at: string | Date
-  amount: number
-  description: string
+export type CashAdvanceRequest = CashAdvance & {
   status: 'Pending' | 'Approved' | 'Rejected'
-  employee_id: number | null
-  employee: Employee
 }
 
-export type CashAdvanceTableFilter = {
-  employee_id: number | null
-  request_at: Date[] | null
-}
+export type CashAdvanceRequestTableFilter = CashAdvanceTableFilter
 
 export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', () => {
   const selectQuery = '*, employee:employee_id (id, firstname, lastname, middlename)'
@@ -39,7 +29,7 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
   // Actions
   async function getCashAdvanceRequestsTable(
     tableOptions: TableOptions,
-    tableFilters: CashAdvanceTableFilter,
+    tableFilters: CashAdvanceRequestTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
@@ -63,7 +53,7 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
     cashAdvanceRequestsTableTotal.value = count as number
   }
 
-  async function getCashAdvanceRequestsCount(tableFilters: CashAdvanceTableFilter) {
+  async function getCashAdvanceRequestsCount(tableFilters: CashAdvanceRequestTableFilter) {
     let query = supabase.from('cash_advance_requests').select('*', { count: 'exact', head: true })
 
     query = getCashAdvanceRequestsFilter(query, tableFilters)
@@ -74,7 +64,7 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
   function getCashAdvanceRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, request_at }: CashAdvanceTableFilter,
+    { employee_id, request_at }: CashAdvanceRequestTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
