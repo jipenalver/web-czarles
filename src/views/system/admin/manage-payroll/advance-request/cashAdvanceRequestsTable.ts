@@ -113,6 +113,7 @@ export function useCashAdvanceRequestsTable() {
     onFilterDate,
     onFilterItems,
     onLoadItems,
+    cashAdvanceRequestsStore,
     employeesStore,
   }
 }

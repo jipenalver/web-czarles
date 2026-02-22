@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CashAdvanceRequestsTable from './advance-request/CashAdvanceRequestsTable.vue'
 import SideNavigation from '@/components/layout/navigation/SideNavigation.vue'
 import HeaderPanel from '@/components/common/HeaderPanel.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
@@ -23,6 +24,8 @@ const isDrawerVisible = ref(xs.value ? false : true)
           header-icon="mdi-cash-sync"
           headline="Manage employee's cash advance requests."
         ></HeaderPanel>
+
+        <CashAdvanceRequestsTable></CashAdvanceRequestsTable>
       </v-container>
     </template>
   </AppLayout>
