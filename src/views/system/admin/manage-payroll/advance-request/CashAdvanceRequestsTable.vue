@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CashAdvancesFormDialog from '../advances/CashAdvancesFormDialog.vue'
 import { useCashAdvanceRequestsTable } from './cashAdvanceRequestsTable'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { requestStatusColors } from '@/utils/helpers/constants'
@@ -16,9 +17,9 @@ const {
   tableFilters,
   isApprover,
   isRequestor,
-  // isDialogVisible,
+  isDialogVisible,
   isConfirmDeleteDialog,
-  // itemData,
+  itemData,
   formAction,
   onAdd,
   onStatus,
@@ -111,7 +112,7 @@ const {
 
         <template #item.request_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.request_at, 'fullDateTime') }}
+            {{ date.format(item.request_at, 'fullDate') }}
           </span>
         </template>
 
@@ -177,17 +178,17 @@ const {
     </v-card-text>
   </v-card>
 
-  <!-- <CashAdvancesFormDialog
+  <CashAdvancesFormDialog
     v-model:is-dialog-visible="isDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
-  ></CashAdvancesFormDialog> -->
+  ></CashAdvancesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
     title="Confirm Delete"
-    text="Are you sure you want to delete this cash advance?"
+    text="Are you sure you want to delete this cash advance request?"
     @confirm="onConfirmDelete"
   ></ConfirmDialog>
 </template>
