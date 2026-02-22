@@ -15,6 +15,7 @@ import LeaveView from '@/views/system/admin/manage-attendance/LeaveView.vue'
 import OvertimeRequestsView from '@/views/system/admin/manage-attendance/OvertimeRequestsView.vue'
 import OvertimeView from '@/views/system/admin/manage-attendance/OvertimeView.vue'
 import SupplementalView from '@/views/system/admin/manage-payroll/SupplementalView.vue'
+import CashAdvanceRequestView from '@/views/system/admin/manage-payroll/CashAdvanceRequestView.vue'
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
@@ -171,6 +172,12 @@ export const routes = [
     path: '/hrms/payroll/supplemental',
     name: 'hrms-payroll-supplemental',
     component: SupplementalView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/hrms/payroll/advance-requests',
+    name: 'hrms-payroll-advance-requests',
+    component: CashAdvanceRequestView,
     meta: { requiresAuth: true },
   },
   {

@@ -29,6 +29,7 @@ export const adminItemsNav3: SubNavigation[] = [
 ]
 export const adminItemsNav4: SubNavigation[] = [
   ['Supplemental', 'mdi-cash-multiple', '', '/hrms/payroll/supplemental'],
+  ['Cash Advance Requests', 'mdi-cash-sync', '', '/hrms/payroll/advance-requests'],
   ['Cash Advance', 'mdi-cash-refund', '', '/hrms/payroll/advance'],
   ['Payroll', 'mdi-account-cash', '', '/hrms/payroll/list'],
 ]
