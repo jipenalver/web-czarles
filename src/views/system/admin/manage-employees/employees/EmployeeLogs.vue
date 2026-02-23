@@ -10,7 +10,7 @@ const props = defineProps<{
   itemId?: number
   maxHeight?: string
   attendanceRequestId?: number | null
-  cashAdvanceId?: number | null
+  cashAdvanceRequestId?: number | null
 }>()
 
 const date = useDate()
@@ -23,7 +23,7 @@ onMounted(async () => {
       props.itemId,
       props.type,
       props.attendanceRequestId,
-      props.cashAdvanceId,
+      props.cashAdvanceRequestId,
     )
 })
 </script>
