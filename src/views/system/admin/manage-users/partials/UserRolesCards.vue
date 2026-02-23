@@ -17,10 +17,7 @@ const {
 } = useUserRolesCards()
 
 const getRolePermission = (...args: string[]) => {
-  return args
-    .toString()
-    .split(',')
-    .filter((item) => item !== '')
+  return args.filter((item) => item !== '')
 }
 </script>
 
@@ -38,17 +35,28 @@ const getRolePermission = (...args: string[]) => {
 
         <v-card-text class="d-flex align-center justify-space-between">
           <div>
-            {{
-              getRolePermission(
-                item.is_approver ? 'Approver' : '',
-                item.is_requestor ? 'Requestor' : '',
-              ).length > 0
-                ? getRolePermission(
-                    item.is_approver ? 'Approver' : '',
-                    item.is_requestor ? 'Requestor' : '',
-                  )
-                : ''
-            }}
+            <template
+              v-if="
+                getRolePermission(
+                  item.is_approver ? 'Approver' : '',
+                  item.is_requestor ? 'Requestor' : '',
+                ).length > 0
+              "
+            >
+              <v-chip
+                v-for="permission in getRolePermission(
+                  item.is_approver ? 'Approver' : '',
+                  item.is_requestor ? 'Requestor' : '',
+                )"
+                :key="permission"
+                class="font-weight-bold me-1"
+                color="secondary"
+                variant="flat"
+                size="small"
+              >
+                {{ permission }}
+              </v-chip>
+            </template>
           </div>
 
           <div class="d-flex flex-wrap ga-2">
