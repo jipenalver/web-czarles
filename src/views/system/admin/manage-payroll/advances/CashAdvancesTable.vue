@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import CashAdvancesFormDialog from './CashAdvancesFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
 import { useCashAdvancesTable } from './cashAdvancesTable'
 import AppAlert from '@/components/common/AppAlert.vue'
 import CashAdvancesPDF from './pdf/CashAdvancesPDF.vue'
 import { getMoneyText } from '@/utils/helpers/others'
-import { useDisplay } from 'vuetify'
-import { useDate } from 'vuetify'
+import { useDisplay, useDate } from 'vuetify'
 
 const date = useDate()
 const { smAndDown, xs } = useDisplay()
@@ -16,12 +14,8 @@ const {
   tableHeaders,
   tableOptions,
   tableFilters,
-  isDialogVisible,
   isConfirmDeleteDialog,
-  itemData,
   formAction,
-  onAdd,
-  onUpdate,
   onDelete,
   onConfirmDelete,
   onFilterDate,
@@ -119,12 +113,6 @@ const {
                 @update:model-value="onFilterDate(false)"
               ></v-date-input>
             </v-col>
-
-            <v-col cols="12" sm="3">
-              <v-btn class="my-1" prepend-icon="mdi-plus" color="primary" block @click="onAdd">
-                Add Cash Advance
-              </v-btn>
-            </v-col>
           </v-row>
 
           <v-divider class="my-5"></v-divider>
@@ -144,17 +132,12 @@ const {
 
         <template #item.request_at="{ item }">
           <span class="font-weight-bold">
-            {{ date.format(item.request_at, 'fullDateTime') }}
+            {{ date.format(item.request_at, 'fullDate') }}
           </span>
         </template>
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center" :class="smAndDown ? 'justify-end' : 'justify-center'">
-            <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>
-              <v-icon icon="mdi-pencil"></v-icon>
-              <v-tooltip activator="parent" location="top">Edit Cash Advance</v-tooltip>
-            </v-btn>
-
             <v-btn variant="text" density="comfortable" @click="onDelete(item.id)" icon>
               <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
               <v-tooltip activator="parent" location="top">Delete Cash Advance</v-tooltip>
@@ -166,13 +149,6 @@ const {
   </v-card>
 
   <CashAdvancesPDF :table-headers="tableHeaders" :table-filters="tableFilters" />
-
-  <CashAdvancesFormDialog
-    v-model:is-dialog-visible="isDialogVisible"
-    :item-data="itemData"
-    :table-options="tableOptions"
-    :table-filters="tableFilters"
-  ></CashAdvancesFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
