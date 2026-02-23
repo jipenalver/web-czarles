@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CashAdvancesFormDialog from '../advances/CashAdvancesFormDialog.vue'
+import CashAdvanceStatusFormDialog from './CashAdvanceStatusFormDialog.vue'
 import { useCashAdvanceRequestsTable } from './cashAdvanceRequestsTable'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { requestStatusColors } from '@/utils/helpers/constants'
@@ -17,7 +18,9 @@ const {
   tableFilters,
   isApprover,
   isRequestor,
-  isDialogVisible,
+  isStatusDialogVisible,
+  // isLogsDialogVisible,
+  isRequestDialogVisible,
   isConfirmDeleteDialog,
   itemData,
   formAction,
@@ -179,11 +182,18 @@ const {
   </v-card>
 
   <CashAdvancesFormDialog
-    v-model:is-dialog-visible="isDialogVisible"
+    v-model:is-dialog-visible="isRequestDialogVisible"
     :item-data="itemData"
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></CashAdvancesFormDialog>
+
+  <CashAdvanceStatusFormDialog
+    v-model:is-dialog-visible="isStatusDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></CashAdvanceStatusFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"

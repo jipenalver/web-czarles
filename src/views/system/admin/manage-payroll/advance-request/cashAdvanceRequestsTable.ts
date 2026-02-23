@@ -35,7 +35,7 @@ export function useCashAdvanceRequestsTable() {
   const isRequestor = ref(false)
   const isStatusDialogVisible = ref(false)
   const isLogsDialogVisible = ref(false)
-  const isDialogVisible = ref(false)
+  const isRequestDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<CashAdvanceRequest | null>(null)
@@ -54,12 +54,12 @@ export function useCashAdvanceRequestsTable() {
 
   const onAdd = () => {
     itemData.value = null
-    isDialogVisible.value = true
+    isRequestDialogVisible.value = true
   }
 
   const onUpdate = (item: CashAdvanceRequest) => {
     itemData.value = item
-    isDialogVisible.value = true
+    isRequestDialogVisible.value = true
   }
 
   const onDelete = (id: number) => {
@@ -134,7 +134,7 @@ export function useCashAdvanceRequestsTable() {
     isRequestor,
     isStatusDialogVisible,
     isLogsDialogVisible,
-    isDialogVisible,
+    isRequestDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
