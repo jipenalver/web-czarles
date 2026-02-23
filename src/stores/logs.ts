@@ -13,7 +13,7 @@ export type Log = {
   user_fullname: string
   employee_id: number
   attendance_request_id: number | null
-  cash_advance_id: number | null
+  cash_advance_request_id: number | null
 }
 
 export const useLogsStore = defineStore('logs', () => {
