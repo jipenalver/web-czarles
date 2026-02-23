@@ -10,7 +10,7 @@ import { useEmployeeDisplay, usePayrollFormatting, useHoursCalculation } from '.
 import { usePayrollWatchers } from './composables/usePayrollWatchers'
 import { getPayrollFromDate, getHolidayDateString, getMonthDateRangeFromStorage } from './composables/payrollStorage'
 import PayrollDeductions from './PayrollDeductions.vue'
-import MiniPayrollPrint from './MiniPayrollPrint.vue'
+import MiniPayrollPrint from './PaySlip.vue'
 import PayrollPrintFooter from './PayrollPrintFooter.vue'
 import AttendanceDaysTooltip from './AttendanceDaysTooltip.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
