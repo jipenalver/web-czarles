@@ -8,6 +8,8 @@ import {
   safeCurrencyFormat,
   getHolidayTypeName,
   getMonthDateRange,
+  calculateHolidayPay,
+  getHolidayMultiplier,
 } from './helpers'
 import { type PayrollData } from './payrollTableDialog'
 import { type TableData } from './payrollComputation'
@@ -21,7 +23,6 @@ import { useTripsStore } from '@/stores/trips'
 import { useCashAdjustmentsStore, type CashAdjustment } from '@/stores/cashAdjustments'
 import type { EmployeeDeduction } from '@/stores/benefits'
 import type { CashAdvance } from '@/stores/cashAdvances'
-import type { HolidayWithAttendance } from './computation/holidays'
 import { fetchFilteredTrips } from './computation/trips'
 import { getLastDateOfMonth } from './helpers'
 
@@ -125,7 +126,9 @@ const {
   sundayDutyAmount,
   sundayDutyRecords, // New: Sunday duty records with fractions
   monthlyAllowancesTotal,
+  monthlyUtilizationsTotal,
   loadAllowances,
+  loadUtilizations,
   loadSundayDuty,
   fetchEmployeeHolidays,
   // isHolidaysLoading - available but not used in mini print
@@ -281,7 +284,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   overallOvertime,
   codaAllowance,
   employeeNonDeductions,
-  computed(() => 0), // monthlyUtilizationsTotal - not used in mini print
+  monthlyUtilizationsTotal,
   monthlyAllowancesTotal,
   monthlyCashAdjustmentsTotal,
   sundayDutyAmount,
@@ -355,7 +358,7 @@ async function updateOverallOvertime() {
 
 // Enhanced mounted hook
 onMounted(async () => {
-  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
+  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances(), loadUtilizations(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
   recalculateEarnings()
 })
 
@@ -387,7 +390,7 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
+    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances(), loadUtilizations(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
     recalculateEarnings()
   },
   { deep: true },
@@ -401,35 +404,6 @@ watch([filterDateString, () => props.employeeData?.id], () => {
 watch([holidayDateString, () => props.employeeData?.id], () => {
   fetchEmployeeHolidays()
 })
-
-// Helper function to calculate holiday pay (added value only, not base rate)
-function calculateHolidayPay(holiday: HolidayWithAttendance): number {
-  const type = holiday.type?.toLowerCase() || ''
-  const fraction = holiday.attendance_fraction || 0
-  const rate = dailyRate.value || 0
-
-  // Return only the premium/additional amount, not including the base 100%
-  if (type.includes('rh')) return rate * 1.0 * fraction  // 200% - 100% = 100% premium
-  if (type.includes('snh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
-  if (type.includes('lh')) return rate * 0.3 * fraction  // 130% - 100% = 30% premium
-  if (type.includes('ch')) return rate * 0.0 * fraction  // 100% - 100% = 0% premium (no additional)
-  if (type.includes('swh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
-  return rate * 0.0 * fraction // Default: no premium
-}
-
-// Helper function to get holiday multiplier text
-function getHolidayMultiplier(holiday: HolidayWithAttendance): string {
-  const type = holiday.type?.toLowerCase() || ''
-  const fraction = holiday.attendance_fraction || 0
-  const halfDayText = fraction === 0.5 ? ' (Half)' : ''
-
-  if (type.includes('rh')) return `200%${halfDayText}`
-  if (type.includes('snh')) return `130%${halfDayText}`
-  if (type.includes('lh')) return `130%${halfDayText}`
-  if (type.includes('ch')) return `100%${halfDayText}`
-  if (type.includes('swh')) return `130%${halfDayText}`
-  return `100%${halfDayText}`
-}
 
 // Computed values for holidays display - filter only holidays with attendance
 const displayableHolidays = computed(() => {
@@ -507,7 +481,7 @@ const displayableHolidays = computed(() => {
             {{ getHolidayMultiplier(holiday) }}
           </v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat(calculateHolidayPay(holiday), formatCurrency) }}
+            {{ safeCurrencyFormat(calculateHolidayPay(holiday, dailyRate), formatCurrency) }}
           </v-col>
         </v-row>
       </template>
@@ -549,6 +523,17 @@ const displayableHolidays = computed(() => {
           <v-col cols="3" class="pa-1"></v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
             {{ safeCurrencyFormat(monthlyAllowancesTotal, formatCurrency) }}
+          </v-col>
+        </v-row>
+      </template>
+
+      <!-- Monthly Utilizations -->
+      <template v-if="monthlyUtilizationsTotal > 0">
+        <v-row dense class="mb-1">
+          <v-col cols="6" class="text-caption pa-1">Monthly Utilizations</v-col>
+          <v-col cols="3" class="pa-1"></v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">
+            {{ safeCurrencyFormat(monthlyUtilizationsTotal, formatCurrency) }}
           </v-col>
         </v-row>
       </template>
