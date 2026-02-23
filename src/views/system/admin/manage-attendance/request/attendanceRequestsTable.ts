@@ -128,7 +128,7 @@ export function useAttendanceRequestsTable(props: {
   }
 
   const onFilterDate = async (isCleared = false) => {
-    if (isCleared) tableFilters.value.attendance_at = null
+    if (isCleared) tableFilters.value.attendance_at = getFirstAndLastDateOfMonth()
 
     onLoadItems(tableOptions.value)
   }
