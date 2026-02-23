@@ -5,7 +5,7 @@ import { useDate } from 'vuetify'
 import { onMounted } from 'vue'
 
 const props = defineProps<{
-  type: 'rates' | 'benefits' | 'leave' | 'overtime' | 'cash_advance'
+  type: 'rates' | 'benefits' | 'leave' | 'overtime' | 'cash advance'
   title?: string
   itemId?: number
   maxHeight?: string

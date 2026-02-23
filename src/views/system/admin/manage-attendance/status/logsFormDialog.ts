@@ -41,7 +41,7 @@ export function useLogsFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} request resubmitted successfully.`
+      formAction.value.formMessage = `${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} Request Resubmitted Successfully.`
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,
