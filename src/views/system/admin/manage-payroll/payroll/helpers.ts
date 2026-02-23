@@ -2,6 +2,7 @@
 import { nextTick } from 'vue'
 import type { Ref } from 'vue'
 import type { TableData } from './payrollTableDialog'
+import type { HolidayWithAttendance } from './computation/holidays'
 export function safeCurrencyFormat(
   amount: number | string | null | undefined,
   formatCurrency: (n: number) => string,
@@ -553,4 +554,39 @@ export async function clearAttendanceCacheHelper(): Promise<void> {
   const { clearAttendanceCache } = await import('./computation/computation')
   clearAttendanceCache()
   console.log('[CACHE] Attendance cache cleared')
+}
+
+/**
+ * Calculate the holiday pay premium (additional amount only, not including base 100%).
+ * Moved from PaySlip.vue.
+ */
+export function calculateHolidayPay(holiday: HolidayWithAttendance, dailyRate: number): number {
+  const type = holiday.type?.toLowerCase() || ''
+  const fraction = holiday.attendance_fraction || 0
+  const rate = dailyRate || 0
+
+  // Return only the premium/additional amount, not including the base 100%
+  if (type.includes('rh')) return rate * 1.0 * fraction  // 200% - 100% = 100% premium
+  if (type.includes('snh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
+  if (type.includes('lh')) return rate * 0.3 * fraction  // 130% - 100% = 30% premium
+  if (type.includes('ch')) return rate * 0.0 * fraction  // 100% - 100% = 0% premium (no additional)
+  if (type.includes('swh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
+  return rate * 0.0 * fraction // Default: no premium
+}
+
+/**
+ * Get the holiday pay multiplier display text (e.g. "200%", "130% (Half)").
+ * Moved from PaySlip.vue.
+ */
+export function getHolidayMultiplier(holiday: HolidayWithAttendance): string {
+  const type = holiday.type?.toLowerCase() || ''
+  const fraction = holiday.attendance_fraction || 0
+  const halfDayText = fraction === 0.5 ? ' (Half)' : ''
+
+  if (type.includes('rh')) return `200%${halfDayText}`
+  if (type.includes('snh')) return `130%${halfDayText}`
+  if (type.includes('lh')) return `130%${halfDayText}`
+  if (type.includes('ch')) return `100%${halfDayText}`
+  if (type.includes('swh')) return `130%${halfDayText}`
+  return `100%${halfDayText}`
 }
