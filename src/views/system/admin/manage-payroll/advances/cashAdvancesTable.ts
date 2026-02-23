@@ -35,23 +35,12 @@ export function useCashAdvancesTable() {
     employee_id: null,
     request_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
-  const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<CashAdvance | null>(null)
   const formAction = ref({ ...formActionDefault })
 
   // Actions
-  const onAdd = () => {
-    itemData.value = null
-    isDialogVisible.value = true
-  }
-
-  const onUpdate = (item: CashAdvance) => {
-    itemData.value = item
-    isDialogVisible.value = true
-  }
-
   const onDelete = (id: number) => {
     deleteId.value = id
     isConfirmDeleteDialog.value = true
@@ -145,12 +134,9 @@ export function useCashAdvancesTable() {
     tableHeaders,
     tableOptions,
     tableFilters,
-    isDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
-    onAdd,
-    onUpdate,
     onDelete,
     onConfirmDelete,
     onFilterDate,
