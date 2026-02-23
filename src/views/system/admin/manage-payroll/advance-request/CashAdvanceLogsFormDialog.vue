@@ -49,7 +49,7 @@ const { formAction, onFormSubmit, onFormReset } = useCashAdvanceLogsFormDialog(p
               <EmployeeLogs
                 type="cash advance"
                 :item-id="props.itemData?.employee_id as number"
-                :attendance-request-id="props.itemData?.id as number"
+                :cash-advance-request-id="props.itemData?.id as number"
                 title="Rejection Logs"
               ></EmployeeLogs>
             </v-col>

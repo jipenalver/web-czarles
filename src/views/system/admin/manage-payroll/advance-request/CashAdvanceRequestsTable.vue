@@ -2,6 +2,7 @@
 import CashAdvancesFormDialog from '../advances/CashAdvancesFormDialog.vue'
 import CashAdvanceStatusFormDialog from './CashAdvanceStatusFormDialog.vue'
 import { useCashAdvanceRequestsTable } from './cashAdvanceRequestsTable'
+import CashAdvanceLogsFormDialog from './CashAdvanceLogsFormDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { requestStatusColors } from '@/utils/helpers/constants'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -19,7 +20,7 @@ const {
   isApprover,
   isRequestor,
   isStatusDialogVisible,
-  // isLogsDialogVisible,
+  isLogsDialogVisible,
   isRequestDialogVisible,
   isConfirmDeleteDialog,
   itemData,
@@ -194,6 +195,13 @@ const {
     :table-options="tableOptions"
     :table-filters="tableFilters"
   ></CashAdvanceStatusFormDialog>
+
+  <CashAdvanceLogsFormDialog
+    v-model:is-dialog-visible="isLogsDialogVisible"
+    :item-data="itemData"
+    :table-options="tableOptions"
+    :table-filters="tableFilters"
+  ></CashAdvanceLogsFormDialog>
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmDeleteDialog"
