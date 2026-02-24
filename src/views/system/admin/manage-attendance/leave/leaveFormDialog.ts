@@ -8,8 +8,10 @@ import { formActionDefault } from '@/utils/helpers/constants'
 import { useAttendancesStore } from '@/stores/attendances'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { getDate } from '@/utils/helpers/dates'
 import { onMounted, ref, watch } from 'vue'
+import { useDate } from 'vuetify'
 
 export function useLeaveFormDialog(
   props: {
@@ -20,9 +22,12 @@ export function useLeaveFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const date = useDate()
+
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
+  const authUserStore = useAuthUserStore()
 
   // States
   const formDataDefault = {
@@ -83,6 +88,17 @@ export function useLeaveFormDialog(
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Request' : 'Applied for Leave'}.`
+
+      if (!isUpdate.value) {
+        const employee = employeesStore.employees.find(
+          (employee) => employee.id === formData.value.employee_id,
+        )
+
+        authUserStore.sendToApprovers({
+          subject: 'Leave Request Notification',
+          message: `Good Day! \n\nA leave request has been applied by employee name ${employee?.firstname} ${employee?.lastname} for date ${date.format(formData.value.date as string, 'fullDate')}. Please review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
+        })
+      }
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,
@@ -158,6 +174,7 @@ export function useLeaveFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
+    if (authUserStore.usersApprovers.length === 0) await authUserStore.getUsersApprovers()
   })
 
   // Expose State and Actions
