@@ -108,6 +108,7 @@ export const useUsersStore = defineStore('users', () => {
     usersTable,
     usersTableTotal,
     $reset,
+    userMap,
     getUsers,
     getUsersTable,
     getUserById,
