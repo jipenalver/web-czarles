@@ -17,3 +17,17 @@ export const supabaseAdmin = createClient(
     },
   },
 )
+
+// 👉 Type for Email Payload
+export type EmailPayload = {
+  email: string
+  subject: string
+  message: string
+}
+
+// 👉 Trigger Edge functions on email sending
+export const onEmailNotification = async (payload: EmailPayload) => {
+  return await supabase.functions.invoke('send-notification', {
+    body: payload,
+  })
+}
