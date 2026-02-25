@@ -203,7 +203,19 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
       await authUserStore.sendToApprovers({
         subject: 'Overtime Request Notification',
-        message: `Good Day! \n\nAn overtime request has been applied by this list of employees:\n\n${newAttendances.map((a: Attendance) => `${a.employee?.firstname} ${a.employee?.lastname} - ${getDateWithWeekday(a.overtime_in)}, ${getTime(a.overtime_in)} to ${getTime(a.overtime_out)}`).join('\n')}\n\nPlease review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
+        message: `<p>Good Day!</p>
+              <p>An overtime request has been applied by this list of employees:</p>
+              <ul>
+                ${newAttendances
+                  .map(
+                    (a) =>
+                      `<li>${a.employee?.firstname} ${a.employee?.lastname} - ${getDateWithWeekday(a.overtime_in)}, ${getTime(a.overtime_in)} to ${getTime(a.overtime_out)}</li>`,
+                  )
+                  .join('')}
+              </ul>
+              <p>Please review the request at your earliest convenience.</p>
+              <p>Best Regards,<br>C'Zarles System</p>
+            `,
       })
     }
 
