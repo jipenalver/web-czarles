@@ -125,7 +125,7 @@ export function useOvertimeFormDialog(
           message: `<p>Good Day!</p>
             <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${getDateWithWeekday(formData.value.overtime_in as string)}, ${getTime(formData.value.overtime_in)} to ${getTime(formData.value.overtime_out)}</strong>.</p>
             <p>Please review the request at your earliest convenience.</p>
-            <p>Best Regards,<br>C'Zarles System</p>`,
+            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`,
         })
       }
 
