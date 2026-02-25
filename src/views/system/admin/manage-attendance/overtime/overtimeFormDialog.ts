@@ -4,8 +4,8 @@ import {
   type AttendanceRequestTableFilter,
   useAttendanceRequestsStore,
 } from '@/stores/attendanceRequests'
+import { getDate, getDateWithWeekday, getTime, getTime24Hour } from '@/utils/helpers/dates'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
-import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
@@ -123,7 +123,7 @@ export function useOvertimeFormDialog(
         await authUserStore.sendToApprovers({
           subject: 'Overtime Request Notification',
           message: `<p>Good Day!</p>
-            <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${date.format(formData.value.date as string, 'fullDate')}</strong>.</p>
+            <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${getDateWithWeekday(formData.value.overtime_in as string)}, ${getTime(formData.value.overtime_in)} to ${getTime(formData.value.overtime_out)}</strong>.</p>
             <p>Please review the request at your earliest convenience.</p>
             <p>Best Regards,<br>C'Zarles System</p>`,
         })

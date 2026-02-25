@@ -95,7 +95,7 @@ export function useLeaveFormDialog(
         await authUserStore.sendToApprovers({
           subject: 'Leave Request Notification',
           message: `<p>Good Day!</p>
-            <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${date.format(formData.value.date as string, 'fullDate')}</strong>.</p>
+            <p>A leave request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${date.format(formData.value.date as string, 'fullDate')}</strong> as <strong>${formData.value.leave_type}</strong> with reason <strong>${formData.value.leave_reason}</strong>.</p>
             <p>Please review the request at your earliest convenience.</p>
             <p>Best Regards,<br>C'Zarles System</p>`,
         })
