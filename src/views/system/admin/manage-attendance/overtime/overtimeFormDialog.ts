@@ -122,7 +122,10 @@ export function useOvertimeFormDialog(
 
         await authUserStore.sendToApprovers({
           subject: 'Overtime Request Notification',
-          message: `Good Day! \n\nAn overtime request has been applied by employee name ${employee?.firstname} ${employee?.lastname} for date ${date.format(formData.value.date as string, 'fullDate')}. Please review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
+          message: `<p>Good Day!</p>
+            <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${date.format(formData.value.date as string, 'fullDate')}</strong>.</p>
+            <p>Please review the request at your earliest convenience.</p>
+            <p>Best Regards,<br>C'Zarles System</p>`,
         })
       }
 
