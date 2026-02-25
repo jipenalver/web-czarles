@@ -9,7 +9,9 @@ import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref, watch } from 'vue'
+import { useDate } from 'vuetify'
 
 export function useOvertimeFormDialog(
   props: {
@@ -20,9 +22,12 @@ export function useOvertimeFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const date = useDate()
+
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
+  const authUserStore = useAuthUserStore()
 
   // States
   const formDataDefault = {
@@ -111,6 +116,15 @@ export function useOvertimeFormDialog(
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Overtime Request' : 'Applied for Overtime'}.`
+
+      if (!isUpdate.value) {
+        const employee = await employeesStore.getEmployeesById(formData.value.employee_id as number)
+
+        await authUserStore.sendToApprovers({
+          subject: 'Overtime Request Notification',
+          message: `Good Day! \n\nAn overtime request has been applied by employee name ${employee?.firstname} ${employee?.lastname} for date ${date.format(formData.value.date as string, 'fullDate')}. Please review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
+        })
+      }
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,

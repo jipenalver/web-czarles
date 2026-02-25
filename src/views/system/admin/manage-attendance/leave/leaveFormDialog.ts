@@ -90,11 +90,9 @@ export function useLeaveFormDialog(
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Request' : 'Applied for Leave'}.`
 
       if (!isUpdate.value) {
-        const employee = employeesStore.employees.find(
-          (employee) => employee.id === formData.value.employee_id,
-        )
+        const employee = await employeesStore.getEmployeesById(formData.value.employee_id as number)
 
-        authUserStore.sendToApprovers({
+        await authUserStore.sendToApprovers({
           subject: 'Leave Request Notification',
           message: `Good Day! \n\nA leave request has been applied by employee name ${employee?.firstname} ${employee?.lastname} for date ${date.format(formData.value.date as string, 'fullDate')}. Please review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
         })
