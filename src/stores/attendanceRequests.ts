@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { getDate, prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
+import {
+  getDate,
+  getDateWithWeekday,
+  getTime,
+  prepareDateRange,
+  prepareFormDates,
+} from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Attendance } from './attendances'
@@ -7,6 +13,7 @@ import { useAuthUserStore } from './authUser'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
+import { useDate } from 'vuetify'
 import { ref } from 'vue'
 
 export type AttendanceRequest = {
@@ -41,6 +48,8 @@ export type AttendanceRequestTableFilter = {
 }
 
 export const useAttendanceRequestsStore = defineStore('attendanceRequests', () => {
+  const date = useDate()
+
   const authUserStore = useAuthUserStore()
 
   const selectQuery =
@@ -149,7 +158,10 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     tableOptions: TableOptions,
     tableFilters: AttendanceRequestTableFilter,
   ) {
-    let query = supabase.from('attendances').select('*').eq('is_overtime_applied', false)
+    let query = supabase
+      .from('attendances')
+      .select('*, employee:employee_id (id, firstname, lastname, middlename)')
+      .eq('is_overtime_applied', false)
 
     query = syncOverTimeRequestsFilter(query, tableFilters)
 
@@ -188,6 +200,11 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
           type: 'Overtime',
         })),
       )
+
+      await authUserStore.sendToApprovers({
+        subject: 'Overtime Request Notification',
+        message: `Good Day! \n\nAn overtime request has been applied by this list of employees:\n\n${newAttendances.map((a: Attendance) => `${a.employee?.firstname} ${a.employee?.lastname} - ${getDateWithWeekday(a.overtime_in)}, ${getTime(a.overtime_in)} to ${getTime(a.overtime_out)}`).join('\n')}\n\nPlease review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
+      })
     }
 
     await getAttendanceRequestsTable(tableOptions, tableFilters)
