@@ -6,7 +6,10 @@ import {
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { getMoneyText } from '@/utils/helpers/others'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref, watch } from 'vue'
+import { useDate } from 'vuetify'
 
 export function useCashAdvancesFormDialog(
   props: {
@@ -17,8 +20,11 @@ export function useCashAdvancesFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const date = useDate()
+
   const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
   const employeesStore = useEmployeesStore()
+  const authUserStore = useAuthUserStore()
 
   // States
   const formDataDefault = {
@@ -58,6 +64,15 @@ export function useCashAdvancesFormDialog(
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Advance Request.`
+
+      if (!isUpdate.value) {
+        const employee = await employeesStore.getEmployeesById(formData.value.employee_id as number)
+
+        await authUserStore.sendToApprovers({
+          subject: 'Cash Advance Request Notification',
+          message: `Good Day! \n\nA cash advance request has been applied by employee name ${employee?.firstname} ${employee?.lastname} with an amount ${getMoneyText(formData.value.amount as number)} for date ${date.format(formData.value.request_at as string, 'fullDate')}. Please review the request at your earliest convenience. \n\nBest Regards, \nC'Zarles System`,
+        })
+      }
 
       await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
         props.tableOptions,
