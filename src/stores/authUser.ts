@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type EmailPayload, onEmailNotification, supabase, supabaseAdmin } from '@/utils/supabase'
+import { emailsSkipped } from '@/utils/helpers/constants'
 import { type AdminUser, useUsersStore } from './users'
 import { type User } from '@supabase/supabase-js'
 import { type UserRole } from './userRoles'
@@ -132,6 +133,8 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
   async function sendToApprovers(payload: Omit<EmailPayload, 'email'>) {
     for (const approver of usersApprovers.value) {
+      if (emailsSkipped.includes(approver.email)) continue
+
       await onEmailNotification({ ...payload, email: approver.email })
 
       await new Promise((resolve) => setTimeout(resolve, 1000))

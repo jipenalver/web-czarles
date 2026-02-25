@@ -36,3 +36,6 @@ export const requestStatusColors = {
   Rejected: 'error',
   Pending: 'warning',
 }
+
+// 👉 // List of emails to skip for notifications
+export const emailsSkipped = ['centmarde@gmail.com']
