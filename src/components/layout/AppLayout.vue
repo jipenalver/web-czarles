@@ -83,7 +83,7 @@ onMounted(async () => {
           :class="mobile ? 'mt-2' : ''"
           @click="() => router.push('/change-logs')"
         >
-          v1.9.2
+          v2.0
         </div>
       </v-footer>
     </v-app>

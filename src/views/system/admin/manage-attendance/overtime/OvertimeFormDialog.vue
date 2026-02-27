@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { type Attendance, type AttendanceTableFilter } from '@/stores/attendances'
+import {
+  type AttendanceRequest,
+  type AttendanceRequestTableFilter,
+} from '@/stores/attendanceRequests'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useOvertimeFormDialog } from './overtimeFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -9,9 +12,9 @@ import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Attendance | null
+  itemData: AttendanceRequest | null
   tableOptions: TableOptions
-  tableFilters: AttendanceTableFilter
+  tableFilters: AttendanceRequestTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -20,10 +23,12 @@ const { mdAndDown } = useDisplay()
 
 const {
   formData,
+  formCheckBox,
   formAction,
   refVForm,
-  formCheckBox,
+  isUpdate,
   isConfirmSubmitDialog,
+  confirmTitle,
   confirmText,
   onSubmit,
   onFormSubmit,
@@ -48,7 +53,7 @@ const {
     <v-card
       prepend-icon="mdi-clock-plus"
       title="Overtime Application"
-      subtitle="Apply for Overtime. Check the checkboxes to modify the time."
+      :subtitle="`${isUpdate ? 'Edit Overtime' : 'Apply for Overtime'}. Check the checkboxes to modify the time.`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
@@ -61,7 +66,7 @@ const {
                 item-title="label"
                 item-value="id"
                 :rules="[requiredValidator]"
-                readonly
+                :readonly="isUpdate"
               ></v-autocomplete>
             </v-col>
 
@@ -73,60 +78,41 @@ const {
                 label="Attendance Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                readonly
                 hide-actions
               ></v-date-input>
             </v-col>
 
-            <v-col cols="12" class="d-flex justify-center">
-              <v-switch
-                v-model="formData.is_overtime_applied"
-                class="ms-2"
-                color="primary"
-                hide-details
+            <v-col cols="12" sm="6" class="d-flex justify-center">
+              <v-time-picker
+                v-model="formData.overtime_in"
+                color="secondary"
+                :disabled="!formCheckBox.isRectifyOvertimeIn"
+                ampm-in-title
               >
-                <template #label>
-                  Apply For Overtime?
-                  <span class="font-weight-black ms-1">
-                    {{ formData.is_overtime_applied ? 'Yes' : 'No' }}
-                  </span>
+                <template #title>
+                  <v-checkbox-btn
+                    v-model="formCheckBox.isRectifyOvertimeIn"
+                    label="Overtime - Time In"
+                  ></v-checkbox-btn>
                 </template>
-              </v-switch>
+              </v-time-picker>
             </v-col>
 
-            <template v-if="formData.is_overtime_applied">
-              <v-col cols="12" sm="6" class="d-flex justify-center">
-                <v-time-picker
-                  v-model="formData.overtime_in"
-                  color="secondary"
-                  :disabled="!formCheckBox.isRectifyOvertimeIn"
-                  ampm-in-title
-                >
-                  <template #title>
-                    <v-checkbox-btn
-                      v-model="formCheckBox.isRectifyOvertimeIn"
-                      label="Overtime - Time In"
-                    ></v-checkbox-btn>
-                  </template>
-                </v-time-picker>
-              </v-col>
-
-              <v-col cols="12" sm="6" class="d-flex justify-center">
-                <v-time-picker
-                  v-model="formData.overtime_out"
-                  color="secondary"
-                  :disabled="!formCheckBox.isRectifyOvertimeOut"
-                  ampm-in-title
-                >
-                  <template #title>
-                    <v-checkbox-btn
-                      v-model="formCheckBox.isRectifyOvertimeOut"
-                      label="Overtime - Time Out"
-                    ></v-checkbox-btn>
-                  </template>
-                </v-time-picker>
-              </v-col>
-            </template>
+            <v-col cols="12" sm="6" class="d-flex justify-center">
+              <v-time-picker
+                v-model="formData.overtime_out"
+                color="secondary"
+                :disabled="!formCheckBox.isRectifyOvertimeOut"
+                ampm-in-title
+              >
+                <template #title>
+                  <v-checkbox-btn
+                    v-model="formCheckBox.isRectifyOvertimeOut"
+                    label="Overtime - Time Out"
+                  ></v-checkbox-btn>
+                </template>
+              </v-time-picker>
+            </v-col>
           </v-row>
         </v-card-text>
 
@@ -142,10 +128,10 @@ const {
             color="primary"
             type="submit"
             variant="elevated"
-            :disabled="formAction.formProcess || !formData.is_overtime_applied"
+            :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Apply Overtime
+            {{ isUpdate ? 'Update' : 'Apply' }} Overtime
           </v-btn>
         </v-card-actions>
       </v-form>
@@ -154,7 +140,7 @@ const {
 
   <ConfirmDialog
     v-model:is-dialog-visible="isConfirmSubmitDialog"
-    title="Confirm Overtime Rectification"
+    :title="confirmTitle"
     :text="confirmText"
     @confirm="onSubmit"
   ></ConfirmDialog>

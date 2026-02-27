@@ -1,27 +1,30 @@
 <script setup lang="ts">
 import {
-  type CashAdvanceRequest,
-  type CashAdvanceRequestTableFilter,
-} from '@/stores/cashAdvanceRequests'
-import { useCashAdvancesFormDialog } from './cashAdvancesFormDialog'
+  type AttendanceRequest,
+  type AttendanceRequestTableFilter,
+} from '@/stores/attendanceRequests'
+import { getDateWithWeekday } from '@/utils/helpers/dates'
 import { type TableOptions } from '@/utils/helpers/tables'
+import { useStatusFormDialog } from './statusFormDialog'
 import AppAlert from '@/components/common/AppAlert.vue'
 import { requiredValidator } from '@/utils/validators'
 import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: CashAdvanceRequest | null
+  itemData: AttendanceRequest | null
   tableOptions: TableOptions
-  tableFilters: CashAdvanceRequestTableFilter
+  tableFilters: AttendanceRequestTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
 
 const { mdAndDown } = useDisplay()
 
-const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, employeesStore } =
-  useCashAdvancesFormDialog(props, emit)
+const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useStatusFormDialog(
+  props,
+  emit,
+)
 </script>
 
 <template>
@@ -37,45 +40,33 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
     :fullscreen="mdAndDown"
     persistent
   >
-    <v-card prepend-icon="mdi-cash-refund" title="Cash Advance Request Details">
+    <v-card
+      prepend-icon="mdi-thumbs-up-down"
+      :title="`${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} Status`"
+      :subtitle="`${props.itemData?.employee.firstname + ' ' + props.itemData?.employee.lastname}: ${getDateWithWeekday(props.itemData?.date as string)}`"
+    >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
-              <v-autocomplete
-                v-model="formData.employee_id"
-                :items="employeesStore.employees"
-                label="Employee"
-                item-title="label"
-                item-value="id"
+              <v-radio-group
+                v-model="formData.status"
+                label="Status"
                 :rules="[requiredValidator]"
-              ></v-autocomplete>
+                inline
+              >
+                <v-radio label="Approve" value="Approved"></v-radio>
+                <v-radio label="Reject" value="Rejected"></v-radio>
+              </v-radio-group>
             </v-col>
 
-            <v-col cols="12">
-              <v-text-field
-                v-model="formData.amount"
-                prepend-inner-icon="mdi-currency-php"
-                label="Amount"
-                type="number"
+            <v-col v-if="formData.status === 'Rejected'" cols="12">
+              <v-textarea
+                v-model="formData.reason"
+                label="Reason"
+                rows="3"
                 :rules="[requiredValidator]"
-              ></v-text-field>
-            </v-col>
-
-            <v-col cols="12">
-              <v-date-input
-                v-model="formData.request_at"
-                prepend-icon=""
-                prepend-inner-icon="mdi-calendar"
-                label="Date Requested"
-                placeholder="Select Date"
-                :rules="[requiredValidator]"
-                hide-actions
-              ></v-date-input>
-            </v-col>
-
-            <v-col cols="12">
-              <v-textarea v-model="formData.description" label="Description" rows="2"></v-textarea>
+              ></v-textarea>
             </v-col>
           </v-row>
         </v-card-text>
@@ -95,7 +86,7 @@ const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset, emp
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            {{ isUpdate ? 'Update Cash Advance' : 'Add Cash Advance' }}
+            Set Status
           </v-btn>
         </v-card-actions>
       </v-form>

@@ -1,20 +1,15 @@
-import { type CashAdvance, useCashAdvancesStore } from '@/stores/cashAdvances'
-import { getDateISO, getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
+import { type CashAdvanceRequest, useCashAdvanceRequestsStore } from '@/stores/cashAdvanceRequests'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
-import { generateCSV, prepareCSV } from '@/utils/helpers/others'
+import { getFirstAndLastDateOfMonth } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
-import { useCashAdvancesPDF } from './pdf/cashAdvancesPDF'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
-import { useDate } from 'vuetify'
 
-export function useCashAdvancesTable() {
-  const date = useDate()
-
-  const cashAdvancesStore = useCashAdvancesStore()
+export function useCashAdvanceRequestsTable() {
+  const authUserStore = useAuthUserStore()
+  const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
   const employeesStore = useEmployeesStore()
-
-  const { isLoadingPDF, formAction: formActionPDF, onExport } = useCashAdvancesPDF()
 
   // States
   const baseHeaders: TableHeader[] = [
@@ -22,6 +17,7 @@ export function useCashAdvancesTable() {
     { title: 'Amount', key: 'amount', align: 'start' },
     { title: 'Description', key: 'description', align: 'start' },
     { title: 'Date Requested', key: 'request_at', align: 'center' },
+    { title: 'Status', key: 'status', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
@@ -35,12 +31,37 @@ export function useCashAdvancesTable() {
     employee_id: null,
     request_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
+  const isApprover = ref(false)
+  const isRequestor = ref(false)
+  const isStatusDialogVisible = ref(false)
+  const isLogsDialogVisible = ref(false)
+  const isRequestDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
-  const itemData = ref<CashAdvance | null>(null)
+  const itemData = ref<CashAdvanceRequest | null>(null)
   const formAction = ref({ ...formActionDefault })
 
   // Actions
+  const onStatus = (item: CashAdvanceRequest) => {
+    itemData.value = item
+    isStatusDialogVisible.value = true
+  }
+
+  const onLogs = (item: CashAdvanceRequest) => {
+    itemData.value = item
+    isLogsDialogVisible.value = true
+  }
+
+  const onAdd = () => {
+    itemData.value = null
+    isRequestDialogVisible.value = true
+  }
+
+  const onUpdate = (item: CashAdvanceRequest) => {
+    itemData.value = item
+    isRequestDialogVisible.value = true
+  }
+
   const onDelete = (id: number) => {
     deleteId.value = id
     isConfirmDeleteDialog.value = true
@@ -49,13 +70,13 @@ export function useCashAdvancesTable() {
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
-    const { data, error } = await cashAdvancesStore.deleteCashAdvance(deleteId.value)
+    const { data, error } = await cashAdvanceRequestsStore.deleteCashAdvanceRequest(deleteId.value)
 
     if (error) {
       formAction.value.formMessage = error.message
       formAction.value.formStatus = 400
     } else if (data) {
-      formAction.value.formMessage = 'Successfully Deleted Cash Advance.'
+      formAction.value.formMessage = 'Successfully Deleted Cash Advance Request.'
 
       await onLoadItems(tableOptions.value)
     }
@@ -68,8 +89,6 @@ export function useCashAdvancesTable() {
     if (isCleared) tableFilters.value.request_at = null
 
     onLoadItems(tableOptions.value)
-
-    await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onFilterItems = async () => {
@@ -77,56 +96,33 @@ export function useCashAdvancesTable() {
     else tableHeaders.value = baseHeaders
 
     onLoadItems(tableOptions.value)
-
-    await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
   }
 
   const onLoadItems = async ({ page, itemsPerPage, sortBy }: TableOptions) => {
     tableOptions.value.isLoading = true
 
-    await cashAdvancesStore.getCashAdvancesTable({ page, itemsPerPage, sortBy }, tableFilters.value)
+    await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
+      { page, itemsPerPage, sortBy },
+      tableFilters.value,
+    )
 
     tableOptions.value.isLoading = false
   }
 
-  const onExportCSV = () => {
-    const filename = `${getDateISO(new Date())}-cash-advances`
-
-    const csvData = () => {
-      const defaultHeaders = tableHeaders.value
-        .filter(({ title }) => !['Actions', 'Employee'].includes(title))
-        .map(({ title }) => title)
-
-      const csvHeaders = ['Lastname', 'Firstname', 'Middlename', ...defaultHeaders].join(',')
-
-      const csvRows = cashAdvancesStore.cashAdvancesExport.map((item) => {
-        const csvData = [
-          prepareCSV(item.employee.lastname),
-          prepareCSV(item.employee.firstname),
-          prepareCSV(item.employee.middlename),
-
-          prepareCSV(item.amount.toString()),
-          prepareCSV(item.description),
-          item.request_at ? prepareCSV(date.format(item.request_at, 'fullDate')) : '',
-        ]
-
-        return csvData.join(',')
-      })
-
-      return [csvHeaders, ...csvRows].join('\n')
-    }
-
-    generateCSV(filename, csvData())
-  }
-
-  const onExportPDF = async () => {
-    await onExport(tableFilters.value)
-  }
-
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (cashAdvancesStore.cashAdvancesExport.length === 0)
-      await cashAdvancesStore.getCashAdvancesExport(tableOptions.value, tableFilters.value)
+
+    if (authUserStore.userRole === 'Super Administrator') {
+      isApprover.value = true
+      isRequestor.value = true
+    }
+
+    if (authUserStore.userRole !== 'Super Administrator') {
+      const userRole = await authUserStore.getUserRole(authUserStore.userRole as string)
+
+      isApprover.value = userRole?.is_approver ?? false
+      isRequestor.value = userRole?.is_requestor ?? false
+    }
   })
 
   // Expose State and Actions
@@ -134,19 +130,24 @@ export function useCashAdvancesTable() {
     tableHeaders,
     tableOptions,
     tableFilters,
+    isApprover,
+    isRequestor,
+    isStatusDialogVisible,
+    isLogsDialogVisible,
+    isRequestDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
+    onAdd,
+    onStatus,
+    onLogs,
+    onUpdate,
     onDelete,
     onConfirmDelete,
     onFilterDate,
     onFilterItems,
     onLoadItems,
-    onExportCSV,
-    onExportPDF,
-    cashAdvancesStore,
+    cashAdvanceRequestsStore,
     employeesStore,
-    isLoadingPDF,
-    formActionPDF,
   }
 }

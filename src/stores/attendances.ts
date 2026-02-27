@@ -34,6 +34,7 @@ export type Attendance = {
   user_id: string
   user_avatar: string | null
   user_fullname: string
+  app_version: string | null
 }
 
 export type AttendanceImage = {
@@ -71,11 +72,15 @@ export const useAttendancesStore = defineStore('attendances', () => {
   }
 
   // Actions
-  async function getAttendances() {
-    const { data } = await supabase
+  async function getAttendances(employee_id: number | null = null) {
+    let query = supabase
       .from('attendances')
       .select(selectQuery)
       .order('created_at', { ascending: false })
+
+    if (employee_id) query = query.eq('employee_id', employee_id).limit(90)
+
+    const { data } = await query
 
     attendances.value = getAttendanceMap((data as Attendance[]) ?? [])
   }

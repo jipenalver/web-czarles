@@ -1,24 +1,30 @@
 import {
-  type CashAdvance,
-  type CashAdvanceTableFilter,
-  useCashAdvancesStore,
-} from '@/stores/cashAdvances'
+  type CashAdvanceRequest,
+  type CashAdvanceRequestTableFilter,
+  useCashAdvanceRequestsStore,
+} from '@/stores/cashAdvanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { getMoneyText } from '@/utils/helpers/others'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref, watch } from 'vue'
+import { useDate } from 'vuetify'
 
 export function useCashAdvancesFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: CashAdvance | null
+    itemData: CashAdvanceRequest | null
     tableOptions: TableOptions
-    tableFilters: CashAdvanceTableFilter
+    tableFilters: CashAdvanceRequestTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const cashAdvancesStore = useCashAdvancesStore()
+  const date = useDate()
+
+  const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
   const employeesStore = useEmployeesStore()
+  const authUserStore = useAuthUserStore()
 
   // States
   const formDataDefault = {
@@ -26,8 +32,9 @@ export function useCashAdvancesFormDialog(
     amount: undefined,
     description: '',
     request_at: new Date(),
+    status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
   }
-  const formData = ref<Partial<CashAdvance>>({ ...formDataDefault })
+  const formData = ref<Partial<CashAdvanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const isUpdate = ref(false)
@@ -45,8 +52,8 @@ export function useCashAdvancesFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     const { data, error } = isUpdate.value
-      ? await cashAdvancesStore.updateCashAdvance(formData.value)
-      : await cashAdvancesStore.addCashAdvance(formData.value)
+      ? await cashAdvanceRequestsStore.updateCashAdvanceRequest(formData.value)
+      : await cashAdvanceRequestsStore.addCashAdvanceRequest(formData.value)
 
     if (error) {
       formAction.value = {
@@ -56,9 +63,24 @@ export function useCashAdvancesFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Advance.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Advance Request.`
 
-      await cashAdvancesStore.getCashAdvancesTable(props.tableOptions, props.tableFilters)
+      if (!isUpdate.value) {
+        const employee = await employeesStore.getEmployeesById(formData.value.employee_id as number)
+
+        await authUserStore.sendToApprovers({
+          subject: 'Cash Advance Request Notification',
+          message: `<p>Good Day!</p>
+            <p>A cash advance request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> with an amount of <strong>${getMoneyText(formData.value.amount as number)}</strong> for date <strong>${date.format(formData.value.request_at as string, 'fullDate')}</strong>.</p>
+            <p>Please review the request at your earliest convenience.</p>
+            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`,
+        })
+      }
+
+      await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
+        props.tableOptions,
+        props.tableFilters,
+      )
 
       setTimeout(() => {
         onFormReset()

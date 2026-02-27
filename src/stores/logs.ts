@@ -12,6 +12,8 @@ export type Log = {
   user_avatar: string | null
   user_fullname: string
   employee_id: number
+  attendance_request_id: number | null
+  cash_advance_request_id: number | null
 }
 
 export const useLogsStore = defineStore('logs', () => {
@@ -28,12 +30,20 @@ export const useLogsStore = defineStore('logs', () => {
     logs.value = data as Log[]
   }
 
-  async function getLogsById(employeeId: number, type: string | null = null) {
-    const { data } = await supabase
-      .from('logs')
-      .select()
-      .eq('employee_id', employeeId)
-      .eq('type', type)
+  async function getLogsById(
+    employeeId: number,
+    type: string | null = null,
+    attendance_request_id: number | null = null,
+    cash_advance_request_id: number | null = null,
+  ) {
+    let query = supabase.from('logs').select().eq('employee_id', employeeId).eq('type', type)
+
+    if (attendance_request_id) query = query.eq('attendance_request_id', attendance_request_id)
+
+    if (cash_advance_request_id)
+      query = query.eq('cash_advance_request_id', cash_advance_request_id)
+
+    const { data } = await query
 
     logsByEmployee.value = data as Log[]
   }

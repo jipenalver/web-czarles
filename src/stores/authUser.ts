@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { supabase } from '@/utils/supabase'
+import { type EmailPayload, onEmailNotification, supabase, supabaseAdmin } from '@/utils/supabase'
+import { emailsSkipped } from '@/utils/helpers/constants'
+import { type AdminUser, useUsersStore } from './users'
+import { type User } from '@supabase/supabase-js'
+import { type UserRole } from './userRoles'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
@@ -16,9 +20,12 @@ type AuthUser = {
 }
 
 export const useAuthUserStore = defineStore('authUser', () => {
+  const usersStore = useUsersStore()
+
   // States
   const userData = ref<Partial<AuthUser> | null>(null)
   const authPages = ref<string[]>([])
+  const usersApprovers = ref<AdminUser[]>([])
 
   // Getters
   const userRole = computed(() => {
@@ -29,6 +36,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
   function $reset() {
     userData.value = null
     authPages.value = []
+    usersApprovers.value = []
   }
 
   // Actions
@@ -97,16 +105,56 @@ export const useAuthUserStore = defineStore('authUser', () => {
       authPages.value = data[0].pages.map((p: { page: string }) => p.page)
   }
 
+  async function getUserRole(name: string) {
+    const { data } = await supabase.from('user_roles').select('*').eq('user_role', name).single()
+
+    return data as Omit<UserRole, 'user_role_pages' | 'pages'>
+  }
+
+  async function getUsersApprovers() {
+    const { data } = await supabaseAdmin.auth.admin.listUsers()
+
+    const { users: usersData } = data as { users: User[] }
+
+    const mappedUsers = usersData.map(usersStore.userMap)
+
+    const filterUsers = await Promise.all(
+      mappedUsers.map(async (user) => {
+        if (!user.user_role) return null
+
+        const userRole = await getUserRole(user.user_role as string)
+
+        return userRole.is_approver ? user : null
+      }),
+    )
+
+    usersApprovers.value = filterUsers.filter((user) => user !== null) as AdminUser[]
+  }
+
+  async function sendToApprovers(payload: Omit<EmailPayload, 'email'>) {
+    for (const approver of usersApprovers.value) {
+      if (emailsSkipped.includes(approver.email)) continue
+
+      await onEmailNotification({ ...payload, email: approver.email })
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+  }
+
   // Expose States and Actions
   return {
     userData,
     userRole,
     authPages,
+    usersApprovers,
     $reset,
     isAuthenticated,
     getUserInformation,
     updateUserInformation,
     updateUserImage,
     getAuthPages,
+    getUserRole,
+    getUsersApprovers,
+    sendToApprovers,
   }
 })

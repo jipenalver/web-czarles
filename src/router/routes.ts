@@ -10,9 +10,12 @@ import EmployeesView from '@/views/system/admin/manage-employees/EmployeesView.v
 import RatesBenefitsView from '@/views/system/admin/manage-employees/RatesBenefitsView.vue'
 import MemosView from '@/views/system/admin/manage-employees/MemosView.vue'
 import AttendanceView from '@/views/system/admin/manage-attendance/AttendanceView.vue'
+import LeaveRequestsView from '@/views/system/admin/manage-attendance/LeaveRequestsView.vue'
 import LeaveView from '@/views/system/admin/manage-attendance/LeaveView.vue'
+import OvertimeRequestsView from '@/views/system/admin/manage-attendance/OvertimeRequestsView.vue'
 import OvertimeView from '@/views/system/admin/manage-attendance/OvertimeView.vue'
 import SupplementalView from '@/views/system/admin/manage-payroll/SupplementalView.vue'
+import CashAdvanceRequestView from '@/views/system/admin/manage-payroll/CashAdvanceRequestView.vue'
 import CashAdvancesView from '@/views/system/admin/manage-payroll/CashAdvancesView.vue'
 import PayrollView from '@/views/system/admin/manage-payroll/PayrollView.vue'
 import SettingsView from '@/views/system/settings/SettingsView.vue'
@@ -140,9 +143,21 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/hrms/attendance/leave-requests',
+    name: 'hrms-attendance-leave-requests',
+    component: LeaveRequestsView,
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/hrms/attendance/leave',
     name: 'hrms-attendance-leave',
     component: LeaveView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/hrms/attendance/overtime-requests',
+    name: 'hrms-attendance-overtime-requests',
+    component: OvertimeRequestsView,
     meta: { requiresAuth: true },
   },
   {
@@ -157,6 +172,12 @@ export const routes = [
     path: '/hrms/payroll/supplemental',
     name: 'hrms-payroll-supplemental',
     component: SupplementalView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/hrms/payroll/advance-requests',
+    name: 'hrms-payroll-advance-requests',
+    component: CashAdvanceRequestView,
     meta: { requiresAuth: true },
   },
   {

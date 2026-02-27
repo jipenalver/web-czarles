@@ -66,6 +66,30 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- February 23, 2026 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">February 23, 2026</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Leave request page for HR admin to view and manage their leave requests,
+                including submission and status tracking.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Overtime request page for HR admin to view and manage their overtime
+                requests, including submission and status tracking.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>
+                (Feature) Cash Advance request page for HR admin to view and manage their cash
+                advance requests, including submission and status tracking.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- January 15, 2026 -->
           <v-divider class="my-4"></v-divider>
           <h3 class="text-h6 mb-3">January 15, 2026</h3>
@@ -523,7 +547,7 @@ onMounted(() => {
           <h3 class="text-h6 mb-3">November 8, 2025</h3>
           <v-list density="comfortable">
             <v-list-item>
-              <v-list-item-title class="text-wrap">
+              <v-list-item-title>
                 (Feature) Updated payroll deductions for late and undertime entries, ensuring field
                 staff calculations are now processed server-side for higher accuracy.
               </v-list-item-title>

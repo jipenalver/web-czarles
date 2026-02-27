@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { type Attendance, type AttendanceTableFilter } from '@/stores/attendances'
+import {
+  type AttendanceRequest,
+  type AttendanceRequestTableFilter,
+} from '@/stores/attendanceRequests'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'
@@ -9,9 +12,9 @@ import { useDisplay } from 'vuetify'
 
 const props = defineProps<{
   isDialogVisible: boolean
-  itemData: Attendance | null
+  itemData: AttendanceRequest | null
   tableOptions: TableOptions
-  tableFilters: AttendanceTableFilter
+  tableFilters: AttendanceRequestTableFilter
 }>()
 
 const emit = defineEmits(['update:isDialogVisible'])
@@ -47,7 +50,7 @@ const {
     <v-card
       prepend-icon="mdi-account-arrow-left"
       title="Leave Application"
-      subtitle="Apply for Employee's Leave."
+      :subtitle="`${isUpdate ? 'Edit' : 'Apply for'} Employee's Leave Request.`"
     >
       <v-form ref="refVForm" @submit.prevent="onFormSubmit">
         <v-card-text>
@@ -72,7 +75,6 @@ const {
                 label="Select Date"
                 placeholder="Select Date"
                 :rules="[requiredValidator]"
-                :readonly="isUpdate"
                 hide-actions
               ></v-date-input>
             </v-col>
@@ -158,7 +160,7 @@ const {
             :disabled="formAction.formProcess"
             :loading="formAction.formProcess"
           >
-            Apply Leave
+            {{ isUpdate ? 'Update' : 'Submit' }} Leave
           </v-btn>
         </v-card-actions>
       </v-form>
