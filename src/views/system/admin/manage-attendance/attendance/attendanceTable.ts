@@ -3,13 +3,7 @@ import {
   getOvertimeHoursDecimal,
   getWorkHoursDecimal,
 } from '@/utils/helpers/attendance'
-import {
-  getDate,
-  getDateISO,
-  getDateWithWeekday,
-  getFirstAndLastDateOfMonth,
-  getTime,
-} from '@/utils/helpers/dates'
+import { getDate, getDateISO, getDateWithWeekday, getTime } from '@/utils/helpers/dates'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { generateCSV, prepareCSV } from '@/utils/helpers/others'
@@ -34,10 +28,12 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const getTableHeaders = (componentView: string): TableHeader[] => {
     const headers = [...baseHeaders]
 
+    if (componentView === 'attendance' || componentView === 'leave')
+      headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
+
     if (componentView === 'overtime')
       headers.push({ title: 'Overtime Applied?', key: 'is_overtime_applied', align: 'center' })
 
-    headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
     return headers
   }
   const tableHeaders = ref<TableHeader[]>(getTableHeaders(props.componentView))
@@ -49,13 +45,11 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   })
   const tableFilters = ref({
     employee_id: null,
-    attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    attendance_at: [new Date()] as Date[] | null,
     component_view: props.componentView,
   })
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)
-  const isLeaveDialogVisible = ref(false)
-  const isOvertimeDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
@@ -90,16 +84,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     isDialogVisible.value = true
   }
 
-  const onLeave = (item: Attendance | null = null) => {
-    itemData.value = item
-    isLeaveDialogVisible.value = true
-  }
-
-  const onOvertime = (item: Attendance) => {
-    itemData.value = item
-    isOvertimeDialogVisible.value = true
-  }
-
   const onDelete = (id: number) => {
     deleteId.value = id
     isConfirmDeleteDialog.value = true
@@ -124,7 +108,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   }
 
   const onFilterDate = async (isCleared = false) => {
-    if (isCleared) tableFilters.value.attendance_at = null
+    if (isCleared) tableFilters.value.attendance_at = [new Date()]
 
     onLoadItems(tableOptions.value)
 
@@ -173,6 +157,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
         ...(props.componentView === 'overtime'
           ? ['Overtime In', 'Overtime Out', 'Rendered Overtime']
           : []),
+        'App Version',
       ].join(',')
 
       const csvRows = attendancesStore.attendancesExport.map((item) => {
@@ -201,6 +186,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
             item.pm_time_out,
             item.employee.is_field_staff,
           ),
+          item.app_version ?? '',
         ]
 
         if (props.componentView === 'overtime') {
@@ -234,8 +220,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     tableFilters,
     isDialogVisible,
     isViewDialogVisible,
-    isLeaveDialogVisible,
-    isOvertimeDialogVisible,
     isConfirmDeleteDialog,
     itemData,
     formAction,
@@ -243,8 +227,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     onAdd,
     onView,
     onUpdate,
-    onLeave,
-    onOvertime,
     onDelete,
     onConfirmDelete,
     onFilterDate,

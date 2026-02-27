@@ -65,9 +65,20 @@ export function useAttendanceFormDialog(
           am_time_out: getTime24Hour(itemData.am_time_out) as string,
           pm_time_in: getTime24Hour(itemData.pm_time_in) as string,
           pm_time_out: getTime24Hour(itemData.pm_time_out) as string,
-          date: getDate(itemData.am_time_in),
+          date: itemData.am_time_in ? getDate(itemData.am_time_in) : getDate(itemData.pm_time_in),
         }
       } else formData.value = { ...formDataDefault }
+    },
+  )
+
+  watch(
+    () => formData.value.employee_id,
+    async () => {
+      formAction.value = { ...formActionDefault, formProcess: true }
+
+      await attendancesStore.getAttendances(formData.value.employee_id)
+
+      formAction.value = { ...formActionDefault, formProcess: false }
     },
   )
 
@@ -179,7 +190,6 @@ export function useAttendanceFormDialog(
 
   onMounted(async () => {
     if (employeesStore.employees.length === 0) await employeesStore.getEmployees()
-    if (attendancesStore.attendances.length === 0) await attendancesStore.getAttendances()
   })
 
   // Expose State and Actions

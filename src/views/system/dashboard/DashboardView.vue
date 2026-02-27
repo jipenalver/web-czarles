@@ -5,6 +5,7 @@ import UserCountWidget from './partials/UserCountWidget.vue'
 import BirthdayWidget from './birthday/BirthdayWidget.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import WelcomeWidget from './partials/WelcomeWidget.vue'
+import AppInfoWidget from './partials/AppInfoWidget.vue'
 import { useDisplay } from 'vuetify'
 import { ref } from 'vue'
 
@@ -32,6 +33,10 @@ const isDrawerVisible = ref(xs.value ? false : true)
 
           <v-col cols="12" lg="2" sm="6">
             <EmployeeCountWidget></EmployeeCountWidget>
+          </v-col>
+
+          <v-col cols="12">
+            <AppInfoWidget></AppInfoWidget>
           </v-col>
 
           <v-col cols="12">

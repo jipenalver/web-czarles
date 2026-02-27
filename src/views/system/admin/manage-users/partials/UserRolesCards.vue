@@ -15,6 +15,10 @@ const {
   onConfirmDelete,
   userRolesStore,
 } = useUserRolesCards()
+
+const getRolePermission = (...args: string[]) => {
+  return args.filter((item) => item !== '')
+}
 </script>
 
 <template>
@@ -30,7 +34,30 @@ const {
         <v-card-title class="mt-3 font-weight-bold"> {{ item.user_role }} </v-card-title>
 
         <v-card-text class="d-flex align-center justify-space-between">
-          <v-spacer></v-spacer>
+          <div>
+            <template
+              v-if="
+                getRolePermission(
+                  item.is_approver ? 'Approver' : '',
+                  item.is_requestor ? 'Requestor' : '',
+                ).length > 0
+              "
+            >
+              <v-chip
+                v-for="permission in getRolePermission(
+                  item.is_approver ? 'Approver' : '',
+                  item.is_requestor ? 'Requestor' : '',
+                )"
+                :key="permission"
+                class="font-weight-bold me-1"
+                color="secondary"
+                variant="flat"
+                size="small"
+              >
+                {{ permission }}
+              </v-chip>
+            </template>
+          </div>
 
           <div class="d-flex flex-wrap ga-2">
             <v-btn variant="text" density="comfortable" @click="onUpdate(item)" icon>

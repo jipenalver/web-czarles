@@ -35,6 +35,7 @@ export function useEmployeesFormDialog(
     is_field_staff: false,
     is_permanent: false,
     is_gps_disabled: false,
+    is_qr_generator: false,
     designation_id: null,
     area_origin_id: null,
     area_assignment_id: null,

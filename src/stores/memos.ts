@@ -56,7 +56,11 @@ export const useMemosStore = defineStore('memos', () => {
   }
 
   async function getMemosTable(tableOptions: TableOptions, { search }: MemoTableFilter) {
-    const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'name')
+    const { rangeStart, rangeEnd, column, order } = tablePagination(
+      tableOptions,
+      'created_at',
+      false,
+    )
     search = tableSearch(search)
 
     let query = supabase

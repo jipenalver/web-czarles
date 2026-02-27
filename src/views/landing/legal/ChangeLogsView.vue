@@ -66,6 +66,96 @@ onMounted(() => {
             📜 System Updates Changelog
           </v-card-title>
 
+          <!-- February 23, 2026 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">February 23, 2026</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Leave request page for HR admin to view and manage their leave requests,
+                including submission and status tracking.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Overtime request page for HR admin to view and manage their overtime
+                requests, including submission and status tracking.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>
+                (Feature) Cash Advance request page for HR admin to view and manage their cash
+                advance requests, including submission and status tracking.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- January 15, 2026 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">January 15, 2026</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Updated attendance filtering to use the current date, ensuring more
+                accurate and timely attendance results.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- January 11, 2026 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">January 11, 2026</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Disabled the delete button for protected user roles to prevent accidental
+                role removal.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added QR generator information to attendance views, showing who generated
+                the QR code.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Displayed QR generator details in employee records for better
+                transparency.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Bugfix) Fixed the disabled state of the GPS Disabled button in the employee form to
+                behave correctly.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added a QR generator flag to employee profiles and updated employee forms
+                to manage this setting.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
+          <!-- January 8, 2026 -->
+          <v-divider class="my-4"></v-divider>
+          <h3 class="text-h6 mb-3">January 8, 2026</h3>
+          <v-list density="comfortable">
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (Feature) Added visibility of employee non-deduction items in payroll printouts for
+                clearer payslip details.
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="text-wrap">
+                (BugFix) Updated attendance calculation logic to count only actual work performed
+                during holidays.
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+
           <!-- December 18, 2025 -->
           <v-divider class="my-4"></v-divider>
           <h3 class="text-h6 mb-3">December 18, 2025</h3>
@@ -457,7 +547,7 @@ onMounted(() => {
           <h3 class="text-h6 mb-3">November 8, 2025</h3>
           <v-list density="comfortable">
             <v-list-item>
-              <v-list-item-title class="text-wrap">
+              <v-list-item-title>
                 (Feature) Updated payroll deductions for late and undertime entries, ensuring field
                 staff calculations are now processed server-side for higher accuracy.
               </v-list-item-title>

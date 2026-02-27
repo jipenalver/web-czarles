@@ -32,6 +32,16 @@ const isFieldStaff = computed(() => {
   const employee = employeesStore.employees.find((emp) => emp.id === props.itemData.employee_id)
   return employee?.is_field_staff || false
 })
+
+const isGPSDisabled = computed(() => {
+  const employee = employeesStore.employees.find((emp) => emp.id === props.itemData.employee_id)
+  return employee?.is_gps_disabled || false
+})
+
+const isQRGenerator = computed(() => {
+  const employee = employeesStore.employees.find((emp) => emp.id === props.itemData.employee_id)
+  return employee?.is_qr_generator || false
+})
 </script>
 
 <template>
@@ -198,6 +208,7 @@ const isFieldStaff = computed(() => {
 
         <v-col
           cols="12"
+          md="6"
           class="d-flex align-center my-2"
           :class="mobile ? 'justify-space-between' : 'justify-start'"
         >
@@ -206,6 +217,53 @@ const isFieldStaff = computed(() => {
             {{ isFieldStaff ? 'Field Staff' : 'Office Staff' }}
           </v-chip>
         </v-col>
+
+        <v-col
+          cols="12"
+          md="3"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
+          <span class="text-body-2 font-weight-bold me-2">GPS Enabled / Disabled :</span>
+          <v-chip
+            class="font-weight-black"
+            :color="isGPSDisabled ? 'error' : 'success'"
+            size="small"
+          >
+            {{ isGPSDisabled ? 'Disabled' : 'Enabled' }}
+          </v-chip>
+        </v-col>
+
+        <v-col
+          cols="12"
+          md="3"
+          class="d-flex align-center my-2"
+          :class="mobile ? 'justify-space-between' : 'justify-start'"
+        >
+          <span class="text-body-2 font-weight-bold me-2">QR Generator:</span>
+          <v-chip
+            class="font-weight-black"
+            :color="isQRGenerator ? 'success' : 'error'"
+            size="small"
+          >
+            {{ isQRGenerator ? 'Enabled' : 'Disabled' }}
+          </v-chip>
+        </v-col>
+
+        <template v-if="props.componentView === 'attendance' || props.componentView === 'overtime'">
+          <v-divider class="my-3" thickness="1"></v-divider>
+
+          <v-col
+            cols="12"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">App Version:</span>
+            <v-chip class="font-weight-black" color="default" size="small">
+              {{ props.itemData.app_version ?? '-' }}
+            </v-chip>
+          </v-col>
+        </template>
 
         <template v-if="props.componentView === 'leave'">
           <v-divider class="my-3" thickness="1"></v-divider>

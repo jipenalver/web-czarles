@@ -1,34 +1,42 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  type Attendance,
-  type AttendanceTableFilter,
-  useAttendancesStore,
-} from '@/stores/attendances'
-import { getDate, getTime24Hour } from '@/utils/helpers/dates'
+  type AttendanceRequest,
+  type AttendanceRequestTableFilter,
+  useAttendanceRequestsStore,
+} from '@/stores/attendanceRequests'
+import { getDate, getDateWithWeekday, getTime, getTime24Hour } from '@/utils/helpers/dates'
+import { type Attendance, useAttendancesStore } from '@/stores/attendances'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
+import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref, watch } from 'vue'
+import { useDate } from 'vuetify'
 
 export function useOvertimeFormDialog(
   props: {
     isDialogVisible: boolean
-    itemData: Attendance | null
+    itemData: AttendanceRequest | null
     tableOptions: TableOptions
-    tableFilters: AttendanceTableFilter
+    tableFilters: AttendanceRequestTableFilter
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
+  const date = useDate()
+
+  const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
+  const authUserStore = useAuthUserStore()
 
   // States
   const formDataDefault = {
     date: null as string | null,
     employee_id: null as number | null,
-    is_overtime_applied: false,
     overtime_in: '',
     overtime_out: '',
+    overtime_status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
+    type: 'Overtime' as 'Leave' | 'Overtime',
   }
   const formCheckBoxDefault = {
     isRectifyOvertimeIn: false,
@@ -38,25 +46,40 @@ export function useOvertimeFormDialog(
   const formAction = ref({ ...formActionDefault })
   const refVForm = ref()
   const formCheckBox = ref({ ...formCheckBoxDefault })
+  const isUpdate = ref(false)
   const isConfirmSubmitDialog = ref(false)
   const confirmTitle = ref('')
   const confirmText = ref('')
-  const isOvertimeApplied = ref(false)
+  const attendanceData = ref<Attendance | undefined>()
 
   watch(
     () => props.isDialogVisible,
     () => {
       formCheckBox.value = { ...formCheckBoxDefault }
 
-      const { employee, attendance_images, ...itemData } = props.itemData as Attendance
-      formData.value = {
-        ...itemData,
-        overtime_in: getTime24Hour(itemData.overtime_in) as string,
-        overtime_out: getTime24Hour(itemData.overtime_out) as string,
-        date: getDate(itemData.am_time_in),
-      }
+      isUpdate.value = props.itemData ? true : false
 
-      isOvertimeApplied.value = itemData.is_overtime_applied || false
+      if (isUpdate.value) {
+        const { employee, attendance, ...itemData } = props.itemData as AttendanceRequest
+        formData.value = {
+          ...itemData,
+          overtime_in: getTime24Hour(itemData.overtime_in) as string,
+          overtime_out: getTime24Hour(itemData.overtime_out) as string,
+          date: getDate(itemData.overtime_in),
+        }
+      } else formData.value = { ...formDataDefault }
+    },
+  )
+
+  watch(
+    () => formData.value.employee_id,
+    async () => {
+      formAction.value = { ...formActionDefault, formProcess: true }
+
+      if (formData.value.employee_id)
+        await attendancesStore.getAttendances(formData.value.employee_id)
+
+      formAction.value = { ...formActionDefault, formProcess: false }
     },
   )
 
@@ -71,15 +94,18 @@ export function useOvertimeFormDialog(
       return `${baseDate} ${timeValue}`
     }
 
-    const { date, ...newFormData } = {
+    const newFormData = {
       ...formData.value,
       overtime_in: prepareTimeField(formData.value.overtime_in as string, baseDate as string),
       overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string),
-      is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn ? true : undefined,
-      is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut ? true : undefined,
+      is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn,
+      is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut,
+      attendance_id: attendanceData.value ? attendanceData.value.id : null,
     }
 
-    const { data, error } = await attendancesStore.updateAttendance(newFormData)
+    const { data, error } = isUpdate.value
+      ? await attendanceRequestsStore.updateAttendanceRequest(newFormData)
+      : await attendanceRequestsStore.addAttendanceRequest(newFormData)
 
     if (error) {
       formAction.value = {
@@ -89,9 +115,24 @@ export function useOvertimeFormDialog(
         formProcess: false,
       }
     } else if (data) {
-      formAction.value.formMessage = `Successfully Updated Attendance Overtime.`
+      formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Overtime Request' : 'Applied for Overtime'}.`
 
-      await attendancesStore.getAttendancesTable(props.tableOptions, props.tableFilters)
+      if (!isUpdate.value) {
+        const employee = await employeesStore.getEmployeesById(formData.value.employee_id as number)
+
+        await authUserStore.sendToApprovers({
+          subject: 'Overtime Request Notification',
+          message: `<p>Good Day!</p>
+            <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${getDateWithWeekday(formData.value.overtime_in as string)}, ${getTime(formData.value.overtime_in)} to ${getTime(formData.value.overtime_out)}</strong>.</p>
+            <p>Please review the request at your earliest convenience.</p>
+            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`,
+        })
+      }
+
+      await attendanceRequestsStore.getAttendanceRequestsTable(
+        props.tableOptions,
+        props.tableFilters,
+      )
 
       setTimeout(() => {
         onFormReset()
@@ -113,30 +154,56 @@ export function useOvertimeFormDialog(
       return true
     }
 
+    attendanceData.value = attendancesStore.attendances.find(
+      (attendance) =>
+        getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
+        attendance.employee_id === formData.value.employee_id,
+    )
+
+    const isAttendanceBlank =
+      attendanceData.value &&
+      [
+        attendanceData.value.am_time_in,
+        attendanceData.value.am_time_out,
+        attendanceData.value.pm_time_in,
+        attendanceData.value.pm_time_out,
+      ].some((time) => time !== null)
+
+    if (!isAttendanceBlank)
+      return setError('Cannot apply for overtime - attendance is not yet recorded for this date.')
+
+    const isAttendanceHasLeave =
+      attendanceData.value &&
+      [attendanceData.value.is_am_leave, attendanceData.value.is_pm_leave].every(
+        (isLeave) => isLeave === true,
+      )
+
+    if (isAttendanceHasLeave)
+      return setError('Cannot apply for overtime - full leave already recorded for this date.')
+
     if (!formData.value.overtime_in) return setError('Overtime - Time In is required.')
 
     const hasChecked = Object.values(formCheckBox.value).some((value) => value)
 
-    if (!hasChecked)
-      return setError('Please check at least one checkbox to rectify the attendance.')
+    if (!hasChecked) return setError('Please check at least one checkbox to rectify the overtime.')
   }
 
   // Trigger Validators
   const onFormSubmit = async () => {
     const { valid } = await refVForm.value.validate()
     if (valid) {
-      if (isOvertimeApplied.value) {
-        if (onFormValidate()) return
-
+      if (isUpdate.value) {
         confirmTitle.value = 'Confirm Overtime Rectification'
         confirmText.value = 'Are you sure you want to update, '
         if (formCheckBox.value.isRectifyOvertimeIn) confirmText.value += ' Overtime - Time In, '
         if (formCheckBox.value.isRectifyOvertimeOut) confirmText.value += ' Overtime - Time Out, '
-        confirmText.value += ' attendance?'
+        confirmText.value += ' overtime request?'
       } else {
         confirmTitle.value = 'Confirm Overtime Application'
         confirmText.value = 'Are you sure you want to apply overtime for this attendance?'
       }
+
+      if (onFormValidate()) return
 
       isConfirmSubmitDialog.value = true
     }
@@ -155,9 +222,10 @@ export function useOvertimeFormDialog(
   // Expose State and Actions
   return {
     formData,
+    formCheckBox,
     formAction,
     refVForm,
-    formCheckBox,
+    isUpdate,
     isConfirmSubmitDialog,
     confirmTitle,
     confirmText,

@@ -39,6 +39,7 @@ export type Employee = {
   payroll_start: number
   payroll_end: number
   is_gps_disabled: boolean
+  is_qr_generator: boolean
   employee_deductions: EmployeeDeduction[]
 }
 
