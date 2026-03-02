@@ -212,8 +212,8 @@ const { mobile } = useDisplay()
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
-            <span class="text-body-2 font-weight-bold me-2">Is ATM Payroll:</span>
-            <p class="text-body-2">{{ props.itemData.is_atm_payroll ? 'Yes' : 'No' }}</p>
+            <span class="text-body-2 font-weight-bold me-2">Payroll Option:</span>
+            <p class="text-body-2">{{ props.itemData.is_atm_payroll ? 'ATM' : 'Cash' }}</p>
           </v-col>
 
           <template v-if="props.itemData.employee_deductions.length > 0">

@@ -149,7 +149,7 @@ export function useEmployeesTable(
           ? [
               'Daily Rate',
               'Accident Insurance',
-              'ATM Payroll',
+              'Payroll Option',
               ...benefitsStore.addons.map(({ benefit }) => benefit),
               ...benefitsStore.deductions.map(({ benefit }) => benefit),
             ]
@@ -196,7 +196,7 @@ export function useEmployeesTable(
             ...csvData,
             item.daily_rate ? item.daily_rate.toFixed(2) : '',
             item.is_insured ? 'Yes' : 'No',
-            item.is_atm_payroll ? 'Yes' : 'No',
+            item.is_atm_payroll ? 'ATM' : 'Cash',
 
             ...getBenefits('addons'),
             ...getBenefits('deductions'),
