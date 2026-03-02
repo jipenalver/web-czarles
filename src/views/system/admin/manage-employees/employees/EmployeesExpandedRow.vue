@@ -187,7 +187,6 @@ const { mobile } = useDisplay()
 
           <v-col
             cols="12"
-            md="6"
             class="d-flex align-center my-2"
             :class="mobile ? 'justify-space-between' : 'justify-start'"
           >
@@ -205,6 +204,16 @@ const { mobile } = useDisplay()
           >
             <span class="text-body-2 font-weight-bold me-2">With Accident Insurance:</span>
             <p class="text-body-2">{{ props.itemData.is_insured ? 'Yes' : 'No' }}</p>
+          </v-col>
+
+          <v-col
+            cols="12"
+            md="6"
+            class="d-flex align-center my-2"
+            :class="mobile ? 'justify-space-between' : 'justify-start'"
+          >
+            <span class="text-body-2 font-weight-bold me-2">Is ATM Payroll:</span>
+            <p class="text-body-2">{{ props.itemData.is_atm_payroll ? 'Yes' : 'No' }}</p>
           </v-col>
 
           <template v-if="props.itemData.employee_deductions.length > 0">
