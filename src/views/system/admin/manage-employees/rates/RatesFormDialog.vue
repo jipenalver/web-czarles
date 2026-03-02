@@ -91,6 +91,17 @@ const {
                 </template>
               </v-switch>
             </v-col>
+
+            <v-col cols="12" class="d-flex justify-center">
+              <v-switch v-model="formData.is_atm_payroll" class="ms-2" color="primary" hide-details>
+                <template #label>
+                  Is ATM Payroll?
+                  <span class="font-weight-black ms-1">
+                    {{ formData.is_atm_payroll ? 'Yes' : 'No' }}
+                  </span>
+                </template>
+              </v-switch>
+            </v-col>
           </v-row>
         </v-card-text>
 

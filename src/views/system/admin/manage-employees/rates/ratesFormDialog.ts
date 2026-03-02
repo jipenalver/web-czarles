@@ -54,7 +54,7 @@ export function useRatesFormDialog(
       await logsStore.addLog({
         type: 'rates',
         employee_id: formData.value.id,
-        description: `Updated employee rate to ${formData.value.daily_rate} and insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}. With Payroll Period: ${formData.value.payroll_start} - ${formData.value.payroll_end}.`,
+        description: `Updated employee rate to ${formData.value.daily_rate}, insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}, and ATM payroll status to ${formData.value.is_atm_payroll ? 'Yes' : 'No'}. With Payroll Period: ${formData.value.payroll_start} - ${formData.value.payroll_end}.`,
       })
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
