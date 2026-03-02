@@ -11,7 +11,6 @@ import { type TableOptions } from '@/utils/helpers/tables'
 import { useEmployeesStore } from '@/stores/employees'
 import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref, watch } from 'vue'
-import { useDate } from 'vuetify'
 
 export function useOvertimeFormDialog(
   props: {
@@ -22,8 +21,6 @@ export function useOvertimeFormDialog(
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
-  const date = useDate()
-
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
   const employeesStore = useEmployeesStore()
