@@ -107,6 +107,7 @@ export function useStatusFormDialog(
         ...newFormData
       } = {
         ...props.itemData,
+        id: props.itemData?.attendance_id as number,
         is_overtime_applied: true,
       }
 
