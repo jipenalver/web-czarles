@@ -4,7 +4,10 @@ import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/summary/pdf/M
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayroll'
 import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summary/pdf/monthlyPayrollPDF'
 import { useMonthlyPayrollCSV } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayrollCSV'
-import { monthNames, getDateRangeForMonth } from '@/views/system/admin/manage-payroll/payroll/helpers'
+import {
+  monthNames,
+  getDateRangeForMonth,
+} from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { calculateDaysWorkedForAdminByAmOnly } from './composables/daysWorkedCalculations'
 import { useDesignationsStore } from '@/stores/designations'
 import { useEmployeesStore } from '@/stores/employees'
@@ -92,7 +95,7 @@ watch([selectedMonth, selectedYear, dayFrom, dayTo, crossMonthEnabled], () => {
         selectedYear.value,
         selectedMonth.value,
         dayFrom.value,
-        dayTo.value
+        dayTo.value,
       )
       fromDate = range.fromDate
       toDate = range.toDate
@@ -136,7 +139,7 @@ const filteredMonthlyPayrollData = computed(() => {
   if (selectedPaymentOption.value !== null) {
     filtered = filtered.filter((item) => {
       // Find the employee in the store to get the payment option
-      const employee = employeesStore.employees.find(emp => emp.id === item.employee_id)
+      const employee = employeesStore.employees.find((emp) => emp.id === item.employee_id)
       return employee ? employee.is_atm_payroll === selectedPaymentOption.value : false
     })
   }
@@ -178,51 +181,63 @@ watch(
 
     // For each payroll item, check if employee is admin/field staff and compute days_worked_calculated
     await Promise.all(
-      monthlyPayrollData.value.map(async (item: { employee_id?: number; id?: number; days_worked_calculated?: number | null; is_admin?: boolean; is_field_staff?: boolean }) => {
-        try {
-          const employeeId = item.employee_id || item.id
-          if (!employeeId) return
+      monthlyPayrollData.value.map(
+        async (item: {
+          employee_id?: number
+          id?: number
+          days_worked_calculated?: number | null
+          is_admin?: boolean
+          is_field_staff?: boolean
+        }) => {
+          try {
+            const employeeId = item.employee_id || item.id
+            if (!employeeId) return
 
-          // Find the employee in the store to get the flags
-          const employee = employeesStore.employees.find(emp => emp.id === employeeId)
+            // Find the employee in the store to get the flags
+            const employee = employeesStore.employees.find((emp) => emp.id === employeeId)
 
-          // Set employee flags for proper late/undertime calculation
-          if (employee) {
-            item.is_admin = employee.is_admin || false
-            item.is_field_staff = employee.is_field_staff || false
+            // Set employee flags for proper late/undertime calculation
+            if (employee) {
+              item.is_admin = employee.is_admin || false
+              item.is_field_staff = employee.is_field_staff || false
 
-            if (employee.is_admin) {
-              console.log(`[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`)
+              if (employee.is_admin) {
+                console.log(
+                  `[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`,
+                )
 
-              const days = await calculateDaysWorkedForAdminByAmOnly(
-                employeeId,
-                monthStr,
-                fromDate,
-                toDate
-              )
-              item.days_worked_calculated = days
+                const days = await calculateDaysWorkedForAdminByAmOnly(
+                  employeeId,
+                  monthStr,
+                  fromDate,
+                  toDate,
+                )
+                item.days_worked_calculated = days
 
-              console.log(`[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`)
+                console.log(
+                  `[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`,
+                )
+              } else {
+                // Leave existing value or undefined for non-admins
+                item.days_worked_calculated = item.days_worked_calculated ?? null
+              }
             } else {
-              // Leave existing value or undefined for non-admins
+              // Employee not found in store, set defaults
+              item.is_admin = false
+              item.is_field_staff = false
               item.days_worked_calculated = item.days_worked_calculated ?? null
             }
-          } else {
-            // Employee not found in store, set defaults
+          } catch {
+            // ignore per-item errors
+            item.days_worked_calculated = item.days_worked_calculated ?? null
             item.is_admin = false
             item.is_field_staff = false
-            item.days_worked_calculated = item.days_worked_calculated ?? null
           }
-        } catch {
-          // ignore per-item errors
-          item.days_worked_calculated = item.days_worked_calculated ?? null
-          item.is_admin = false
-          item.is_field_staff = false
-        }
-      })
+        },
+      ),
     )
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // Reset to first page when data changes or search query changes
@@ -260,7 +275,7 @@ const handleExportCSV = () => {
     selectedYear.value,
     crossMonthEnabled.value,
     dayFrom.value,
-    dayTo.value
+    dayTo.value,
   )
 }
 </script>
@@ -362,7 +377,7 @@ const handleExportCSV = () => {
             ></v-select>
           </v-col>
 
-          <v-col cols="12" md="1">
+          <v-col cols="12" md="2">
             <v-select
               v-model="selectedYear"
               :items="Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)"
@@ -389,7 +404,6 @@ const handleExportCSV = () => {
               })`"
               variant="outlined"
               density="compact"
-              clearable
               :disabled="!crossMonthEnabled"
             ></v-select>
           </v-col>
@@ -401,7 +415,6 @@ const handleExportCSV = () => {
               :label="`To Day (${selectedMonth ? selectedMonth.slice(0, 3) : 'month'})`"
               variant="outlined"
               density="compact"
-              clearable
               :disabled="!crossMonthEnabled"
             ></v-select>
           </v-col>
@@ -440,7 +453,7 @@ const handleExportCSV = () => {
             ></v-select>
           </v-col>
 
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="2">
             <v-text-field
               v-model="searchQuery"
               label="Search Employee"
@@ -452,8 +465,6 @@ const handleExportCSV = () => {
             ></v-text-field>
           </v-col>
         </v-row>
-
-
       </v-card-text>
 
       <v-divider v-if="monthlyPayrollData.length > 0"></v-divider>
