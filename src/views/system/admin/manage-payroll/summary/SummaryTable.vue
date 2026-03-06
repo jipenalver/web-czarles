@@ -120,6 +120,9 @@ const searchQuery = ref('')
 // Designation filter state
 const selectedDesignation = ref<number | null>(null)
 
+// Payment option filter state
+const selectedPaymentOption = ref<boolean | null>(null)
+
 // Filtered items based on search query and designation
 const filteredMonthlyPayrollData = computed(() => {
   let filtered = monthlyPayrollData.value
@@ -127,6 +130,15 @@ const filteredMonthlyPayrollData = computed(() => {
   // Filter by designation
   if (selectedDesignation.value !== null) {
     filtered = filtered.filter((item) => item.designation_id === selectedDesignation.value)
+  }
+
+  // Filter by payment option
+  if (selectedPaymentOption.value !== null) {
+    filtered = filtered.filter((item) => {
+      // Find the employee in the store to get the payment option
+      const employee = employeesStore.employees.find(emp => emp.id === item.employee_id)
+      return employee ? employee.is_atm_payroll === selectedPaymentOption.value : false
+    })
   }
 
   // Filter by search query
@@ -223,6 +235,10 @@ watch(searchQuery, () => {
 })
 
 watch(selectedDesignation, () => {
+  currentPage.value = 1
+})
+
+watch(selectedPaymentOption, () => {
   currentPage.value = 1
 })
 
@@ -346,18 +362,17 @@ const handleExportCSV = () => {
             ></v-select>
           </v-col>
 
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="1">
             <v-select
               v-model="selectedYear"
               :items="Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)"
               label="Select Year"
               variant="outlined"
               density="compact"
-              prepend-inner-icon="mdi-calendar-range"
             ></v-select>
           </v-col>
 
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="1">
             <v-select
               v-model="dayFrom"
               :items="dayOptionsFrom"
@@ -374,20 +389,18 @@ const handleExportCSV = () => {
               })`"
               variant="outlined"
               density="compact"
-              prepend-inner-icon="mdi-calendar-start"
               clearable
               :disabled="!crossMonthEnabled"
             ></v-select>
           </v-col>
 
-          <v-col cols="12" md="2">
+          <v-col cols="12" md="1">
             <v-select
               v-model="dayTo"
               :items="dayOptionsTo"
               :label="`To Day (${selectedMonth ? selectedMonth.slice(0, 3) : 'month'})`"
               variant="outlined"
               density="compact"
-              prepend-inner-icon="mdi-calendar-end"
               clearable
               :disabled="!crossMonthEnabled"
             ></v-select>
@@ -412,6 +425,22 @@ const handleExportCSV = () => {
           </v-col>
 
           <v-col cols="12" md="2">
+            <v-select
+              v-model="selectedPaymentOption"
+              :items="[
+                { title: 'All Payment Options', value: null },
+                { title: 'ATM', value: true },
+                { title: 'Cash', value: false },
+              ]"
+              label="Payment Option"
+              variant="outlined"
+              density="compact"
+              prepend-inner-icon="mdi-credit-card"
+              clearable
+            ></v-select>
+          </v-col>
+
+          <v-col cols="12" md="3">
             <v-text-field
               v-model="searchQuery"
               label="Search Employee"
