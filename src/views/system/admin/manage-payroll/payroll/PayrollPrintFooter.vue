@@ -61,7 +61,7 @@ const formattedPrice = computed(() => {
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="pa-1">Revision No :</div>
 
-            <div class="pa-1">00</div>
+            <div class="pa-1">01</div>
           </div>
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="pa-1">Date Effective :</div>
