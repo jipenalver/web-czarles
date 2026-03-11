@@ -30,3 +30,5 @@ coverage
 *.tsbuildinfo
 github
 .env
+.vercel
+.env*.local
