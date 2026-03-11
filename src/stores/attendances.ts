@@ -87,7 +87,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   async function getAttendancesExport(
     tableOptions: TableOptions,
-    tableFilters: AttendanceTableFilter,
+    tableFilters: AttendanceTableFilter
   ) {
     const { column, order } = tablePagination(tableOptions, 'created_at', false)
 
@@ -102,12 +102,12 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   async function getAttendancesTable(
     tableOptions: TableOptions,
-    tableFilters: AttendanceTableFilter,
+    tableFilters: AttendanceTableFilter
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'created_at',
-      false,
+      false
     )
 
     let query = supabase
@@ -138,7 +138,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
           ? getDate(item.am_time_in)
           : item.pm_time_in
             ? getDate(item.pm_time_in)
-            : null,
+            : null
       }))
       .sort((a, b) => {
         const dateA = a.date ? new Date(a.date).getTime() : -Infinity
@@ -158,7 +158,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
   function getAttendancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, attendance_at, component_view }: AttendanceTableFilter,
+    { employee_id, attendance_at, component_view }: AttendanceTableFilter
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -167,7 +167,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
       if (startDate && endDate) {
         query = query.or(
-          `and(am_time_in.gte.${startDate},am_time_in.lt.${endDate}),and(am_time_in.is.null,pm_time_in.gte.${startDate},pm_time_in.lt.${endDate})`,
+          `and(am_time_in.gte.${startDate},am_time_in.lt.${endDate}),and(am_time_in.is.null,pm_time_in.gte.${startDate},pm_time_in.lt.${endDate})`
         )
       }
     }
@@ -210,6 +210,6 @@ export const useAttendancesStore = defineStore('attendances', () => {
     getAttendancesTable,
     addAttendance,
     updateAttendance,
-    deleteAttendance,
+    deleteAttendance
   }
 })

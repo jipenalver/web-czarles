@@ -4,7 +4,7 @@ import {
   adminItemsNav1,
   adminItemsNav2,
   adminItemsNav3,
-  adminItemsNav4,
+  adminItemsNav4
 } from '@/components/layout/navigation/sideNavigation'
 import { useUserRolesFormDialog } from './userRolesFormDialog'
 import AppAlert from '@/components/common/AppAlert.vue'

@@ -2,7 +2,7 @@
 import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
-  useAttendanceRequestsStore,
+  useAttendanceRequestsStore
 } from '@/stores/attendanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useAttendancesStore } from '@/stores/attendances'
@@ -20,7 +20,7 @@ export function useLeaveFormDialog(
     tableOptions: TableOptions
     tableFilters: AttendanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const date = useDate()
 
@@ -39,7 +39,7 @@ export function useLeaveFormDialog(
     leave_type: null,
     leave_reason: '',
     leave_status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
-    type: 'Leave' as 'Leave' | 'Overtime',
+    type: 'Leave' as 'Leave' | 'Overtime'
   }
   const formData = ref<Partial<AttendanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -56,7 +56,7 @@ export function useLeaveFormDialog(
         const { employee, ...itemData } = props.itemData as AttendanceRequest
         formData.value = { ...itemData }
       } else formData.value = { ...formDataDefault }
-    },
+    }
   )
 
   watch(
@@ -68,7 +68,7 @@ export function useLeaveFormDialog(
         await attendancesStore.getAttendances(formData.value.employee_id)
 
       formAction.value = { ...formActionDefault, formProcess: false }
-    },
+    }
   )
 
   // Actions
@@ -84,7 +84,7 @@ export function useLeaveFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Leave Request' : 'Applied for Leave'}.`
@@ -97,13 +97,13 @@ export function useLeaveFormDialog(
           message: `<p>Good Day!</p>
             <p>A leave request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${date.format(formData.value.date as string, 'fullDate')}</strong> as <strong>${formData.value.leave_type}</strong> with reason <strong>${formData.value.leave_reason}</strong>.</p>
             <p>Please review the request at your earliest convenience.</p>
-            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`,
+            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`
         })
       }
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,
-        props.tableFilters,
+        props.tableFilters
       )
 
       setTimeout(() => {
@@ -121,7 +121,7 @@ export function useLeaveFormDialog(
         formMessage: message,
         formStatus: 400,
         formProcess: false,
-        formAlert: true,
+        formAlert: true
       }
       return true
     }
@@ -129,7 +129,7 @@ export function useLeaveFormDialog(
     const attendance = attendancesStore.attendances.find(
       (attendance) =>
         getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
-        attendance.employee_id === formData.value.employee_id,
+        attendance.employee_id === formData.value.employee_id
     )
 
     const isAttendanceComplete =
@@ -138,7 +138,7 @@ export function useLeaveFormDialog(
         attendance.am_time_in,
         attendance.am_time_out,
         attendance.pm_time_in,
-        attendance.pm_time_out,
+        attendance.pm_time_out
       ].every((time) => time !== null)
 
     if (isAttendanceComplete)
@@ -150,7 +150,7 @@ export function useLeaveFormDialog(
 
     if (isAttendanceHasLeave)
       return setError(
-        'Cannot apply for leave - partial or full leave already recorded for this date.',
+        'Cannot apply for leave - partial or full leave already recorded for this date.'
       )
 
     if (!formData.value.is_am_leave && !formData.value.is_pm_leave)
@@ -188,6 +188,6 @@ export function useLeaveFormDialog(
     onSubmit,
     onFormSubmit,
     onFormReset,
-    employeesStore,
+    employeesStore
   }
 }

@@ -25,7 +25,7 @@ const onLogout = async () => {
   formAction.value = {
     ...formActionDefault,
     formMessage: 'Logout Successful.',
-    formAlert: true,
+    formAlert: true
   }
 
   router.replace('/')
@@ -54,7 +54,7 @@ const onLogout = async () => {
           <span class="text-h5">
             {{
               getAvatarText(
-                authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+                authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname
               )
             }}
           </span>
@@ -82,7 +82,7 @@ const onLogout = async () => {
                 <span class="text-h5">
                   {{
                     getAvatarText(
-                      authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+                      authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname
                     )
                   }}
                 </span>

@@ -5,7 +5,7 @@ import type { TableData } from './payrollTableDialog'
 import type { HolidayWithAttendance } from './computation/holidays'
 export function safeCurrencyFormat(
   amount: number | string | null | undefined,
-  formatCurrency: (n: number) => string,
+  formatCurrency: (n: number) => string
 ): string {
   const numAmount = Number(amount) || 0
   return formatCurrency(numAmount)
@@ -24,7 +24,7 @@ export const monthNames = [
   'September',
   'October',
   'November',
-  'December',
+  'December'
 ]
 
 /**
@@ -33,7 +33,7 @@ export const monthNames = [
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
-    currency: 'PHP',
+    currency: 'PHP'
   }).format(value)
 }
 
@@ -119,7 +119,7 @@ export const getMonthDateRangeNextMonth = (year: number, monthName: string): str
   const startStr = start.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric',
+    year: 'numeric'
   })
   const endStr = end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
   return `${startStr} to ${endStr}`
@@ -153,7 +153,7 @@ export const getMonthShortText = (date: Date | string | null) => {
     'SEP.',
     'OCT.',
     'NOV.',
-    'DEC.',
+    'DEC.'
   ]
   return months[dateValue.getMonth()]
 }
@@ -216,7 +216,7 @@ export function onCrossMonthChange(
   dayFrom: Ref<number | null>,
   dayTo: Ref<number | null>,
   payrollStart?: number | null,
-  payrollEnd?: number | null,
+  payrollEnd?: number | null
 ) {
   if (!val) {
     dayFrom.value = null
@@ -262,7 +262,7 @@ export function getDateRangeForMonth(
   year: number | undefined,
   monthName: string,
   fromDay?: number | null,
-  toDay?: number | null,
+  toDay?: number | null
 ) {
   const y = year || new Date().getFullYear()
   const monthIndex = monthNames.findIndex((m) => m === monthName)
@@ -319,7 +319,7 @@ export function getDateRangeForMonthNoCross(
   year: number | undefined,
   monthName: string,
   fromDay?: number | null,
-  toDay?: number | null,
+  toDay?: number | null
 ) {
   const y = year || new Date().getFullYear()
   const monthIndex = monthNames.findIndex((m) => m === monthName)
@@ -361,7 +361,7 @@ export function getDateRangeForMonthNoCross(
 export async function reloadAllPayrollFunctions(
   payrollPrintRef: Ref<unknown | null>,
   payrollPrintKey: Ref<number>,
-  isReloadingData: Ref<boolean>,
+  isReloadingData: Ref<boolean>
 ) {
   try {
     // mark loading
@@ -392,7 +392,7 @@ export async function reloadAllPayrollFunctions(
  */
 export async function manualRefreshPayroll(
   payrollPrintRef: Ref<unknown | null>,
-  isReloadingData: Ref<boolean>,
+  isReloadingData: Ref<boolean>
 ) {
   if (!payrollPrintRef.value) return
   try {
@@ -411,7 +411,7 @@ export async function manualRefreshPayroll(
       inst?.loadTrips?.() ?? Promise.resolve(),
       inst?.fetchEmployeeHolidays?.() ?? Promise.resolve(),
       inst?.updateOverallOvertime?.() ?? Promise.resolve(),
-      inst?.updateEmployeeDeductions?.() ?? Promise.resolve(),
+      inst?.updateEmployeeDeductions?.() ?? Promise.resolve()
     ])
 
     // Force recalculation if available
@@ -479,7 +479,7 @@ export function onView(options: {
     chosenMonth: chosenMonth.value,
     crossMonthEnabled: crossMonthEnabled.value,
     dayFrom: dayFrom.value,
-    dayTo: dayTo.value,
+    dayTo: dayTo.value
   })
 
   try {
@@ -513,7 +513,7 @@ export async function preloadEmployeesAttendance(
   employeeIds: number[],
   dateString: string,
   fromDateISO?: string,
-  toDateISO?: string,
+  toDateISO?: string
 ): Promise<void> {
   // Dynamic import to avoid circular dependency
   const { getEmployeesAttendanceBatch } = await import('./computation/computation')

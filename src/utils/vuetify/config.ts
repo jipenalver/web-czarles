@@ -7,8 +7,8 @@ export const customTheme = {
       background: '#F7F7F9',
       'on-background': '#262B43',
       surface: '#fff',
-      'on-surface': '#262B43',
-    },
+      'on-surface': '#262B43'
+    }
   },
   dark: {
     dark: true,
@@ -18,34 +18,34 @@ export const customTheme = {
       background: '#282A42',
       'on-background': '#EAEAFF',
       surface: '#30334E',
-      'on-surface': '#EAEAFF',
-    },
-  },
+      'on-surface': '#EAEAFF'
+    }
+  }
 }
 
 export const customDefaults = {
   VBtn: {
-    class: 'font-weight-bold',
+    class: 'font-weight-bold'
   },
   VTextField: {
-    variant: 'outlined',
+    variant: 'outlined'
   },
   VTextarea: {
-    variant: 'outlined',
+    variant: 'outlined'
   },
   VAutocomplete: {
-    variant: 'outlined',
+    variant: 'outlined'
   },
   VSelect: {
-    variant: 'outlined',
+    variant: 'outlined'
   },
   VCombobox: {
-    variant: 'outlined',
+    variant: 'outlined'
   },
   VFileInput: {
-    variant: 'outlined',
+    variant: 'outlined'
   },
   VDateInput: {
-    variant: 'outlined',
-  },
+    variant: 'outlined'
+  }
 }

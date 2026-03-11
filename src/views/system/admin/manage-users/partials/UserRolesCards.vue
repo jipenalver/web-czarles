@@ -13,7 +13,7 @@ const {
   onUpdate,
   onDelete,
   onConfirmDelete,
-  userRolesStore,
+  userRolesStore
 } = useUserRolesCards()
 
 const getRolePermission = (...args: string[]) => {
@@ -39,14 +39,14 @@ const getRolePermission = (...args: string[]) => {
               v-if="
                 getRolePermission(
                   item.is_approver ? 'Approver' : '',
-                  item.is_requestor ? 'Requestor' : '',
+                  item.is_requestor ? 'Requestor' : ''
                 ).length > 0
               "
             >
               <v-chip
                 v-for="permission in getRolePermission(
                   item.is_approver ? 'Approver' : '',
-                  item.is_requestor ? 'Requestor' : '',
+                  item.is_requestor ? 'Requestor' : ''
                 )"
                 :key="permission"
                 class="font-weight-bold me-1"

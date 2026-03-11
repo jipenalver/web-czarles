@@ -120,6 +120,6 @@ export const useBenefitsStore = defineStore('benefits', () => {
     updateBenefit,
     deleteBenefit,
     getDeductionsById,
-    updateDeductionsById,
+    updateDeductionsById
   }
 })

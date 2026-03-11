@@ -7,16 +7,24 @@ import L from 'leaflet'
 import { useHeroComputed } from '@/utils/helpers/style'
 import { useForm, type GenericObject } from 'vee-validate'
 import * as yup from 'yup'
-import { useContact, type SendMessageProps } from '@/views/landing/contact/composables/contact.composable'
+import {
+  useContact,
+  type SendMessageProps
+} from '@/views/landing/contact/composables/contact.composable'
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
   email: yup.string().email('Invalid email address').required('Email is required'),
   subject: yup.string().required('Subject is required'),
-  message: yup.string().min(10, 'Message must be at least 10 characters').required('Message is required'),
+  message: yup
+    .string()
+    .min(10, 'Message must be at least 10 characters')
+    .required('Message is required')
 })
 
-const { handleSubmit, defineField, errors, resetForm } = useForm<SendMessageProps>({ validationSchema: schema })
+const { handleSubmit, defineField, errors, resetForm } = useForm<SendMessageProps>({
+  validationSchema: schema
+})
 
 const heroComputed = useHeroComputed()
 const { mapRef, lat, lng, mobile, sendMessage } = useContact()
@@ -28,7 +36,9 @@ const alertStatus = ref(0)
 const onSubmit = handleSubmit(async (values: GenericObject & SendMessageProps) => {
   const data = await sendMessage(values)
 
-  alertMessage.value = data?.success ? 'Message sent! We will get back to you shortly.' : 'Failed to send message. Please try again later.'
+  alertMessage.value = data?.success
+    ? 'Message sent! We will get back to you shortly.'
+    : 'Failed to send message. Please try again later.'
   alertStatus.value = data?.success ? 200 : 500
   alertVisible.value = true
 
@@ -50,11 +60,11 @@ onMounted(() => {
   if (!mapRef.value) return
   const map = L.map(mapRef.value, { zoomControl: true, attributionControl: false }).setView(
     [lat, lng],
-    15,
+    15
   )
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map)
 
   // use a custom SVG pin to avoid default icon asset issues
@@ -71,7 +81,7 @@ onMounted(() => {
     html: pinHtml,
     className: 'custom-pin',
     iconSize: [46, 58],
-    iconAnchor: [23, 58],
+    iconAnchor: [23, 58]
   })
   L.marker([lat, lng], { icon: pinIcon }).addTo(map).bindPopup('Our Location')
 
@@ -92,7 +102,13 @@ onMounted(() => {
       <div class="text-center white--text" style="max-width: 900px">
         <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
           <h1
-            :class="[heroComputed.titleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']"
+            :class="[
+              heroComputed.titleClass,
+              'font-weight-bold',
+              'mb-4',
+              'text-white',
+              'animate-slide-up'
+            ]"
           >
             Contact
           </h1>
@@ -103,7 +119,7 @@ onMounted(() => {
               'text-white',
               'font-weight-light',
               'animate-slide-up',
-              'delay-1',
+              'delay-1'
             ]"
           >
             Get in touch with our team for inquiries, support, or partnerships.
@@ -187,10 +203,12 @@ onMounted(() => {
             </v-row>
 
             <v-card :class="[heroComputed.cardPadding, 'contact-form-card']" elevation="2">
-              <div :class="[heroComputed.contentTitleClass, 'mb-4', 'font-weight-bold']">Get in Touch</div>
+              <div :class="[heroComputed.contentTitleClass, 'mb-4', 'font-weight-bold']">
+                Get in Touch
+              </div>
               <div :class="[heroComputed.bodyTextClass, 'mb-4']">
-                Have a project in mind or need a quote? Fill out the form and our team will get
-                back to you as soon as possible.
+                Have a project in mind or need a quote? Fill out the form and our team will get back
+                to you as soon as possible.
               </div>
 
               <v-row>
@@ -239,9 +257,7 @@ onMounted(() => {
                   />
                 </v-col>
                 <v-col cols="12" class="d-flex align-center justify-space-between">
-                  <v-btn color="orange" class="white--text" @click="onSubmit"
-                    >Send Message</v-btn
-                  >
+                  <v-btn color="orange" class="white--text" @click="onSubmit">Send Message</v-btn>
                   <div class="socials">
                     <v-icon small class="mx-2">mdi-twitter</v-icon>
                     <v-icon small class="mx-2">mdi-facebook</v-icon>

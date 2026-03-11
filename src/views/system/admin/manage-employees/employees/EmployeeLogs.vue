@@ -23,7 +23,7 @@ onMounted(async () => {
       props.itemId,
       props.type,
       props.attendanceRequestId,
-      props.cashAdvanceRequestId,
+      props.cashAdvanceRequestId
     )
 })
 </script>

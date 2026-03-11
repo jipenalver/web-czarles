@@ -2,7 +2,7 @@ import { getPaidLeaveDaysForMonth } from '@/views/system/admin/manage-payroll/pa
 import { getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 import {
   fetchHolidaysByRange,
-  fetchHolidaysByDateString,
+  fetchHolidaysByDateString
 } from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
 
 /**
@@ -13,7 +13,7 @@ export async function countActualAttendanceOnRegularHolidays(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string,
+  toDate?: string
 ): Promise<number> {
   try {
     // Get attendance data
@@ -21,7 +21,7 @@ export async function countActualAttendanceOnRegularHolidays(
       employeeId,
       dateStringForCalculation.substring(0, 7),
       fromDate,
-      toDate,
+      toDate
     )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -45,7 +45,7 @@ export async function countActualAttendanceOnRegularHolidays(
 
       // Check if this date is a Regular Holiday
       const isRegularHoliday = holidays.some(
-        (h) => h.holiday_at === attendanceDate && h.type?.toUpperCase().includes('RH'),
+        (h) => h.holiday_at === attendanceDate && h.type?.toUpperCase().includes('RH')
       )
 
       if (isRegularHoliday) {
@@ -59,7 +59,7 @@ export async function countActualAttendanceOnRegularHolidays(
         if (hasAnyAttendance) {
           actualRHAttendanceCount += 1
           console.log(
-            `[RH Actual Attendance] Employee ${employeeId} worked on Regular Holiday: ${attendanceDate}`,
+            `[RH Actual Attendance] Employee ${employeeId} worked on Regular Holiday: ${attendanceDate}`
           )
         }
       }
@@ -81,7 +81,7 @@ export async function calculateDaysWorked(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string,
+  toDate?: string
 ): Promise<number> {
   try {
     // Get attendance data using standard fetch for all employees
@@ -89,7 +89,7 @@ export async function calculateDaysWorked(
       employeeId,
       dateStringForCalculation.substring(0, 7),
       fromDate,
-      toDate,
+      toDate
     )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -101,7 +101,7 @@ export async function calculateDaysWorked(
       dateStringForCalculation,
       employeeId,
       fromDate,
-      toDate,
+      toDate
     )
 
     // Fetch holidays for the date range to check for Regular Holidays
@@ -115,14 +115,14 @@ export async function calculateDaysWorked(
     // Count Regular Holidays in the period - ALL employees get these days
     const regularHolidaysCount = holidays.filter((h) => h.type?.toUpperCase().includes('RH')).length
     console.log(
-      `[RH Days] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`,
+      `[RH Days] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`
     )
 
     let employeePresentDays = 0
 
     // Track which dates are regular holidays for exclusion from regular attendance counting
     const regularHolidayDates = new Set(
-      holidays.filter((h) => h.type?.toUpperCase().includes('RH')).map((h) => h.holiday_at),
+      holidays.filter((h) => h.type?.toUpperCase().includes('RH')).map((h) => h.holiday_at)
     )
 
     // Use the same logic as payrollComputation.ts
@@ -184,7 +184,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string,
+  toDate?: string
 ): Promise<number> {
   try {
     // Fetch holidays for the date range first
@@ -198,7 +198,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
     // Count Regular Holidays in the period - ALL employees get these days
     const regularHolidaysCount = holidays.filter((h) => h.type?.toUpperCase().includes('RH')).length
     console.log(
-      `[RH Days - Admin] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`,
+      `[RH Days - Admin] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`
     )
 
     // Use standard attendance fetch but apply admin-specific logic
@@ -206,7 +206,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
       employeeId,
       dateStringForCalculation.substring(0, 7),
       fromDate,
-      toDate,
+      toDate
     )
 
     // Get paid leave days
@@ -214,7 +214,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
       dateStringForCalculation,
       employeeId,
       fromDate,
-      toDate,
+      toDate
     )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -226,7 +226,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
 
     // Track which dates are regular holidays for exclusion from regular attendance counting
     const regularHolidayDates = new Set(
-      holidays.filter((h) => h.type?.toUpperCase().includes('RH')).map((h) => h.holiday_at),
+      holidays.filter((h) => h.type?.toUpperCase().includes('RH')).map((h) => h.holiday_at)
     )
 
     attendances.forEach((attendance) => {
@@ -257,7 +257,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
   } catch (error) {
     console.error(
       '[calculateDaysWorkedForAdminByAmOnly] Error calculating days worked for admin:',
-      error,
+      error
     )
     return 0
   }

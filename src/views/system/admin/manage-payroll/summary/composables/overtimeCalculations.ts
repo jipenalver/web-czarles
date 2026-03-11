@@ -1,7 +1,7 @@
 import {
   getEmployeeAttendanceById,
   getEmployeeAttendanceForEmployee55,
-  computeOvertimeHours,
+  computeOvertimeHours
 } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 
 /**
@@ -13,7 +13,7 @@ export async function calculateOvertimeHours(
   dateStringForCalculation: string,
   fromDate?: string,
   toDate?: string,
-  isAdmin: boolean = false,
+  isAdmin: boolean = false
 ): Promise<number> {
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
@@ -22,13 +22,13 @@ export async function calculateOvertimeHours(
           employeeId,
           dateStringForCalculation.substring(0, 7),
           fromDate,
-          toDate,
+          toDate
         )
       : await getEmployeeAttendanceById(
           employeeId,
           dateStringForCalculation.substring(0, 7),
           fromDate,
-          toDate,
+          toDate
         )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {

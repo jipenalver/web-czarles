@@ -51,7 +51,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
   async function getCashAdvancesExport(
     tableOptions: TableOptions,
-    tableFilters: CashAdvanceTableFilter,
+    tableFilters: CashAdvanceTableFilter
   ) {
     const { column, order } = tablePagination(tableOptions, 'request_at', false)
 
@@ -69,12 +69,12 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
 
   async function getCashAdvancesTable(
     tableOptions: TableOptions,
-    tableFilters: CashAdvanceTableFilter,
+    tableFilters: CashAdvanceTableFilter
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'request_at',
-      false,
+      false
     )
 
     let query = supabase
@@ -104,7 +104,7 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
   function getCashAdvancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, request_at }: CashAdvanceTableFilter,
+    { employee_id, request_at }: CashAdvanceTableFilter
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -145,6 +145,6 @@ export const useCashAdvancesStore = defineStore('cashAdvances', () => {
     getCashAdvancesTable,
     addCashAdvance,
     updateCashAdvance,
-    deleteCashAdvance,
+    deleteCashAdvance
   }
 })

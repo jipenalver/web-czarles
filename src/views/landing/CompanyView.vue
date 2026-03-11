@@ -2,7 +2,7 @@
 import LandingLayout from '@/components/landing/LandingLayout.vue'
 import { ref, onMounted, type Ref } from 'vue'
 import { useHeroComputed } from '@/utils/helpers/style'
-import { coreValues } from '@/views/landing/company/data/company.data';
+import { coreValues } from '@/views/landing/company/data/company.data'
 
 const heroComputed = useHeroComputed()
 
@@ -11,24 +11,24 @@ const missionVisible = ref(false)
 const valuesVisible = ref(false)
 const ctaVisible = ref(false)
 
- const stateRefs: Record<string, Ref<boolean>> = {                                                                                                                        
-    isVisible,    
-    missionVisible,
-    valuesVisible,
-    ctaVisible,
-  }
+const stateRefs: Record<string, Ref<boolean>> = {
+  isVisible,
+  missionVisible,
+  valuesVisible,
+  ctaVisible
+}
 
 const delayPerState: Record<string, number> = {
   isVisible: 300,
   missionVisible: 800,
   valuesVisible: 1200,
-  ctaVisible: 1600,
+  ctaVisible: 1600
 }
 
 onMounted(() => {
-  Object.entries(delayPerState).forEach(([key, delay]) => {                                                                                                              
+  Object.entries(delayPerState).forEach(([key, delay]) => {
     setTimeout(() => {
-      stateRefs[key].value = true                                                                                                                                                   
+      stateRefs[key].value = true
     }, Number(delay))
   })
 })
@@ -50,7 +50,7 @@ onMounted(() => {
               'mb-4',
               'text-white',
               'animate-hero-title',
-              { 'animate-hero-title-visible': isVisible },
+              { 'animate-hero-title-visible': isVisible }
             ]"
           >
             About C'zarles
@@ -62,7 +62,7 @@ onMounted(() => {
               'text-white',
               'font-weight-light',
               'animate-hero-subtitle',
-              { 'animate-hero-subtitle-visible': isVisible },
+              { 'animate-hero-subtitle-visible': isVisible }
             ]"
           >
             Building Excellence. Delivering Dreams. Creating Lasting Value.

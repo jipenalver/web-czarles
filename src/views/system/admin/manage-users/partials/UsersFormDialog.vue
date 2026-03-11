@@ -3,7 +3,7 @@ import {
   emailValidator,
   lengthMinValidator,
   passwordValidator,
-  requiredValidator,
+  requiredValidator
 } from '@/utils/validators'
 import { type TableOptions } from '@/utils/helpers/tables'
 import AppAlert from '@/components/common/AppAlert.vue'

@@ -11,10 +11,10 @@ export function useHolidaysTable() {
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
-    year: new Date().getFullYear().toString(),
+    year: new Date().getFullYear().toString()
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -83,6 +83,6 @@ export function useHolidaysTable() {
     onConfirmDelete,
     onFilterItems,
     onLoadItems,
-    holidaysStore,
+    holidaysStore
   }
 }

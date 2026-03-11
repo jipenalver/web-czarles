@@ -27,18 +27,18 @@ export function useTripsTable() {
     { title: 'No. of Trips', key: 'trip_no', align: 'start' },
     { title: 'Per Trip', key: 'per_trip', align: 'start' },
     { title: 'Amount', key: 'amount', sortable: false, align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
     employee_id: null,
-    trip_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    trip_at: getFirstAndLastDateOfMonth() as Date[] | null
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -128,7 +128,7 @@ export function useTripsTable() {
           prepareCSV(item.km.toString()),
           prepareCSV(item.trip_no.toString()),
           prepareCSV(getMoneyText(item.per_trip)),
-          prepareCSV(getMoneyText(item.trip_no * item.per_trip)),
+          prepareCSV(getMoneyText(item.trip_no * item.per_trip))
         ]
 
         return csvData.join(',')
@@ -171,6 +171,6 @@ export function useTripsTable() {
     tripsStore,
     employeesStore,
     isLoadingPDF,
-    formActionPDF,
+    formActionPDF
   }
 }

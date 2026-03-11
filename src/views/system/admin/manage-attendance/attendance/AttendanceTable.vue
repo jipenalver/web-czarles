@@ -37,7 +37,7 @@ const {
   hasAttendanceImage,
   onExportCSV,
   attendancesStore,
-  employeesStore,
+  employeesStore
 } = useAttendanceTable(props)
 </script>
 

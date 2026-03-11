@@ -17,33 +17,33 @@ const tabsItems = [
   {
     icon: 'mdi-cash-plus',
     text: 'Adjustments',
-    value: 'adjustments',
+    value: 'adjustments'
   },
   {
     icon: 'mdi-highway',
     text: 'Trips',
-    value: 'trips',
+    value: 'trips'
   },
   {
     icon: 'mdi-fuel',
     text: 'Utilizations',
-    value: 'utilizations',
+    value: 'utilizations'
   },
   {
     icon: 'mdi-cash-multiple',
     text: 'Allowances',
-    value: 'allowances',
+    value: 'allowances'
   },
   {
     icon: 'mdi-dump-truck',
     text: 'Units',
-    value: 'units',
+    value: 'units'
   },
   {
     icon: 'mdi-office-building-marker',
     text: 'Locations',
-    value: 'locations',
-  },
+    value: 'locations'
+  }
 ]
 
 const tabWindow = ref('adjustments')

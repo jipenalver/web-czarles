@@ -15,7 +15,7 @@ export function usePayrollPrintDialog(
       year?: number
     }
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   // States
   const formAction = ref({ ...formActionDefault })
@@ -48,7 +48,7 @@ export function usePayrollPrintDialog(
 
   watch(
     () => propsGetter().isDialogVisible,
-    async () => {},
+    async () => {}
   )
   /* https://www.npmjs.com/package/html2pdf.js/v/0.9.0 */
   // Actions
@@ -64,7 +64,7 @@ export function usePayrollPrintDialog(
     if (isDarkMode) {
       // Trigger theme toggle by simulating click on theme button
       const themeToggleButton = document.querySelector(
-        'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
       )
       if (themeToggleButton) {
         ;(themeToggleButton as HTMLButtonElement).click()
@@ -100,14 +100,14 @@ export function usePayrollPrintDialog(
         top: miniPayrollSection?.style.top || '',
         left: miniPayrollSection?.style.left || '',
         width: miniPayrollSection?.style.width || '',
-        height: miniPayrollSection?.style.height || '',
+        height: miniPayrollSection?.style.height || ''
       },
       mainContainer: null as {
         transform: string
         transformOrigin: string
         position: string
         left: string
-      } | null,
+      } | null
     }
 
     const mainContainer = payrollElement.querySelector('.v-container') as HTMLElement
@@ -116,7 +116,7 @@ export function usePayrollPrintDialog(
         transform: mainContainer.style.transform || '',
         transformOrigin: mainContainer.style.transformOrigin || '',
         position: mainContainer.style.position || '',
-        left: mainContainer.style.left || '',
+        left: mainContainer.style.left || ''
       }
     }
 
@@ -179,13 +179,13 @@ export function usePayrollPrintDialog(
           useCORS: true,
           allowTaint: true,
           width: 1400, // Larger width para sa bigger content
-          height: 1850, // Larger height
+          height: 1850 // Larger height
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'portrait',
-        },
+          orientation: 'portrait'
+        }
       })
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -193,7 +193,7 @@ export function usePayrollPrintDialog(
         formProcess: false,
         formAlert: true,
         formMessage: 'Error occurred while generating PDF. Please try again.',
-        formStatus: 500,
+        formStatus: 500
       }
     } finally {
       // Reset all styles to original values
@@ -209,7 +209,7 @@ export function usePayrollPrintDialog(
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -246,6 +246,6 @@ export function usePayrollPrintDialog(
     formAction,
     isPrinting,
     onPrint,
-    onDialogClose,
+    onDialogClose
   }
 }

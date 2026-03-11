@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type AttendanceRequest,
-  type AttendanceRequestTableFilter,
+  type AttendanceRequestTableFilter
 } from '@/stores/attendanceRequests'
 import { getDateWithWeekday } from '@/utils/helpers/dates'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -23,7 +23,7 @@ const { mdAndDown } = useDisplay()
 
 const { formData, formAction, refVForm, onFormSubmit, onFormReset } = useStatusFormDialog(
   props,
-  emit,
+  emit
 )
 </script>
 

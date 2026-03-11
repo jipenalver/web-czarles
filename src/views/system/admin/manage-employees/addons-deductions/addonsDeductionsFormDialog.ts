@@ -1,7 +1,7 @@
 import {
   type EmployeeDeduction,
   type EmployeeDeductionForm,
-  useBenefitsStore,
+  useBenefitsStore
 } from '@/stores/benefits'
 import { type EmployeeTableFilter, useEmployeesStore } from '@/stores/employees'
 import { formActionDefault } from '@/utils/helpers/constants'
@@ -16,7 +16,7 @@ export function useAddonsDeductionsFormDialog(
     tableOptions: TableOptions
     tableFilters: EmployeeTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const employeesStore = useEmployeesStore()
   const benefitsStore = useBenefitsStore()
@@ -37,7 +37,7 @@ export function useAddonsDeductionsFormDialog(
       const benefitsData = await benefitsStore.getDeductionsById(props.itemId as number)
 
       const sortedBenefits = benefitsData.sort((a, b) =>
-        a.benefit.benefit.localeCompare(b.benefit.benefit),
+        a.benefit.benefit.localeCompare(b.benefit.benefit)
       )
 
       const addons: EmployeeDeductionForm = { amount: [], is_quincena: [] }
@@ -55,7 +55,7 @@ export function useAddonsDeductionsFormDialog(
 
       formAddons.value = addons
       formDeductions.value = deductions
-    },
+    }
   )
 
   // Actions
@@ -67,14 +67,14 @@ export function useAddonsDeductionsFormDialog(
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
         amount: formAddons.value.amount[index] || undefined,
-        is_quincena: formAddons.value.is_quincena[index],
+        is_quincena: formAddons.value.is_quincena[index]
       })),
       ...benefitsStore.deductions.map((benefit, index) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
         amount: formDeductions.value.amount[index] || undefined,
-        is_quincena: formDeductions.value.is_quincena[index],
-      })),
+        is_quincena: formDeductions.value.is_quincena[index]
+      }))
     ]
 
     const { data, error } = await benefitsStore.updateDeductionsById(formData.value)
@@ -84,7 +84,7 @@ export function useAddonsDeductionsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully Updated Employee Deduction(s).`
@@ -98,7 +98,7 @@ export function useAddonsDeductionsFormDialog(
       await logsStore.addLog({
         type: 'benefits',
         employee_id: props.itemId,
-        description,
+        description
       })
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
@@ -139,6 +139,6 @@ export function useAddonsDeductionsFormDialog(
     onSubmit,
     onFormSubmit,
     onFormReset,
-    benefitsStore,
+    benefitsStore
   }
 }

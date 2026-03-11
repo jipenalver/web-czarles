@@ -21,18 +21,18 @@ export function useCashAdjustmentsTable() {
     { title: 'Remarks', key: 'remarks', align: 'start' },
     { title: 'Amount', key: 'amount', align: 'center' },
     { title: 'Type', key: 'is_deduction', align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
     employee_id: null,
-    adjustment_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    adjustment_at: getFirstAndLastDateOfMonth() as Date[] | null
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -96,7 +96,7 @@ export function useCashAdjustmentsTable() {
 
     await cashAdjustmentsStore.getCashAdjustmentsTable(
       { page, itemsPerPage, sortBy },
-      tableFilters.value,
+      tableFilters.value
     )
 
     tableOptions.value.isLoading = false
@@ -122,7 +122,7 @@ export function useCashAdjustmentsTable() {
           prepareCSV(item.name),
           prepareCSV(item.remarks),
           prepareCSV(getMoneyText(item.amount)),
-          item.is_deduction ? 'Deduction' : 'Add-on',
+          item.is_deduction ? 'Deduction' : 'Add-on'
         ]
 
         return csvData.join(',')
@@ -158,6 +158,6 @@ export function useCashAdjustmentsTable() {
     onLoadItems,
     onExportCSV,
     cashAdjustmentsStore,
-    employeesStore,
+    employeesStore
   }
 }

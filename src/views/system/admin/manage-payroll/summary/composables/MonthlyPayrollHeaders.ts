@@ -5,60 +5,60 @@ export const tableHeaders: TableHeader[] = [
     title: 'Employee',
     key: 'employee_name',
     align: 'start',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Daily Rate',
     key: 'daily_rate',
     align: 'end',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Days Worked',
     key: 'days_worked',
     align: 'center',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Basic Pay',
     key: 'basic_pay',
     align: 'end',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Overtime',
     key: 'overtime_pay',
     align: 'end',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Trips',
     key: 'trips_pay',
     align: 'end',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Holidays',
     key: 'holidays_pay',
     align: 'end',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Gross Pay',
     key: 'gross_pay',
     align: 'end',
-    sortable: true,
+    sortable: true
   },
   {
     title: 'Deductions',
     key: 'deductions',
     align: 'end',
-    sortable: false,
+    sortable: false
   },
   {
     title: 'Net Pay',
     key: 'net_pay',
     align: 'end',
-    sortable: true,
-  },
+    sortable: true
+  }
 ]

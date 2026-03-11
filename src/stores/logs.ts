@@ -34,7 +34,7 @@ export const useLogsStore = defineStore('logs', () => {
     employeeId: number,
     type: string | null = null,
     attendance_request_id: number | null = null,
-    cash_advance_request_id: number | null = null,
+    cash_advance_request_id: number | null = null
   ) {
     let query = supabase.from('logs').select().eq('employee_id', employeeId).eq('type', type)
 
@@ -53,7 +53,7 @@ export const useLogsStore = defineStore('logs', () => {
       ...logData,
       user_id: authUserStore.userData?.id as string,
       user_avatar: authUserStore.userData?.avatar || null,
-      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname
     }
 
     return await supabase.from('logs').insert(preparedData).select()
@@ -65,6 +65,6 @@ export const useLogsStore = defineStore('logs', () => {
     logsByEmployee,
     getLogs,
     getLogsById,
-    addLog,
+    addLog
   }
 })

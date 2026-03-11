@@ -9,7 +9,7 @@ export function usePasswordForm() {
   // States
   const formDataDefault = {
     password: '',
-    password_confirmation: '',
+    password_confirmation: ''
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -26,13 +26,13 @@ export function usePasswordForm() {
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formAlert: true,
+        formAlert: true
       }
     } else if (data) {
       formAction.value = {
         ...formActionDefault,
         formMessage: 'Successfully Updated Password.',
-        formAlert: true,
+        formAlert: true
       }
 
       if (!authUserStore.userData?.is_admin)

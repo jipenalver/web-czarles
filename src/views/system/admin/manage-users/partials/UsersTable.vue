@@ -16,38 +16,38 @@ const tableHeaders: TableHeader[] = [
     title: 'Fullname',
     key: 'lastname',
     sortable: false,
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Email',
     key: 'email',
     sortable: false,
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Phone',
     key: 'phone',
     sortable: false,
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Role',
     key: 'user_role',
     sortable: false,
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Registered Date',
     key: 'created_at',
     sortable: false,
-    align: 'center',
+    align: 'center'
   },
   {
     title: 'Actions',
     key: 'actions',
     sortable: false,
-    align: 'center',
-  },
+    align: 'center'
+  }
 ]
 
 const {
@@ -62,7 +62,7 @@ const {
   onConfirmDelete,
   onLoadItems,
   usersStore,
-  authUserStore,
+  authUserStore
 } = useUsersTable()
 </script>
 

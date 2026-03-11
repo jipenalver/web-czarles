@@ -9,7 +9,7 @@ export type HolidayWithAttendance = Holiday & {
 
 export async function fetchHolidaysByDateString(
   dateString: string,
-  employeeId?: string,
+  employeeId?: string
 ): Promise<HolidayWithAttendance[]> {
   // Query sa holidays table gamit ang %ilike% sa holiday_at column
   // dateString format: YYYY-MM
@@ -72,9 +72,9 @@ export async function fetchHolidaysByDateString(
       return {
         ...holiday,
         attendance_fraction,
-        hasActualAttendance,
+        hasActualAttendance
       } as HolidayWithAttendance
-    }),
+    })
   )
 
   return holidaysWithAttendance
@@ -84,7 +84,7 @@ export async function fetchHolidaysByDateString(
 export async function fetchHolidaysByRange(
   fromDate: string,
   toDate: string,
-  employeeId?: string,
+  employeeId?: string
 ): Promise<HolidayWithAttendance[]> {
   // Query holidays between fromDate and toDate (inclusive)
   const { data: holidays, error: holidaysError } = await supabase
@@ -140,9 +140,9 @@ export async function fetchHolidaysByRange(
       return {
         ...holiday,
         attendance_fraction,
-        hasActualAttendance,
+        hasActualAttendance
       } as HolidayWithAttendance
-    }),
+    })
   )
 
   return holidaysWithAttendance

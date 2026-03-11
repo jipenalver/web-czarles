@@ -15,7 +15,7 @@ const items = computed(() =>
   props.headerItems.map((item, index) => {
     if (index === props.headerItems.length - 1) return { title: item, disabled: false }
     return { title: item, disabled: true }
-  }),
+  })
 )
 </script>
 

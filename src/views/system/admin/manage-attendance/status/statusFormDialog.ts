@@ -2,7 +2,7 @@
 import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
-  useAttendanceRequestsStore,
+  useAttendanceRequestsStore
 } from '@/stores/attendanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -18,7 +18,7 @@ export function useStatusFormDialog(
     tableOptions: TableOptions
     tableFilters: AttendanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
@@ -28,7 +28,7 @@ export function useStatusFormDialog(
   const formDataDefault = {
     status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
     reason: '',
-    type: 'Leave' as 'Leave' | 'Overtime',
+    type: 'Leave' as 'Leave' | 'Overtime'
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -39,9 +39,9 @@ export function useStatusFormDialog(
     () => {
       formData.value = {
         ...formDataDefault,
-        type: props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime',
+        type: props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'
       }
-    },
+    }
   )
 
   // Actions
@@ -69,7 +69,7 @@ export function useStatusFormDialog(
         ...newFormData
       } = {
         ...props.itemData,
-        am_time_in: getDate(props.itemData?.date as string),
+        am_time_in: getDate(props.itemData?.date as string)
       }
 
       const { data, error } = await attendancesStore.addAttendance(newFormData)
@@ -79,7 +79,7 @@ export function useStatusFormDialog(
           ...formActionDefault,
           formMessage: error.message,
           formStatus: 400,
-          formProcess: false,
+          formProcess: false
         }
       } else if (data) {
         formAction.value.formMessage = 'Approved Leave Request.'
@@ -108,7 +108,7 @@ export function useStatusFormDialog(
       } = {
         ...props.itemData,
         id: props.itemData?.attendance_id as number,
-        is_overtime_applied: true,
+        is_overtime_applied: true
       }
 
       const { data, error } = await attendancesStore.updateAttendance(newFormData)
@@ -118,7 +118,7 @@ export function useStatusFormDialog(
           ...formActionDefault,
           formMessage: error.message,
           formStatus: 400,
-          formProcess: false,
+          formProcess: false
         }
       } else if (data) {
         formAction.value.formMessage = 'Approved Overtime Request.'
@@ -132,7 +132,7 @@ export function useStatusFormDialog(
         ...props.itemData,
         ...(formData.value.type === 'Leave'
           ? { leave_status: formData.value.status }
-          : { overtime_status: formData.value.status }),
+          : { overtime_status: formData.value.status })
       } as AttendanceRequest)
 
       if (error) {
@@ -140,7 +140,7 @@ export function useStatusFormDialog(
           ...formActionDefault,
           formMessage: error.message,
           formStatus: 400,
-          formProcess: false,
+          formProcess: false
         }
       } else if (data) {
         formAction.value.formMessage = `Rejected ${formData.value.type} Request.`
@@ -149,7 +149,7 @@ export function useStatusFormDialog(
           type: formData.value.type.toLowerCase() as 'leave' | 'overtime',
           employee_id: props.itemData?.employee_id as number,
           attendance_request_id: props.itemData?.id as number,
-          description: formData.value.reason,
+          description: formData.value.reason
         })
       }
     }
@@ -181,6 +181,6 @@ export function useStatusFormDialog(
     formAction,
     refVForm,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

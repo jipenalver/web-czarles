@@ -59,7 +59,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
 
   async function getAllowancesExport(
     tableOptions: TableOptions,
-    tableFilters: AllowanceTableFilter,
+    tableFilters: AllowanceTableFilter
   ) {
     const { column, order } = tablePagination(tableOptions, 'trip_at', false)
 
@@ -74,7 +74,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
 
   async function getAllowancesTable(
     tableOptions: TableOptions,
-    tableFilters: AllowanceTableFilter,
+    tableFilters: AllowanceTableFilter
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'trip_at', false)
 
@@ -105,7 +105,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
   function getAllowancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, trip_at }: AllowanceTableFilter,
+    { employee_id, trip_at }: AllowanceTableFilter
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -138,7 +138,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
 
     const { employee, trip_location, trip_range_at, ...updatedData } = prepareFormDates(
       preparedData,
-      ['trip_at'],
+      ['trip_at']
     )
 
     return await supabase.from('allowances').update(updatedData).eq('id', formData.id).select()
@@ -160,6 +160,6 @@ export const useAllowancesStore = defineStore('allowances', () => {
     getAllowancesTable,
     addAllowance,
     updateAllowance,
-    deleteAllowance,
+    deleteAllowance
   }
 })

@@ -27,7 +27,7 @@ const {
   onSubmit,
   onFormSubmit,
   onFormReset,
-  benefitsStore,
+  benefitsStore
 } = useAddonsDeductionsFormDialog(props, emit)
 </script>
 

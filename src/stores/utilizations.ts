@@ -65,7 +65,7 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
 
   async function getUtilizationsExport(
     tableOptions: TableOptions,
-    tableFilters: UtilizationTableFilter,
+    tableFilters: UtilizationTableFilter
   ) {
     const { column, order } = tablePagination(tableOptions, 'utilization_at', false)
 
@@ -83,12 +83,12 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
 
   async function getUtilizationsTable(
     tableOptions: TableOptions,
-    tableFilters: UtilizationTableFilter,
+    tableFilters: UtilizationTableFilter
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'utilization_at',
-      false,
+      false
     )
 
     let query = supabase
@@ -118,7 +118,7 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
   function getUtilizationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, utilization_at }: UtilizationTableFilter,
+    { employee_id, utilization_at }: UtilizationTableFilter
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -140,7 +140,7 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
 
   async function updateUtilization(formData: Partial<Utilization>) {
     const { employee, unit, trip_location, ...updatedData } = prepareFormDates(formData, [
-      'utilization_at',
+      'utilization_at'
     ])
 
     return await supabase.from('utilizations').update(updatedData).eq('id', formData.id).select()
@@ -162,6 +162,6 @@ export const useUtilizationsStore = defineStore('utilizations', () => {
     getUtilizationsTable,
     addUtilization,
     updateUtilization,
-    deleteUtilization,
+    deleteUtilization
   }
 })

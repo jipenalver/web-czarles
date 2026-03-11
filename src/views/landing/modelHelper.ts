@@ -2,7 +2,7 @@ export function startOrbitLoop(
   setCameraOrbit: (s: string) => void,
   orbitA: string,
   orbitB: string,
-  duration = 3000,
+  duration = 3000
 ) {
   let rafId: number | undefined
   let stopped = false
@@ -43,7 +43,7 @@ export function startOrbitLoop(
     const current = {
       az: from.az + (to.az - from.az) * eased,
       el: from.el + (to.el - from.el) * eased,
-      r: from.r + (to.r - from.r) * eased,
+      r: from.r + (to.r - from.r) * eased
     }
 
     setCameraOrbit(formatOrbit(current))
@@ -59,7 +59,7 @@ export function startOrbitLoop(
         cancelAnimationFrame(rafId)
         rafId = undefined
       }
-    },
+    }
   }
 }
 
@@ -68,7 +68,7 @@ export type OrbitController = ReturnType<typeof startOrbitLoop>
 export function attachOrbitToScroll(
   setCameraOrbit: (s: string) => void,
   orbitA: string,
-  orbitB: string,
+  orbitB: string
 ) {
   let rafId: number | undefined
   let lastKnownScroll = 0
@@ -104,7 +104,7 @@ export function attachOrbitToScroll(
     const current = {
       az: from.az + (to.az - from.az) * eased,
       el: from.el + (to.el - from.el) * eased,
-      r: from.r + (to.r - from.r) * eased,
+      r: from.r + (to.r - from.r) * eased
     }
 
     setCameraOrbit(formatOrbit(current))
@@ -133,7 +133,7 @@ export function attachOrbitToScroll(
         cancelAnimationFrame(rafId)
         rafId = undefined
       }
-    },
+    }
   }
 }
 

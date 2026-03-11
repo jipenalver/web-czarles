@@ -1,7 +1,7 @@
 import {
   useCashAdvanceRequestsStore,
   type CashAdvanceRequest,
-  type CashAdvanceRequestTableFilter,
+  type CashAdvanceRequestTableFilter
 } from '@/stores/cashAdvanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -14,7 +14,7 @@ export function useCashAdvanceLogsFormDialog(
     tableOptions: TableOptions
     tableFilters: CashAdvanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
 
@@ -28,7 +28,7 @@ export function useCashAdvanceLogsFormDialog(
 
     const { data, error } = await cashAdvanceRequestsStore.updateCashAdvanceRequest({
       ...props.itemData,
-      status: 'Pending',
+      status: 'Pending'
     } as CashAdvanceRequest)
 
     if (error) {
@@ -36,14 +36,14 @@ export function useCashAdvanceLogsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = 'Cash Advance Request Resubmitted Successfully.'
 
       await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
         props.tableOptions,
-        props.tableFilters,
+        props.tableFilters
       )
 
       setTimeout(() => {
@@ -64,6 +64,6 @@ export function useCashAdvanceLogsFormDialog(
     formAction,
     refVForm,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

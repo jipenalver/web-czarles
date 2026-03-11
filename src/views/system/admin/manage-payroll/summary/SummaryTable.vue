@@ -6,7 +6,7 @@ import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summar
 import { useMonthlyPayrollCSV } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayrollCSV'
 import {
   monthNames,
-  getDateRangeForMonth,
+  getDateRangeForMonth
 } from '@/views/system/admin/manage-payroll/payroll/helpers'
 import { calculateDaysWorkedForAdminByAmOnly } from './composables/daysWorkedCalculations'
 import { useDesignationsStore } from '@/stores/designations'
@@ -27,7 +27,7 @@ const {
   selectedMonth,
   selectedYear,
   loadMonthlyPayroll,
-  refreshMonthlyPayroll,
+  refreshMonthlyPayroll
 } = useMonthlyPayroll()
 
 //  Use PDF composable
@@ -59,10 +59,10 @@ const daysInPreviousMonth = computed(() => {
 })
 
 const dayOptionsFrom = computed(() =>
-  Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1),
+  Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1)
 )
 const dayOptionsTo = computed(() =>
-  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
+  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1)
 )
 
 // Set default month to current month and load designations
@@ -95,7 +95,7 @@ watch([selectedMonth, selectedYear, dayFrom, dayTo, crossMonthEnabled], () => {
         selectedYear.value,
         selectedMonth.value,
         dayFrom.value,
-        dayTo.value,
+        dayTo.value
       )
       fromDate = range.fromDate
       toDate = range.toDate
@@ -203,19 +203,19 @@ watch(
 
               if (employee.is_admin) {
                 console.log(
-                  `[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`,
+                  `[Admin Calculation] Calculating days for admin employee: ${employee.firstname} ${employee.lastname} (ID: ${employeeId})`
                 )
 
                 const days = await calculateDaysWorkedForAdminByAmOnly(
                   employeeId,
                   monthStr,
                   fromDate,
-                  toDate,
+                  toDate
                 )
                 item.days_worked_calculated = days
 
                 console.log(
-                  `[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`,
+                  `[Admin Calculation] Admin employee ${employee.firstname} ${employee.lastname}: ${days} days calculated`
                 )
               } else {
                 // Leave existing value or undefined for non-admins
@@ -233,11 +233,11 @@ watch(
             item.is_admin = false
             item.is_field_staff = false
           }
-        },
-      ),
+        }
+      )
     )
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Reset to first page when data changes or search query changes
@@ -262,7 +262,7 @@ const handleExportPDF = async () => {
   menuOpen.value = false
   await onExport({
     selectedMonth: selectedMonth.value,
-    selectedYear: selectedYear.value,
+    selectedYear: selectedYear.value
   })
 }
 
@@ -275,7 +275,7 @@ const handleExportCSV = () => {
     selectedYear.value,
     crossMonthEnabled.value,
     dayFrom.value,
-    dayTo.value,
+    dayTo.value
   )
 }
 </script>
@@ -367,7 +367,7 @@ const handleExportCSV = () => {
                 monthNames.map((month, index) => ({
                   title: month,
                   value: month,
-                  index: index,
+                  index: index
                 }))
               "
               label="Select Month"
@@ -426,8 +426,8 @@ const handleExportCSV = () => {
                 { title: 'All Designations', value: null },
                 ...designationsStore.designations.map((d) => ({
                   title: d.designation,
-                  value: d.id,
-                })),
+                  value: d.id
+                }))
               ]"
               label="Filter by Designation"
               variant="outlined"
@@ -443,7 +443,7 @@ const handleExportCSV = () => {
               :items="[
                 { title: 'All Payment Options', value: null },
                 { title: 'ATM', value: true },
-                { title: 'Cash', value: false },
+                { title: 'Cash', value: false }
               ]"
               label="Payment Option"
               variant="outlined"

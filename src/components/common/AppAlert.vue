@@ -15,7 +15,7 @@ watch(
     setTimeout(() => {
       onClose()
     }, 10000)
-  },
+  }
 )
 
 const onClose = () => {

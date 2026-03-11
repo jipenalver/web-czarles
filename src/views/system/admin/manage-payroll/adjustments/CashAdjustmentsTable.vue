@@ -27,7 +27,7 @@ const {
   onLoadItems,
   onExportCSV,
   cashAdjustmentsStore,
-  employeesStore,
+  employeesStore
 } = useCashAdjustmentsTable()
 </script>
 

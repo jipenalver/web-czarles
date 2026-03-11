@@ -26,7 +26,7 @@ const {
   onFileReset,
   onFormSubmit,
   onFormReset,
-  employeesStore,
+  employeesStore
 } = useMemosFormDialog(props, emit)
 </script>
 

@@ -7,7 +7,7 @@ export async function loadEmployees(
   employeesStore: ReturnType<typeof useEmployeesStore>,
   tableOptions: Ref<TableOptions & { isLoading?: boolean }>,
   tableFilters: Ref<EmployeeTableFilter>,
-  usersStore?: ReturnType<typeof useUsersStore>,
+  usersStore?: ReturnType<typeof useUsersStore>
 ) {
   tableOptions.value.isLoading = true
   await employeesStore.getEmployeesExport(tableOptions.value, tableFilters.value)
@@ -31,7 +31,7 @@ export async function loadEmployees(
         if (p.email) found = usersStore.users.find((u: AdminUser) => u.email === p.email)
         if (!found)
           found = usersStore.users.find(
-            (u: AdminUser) => u.firstname === p.firstname && u.lastname === p.lastname,
+            (u: AdminUser) => u.firstname === p.firstname && u.lastname === p.lastname
           )
 
         if (found?.id) {
@@ -92,7 +92,7 @@ export function getZodiacSign(birthdate?: string) {
       { name: '♎ Libra', start: [9, 23], end: [10, 22] },
       { name: '♏ Scorpio', start: [10, 23], end: [11, 21] },
       { name: '♐ Sagittarius', start: [11, 22], end: [12, 21] },
-      { name: '♑ Capricorn', start: [12, 22], end: [1, 19] },
+      { name: '♑ Capricorn', start: [12, 22], end: [1, 19] }
     ]
 
     for (const sign of signs) {

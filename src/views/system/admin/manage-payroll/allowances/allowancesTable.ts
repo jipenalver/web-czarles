@@ -23,18 +23,18 @@ export function useAllowancesTable() {
     { title: 'Location', key: 'trip_location', sortable: false, align: 'start' },
     { title: 'Activities', key: 'activities', align: 'start' },
     { title: 'Amount', key: 'amount', align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
     employee_id: null,
-    trip_at: getFirstAndLastDateOfMonth() as Date[] | null,
+    trip_at: getFirstAndLastDateOfMonth() as Date[] | null
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -120,7 +120,7 @@ export function useAllowancesTable() {
           item.trip_at ? prepareCSV(date.format(item.trip_at, 'fullDate')) : '',
           prepareCSV(item.trip_location.location),
           prepareCSV(item.activities),
-          prepareCSV(getMoneyText(item.amount)),
+          prepareCSV(getMoneyText(item.amount))
         ]
 
         return csvData.join(',')
@@ -161,7 +161,7 @@ export function useAllowancesTable() {
     onExportCSV,
     // onExportPDF,
     allowancesStore,
-    employeesStore,
+    employeesStore
     // isLoadingPDF,
     // formActionPDF,
   }

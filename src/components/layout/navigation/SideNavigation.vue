@@ -7,7 +7,7 @@ import {
   adminItemsNav2,
   adminItemsNav3,
   adminItemsNav4,
-  settingsItemsNav,
+  settingsItemsNav
 } from './sideNavigation'
 import { useAuthUserStore } from '@/stores/authUser'
 import { onMounted, ref } from 'vue'
@@ -37,7 +37,7 @@ onMounted(() => {
     { items: editableItemsNav1, title: adminNav[0][0] },
     { items: editableItemsNav2, title: adminNav[1][0] },
     { items: editableItemsNav3, title: adminNav[2][0] },
-    { items: editableItemsNav4, title: adminNav[3][0] },
+    { items: editableItemsNav4, title: adminNav[3][0] }
   ]
 
   menuItems.forEach(({ items, title }) => {

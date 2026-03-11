@@ -17,7 +17,7 @@ export function useAttendanceRequestsTable(props: {
   // States
   const baseHeaders: TableHeader[] = [
     { title: 'Employee', key: 'employee', sortable: false, align: 'start' },
-    { title: 'Date', key: 'date', align: 'start' },
+    { title: 'Date', key: 'date', align: 'start' }
   ]
   const getTableHeaders = (componentView: string): TableHeader[] => {
     const headers = [...baseHeaders]
@@ -27,14 +27,14 @@ export function useAttendanceRequestsTable(props: {
         { title: 'Leave Type', key: 'leave_type', align: 'start' },
         { title: 'Leave Reason', key: 'leave_reason', align: 'start' },
         { title: 'Requestor', key: 'user_fullname', align: 'start' },
-        { title: 'Leave Status', key: 'leave_status', align: 'center' },
+        { title: 'Leave Status', key: 'leave_status', align: 'center' }
       )
 
     if (componentView === 'overtime-requests')
       headers.push(
         { title: 'Overtime In', key: 'overtime_in', align: 'start' },
         { title: 'Overtime Out', key: 'overtime_out', align: 'start' },
-        { title: 'Overtime Status', key: 'overtime_status', align: 'center' },
+        { title: 'Overtime Status', key: 'overtime_status', align: 'center' }
       )
 
     headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
@@ -45,12 +45,12 @@ export function useAttendanceRequestsTable(props: {
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
     employee_id: null,
     attendance_at: getFirstAndLastDateOfMonth() as Date[] | null,
-    component_view: props.componentView,
+    component_view: props.componentView
   })
   const isApprover = ref(false)
   const isRequestor = ref(false)
@@ -77,7 +77,7 @@ export function useAttendanceRequestsTable(props: {
       | 'pm_time_in'
       | 'pm_time_out'
       | 'overtime_in'
-      | 'overtime_out',
+      | 'overtime_out'
   ) => {
     attendanceData.value = item
     viewType.value = timeType
@@ -147,7 +147,7 @@ export function useAttendanceRequestsTable(props: {
 
     await attendanceRequestsStore.getAttendanceRequestsTable(
       { page, itemsPerPage, sortBy },
-      tableFilters.value,
+      tableFilters.value
     )
 
     tableOptions.value.isLoading = false
@@ -214,6 +214,6 @@ export function useAttendanceRequestsTable(props: {
     hasAttendanceImage,
     authUserStore,
     attendanceRequestsStore,
-    employeesStore,
+    employeesStore
   }
 }

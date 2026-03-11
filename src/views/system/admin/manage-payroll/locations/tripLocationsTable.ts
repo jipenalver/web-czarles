@@ -11,10 +11,10 @@ export function useTripLocationsTable() {
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
-    search: '',
+    search: ''
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -71,7 +71,7 @@ export function useTripLocationsTable() {
 
     await tripLocationsStore.getTripLocationsTable(
       { page, itemsPerPage, sortBy },
-      tableFilters.value,
+      tableFilters.value
     )
 
     tableOptions.value.isLoading = false
@@ -91,6 +91,6 @@ export function useTripLocationsTable() {
     onConfirmDelete,
     onSearchItems,
     onLoadItems,
-    tripLocationsStore,
+    tripLocationsStore
   }
 }

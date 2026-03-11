@@ -9,7 +9,7 @@ export function useLoginForm() {
   // States
   const formDataDefault = {
     email: '',
-    password: '',
+    password: ''
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -26,13 +26,13 @@ export function useLoginForm() {
         ...formActionDefault,
         formMessage: error.message,
         formStatus: error.status as number,
-        formAlert: true,
+        formAlert: true
       }
     } else if (data) {
       formAction.value = {
         ...formActionDefault,
         formMessage: 'Successfully Logged Account.',
-        formAlert: true,
+        formAlert: true
       }
 
       router.replace('/dashboard')

@@ -2,7 +2,7 @@
 import {
   type Attendance,
   type AttendanceTableFilter,
-  useAttendancesStore,
+  useAttendancesStore
 } from '@/stores/attendances'
 import { getDate, getTime24Hour } from '@/utils/helpers/dates'
 import { formActionDefault } from '@/utils/helpers/constants'
@@ -18,7 +18,7 @@ export function useAttendanceFormDialog(
     tableOptions: TableOptions
     tableFilters: AttendanceTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const authUserStore = useAuthUserStore()
   const attendancesStore = useAttendancesStore()
@@ -35,13 +35,13 @@ export function useAttendanceFormDialog(
     is_am_in_rectified: false,
     is_am_out_rectified: false,
     is_pm_in_rectified: false,
-    is_pm_out_rectified: false,
+    is_pm_out_rectified: false
   }
   const formCheckBoxDefault = {
     isRectifyAMTimeIn: false,
     isRectifyAMTimeOut: false,
     isRectifyPMTimeIn: false,
-    isRectifyPMTimeOut: false,
+    isRectifyPMTimeOut: false
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -65,10 +65,10 @@ export function useAttendanceFormDialog(
           am_time_out: getTime24Hour(itemData.am_time_out) as string,
           pm_time_in: getTime24Hour(itemData.pm_time_in) as string,
           pm_time_out: getTime24Hour(itemData.pm_time_out) as string,
-          date: itemData.am_time_in ? getDate(itemData.am_time_in) : getDate(itemData.pm_time_in),
+          date: itemData.am_time_in ? getDate(itemData.am_time_in) : getDate(itemData.pm_time_in)
         }
       } else formData.value = { ...formDataDefault }
-    },
+    }
   )
 
   watch(
@@ -79,7 +79,7 @@ export function useAttendanceFormDialog(
       await attendancesStore.getAttendances(formData.value.employee_id)
 
       formAction.value = { ...formActionDefault, formProcess: false }
-    },
+    }
   )
 
   // Actions
@@ -105,7 +105,7 @@ export function useAttendanceFormDialog(
       is_pm_out_rectified: formCheckBox.value.isRectifyPMTimeOut ? true : undefined,
       user_id: authUserStore.userData?.id as string,
       user_avatar: authUserStore.userData?.avatar || null,
-      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+      user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname
     }
 
     const { data, error } = isUpdate.value
@@ -117,7 +117,7 @@ export function useAttendanceFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Attendance.`
@@ -139,7 +139,7 @@ export function useAttendanceFormDialog(
         formMessage: message,
         formStatus: 400,
         formProcess: false,
-        formAlert: true,
+        formAlert: true
       }
       return true
     }
@@ -153,7 +153,7 @@ export function useAttendanceFormDialog(
       const hasAttendance = attendancesStore.attendances.some(
         (attendance) =>
           getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
-          attendance.employee_id === formData.value.employee_id,
+          attendance.employee_id === formData.value.employee_id
       )
 
       if (hasAttendance)
@@ -204,6 +204,6 @@ export function useAttendanceFormDialog(
     onSubmit,
     onFormSubmit,
     onFormReset,
-    employeesStore,
+    employeesStore
   }
 }

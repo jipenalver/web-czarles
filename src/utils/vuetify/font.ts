@@ -4,7 +4,7 @@ export const createFont = async () => {
   webFontLoader.load({
     google: {
       api: 'https://fonts.googleapis.com/css2',
-      families: ['Inter:wght@300;400;500;600;700;900&display=swap'],
-    },
+      families: ['Inter:wght@300;400;500;600;700;900&display=swap']
+    }
   })
 }

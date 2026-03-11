@@ -6,7 +6,7 @@ import { supabase } from '@/utils/supabase'
  */
 export async function fetchFilteredUtilizations(
   dateString: string = new Date().toISOString().slice(0, 7), // Default to current month YYYY-MM
-  employeeId: number | undefined = undefined,
+  employeeId: number | undefined = undefined
 ): Promise<Utilization[]> {
   if (!employeeId) {
     console.warn('[fetchFilteredUtilizations] No employeeId provided, returning empty array')
@@ -37,7 +37,7 @@ export async function fetchFilteredUtilizations(
   const { data, error } = await supabase
     .from('utilizations')
     .select(
-      '*, employee:employee_id (id, firstname, lastname, middlename), unit:unit_id (*), trip_location:trip_location_id (*)',
+      '*, employee:employee_id (id, firstname, lastname, middlename), unit:unit_id (*), trip_location:trip_location_id (*)'
     )
     .eq('employee_id', employeeId)
     .gte('utilization_at', `${yearMonth}-01`)
@@ -63,7 +63,7 @@ export async function fetchFilteredUtilizations(
 export async function fetchUtilizationsByRange(
   fromDate: string,
   toDate: string,
-  employeeId: number | undefined = undefined,
+  employeeId: number | undefined = undefined
 ): Promise<Utilization[]> {
   if (!employeeId) {
     console.warn('[fetchUtilizationsByRange] No employeeId provided, returning empty array')
@@ -85,7 +85,7 @@ export async function fetchUtilizationsByRange(
   const { data, error } = await supabase
     .from('utilizations')
     .select(
-      '*, employee:employee_id (id, firstname, lastname, middlename), unit:unit_id (*), trip_location:trip_location_id (*)',
+      '*, employee:employee_id (id, firstname, lastname, middlename), unit:unit_id (*), trip_location:trip_location_id (*)'
     )
     .eq('employee_id', employeeId)
     .gte('utilization_at', fromDate)

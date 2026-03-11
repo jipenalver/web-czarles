@@ -2,7 +2,7 @@
 import {
   type CashAdvanceRequest,
   type CashAdvanceRequestTableFilter,
-  useCashAdvanceRequestsStore,
+  useCashAdvanceRequestsStore
 } from '@/stores/cashAdvanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { useCashAdvancesStore } from '@/stores/cashAdvances'
@@ -17,7 +17,7 @@ export function useCashAdvanceStatusFormDialog(
     tableOptions: TableOptions
     tableFilters: CashAdvanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const cashAdvanceRequestsStore = useCashAdvanceRequestsStore()
   const cashAdvancesStore = useCashAdvancesStore()
@@ -26,7 +26,7 @@ export function useCashAdvanceStatusFormDialog(
   // States
   const formDataDefault = {
     status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
-    reason: '',
+    reason: ''
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -36,7 +36,7 @@ export function useCashAdvanceStatusFormDialog(
     () => props.isDialogVisible,
     () => {
       formData.value = { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -45,7 +45,7 @@ export function useCashAdvanceStatusFormDialog(
 
     if (formData.value.status === 'Approved') {
       const { id, created_at, employee, status, ...newFormData } = {
-        ...props.itemData,
+        ...props.itemData
       }
 
       const { data, error } = await cashAdvancesStore.addCashAdvance(newFormData)
@@ -55,7 +55,7 @@ export function useCashAdvanceStatusFormDialog(
           ...formActionDefault,
           formMessage: error.message,
           formStatus: 400,
-          formProcess: false,
+          formProcess: false
         }
       } else if (data) {
         formAction.value.formMessage = 'Approved Cash Advance Request.'
@@ -65,7 +65,7 @@ export function useCashAdvanceStatusFormDialog(
     } else if (formData.value.status === 'Rejected') {
       const { data, error } = await cashAdvanceRequestsStore.updateCashAdvanceRequest({
         ...props.itemData,
-        status: formData.value.status,
+        status: formData.value.status
       } as CashAdvanceRequest)
 
       if (error) {
@@ -73,7 +73,7 @@ export function useCashAdvanceStatusFormDialog(
           ...formActionDefault,
           formMessage: error.message,
           formStatus: 400,
-          formProcess: false,
+          formProcess: false
         }
       } else if (data) {
         formAction.value.formMessage = 'Rejected Cash Advance Request.'
@@ -82,14 +82,14 @@ export function useCashAdvanceStatusFormDialog(
           type: 'cash advance',
           employee_id: props.itemData?.employee_id as number,
           cash_advance_request_id: props.itemData?.id as number,
-          description: formData.value.reason,
+          description: formData.value.reason
         })
       }
     }
 
     await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
       props.tableOptions,
-      props.tableFilters,
+      props.tableFilters
     )
 
     setTimeout(() => {
@@ -117,6 +117,6 @@ export function useCashAdvanceStatusFormDialog(
     formAction,
     refVForm,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

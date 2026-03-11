@@ -12,7 +12,7 @@ import AttendanceDaysTooltip from '@/views/system/admin/manage-payroll/payroll/A
 function calculateEmployeePresentDays(
   attendanceRecords: AttendanceRecord[],
   holidays: Holiday[],
-  isAdmin: boolean = false,
+  isAdmin: boolean = false
 ): number {
   if (!attendanceRecords || attendanceRecords.length === 0) {
     return 0
@@ -114,7 +114,7 @@ const itemsWithCalculations = computed(() => {
       const calculatedPresentDays = calculateEmployeePresentDays(
         item.attendance_records || [],
         item.holidays || [],
-        item.is_admin || false,
+        item.is_admin || false
       )
 
       // Use calculated present days if we have attendance records, otherwise fall back to existing logic
@@ -163,7 +163,7 @@ const itemsWithCalculations = computed(() => {
       basic_pay: basicPay,
       gross_pay: grossPay,
       total_deductions: totalDeductions,
-      net_pay: netPay,
+      net_pay: netPay
     }
   })
 })
@@ -212,7 +212,7 @@ const totals = computed(() => {
         cash_adjustment_deduction:
           acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
         total_deductions: acc.total_deductions + (item.total_deductions || 0),
-        net_pay: acc.net_pay + (item.net_pay || 0),
+        net_pay: acc.net_pay + (item.net_pay || 0)
       }
     },
     {
@@ -240,8 +240,8 @@ const totals = computed(() => {
       undertime: 0,
       cash_adjustment_deduction: 0,
       total_deductions: 0,
-      net_pay: 0,
-    },
+      net_pay: 0
+    }
   )
 })
 </script>
@@ -362,7 +362,7 @@ const totals = computed(() => {
             <td class="text-end text-error border">
               {{
                 formatCurrency(
-                  (item.deductions.savings || 0) + (item.deductions.salary_deposit || 0),
+                  (item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)
                 )
               }}
             </td>
@@ -382,7 +382,7 @@ const totals = computed(() => {
                   style: 'currency',
                   currency: 'PHP',
                   minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
+                  maximumFractionDigits: 0
                 })
               }}
             </td>
@@ -468,7 +468,7 @@ const totals = computed(() => {
                   style: 'currency',
                   currency: 'PHP',
                   minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
+                  maximumFractionDigits: 0
                 })
               }}
             </td>

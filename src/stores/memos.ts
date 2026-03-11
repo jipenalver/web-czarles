@@ -59,7 +59,7 @@ export const useMemosStore = defineStore('memos', () => {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'created_at',
-      false,
+      false
     )
     search = tableSearch(search)
 
@@ -90,7 +90,7 @@ export const useMemosStore = defineStore('memos', () => {
   function getMemosFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { search }: MemoTableFilter,
+    { search }: MemoTableFilter
   ) {
     if (search) query = query.or(`name.ilike.%${search}%, description.ilike.%${search}%`)
 
@@ -179,7 +179,7 @@ export const useMemosStore = defineStore('memos', () => {
       .from('czarles')
       .upload('memos/' + id + '-memo.' + file.name.split('.').pop(), file, {
         cacheControl: '3600',
-        upsert: true,
+        upsert: true
       })
 
     if (error) return { data, error }
@@ -198,6 +198,6 @@ export const useMemosStore = defineStore('memos', () => {
     getMemosTable,
     addMemo,
     updateMemo,
-    deleteMemo,
+    deleteMemo
   }
 })

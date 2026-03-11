@@ -60,6 +60,6 @@ export function useUserRolesCards() {
     onUpdate,
     onDelete,
     onConfirmDelete,
-    userRolesStore,
+    userRolesStore
   }
 }

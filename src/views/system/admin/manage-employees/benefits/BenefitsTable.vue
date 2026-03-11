@@ -14,29 +14,29 @@ const tableHeaders: TableHeader[] = [
   {
     title: 'Benefit',
     key: 'benefit',
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Type',
     key: 'is_deduction',
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Description',
     key: 'description',
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Added Date',
     key: 'created_at',
-    align: 'center',
+    align: 'center'
   },
   {
     title: 'Actions',
     key: 'actions',
     sortable: false,
-    align: 'center',
-  },
+    align: 'center'
+  }
 ]
 
 const {
@@ -50,7 +50,7 @@ const {
   onDelete,
   onConfirmDelete,
   onLoadItems,
-  benefitsStore,
+  benefitsStore
 } = useBenefitsTable()
 </script>
 

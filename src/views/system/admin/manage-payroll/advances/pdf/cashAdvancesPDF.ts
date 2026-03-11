@@ -27,7 +27,7 @@ export function useCashAdvancesPDF() {
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -58,7 +58,7 @@ export function useCashAdvancesPDF() {
         position: cashAdvancesTableElement.style.position || '',
         width: cashAdvancesTableElement.style.width || '',
         backgroundColor: cashAdvancesTableElement.style.backgroundColor || '',
-        display: cashAdvancesTableElement.style.display || '',
+        display: cashAdvancesTableElement.style.display || ''
       }
 
       // Apply styles para sa PDF generation
@@ -81,15 +81,15 @@ export function useCashAdvancesPDF() {
           scale: 2,
           useCORS: true,
           allowTaint: true,
-          letterRendering: true,
+          letterRendering: true
           /*         width: 1680, // Landscape width
           height: 1190, // Landscape height */
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'landscape', // Landscape orientation
-        },
+          orientation: 'landscape' // Landscape orientation
+        }
       })
 
       // Restore original styles
@@ -99,7 +99,7 @@ export function useCashAdvancesPDF() {
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -117,7 +117,7 @@ export function useCashAdvancesPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'PDF successfully generated!',
-        formStatus: 200,
+        formStatus: 200
       }
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -125,7 +125,7 @@ export function useCashAdvancesPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'Error occurred while generating PDF. Please try again.',
-        formStatus: 500,
+        formStatus: 500
       }
     } finally {
       // Reset printing state
@@ -157,6 +157,6 @@ export function useCashAdvancesPDF() {
   return {
     formAction,
     isLoadingPDF,
-    onExport,
+    onExport
   }
 }

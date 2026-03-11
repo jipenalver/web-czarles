@@ -11,7 +11,7 @@ export async function processNonFieldStaffEmployees(
   nonFieldStaffEmployees: MonthlyPayrollRow[],
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string,
+  toDate?: string
 ): Promise<void> {
   await Promise.all(
     nonFieldStaffEmployees.map(async (employee: MonthlyPayrollRow) => {
@@ -20,7 +20,7 @@ export async function processNonFieldStaffEmployees(
         employee.employee_id,
         dateStringForCalculation,
         fromDate,
-        toDate,
+        toDate
       )
       employee.days_worked = Number(accurateDaysWorked.toFixed(1))
 
@@ -29,7 +29,7 @@ export async function processNonFieldStaffEmployees(
         dateStringForCalculation,
         employee.employee_id,
         fromDate,
-        toDate,
+        toDate
       )
       employee.sunday_days = sundayDays
       // Sunday amount is 30% premium (0.3x daily rate per Sunday worked)
@@ -41,7 +41,7 @@ export async function processNonFieldStaffEmployees(
         employee.employee_id,
         dateStringForCalculation,
         fromDate,
-        toDate,
+        toDate
       )
       employee.overtime_hrs = clientOvertimeHours
 
@@ -64,7 +64,7 @@ export async function processNonFieldStaffEmployees(
           false, // isFieldStaff = false
           fromDate,
           toDate,
-          employee.is_admin || false, // isAdmin parameter
+          employee.is_admin || false // isAdmin parameter
         )
 
       // Update deductions with client-side calculated values
@@ -97,6 +97,6 @@ export async function processNonFieldStaffEmployees(
 
       employee.total_deductions = Number(newTotalDeductions.toFixed(2))
       employee.net_pay = Number((newGrossPay - newTotalDeductions).toFixed(2))
-    }),
+    })
   )
 }

@@ -40,7 +40,7 @@ const { formData, formAction, refVForm, onFormSubmit } = usePasswordForm()
           @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
           :rules="[
             requiredValidator,
-            confirmedValidator(formData.password_confirmation, formData.password),
+            confirmedValidator(formData.password_confirmation, formData.password)
           ]"
         ></v-text-field>
       </v-col>

@@ -1,7 +1,7 @@
 import {
   getLateUndertimeHoursDecimal,
   getOvertimeHoursDecimal,
-  getWorkHoursDecimal,
+  getWorkHoursDecimal
 } from '@/utils/helpers/attendance'
 import { getDate, getDateISO, getDateWithWeekday, getTime } from '@/utils/helpers/dates'
 import { type TableHeader, type TableOptions } from '@/utils/helpers/tables'
@@ -23,7 +23,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     { title: 'AM - Time In', key: 'am_time_in', sortable: false, align: 'start' },
     { title: 'AM - Time Out', key: 'am_time_out', sortable: false, align: 'start' },
     { title: 'PM - Time In', key: 'pm_time_in', sortable: false, align: 'start' },
-    { title: 'PM - Time Out', key: 'pm_time_out', sortable: false, align: 'start' },
+    { title: 'PM - Time Out', key: 'pm_time_out', sortable: false, align: 'start' }
   ]
   const getTableHeaders = (componentView: string): TableHeader[] => {
     const headers = [...baseHeaders]
@@ -41,12 +41,12 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const tableFilters = ref({
     employee_id: null,
     attendance_at: [new Date()] as Date[] | null,
-    component_view: props.componentView,
+    component_view: props.componentView
   })
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)
@@ -72,7 +72,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
       | 'pm_time_in'
       | 'pm_time_out'
       | 'overtime_in'
-      | 'overtime_out',
+      | 'overtime_out'
   ) => {
     itemData.value = item
     viewType.value = timeType
@@ -157,7 +157,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
         ...(props.componentView === 'overtime'
           ? ['Overtime In', 'Overtime Out', 'Rendered Overtime']
           : []),
-        'App Version',
+        'App Version'
       ].join(',')
 
       const csvRows = attendancesStore.attendancesExport.map((item) => {
@@ -177,16 +177,16 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
             item.am_time_out,
             item.pm_time_in,
             item.pm_time_out,
-            item.employee.is_field_staff,
+            item.employee.is_field_staff
           ),
           getLateUndertimeHoursDecimal(
             item.am_time_in,
             item.am_time_out,
             item.pm_time_in,
             item.pm_time_out,
-            item.employee.is_field_staff,
+            item.employee.is_field_staff
           ),
-          item.app_version ?? '',
+          item.app_version ?? ''
         ]
 
         if (props.componentView === 'overtime') {
@@ -194,7 +194,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
             ...csvData,
             item.overtime_in ? getTime(item.overtime_in) : '',
             item.overtime_out ? getTime(item.overtime_out) : '',
-            getOvertimeHoursDecimal(item.overtime_in, item.overtime_out),
+            getOvertimeHoursDecimal(item.overtime_in, item.overtime_out)
           ]
         }
 
@@ -235,6 +235,6 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     hasAttendanceImage,
     onExportCSV,
     attendancesStore,
-    employeesStore,
+    employeesStore
   }
 }

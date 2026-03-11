@@ -1,7 +1,7 @@
 import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
-  useAttendanceRequestsStore,
+  useAttendanceRequestsStore
 } from '@/stores/attendanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -14,7 +14,7 @@ export function useLogsFormDialog(
     tableOptions: TableOptions
     tableFilters: AttendanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const attendanceRequestsStore = useAttendanceRequestsStore()
 
@@ -30,7 +30,7 @@ export function useLogsFormDialog(
       ...props.itemData,
       ...(props.tableFilters.component_view === 'leave-requests'
         ? { leave_status: 'Pending' }
-        : { overtime_status: 'Pending' }),
+        : { overtime_status: 'Pending' })
     } as AttendanceRequest)
 
     if (error) {
@@ -38,14 +38,14 @@ export function useLogsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `${props.tableFilters.component_view === 'leave-requests' ? 'Leave' : 'Overtime'} Request Resubmitted Successfully.`
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,
-        props.tableFilters,
+        props.tableFilters
       )
 
       setTimeout(() => {
@@ -66,6 +66,6 @@ export function useLogsFormDialog(
     formAction,
     refVForm,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

@@ -13,13 +13,13 @@ const tabsItems = [
   {
     icon: 'mdi-account-multiple',
     text: 'Employees',
-    value: 'employees',
+    value: 'employees'
   },
   {
     icon: 'mdi-account-cash',
     text: 'Benefits',
-    value: 'benefits',
-  },
+    value: 'benefits'
+  }
 ]
 
 const tabWindow = ref('employees')

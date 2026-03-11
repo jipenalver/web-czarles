@@ -9,13 +9,13 @@ import { usePayrollData } from './usePayrollData'
 import {
   useEmployeeDisplay,
   usePayrollFormatting,
-  useHoursCalculation,
+  useHoursCalculation
 } from './composables/usePayrollDisplay'
 import { usePayrollWatchers } from './composables/usePayrollWatchers'
 import {
   getPayrollFromDate,
   getHolidayDateString,
-  getMonthDateRangeFromStorage,
+  getMonthDateRangeFromStorage
 } from './composables/payrollStorage'
 import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './PaySlip.vue'
@@ -33,11 +33,11 @@ const props = defineProps<{
 }>()
 
 const filterDateString = computed(() =>
-  getPayrollFromDate(props.payrollData.year, props.payrollData.month),
+  getPayrollFromDate(props.payrollData.year, props.payrollData.month)
 )
 
 const holidayDateString = computed(() =>
-  getHolidayDateString(props.payrollData.year, props.payrollData.month),
+  getHolidayDateString(props.payrollData.year, props.payrollData.month)
 )
 
 // Create params para sa composable
@@ -45,7 +45,7 @@ const payrollDataParams = computed(() => {
   const params = {
     employeeId: props.employeeData?.id,
     filterDateString: filterDateString.value,
-    holidayDateString: holidayDateString.value,
+    holidayDateString: holidayDateString.value
   }
   return params
 })
@@ -82,7 +82,7 @@ const {
   fetchEmployeeHolidays,
   updateEmployeeDeductions,
   initializePayrollCalculations: initializeDataCalculations,
-  reloadAllFunctions: reloadAllData,
+  reloadAllFunctions: reloadAllData
 } = usePayrollData(payrollDataParams)
 
 // Watch kuha sa employee deductions when employee changes
@@ -93,7 +93,7 @@ watch(
       await updateEmployeeDeductions(id)
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 const monthDateRange = computed(() => {
@@ -106,7 +106,7 @@ const tripsStore = useTripsStore()
 
 // Employee display composables
 const { fullName, designation, address, dailyRate, isFieldStaff, isAdmin } = useEmployeeDisplay(
-  computed(() => props.employeeData),
+  computed(() => props.employeeData)
 )
 const { formattedDate, showLateDeduction } = usePayrollFormatting(isAdmin)
 
@@ -116,11 +116,11 @@ const payrollPrint = usePayrollPrint(
   {
     employeeData: props.employeeData,
     payrollData: props.payrollData,
-    tableData: props.tableData,
+    tableData: props.tableData
   },
   dailyRate,
   grossSalary,
-  filterDateString,
+  filterDateString
 )
 
 const {
@@ -134,7 +134,7 @@ const {
   undertimeDeduction,
   computeOverallOvertimeCalculation,
   netSalary,
-  attendanceRecords,
+  attendanceRecords
 } = payrollPrint
 
 // Computed property to ensure holidays reactivity
@@ -189,7 +189,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   monthlyUtilizationsTotal,
   monthlyAllowancesTotal,
   monthlyCashAdjustmentsTotal,
-  sundayDutyAmount,
+  sundayDutyAmount
 )
 
 const displayTotalEarnings = computed(() => {
@@ -271,7 +271,7 @@ defineExpose({
   fetchEmployeeHolidays,
   updateOverallOvertime,
   updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
-  isPayrollCalculating, // Expose comprehensive loading state
+  isPayrollCalculating // Expose comprehensive loading state
 })
 
 // Setup watchers using composable
@@ -289,14 +289,14 @@ usePayrollWatchers(
     filterDateString,
     holidayDateString,
     payrollMonth: computed(() => props.payrollData?.month),
-    payrollYear: computed(() => props.payrollData?.year),
+    payrollYear: computed(() => props.payrollData?.year)
   },
   {
     recalculateEarnings,
     initializePayrollCalculations,
     loadTrips,
-    fetchEmployeeHolidays,
-  },
+    fetchEmployeeHolidays
+  }
 )
 
 // Track if initial load is complete to prevent dialog from showing again
@@ -314,7 +314,7 @@ watch(
     if (!isCompleting && !hasCompletedInitialLoad.value) {
       hasCompletedInitialLoad.value = true
     }
-  },
+  }
 )
 
 // Debug: Watch for deduction value changes
@@ -323,7 +323,7 @@ watch(
   () => {
     // console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 onMounted(async () => {

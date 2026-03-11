@@ -27,7 +27,7 @@ export function useMonthlyPayrollPDF() {
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -58,7 +58,7 @@ export function useMonthlyPayrollPDF() {
         position: payrollTableElement.style.position || '',
         width: payrollTableElement.style.width || '',
         backgroundColor: payrollTableElement.style.backgroundColor || '',
-        display: payrollTableElement.style.display || '',
+        display: payrollTableElement.style.display || ''
       }
 
       // Apply styles for PDF generation
@@ -81,12 +81,12 @@ export function useMonthlyPayrollPDF() {
           scale: 2, // Good scale for quality
           useCORS: true,
           allowTaint: true,
-          letterRendering: true,
+          letterRendering: true
         },
         jsPDF: {
           format: 'a4',
-          orientation: 'landscape', // Landscape for wide payroll table
-        },
+          orientation: 'landscape' // Landscape for wide payroll table
+        }
       })
 
       // Restore original styles
@@ -96,7 +96,7 @@ export function useMonthlyPayrollPDF() {
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -114,7 +114,7 @@ export function useMonthlyPayrollPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'PDF successfully generated!',
-        formStatus: 200,
+        formStatus: 200
       }
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -122,7 +122,7 @@ export function useMonthlyPayrollPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'Error occurred while generating PDF. Please try again.',
-        formStatus: 500,
+        formStatus: 500
       }
     } finally {
       // Reset printing state
@@ -141,6 +141,6 @@ export function useMonthlyPayrollPDF() {
   return {
     formAction,
     isLoadingPDF,
-    onExport,
+    onExport
   }
 }

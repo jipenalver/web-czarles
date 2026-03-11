@@ -25,35 +25,35 @@ const tableHeaders: TableHeader[] = [
   {
     title: 'Fullname',
     key: 'lastname',
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Phone',
     key: 'phone',
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Email',
     key: 'email',
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Designation',
     key: 'designation',
     sortable: false,
-    align: 'start',
+    align: 'start'
   },
   {
     title: 'Hired Date',
     key: 'hired_at',
-    align: 'center',
+    align: 'center'
   },
   {
     title: 'Actions',
     key: 'actions',
     sortable: false,
-    align: 'center',
-  },
+    align: 'center'
+  }
 ]
 
 const {
@@ -81,7 +81,7 @@ const {
   employeesStore,
   designationsStore,
   isLoadingPDF,
-  formActionPDF,
+  formActionPDF
 } = useEmployeesTable(props, tableHeaders)
 </script>
 

@@ -6,9 +6,16 @@ import { commitments } from '@/views/landing/about/data/commitments.data'
 const orbitA = '-76.81deg 80.14deg 20.35m'
 const orbitB = '-79.81deg 80.14deg 20.35m'
 
-const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animatedProjects, animatedSatisfaction, cameraOrbit } =
-  useAbout({ orbitals: [orbitA, orbitB] })
-
+const {
+  isVisible,
+  countersVisible,
+  heroComputed,
+  mobile,
+  animatedYears,
+  animatedProjects,
+  animatedSatisfaction,
+  cameraOrbit
+} = useAbout({ orbitals: [orbitA, orbitB] })
 </script>
 
 <template>
@@ -17,7 +24,13 @@ const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animate
       <div class="text-center white--text" style="max-width: 900px">
         <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
           <h1
-            :class="[heroComputed.titleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']"
+            :class="[
+              heroComputed.titleClass,
+              'font-weight-bold',
+              'mb-4',
+              'text-white',
+              'animate-slide-up'
+            ]"
           >
             About Us
           </h1>
@@ -60,7 +73,14 @@ const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animate
           <div class="about-intro" :class="{ 'animate-slide-left': isVisible }">
             <!-- Company Name with gradient effect -->
             <div class="mb-6">
-              <h1 :class="[heroComputed.contentTitleClass, 'font-weight-bold', 'gradient-text', 'mb-2']">
+              <h1
+                :class="[
+                  heroComputed.contentTitleClass,
+                  'font-weight-bold',
+                  'gradient-text',
+                  'mb-2'
+                ]"
+              >
                 C&apos;ZARLES CONSTRUCTION & SUPPLY
               </h1>
               <div class="orange-underline"></div>
@@ -74,8 +94,17 @@ const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animate
               outlined
             >
               <v-icon color="orange" size="large" class="mb-4">mdi-bullseye-arrow</v-icon>
-              <h3 :class="[heroComputed.sectionTitleClass, 'mb-4', 'font-weight-medium']">Our Mission</h3>
-              <p :class="[heroComputed.bodyTextClass, 'grey--text', 'text--darken-1', 'line-height-relaxed']">
+              <h3 :class="[heroComputed.sectionTitleClass, 'mb-4', 'font-weight-medium']">
+                Our Mission
+              </h3>
+              <p
+                :class="[
+                  heroComputed.bodyTextClass,
+                  'grey--text',
+                  'text--darken-1',
+                  'line-height-relaxed'
+                ]"
+              >
                 (CCS) shall endeavor to deliver quality, credible and safe Construction Operations
                 with integrity to its customers, and well-being of its employees.
               </p>
@@ -83,7 +112,9 @@ const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animate
 
             <!-- Core Commitments -->
             <div class="mb-8">
-              <h3 :class="[heroComputed.sectionTitleClass, 'mb-6', 'font-weight-medium']">Our Commitments</h3>
+              <h3 :class="[heroComputed.sectionTitleClass, 'mb-6', 'font-weight-medium']">
+                Our Commitments
+              </h3>
               <v-row>
                 <v-col
                   cols="12"
@@ -92,7 +123,11 @@ const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animate
                   :key="index"
                   class="mb-4"
                 >
-                  <v-card :class="[heroComputed.cardPadding, 'h-100', 'commitment-card']" elevation="2" hover>
+                  <v-card
+                    :class="[heroComputed.cardPadding, 'h-100', 'commitment-card']"
+                    elevation="2"
+                    hover
+                  >
                     <v-icon :color="commitment.color" size="large" class="mb-3">{{
                       commitment.icon
                     }}</v-icon>
@@ -120,8 +155,19 @@ const { isVisible, countersVisible, heroComputed, mobile, animatedYears, animate
             </div>
 
             <!-- Enhanced Metrics Section -->
-            <v-card :class="[heroComputed.cardPadding, 'metrics-card']" color="grey-lighten-5" elevation="4">
-              <h3 :class="[heroComputed.sectionTitleClass, 'mb-6', 'text-center', 'font-weight-medium']">
+            <v-card
+              :class="[heroComputed.cardPadding, 'metrics-card']"
+              color="grey-lighten-5"
+              elevation="4"
+            >
+              <h3
+                :class="[
+                  heroComputed.sectionTitleClass,
+                  'mb-6',
+                  'text-center',
+                  'font-weight-medium'
+                ]"
+              >
                 Our Track Record
               </h3>
               <v-row class="text-center">

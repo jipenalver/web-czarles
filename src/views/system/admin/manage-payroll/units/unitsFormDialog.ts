@@ -10,14 +10,14 @@ export function useUnitsFormDialog(
     tableOptions: TableOptions
     tableFilters: UnitTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const unitsStore = useUnitsStore()
 
   // States
   const formDataDefault = {
     name: '',
-    description: '',
+    description: ''
   }
   const formData = ref<Partial<Unit>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -29,7 +29,7 @@ export function useUnitsFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -45,7 +45,7 @@ export function useUnitsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Unit.`
@@ -80,6 +80,6 @@ export function useUnitsFormDialog(
     refVForm,
     isUpdate,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

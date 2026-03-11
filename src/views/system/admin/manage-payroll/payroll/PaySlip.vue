@@ -2,14 +2,14 @@
 import {
   useOverallEarningsTotal,
   // useEarningsBreakdown,
-  useNetSalaryCalculation,
+  useNetSalaryCalculation
 } from './overallTotal'
 import {
   safeCurrencyFormat,
   getHolidayTypeName,
   getMonthDateRange,
   calculateHolidayPay,
-  getHolidayMultiplier,
+  getHolidayMultiplier
 } from './helpers'
 import { type PayrollData } from './payrollTableDialog'
 import { type TableData } from './payrollComputation'
@@ -54,7 +54,7 @@ const monthNames = [
   'September',
   'October',
   'November',
-  'December',
+  'December'
 ]
 
 // Date formatting computeds
@@ -70,7 +70,7 @@ const formattedPeriod = computed(() => {
           const opts: Intl.DateTimeFormatOptions = {
             month: 'short',
             day: 'numeric',
-            year: 'numeric',
+            year: 'numeric'
           }
           return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
         }
@@ -120,7 +120,7 @@ const holidayDateString = computed(() => {
 const payrollDataParams = computed(() => ({
   employeeId: props.employeeData?.id,
   filterDateString: filterDateString.value,
-  holidayDateString: holidayDateString.value,
+  holidayDateString: holidayDateString.value
 }))
 
 // Use payroll data composable for ALL data fetching including holidays
@@ -138,7 +138,7 @@ const {
   // isHolidaysLoading - available but not used in mini print
   cashAdjustmentsAdditions,
   monthlyCashAdjustmentsTotal,
-  loadCashAdjustments,
+  loadCashAdjustments
 } = usePayrollData(payrollDataParams)
 
 // Use fetchEmployeeDeductions from benefits.ts
@@ -169,7 +169,7 @@ async function fetchCashAdjustmentsDeductions(filterDateString: string, employee
   // Fetch using store with filters
   await cashAdjustmentsStore.getCashAdjustmentsExport(
     { page: 1, itemsPerPage: -1, sortBy: [] },
-    { employee_id: employeeId, adjustment_at: adjustmentDates },
+    { employee_id: employeeId, adjustment_at: adjustmentDates }
   )
 
   // Filter for deductions only (is_deduction = true)
@@ -182,7 +182,7 @@ watch(
   (id) => {
     updateEmployeeDeductions(id)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Fetch cash advances and cash adjustments when employeeId or filterDateString changes
@@ -194,7 +194,7 @@ watch(
       const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
       const fetchedCashAdjustments = await fetchCashAdjustmentsDeductions(
         filterDateString as string,
-        employeeId,
+        employeeId
       )
 
       // Filter out dummy entries with amount: 0
@@ -205,17 +205,17 @@ watch(
       cashAdjustments.value = []
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Compute total cash advance from all ca.amount
 const totalCashAdvance = computed(() =>
-  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0),
+  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0)
 )
 
 // Compute total cash adjustments (deductions only)
 const totalCashAdjustments = computed(() =>
-  cashAdjustments.value.reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0),
+  cashAdjustments.value.reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0)
 )
 
 // Reactive references
@@ -253,11 +253,11 @@ const payrollPrint = usePayrollPrint(
   {
     employeeData: props.employeeData,
     payrollData: props.payrollData,
-    tableData: props.tableData,
+    tableData: props.tableData
   },
   dailyRate,
   grossSalary,
-  filterDateString,
+  filterDateString
 )
 
 // const { fetchFilteredTrips } = usePayrollFilters(filterDateString.value, props.employeeData?.id)
@@ -278,7 +278,7 @@ const {
   monthLateDeduction,
   monthUndertimeDeduction,
   undertimeDeduction,
-  computeOverallOvertimeCalculation,
+  computeOverallOvertimeCalculation
 } = payrollPrint
 
 // Use helpers for payroll calculations
@@ -294,7 +294,7 @@ const overallEarningsTotal = useOverallEarningsTotal(
   monthlyUtilizationsTotal,
   monthlyAllowancesTotal,
   monthlyCashAdjustmentsTotal,
-  sundayDutyAmount,
+  sundayDutyAmount
 )
 
 // Helper function to format Sunday duty text
@@ -332,7 +332,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
   lateDeduction,
   employeeDeductions,
   computed(() => totalCashAdvance.value + totalCashAdjustments.value), // Combine both cash deductions
-  undertimeDeduction,
+  undertimeDeduction
 )
 
 // Use imported safeCurrencyFormat from helpers.ts
@@ -372,7 +372,7 @@ onMounted(async () => {
     loadAllowances(),
     loadUtilizations(),
     loadCashAdjustments(),
-    loadSundayDuty(dailyRate.value),
+    loadSundayDuty(dailyRate.value)
   ])
   recalculateEarnings()
 })
@@ -388,12 +388,12 @@ watch(
     dailyRate,
     codaAllowance,
     monthlyAllowancesTotal,
-    sundayDutyAmount,
+    sundayDutyAmount
   ],
   () => {
     recalculateEarnings()
   },
-  { deep: true, immediate: true },
+  { deep: true, immediate: true }
 )
 
 // Enhanced watchers for better reactivity
@@ -402,7 +402,7 @@ watch(
     () => props.employeeData?.id,
     () => filterDateString.value,
     () => props.payrollData?.month,
-    () => props.payrollData?.year,
+    () => props.payrollData?.year
   ],
   async () => {
     await Promise.all([
@@ -412,11 +412,11 @@ watch(
       loadAllowances(),
       loadUtilizations(),
       loadCashAdjustments(),
-      loadSundayDuty(dailyRate.value),
+      loadSundayDuty(dailyRate.value)
     ])
     recalculateEarnings()
   },
-  { deep: true },
+  { deep: true }
 )
 
 // Individual watchers for specific data changes
@@ -493,9 +493,9 @@ const displayableHolidays = computed(() => {
               safeCurrencyFormat(
                 tripsStore.trips.reduce(
                   (total, trip) => total + (trip.per_trip ?? 0) * (trip.trip_no ?? 1),
-                  0,
+                  0
                 ),
-                formatCurrency,
+                formatCurrency
               )
             }}
           </v-col>

@@ -7,7 +7,7 @@ export function useUserRolesFormDialog(
     isDialogVisible: boolean
     itemData: UserRole | null
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const userRolesStore = useUserRolesStore()
 
@@ -17,7 +17,7 @@ export function useUserRolesFormDialog(
     description: '',
     is_approver: false,
     is_requestor: false,
-    pages: [],
+    pages: []
   }
   const formData = ref<Partial<UserRole>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -31,10 +31,10 @@ export function useUserRolesFormDialog(
       formData.value = props.itemData
         ? {
             ...props.itemData,
-            pages: props.itemData.user_role_pages.map((item) => item.page),
+            pages: props.itemData.user_role_pages.map((item) => item.page)
           }
         : { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -46,7 +46,7 @@ export function useUserRolesFormDialog(
         ...formActionDefault,
         formMessage: 'Please select at least 1 page.',
         formStatus: 400,
-        formAlert: true,
+        formAlert: true
       }
       return
     }
@@ -60,7 +60,7 @@ export function useUserRolesFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User Role and its Pages.`
@@ -94,6 +94,6 @@ export function useUserRolesFormDialog(
     refVForm,
     isUpdate,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

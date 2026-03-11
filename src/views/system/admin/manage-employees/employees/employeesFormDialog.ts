@@ -12,7 +12,7 @@ export function useEmployeesFormDialog(
     tableOptions: TableOptions
     tableFilters: EmployeeTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const employeesStore = useEmployeesStore()
   const designationsStore = useDesignationsStore()
@@ -38,7 +38,7 @@ export function useEmployeesFormDialog(
     is_qr_generator: false,
     designation_id: null,
     area_origin_id: null,
-    area_assignment_id: null,
+    area_assignment_id: null
   }
   const formData = ref<Partial<Employee>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -50,7 +50,7 @@ export function useEmployeesFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -66,7 +66,7 @@ export function useEmployeesFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Employee.`
@@ -108,6 +108,6 @@ export function useEmployeesFormDialog(
     onFormSubmit,
     onFormReset,
     designationsStore,
-    areasStore,
+    areasStore
   }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type AttendanceRequest,
-  type AttendanceRequestTableFilter,
+  type AttendanceRequestTableFilter
 } from '@/stores/attendanceRequests'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -30,7 +30,7 @@ const {
   onSubmit,
   onFormSubmit,
   onFormReset,
-  employeesStore,
+  employeesStore
 } = useLeaveFormDialog(props, emit)
 </script>
 
@@ -129,7 +129,7 @@ const {
                   'Maternity Leave',
                   'Paternity Leave',
                   'Leisure Leave',
-                  'Others',
+                  'Others'
                 ]"
                 :rules="[requiredValidator]"
               ></v-select>

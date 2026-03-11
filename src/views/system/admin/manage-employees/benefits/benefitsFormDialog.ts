@@ -9,7 +9,7 @@ export function useBenefitsFormDialog(
     itemData: Benefit | null
     tableOptions: TableOptions
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const benefitsStore = useBenefitsStore()
 
@@ -17,7 +17,7 @@ export function useBenefitsFormDialog(
   const formDataDefault = {
     benefit: '',
     is_deduction: false,
-    description: '',
+    description: ''
   }
   const formData = ref<Partial<Benefit>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -29,7 +29,7 @@ export function useBenefitsFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -45,7 +45,7 @@ export function useBenefitsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Benefit.`
@@ -80,6 +80,6 @@ export function useBenefitsFormDialog(
     refVForm,
     isUpdate,
     onFormSubmit,
-    onFormReset,
+    onFormReset
   }
 }

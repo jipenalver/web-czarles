@@ -11,7 +11,7 @@ export function useProfileForm() {
     middlename: authUserStore.userData?.middlename,
     lastname: authUserStore.userData?.lastname,
     email: authUserStore.userData?.email,
-    phone: authUserStore.userData?.phone,
+    phone: authUserStore.userData?.phone
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -28,13 +28,13 @@ export function useProfileForm() {
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formAlert: true,
+        formAlert: true
       }
     } else if (data) {
       formAction.value = {
         ...formActionDefault,
         formMessage: 'Successfully Updated Profile Information.',
-        formAlert: true,
+        formAlert: true
       }
     }
   }

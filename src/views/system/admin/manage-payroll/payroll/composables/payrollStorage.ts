@@ -58,7 +58,7 @@ export function getMonthDateRangeFromStorage(fallbackRange: string): string {
           const opts: Intl.DateTimeFormatOptions = {
             month: 'short',
             day: 'numeric',
-            year: 'numeric',
+            year: 'numeric'
           }
           return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
         }

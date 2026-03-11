@@ -23,7 +23,7 @@ export type SortBy = {
 export const tablePagination = (
   { page, itemsPerPage, sortBy }: TableOptions,
   defaultColumn = 'id',
-  isAscending = true,
+  isAscending = true
 ) => {
   const [column, order] =
     sortBy && sortBy[0] ? [sortBy[0].key, sortBy[0].order === 'asc'] : [defaultColumn, isAscending]

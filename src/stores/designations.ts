@@ -34,13 +34,13 @@ export const useDesignationsStore = defineStore('designations', () => {
 
     designations.value = (data as Designation[]).map((designation) => ({
       ...designation,
-      title: `${designation.designation} ${designation.description ? `(${designation.description})` : ''}`,
+      title: `${designation.designation} ${designation.description ? `(${designation.description})` : ''}`
     }))
   }
 
   async function getDesignationsTable(
     tableOptions: TableOptions,
-    { search }: DesignationTableFilter,
+    { search }: DesignationTableFilter
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'designation')
     search = tableSearch(search)
@@ -72,7 +72,7 @@ export const useDesignationsStore = defineStore('designations', () => {
   function getDesignationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { search }: DesignationTableFilter,
+    { search }: DesignationTableFilter
   ) {
     if (search) query = query.or(`designation.ilike.%${search}%, description.ilike.%${search}%`)
 
@@ -105,6 +105,6 @@ export const useDesignationsStore = defineStore('designations', () => {
     getDesignationsTable,
     addDesignation,
     updateDesignation,
-    deleteDesignation,
+    deleteDesignation
   }
 })

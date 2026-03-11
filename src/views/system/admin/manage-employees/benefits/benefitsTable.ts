@@ -11,7 +11,7 @@ export function useBenefitsTable() {
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false,
+    isLoading: false
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -74,6 +74,6 @@ export function useBenefitsTable() {
     onDelete,
     onConfirmDelete,
     onLoadItems,
-    benefitsStore,
+    benefitsStore
   }
 }

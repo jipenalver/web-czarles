@@ -25,7 +25,7 @@ const {
   onFormSubmit,
   onFormReset,
   designationsStore,
-  areasStore,
+  areasStore
 } = useEmployeesFormDialog(props, emit)
 </script>
 

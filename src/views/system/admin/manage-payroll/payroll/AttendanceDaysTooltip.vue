@@ -4,7 +4,7 @@ import { formatHoursOneDecimal } from './helpers'
 import {
   getExcessMinutes,
   getUndertimeMinutes,
-  type AttendanceRecord as BaseAttendanceRecord,
+  type AttendanceRecord as BaseAttendanceRecord
 } from './computation/computation'
 import { isFridayOrSaturday } from './computation/attendance'
 
@@ -110,7 +110,7 @@ const attendanceStats = computed(() => {
         hasLateness: false,
         isRegularHoliday: true,
         holidayDescription: holiday.description,
-        hasActualAttendance,
+        hasActualAttendance
       })
     })
   }
@@ -127,7 +127,7 @@ const attendanceStats = computed(() => {
       mergedHalfDays,
       remainingHalfDays,
       totalCount,
-      records,
+      records
     }
   }
 
@@ -259,7 +259,7 @@ const attendanceStats = computed(() => {
         pmUndertime,
         hasLateness,
         isRegularHoliday,
-        holidayDescription,
+        holidayDescription
       })
     } else if (hasAmData && hasPmData) {
       fullDaysCount += 1
@@ -276,7 +276,7 @@ const attendanceStats = computed(() => {
         amUndertime,
         pmUndertime,
         hasLateness,
-        isRegularHoliday: false,
+        isRegularHoliday: false
       })
     } else if (hasAmData) {
       halfDaysCount += 1
@@ -293,7 +293,7 @@ const attendanceStats = computed(() => {
         amUndertime,
         pmUndertime: 0,
         hasLateness: amLate > 0 || amUndertime > 0,
-        isRegularHoliday: false,
+        isRegularHoliday: false
       })
     } else if (hasPmData) {
       halfDaysCount += 1
@@ -310,7 +310,7 @@ const attendanceStats = computed(() => {
         amUndertime: 0,
         pmUndertime,
         hasLateness: pmLate > 0 || pmUndertime > 0,
-        isRegularHoliday: false,
+        isRegularHoliday: false
       })
     }
   })
@@ -325,7 +325,7 @@ const attendanceStats = computed(() => {
     mergedHalfDays,
     remainingHalfDays,
     totalCount,
-    records,
+    records
   }
 })
 
@@ -358,7 +358,7 @@ const totals = computed(() => {
 
   return {
     totalLateMinutes,
-    totalUndertimeMinutes,
+    totalUndertimeMinutes
   }
 })
 

@@ -13,7 +13,7 @@ export function useMonthlyPayrollCSV() {
     selectedYear: number,
     crossMonthEnabled?: boolean,
     dayFrom?: number | null,
-    dayTo?: number | null,
+    dayTo?: number | null
   ) => {
     if (!data.length) {
       console.warn('No data to export')
@@ -55,7 +55,7 @@ export function useMonthlyPayrollCSV() {
         'Others - Savings',
         'Others - Adjustments',
         'Total Deductions',
-        'Net Pay',
+        'Net Pay'
       ].join(',')
 
       // Generate CSV rows to match the table structure exactly
@@ -85,11 +85,11 @@ export function useMonthlyPayrollCSV() {
           prepareCSV(getMoneyText(item.deductions.late || 0)),
           prepareCSV(getMoneyText(item.deductions.undertime || 0)),
           prepareCSV(
-            getMoneyText((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)),
+            getMoneyText((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0))
           ),
           prepareCSV(getMoneyText(item.deductions.cash_adjustment || 0)),
           prepareCSV(getMoneyText(item.total_deductions || 0)),
-          prepareCSV(getMoneyText(item.net_pay || 0)),
+          prepareCSV(getMoneyText(item.net_pay || 0))
         ]
 
         return csvData.join(',')
@@ -126,7 +126,7 @@ export function useMonthlyPayrollCSV() {
             cash_adjustment_deduction:
               acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
             total_deductions: acc.total_deductions + (item.total_deductions || 0),
-            net_pay: acc.net_pay + (item.net_pay || 0),
+            net_pay: acc.net_pay + (item.net_pay || 0)
           }
         },
         {
@@ -153,8 +153,8 @@ export function useMonthlyPayrollCSV() {
           undertime: 0,
           cash_adjustment_deduction: 0,
           total_deductions: 0,
-          net_pay: 0,
-        },
+          net_pay: 0
+        }
       )
 
       // Add totals row to match the new structure exactly
@@ -182,7 +182,7 @@ export function useMonthlyPayrollCSV() {
         prepareCSV(getMoneyText(totals.savings + totals.salary_deposit)),
         prepareCSV(getMoneyText(totals.cash_adjustment_deduction)),
         prepareCSV(getMoneyText(totals.total_deductions)),
-        prepareCSV(getMoneyText(totals.net_pay)),
+        prepareCSV(getMoneyText(totals.net_pay))
       ].join(',')
 
       // Generate final CSV data
@@ -201,6 +201,6 @@ export function useMonthlyPayrollCSV() {
 
   return {
     isExporting,
-    generatePayrollCSV,
+    generatePayrollCSV
   }
 }

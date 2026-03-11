@@ -4,7 +4,7 @@ import { type SendMessageProps } from '@/views/landing/contact/composables/conta
 // 👉 Create a single supabase client for interacting with your database
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 )
 
 // 👉 Create a single supabase admin client for interacting auth users
@@ -14,9 +14,9 @@ export const supabaseAdmin = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false,
-    },
-  },
+      persistSession: false
+    }
+  }
 )
 
 // 👉 Type for Email Payload
@@ -29,12 +29,12 @@ export type EmailPayload = {
 // 👉 Trigger Edge functions on email sending
 export const onEmailNotification = async (payload: EmailPayload) => {
   return await supabase.functions.invoke('send-notification', {
-    body: payload,
+    body: payload
   })
 }
 
 export const clientEmailSending = async (payload: SendMessageProps) => {
   return await supabase.functions.invoke('send-client-email', {
-    body: payload,
+    body: payload
   })
 }

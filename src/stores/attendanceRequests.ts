@@ -4,7 +4,7 @@ import {
   getDateWithWeekday,
   getTime,
   prepareDateRange,
-  prepareFormDates,
+  prepareFormDates
 } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
@@ -79,7 +79,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
   async function getAttendanceRequestsTable(
     tableOptions: TableOptions,
-    tableFilters: AttendanceRequestTableFilter,
+    tableFilters: AttendanceRequestTableFilter
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'date', false)
 
@@ -110,7 +110,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
   function getAttendanceRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, attendance_at, component_view }: AttendanceRequestTableFilter,
+    { employee_id, attendance_at, component_view }: AttendanceRequestTableFilter
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -132,9 +132,9 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
         ...formData,
         requestor_id: authUserStore.userData?.id as string,
         user_avatar: authUserStore.userData?.avatar || null,
-        user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname,
+        user_fullname: authUserStore.userData?.firstname + ' ' + authUserStore.userData?.lastname
       },
-      ['date'],
+      ['date']
     )
 
     return await supabase.from('attendance_requests').insert(preparedData).select()
@@ -156,7 +156,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
   async function syncOvertimeRequest(
     tableOptions: TableOptions,
-    tableFilters: AttendanceRequestTableFilter,
+    tableFilters: AttendanceRequestTableFilter
   ) {
     let query = supabase
       .from('attendances')
@@ -181,7 +181,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
     // Filter out attendances that already have requests
     const newAttendances = attendances.filter(
-      (attendance) => !existingAttendanceIds.has(attendance.id),
+      (attendance) => !existingAttendanceIds.has(attendance.id)
     )
 
     // Only insert if there are new records
@@ -197,8 +197,8 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
           overtime_in: attendance.overtime_in,
           overtime_out: attendance.overtime_out,
           overtime_status: 'Pending',
-          type: 'Overtime',
-        })),
+          type: 'Overtime'
+        }))
       )
 
       await authUserStore.sendToApprovers({
@@ -209,13 +209,13 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
                 ${newAttendances
                   .map(
                     (a) =>
-                      `<li>${a.employee?.firstname} ${a.employee?.lastname} - ${getDateWithWeekday(a.overtime_in)}, ${getTime(a.overtime_in)} to ${getTime(a.overtime_out)}</li>`,
+                      `<li>${a.employee?.firstname} ${a.employee?.lastname} - ${getDateWithWeekday(a.overtime_in)}, ${getTime(a.overtime_in)} to ${getTime(a.overtime_out)}</li>`
                   )
                   .join('')}
               </ul>
               <p>Please review the request at your earliest convenience.</p>
               <p>Best Regards,<br>C'Zarles Construction and Supply System</p>
-            `,
+            `
       })
     }
 
@@ -225,7 +225,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
   function syncOverTimeRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, attendance_at }: AttendanceRequestTableFilter,
+    { employee_id, attendance_at }: AttendanceRequestTableFilter
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -250,6 +250,6 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
     addAttendanceRequest,
     updateAttendanceRequest,
     deleteAttendanceRequest,
-    syncOvertimeRequest,
+    syncOvertimeRequest
   }
 })

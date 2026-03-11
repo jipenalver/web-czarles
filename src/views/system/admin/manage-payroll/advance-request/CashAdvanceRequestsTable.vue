@@ -35,7 +35,7 @@ const {
   onFilterItems,
   onLoadItems,
   cashAdvanceRequestsStore,
-  employeesStore,
+  employeesStore
 } = useCashAdvanceRequestsTable()
 </script>
 

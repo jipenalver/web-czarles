@@ -1,7 +1,7 @@
 import {
   type CashAdvanceRequest,
   type CashAdvanceRequestTableFilter,
-  useCashAdvanceRequestsStore,
+  useCashAdvanceRequestsStore
 } from '@/stores/cashAdvanceRequests'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -18,7 +18,7 @@ export function useCashAdvancesFormDialog(
     tableOptions: TableOptions
     tableFilters: CashAdvanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const date = useDate()
 
@@ -32,7 +32,7 @@ export function useCashAdvancesFormDialog(
     amount: undefined,
     description: '',
     request_at: new Date(),
-    status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
+    status: 'Pending' as 'Pending' | 'Approved' | 'Rejected'
   }
   const formData = ref<Partial<CashAdvanceRequest>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -44,7 +44,7 @@ export function useCashAdvancesFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -60,7 +60,7 @@ export function useCashAdvancesFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Cash Advance Request.`
@@ -73,13 +73,13 @@ export function useCashAdvancesFormDialog(
           message: `<p>Good Day!</p>
             <p>A cash advance request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> with an amount of <strong>${getMoneyText(formData.value.amount as number)}</strong> for date <strong>${date.format(formData.value.request_at as string, 'fullDate')}</strong>.</p>
             <p>Please review the request at your earliest convenience.</p>
-            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`,
+            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`
         })
       }
 
       await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
         props.tableOptions,
-        props.tableFilters,
+        props.tableFilters
       )
 
       setTimeout(() => {
@@ -114,6 +114,6 @@ export function useCashAdvancesFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
-    employeesStore,
+    employeesStore
   }
 }

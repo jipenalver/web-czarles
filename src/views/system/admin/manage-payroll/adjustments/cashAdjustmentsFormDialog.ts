@@ -1,7 +1,7 @@
 import {
   type CashAdjustment,
   type CashAdjustmentTableFilter,
-  useCashAdjustmentsStore,
+  useCashAdjustmentsStore
 } from '@/stores/cashAdjustments'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -15,7 +15,7 @@ export function useCashAdjustmentsFormDialog(
     tableOptions: TableOptions
     tableFilters: CashAdjustmentTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  emit: (event: 'update:isDialogVisible', value: boolean) => void
 ) {
   const cashAdjustmentsStore = useCashAdjustmentsStore()
   const employeesStore = useEmployeesStore()
@@ -27,7 +27,7 @@ export function useCashAdjustmentsFormDialog(
     name: '',
     remarks: '',
     is_deduction: false,
-    amount: undefined,
+    amount: undefined
   }
   const formData = ref<Partial<CashAdjustment>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -39,7 +39,7 @@ export function useCashAdjustmentsFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    },
+    }
   )
 
   // Actions
@@ -55,7 +55,7 @@ export function useCashAdjustmentsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false,
+        formProcess: false
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Salary Adjustment.`
@@ -94,6 +94,6 @@ export function useCashAdjustmentsFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
-    employeesStore,
+    employeesStore
   }
 }

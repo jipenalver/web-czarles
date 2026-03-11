@@ -34,43 +34,43 @@ export const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   {
     path: '/privacy-policy',
     name: 'privacy-policy',
     component: PrivacyPolicyView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   {
     path: '/terms-and-conditions',
     name: 'terms-and-conditions',
     component: TermsConditionsView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   {
     path: '/change-logs',
     name: 'change-logs',
     component: ChangeLogsView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   {
     path: '/about',
     name: 'about',
     component: AboutView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   {
     path: '/company',
     name: 'company',
     component: CompanyView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   {
     path: '/contact',
     name: 'contact',
     component: ContactView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
 
   // Auth
@@ -78,7 +78,7 @@ export const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false }
   },
   // {
   //   path: '/register',
@@ -92,13 +92,13 @@ export const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: DashboardView,
-    meta: { requiresAuth: true, isDefault: true },
+    meta: { requiresAuth: true, isDefault: true }
   },
   {
     path: '/settings/:tab?',
     name: 'settings',
     component: SettingsView,
-    meta: { requiresAuth: true, isDefault: true },
+    meta: { requiresAuth: true, isDefault: true }
   },
 
   // Users
@@ -106,13 +106,13 @@ export const routes = [
     path: '/admin/users/roles',
     name: 'admin-users-roles',
     component: UserRolesView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/admin/users/list',
     name: 'admin-users-list',
     component: UsersView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
 
   // Employees
@@ -120,19 +120,19 @@ export const routes = [
     path: '/hrms/employees/list',
     name: 'hrms-employees-list',
     component: EmployeesView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/employees/benefits',
     name: 'hrms-employees-benefits',
     component: RatesBenefitsView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/employees/memos',
     name: 'hrms-employees-memos',
     component: MemosView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
 
   // Attendance
@@ -140,31 +140,31 @@ export const routes = [
     path: '/hrms/attendance/list',
     name: 'hrms-attendance-list',
     component: AttendanceView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/attendance/leave-requests',
     name: 'hrms-attendance-leave-requests',
     component: LeaveRequestsView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/attendance/leave',
     name: 'hrms-attendance-leave',
     component: LeaveView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/attendance/overtime-requests',
     name: 'hrms-attendance-overtime-requests',
     component: OvertimeRequestsView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/attendance/overtime',
     name: 'hrms-attendance-overtime',
     component: OvertimeView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
 
   // Payroll
@@ -172,25 +172,25 @@ export const routes = [
     path: '/hrms/payroll/supplemental',
     name: 'hrms-payroll-supplemental',
     component: SupplementalView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/payroll/advance-requests',
     name: 'hrms-payroll-advance-requests',
     component: CashAdvanceRequestView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/payroll/advance',
     name: 'hrms-payroll-advance',
     component: CashAdvancesView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
   {
     path: '/hrms/payroll/list',
     name: 'hrms-payroll-list',
     component: PayrollView,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true }
   },
 
   // Errors Pages
@@ -198,12 +198,12 @@ export const routes = [
     path: '/forbidden',
     name: 'forbidden',
     component: ForbiddenView,
-    meta: { isDefault: true },
+    meta: { isDefault: true }
   },
   {
     path: '/:catchAll(.*)',
     name: 'not-found',
     component: NotFoundView,
-    meta: { isDefault: true },
-  },
+    meta: { isDefault: true }
+  }
 ]

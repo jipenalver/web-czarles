@@ -65,7 +65,7 @@ watch(
       const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
       const fetchedCashAdjustments = await fetchCashAdjustments(
         filterDateString as string,
-        employeeId,
+        employeeId
       )
 
       // Filter out dummy entries with amount: 0
@@ -76,17 +76,17 @@ watch(
       cashAdjustments.value = []
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Compute total cash advance from all ca.amount
 const totalCashAdvance = computed(() =>
-  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0),
+  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0)
 )
 
 // Compute total cash adjustments (deductions only)
 const totalCashAdjustments = computed(() =>
-  cashAdjustments.value.reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0),
+  cashAdjustments.value.reduce((sum, adj) => sum + (Number(adj.amount) || 0), 0)
 )
 
 // Console warn for late deduction
@@ -108,7 +108,7 @@ const netSalaryCalculation = useNetSalaryCalculation(
   computed(() => props.lateDeduction),
   computed(() => props.employeeDeductions),
   computed(() => totalCashAdvance.value + totalCashAdjustments.value), // Combine both cash deductions
-  computed(() => props.undertimeDeduction),
+  computed(() => props.undertimeDeduction)
 )
 
 // Publish net salary in realtime for other components (e.g. print footer)
@@ -122,14 +122,14 @@ watch(
         localStorage.setItem('czarles_payroll_price', String(priceValue))
         // dispatch a custom event so same-window listeners receive updates in realtime
         window.dispatchEvent(
-          new CustomEvent('czarles_payroll_price_update', { detail: { price: priceValue } }),
+          new CustomEvent('czarles_payroll_price_update', { detail: { price: priceValue } })
         )
       } catch {
         // noop
       }
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // ...existing code...
