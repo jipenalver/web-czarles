@@ -82,7 +82,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Information We Collect</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Information We Collect
+                </h3>
 
                 <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">
                   Personal Information
@@ -151,7 +153,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">How We Use Your Information</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  How We Use Your Information
+                </h3>
                 <p class="mb-3">We use your information for the following purposes:</p>
 
                 <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Core Functionality</h4>
@@ -177,7 +181,9 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Security and Compliance</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">
+                  Security and Compliance
+                </h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Fraud Prevention:</strong> Detect fake locations and prevent attendance
@@ -193,7 +199,9 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Service Improvement</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">
+                  Service Improvement
+                </h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Performance Optimization:</strong> Improve app functionality and user
@@ -210,7 +218,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Information Sharing and Disclosure</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Information Sharing and Disclosure
+                </h3>
 
                 <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Employer Access</h4>
                 <ul class="mb-4">
@@ -225,7 +235,9 @@ onMounted(() => {
                   <li>Performance and attendance analytics may be provided to management</li>
                 </ul>
 
-                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Third-Party Services</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">
+                  Third-Party Services
+                </h4>
                 <p class="mb-3">We use the following third-party services:</p>
                 <ul class="mb-4">
                   <li>
@@ -249,7 +261,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Data Storage and Security</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Data Storage and Security
+                </h3>
 
                 <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Security Measures</h4>
                 <ul class="mb-4">
@@ -301,7 +315,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Your Rights and Choices</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Your Rights and Choices
+                </h3>
 
                 <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Access and Control</h4>
                 <ul class="mb-4">
@@ -346,7 +362,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">International Data Transfers</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  International Data Transfers
+                </h3>
                 <p class="mb-4">
                   Your information may be transferred to and processed in countries other than your
                   country of residence. We ensure appropriate safeguards are in place to protect
@@ -355,7 +373,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Changes to This Privacy Policy</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Changes to This Privacy Policy
+                </h3>
                 <p class="mb-3">
                   We may update this Privacy Policy from time to time. We will notify you of any
                   material changes by:
@@ -372,7 +392,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Third-Party Links and Services</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Third-Party Links and Services
+                </h3>
                 <p class="mb-4">
                   Our App may contain links to third-party websites or services. We are not
                   responsible for the privacy practices of these third parties. We encourage you to
@@ -381,7 +403,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Data Breach Notification</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Data Breach Notification
+                </h3>
                 <p class="mb-3">
                   In the event of a data breach that may affect your personal information, we will:
                 </p>
@@ -394,7 +418,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Contact Information</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Contact Information
+                </h3>
                 <p class="mb-3">
                   If you have questions, concerns, or requests regarding this Privacy Policy or your
                   personal information, please contact us:
@@ -452,7 +478,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Compliance and Certifications</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
+                  Compliance and Certifications
+                </h3>
                 <p class="mb-3">This App complies with applicable privacy laws including:</p>
                 <ul class="mb-4">
                   <li>General Data Protection Regulation (GDPR)</li>

@@ -67,9 +67,13 @@ onMounted(() => {
         <v-col cols="12" lg="10">
           <v-card :class="[heroComputed.cardPadding, 'ma-2 ma-md-4']" outlined>
             <div class="terms-conditions-content">
-              <h2 :class="[heroComputed.contentTitleClass, 'mb-6 text-primary']">Terms and Conditions</h2>
+              <h2 :class="[heroComputed.contentTitleClass, 'mb-6 text-primary']">
+                Terms and Conditions
+              </h2>
 
-              <p :class="[heroComputed.bodyTextClass, 'mb-6']"><strong>Last updated:</strong> August 25, 2025</p>
+              <p :class="[heroComputed.bodyTextClass, 'mb-6']">
+                <strong>Last updated:</strong> August 25, 2025
+              </p>
 
               <section class="mb-6">
                 <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
@@ -231,7 +235,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">11. Service Availability</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  11. Service Availability
+                </h3>
                 <ul class="mb-4">
                   <li>
                     We strive to maintain App availability but do not guarantee uninterrupted
@@ -256,7 +262,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">13. Account Termination</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  13. Account Termination
+                </h3>
                 <p class="mb-3">We may suspend or terminate your account if you:</p>
                 <ul class="mb-4">
                   <li>Violate these Terms and Conditions</li>
@@ -267,7 +275,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">14. Third-Party Services</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  14. Third-Party Services
+                </h3>
                 <ul class="mb-4">
                   <li>
                     The App may integrate with third-party services (mapping, cloud storage, etc.)
@@ -280,7 +290,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">15. Compliance with Laws</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  15. Compliance with Laws
+                </h3>
                 <ul class="mb-4">
                   <li>
                     You must comply with all applicable local, state, and federal laws while using
@@ -311,7 +323,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">17. Support and Contact</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  17. Support and Contact
+                </h3>
                 <p class="mb-3">For technical support or questions about these Terms:</p>
                 <ul class="mb-4">
                   <li><strong>Email:</strong> czarlesconst0897@gmail.com</li>
@@ -321,7 +335,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">18. Dispute Resolution</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  18. Dispute Resolution
+                </h3>
                 <ul class="mb-4">
                   <li>
                     Any disputes will be resolved through binding arbitration in [JURISDICTION]
@@ -332,7 +348,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">19. Severability</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  19. Severability
+                </h3>
                 <p class="mb-4">
                   If any provision of these Terms is found to be unenforceable, the remaining
                   provisions will continue in full force and effect.
@@ -340,7 +358,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">20. Entire Agreement</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  20. Entire Agreement
+                </h3>
                 <p class="mb-4">
                   These Terms, along with our Privacy Policy, constitute the entire agreement
                   between you and C'Zarles Construction and Supplies regarding the use of the App.
@@ -350,7 +370,9 @@ onMounted(() => {
               <v-divider class="my-6"></v-divider>
 
               <section class="mb-6">
-                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">Company Information</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                  Company Information
+                </h3>
                 <ul class="mb-4">
                   <li><strong>Company Name:</strong> C'Zarles Construction and Supplies</li>
                   <li><strong>Address:</strong> 360 R. Calo St, Butuan City, Agusan Del Norte</li>
