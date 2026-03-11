@@ -42,7 +42,6 @@ export function getFormattedCurrentDate(): string {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
-
 /**
  * Round decimal to specified places (default 2)
  */
@@ -436,15 +435,7 @@ export function onView(options: {
   tableFilters?: { value?: Record<string, unknown> }
   baseOnView: (payload: TableData) => void
 }) {
-  const {
-    item,
-    chosenMonth,
-    dayFrom,
-    dayTo,
-    crossMonthEnabled,
-    tableFilters,
-    baseOnView,
-  } = options
+  const { item, chosenMonth, dayFrom, dayTo, crossMonthEnabled, tableFilters, baseOnView } = options
 
   chosenMonth.value = String(item.month)
 
@@ -480,25 +471,15 @@ export function onView(options: {
   }
 
   const range = crossMonthEnabled.value
-    ? getDateRangeForMonth(
-        tfYear,
-        chosenMonth.value,
-        dayFrom.value,
-        dayTo.value,
-      )
-    : getDateRangeForMonthNoCross(
-        tfYear,
-        chosenMonth.value,
-        dayFrom.value,
-        dayTo.value,
-      )
+    ? getDateRangeForMonth(tfYear, chosenMonth.value, dayFrom.value, dayTo.value)
+    : getDateRangeForMonthNoCross(tfYear, chosenMonth.value, dayFrom.value, dayTo.value)
 
   console.log('[PAYROLL] Selected date range for view:', {
     range,
     chosenMonth: chosenMonth.value,
     crossMonthEnabled: crossMonthEnabled.value,
     dayFrom: dayFrom.value,
-    dayTo: dayTo.value
+    dayTo: dayTo.value,
   })
 
   try {
@@ -566,10 +547,10 @@ export function calculateHolidayPay(holiday: HolidayWithAttendance, dailyRate: n
   const rate = dailyRate || 0
 
   // Return only the premium/additional amount, not including the base 100%
-  if (type.includes('rh')) return rate * 1.0 * fraction  // 200% - 100% = 100% premium
+  if (type.includes('rh')) return rate * 1.0 * fraction // 200% - 100% = 100% premium
   if (type.includes('snh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
-  if (type.includes('lh')) return rate * 0.3 * fraction  // 130% - 100% = 30% premium
-  if (type.includes('ch')) return rate * 0.0 * fraction  // 100% - 100% = 0% premium (no additional)
+  if (type.includes('lh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
+  if (type.includes('ch')) return rate * 0.0 * fraction // 100% - 100% = 0% premium (no additional)
   if (type.includes('swh')) return rate * 0.3 * fraction // 130% - 100% = 30% premium
   return rate * 0.0 * fraction // Default: no premium
 }

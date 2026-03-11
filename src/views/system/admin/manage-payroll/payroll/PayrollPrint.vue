@@ -6,9 +6,17 @@ import { type PayrollData } from './payrollTableDialog'
 import { type TableData } from './payrollComputation'
 import { usePayrollPrint } from './usePayrollPrint'
 import { usePayrollData } from './usePayrollData'
-import { useEmployeeDisplay, usePayrollFormatting, useHoursCalculation } from './composables/usePayrollDisplay'
+import {
+  useEmployeeDisplay,
+  usePayrollFormatting,
+  useHoursCalculation,
+} from './composables/usePayrollDisplay'
 import { usePayrollWatchers } from './composables/usePayrollWatchers'
-import { getPayrollFromDate, getHolidayDateString, getMonthDateRangeFromStorage } from './composables/payrollStorage'
+import {
+  getPayrollFromDate,
+  getHolidayDateString,
+  getMonthDateRangeFromStorage,
+} from './composables/payrollStorage'
 import PayrollDeductions from './PayrollDeductions.vue'
 import MiniPayrollPrint from './PaySlip.vue'
 import PayrollPrintFooter from './PayrollPrintFooter.vue'
@@ -25,11 +33,11 @@ const props = defineProps<{
 }>()
 
 const filterDateString = computed(() =>
-  getPayrollFromDate(props.payrollData.year, props.payrollData.month)
+  getPayrollFromDate(props.payrollData.year, props.payrollData.month),
 )
 
 const holidayDateString = computed(() =>
-  getHolidayDateString(props.payrollData.year, props.payrollData.month)
+  getHolidayDateString(props.payrollData.year, props.payrollData.month),
 )
 
 // Create params para sa composable
@@ -98,7 +106,7 @@ const tripsStore = useTripsStore()
 
 // Employee display composables
 const { fullName, designation, address, dailyRate, isFieldStaff, isAdmin } = useEmployeeDisplay(
-  computed(() => props.employeeData)
+  computed(() => props.employeeData),
 )
 const { formattedDate, showLateDeduction } = usePayrollFormatting(isAdmin)
 
@@ -133,7 +141,11 @@ const {
 const holidaysArray = computed(() => holidays.value || [])
 
 // Function to calculate holiday amount based on type
-const calculateHolidayAmount = (holiday: { type?: string | null; attendance_fraction?: number; hasActualAttendance?: boolean }) => {
+const calculateHolidayAmount = (holiday: {
+  type?: string | null
+  attendance_fraction?: number
+  hasActualAttendance?: boolean
+}) => {
   const rate = dailyRate.value || 0
   const fraction = holiday.attendance_fraction || 0
 
@@ -185,7 +197,6 @@ const displayTotalEarnings = computed(() => {
 })
 
 // Helper function to format Sunday duty text
-
 
 // Recalculate earnings function
 function recalculateEarnings() {
@@ -285,7 +296,7 @@ usePayrollWatchers(
     initializePayrollCalculations,
     loadTrips,
     fetchEmployeeHolidays,
-  }
+  },
 )
 
 // Track if initial load is complete to prevent dialog from showing again
@@ -297,17 +308,22 @@ const showLoadingDialog = computed(() => {
 })
 
 // Watch for when initial calculations complete
-watch(() => isCalculationsCompleting.value, (isCompleting) => {
-  if (!isCompleting && !hasCompletedInitialLoad.value) {
-    hasCompletedInitialLoad.value = true
-  }
-})
+watch(
+  () => isCalculationsCompleting.value,
+  (isCompleting) => {
+    if (!isCompleting && !hasCompletedInitialLoad.value) {
+      hasCompletedInitialLoad.value = true
+    }
+  },
+)
 
 // Debug: Watch for deduction value changes
-watch([monthLateDeduction, monthUndertimeDeduction, lateDeduction, undertimeDeduction],
+watch(
+  [monthLateDeduction, monthUndertimeDeduction, lateDeduction, undertimeDeduction],
   () => {
     // console.warn(`[PAYROLL PROPS DEBUG] Employee ${props.employeeData?.id} - monthLate: ${late}, monthUndertime: ${undertime}, lateDeduction: ₱${lateAmount}, undertimeDeduction: ₱${undertimeAmount}`)
-  }, { immediate: true }
+  },
+  { immediate: true },
 )
 
 onMounted(async () => {
@@ -366,9 +382,7 @@ onMounted(async () => {
           <td class="border-b-thin text-center pa-2">
             Days Regular Work for <span class="font-weight-bold">{{ monthDateRange }}</span>
           </td>
-          <td class="pa-2">
-            @ {{ getMoneyText(employeeDailyRate ?? 0) }}
-          </td>
+          <td class="pa-2">@ {{ getMoneyText(employeeDailyRate ?? 0) }}</td>
           <td class="pa-2">
             <span>
               x

@@ -24,9 +24,10 @@ export function useMonthlyPayrollCSV() {
 
     try {
       // Generate filename
-      const dateString = crossMonthEnabled && dayFrom && dayTo
-        ? `${selectedMonth}_${selectedYear}_${dayFrom}-${dayTo}`
-        : `${selectedMonth}_${selectedYear}`
+      const dateString =
+        crossMonthEnabled && dayFrom && dayTo
+          ? `${selectedMonth}_${selectedYear}_${dayFrom}-${dayTo}`
+          : `${selectedMonth}_${selectedYear}`
       const filename = `${getDateISO(new Date())}-monthly-payroll-${dateString.toLowerCase()}`
 
       // Define CSV headers to match the table structure exactly
@@ -83,7 +84,9 @@ export function useMonthlyPayrollCSV() {
           prepareCSV(getMoneyText(item.deductions.sss_loan || 0)),
           prepareCSV(getMoneyText(item.deductions.late || 0)),
           prepareCSV(getMoneyText(item.deductions.undertime || 0)),
-          prepareCSV(getMoneyText((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0))),
+          prepareCSV(
+            getMoneyText((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)),
+          ),
           prepareCSV(getMoneyText(item.deductions.cash_adjustment || 0)),
           prepareCSV(getMoneyText(item.total_deductions || 0)),
           prepareCSV(getMoneyText(item.net_pay || 0)),
@@ -120,7 +123,8 @@ export function useMonthlyPayrollCSV() {
             salary_deposit: acc.salary_deposit + (item.deductions.salary_deposit || 0),
             late: acc.late + (item.deductions.late || 0),
             undertime: acc.undertime + (item.deductions.undertime || 0),
-            cash_adjustment_deduction: acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
+            cash_adjustment_deduction:
+              acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
             total_deductions: acc.total_deductions + (item.total_deductions || 0),
             net_pay: acc.net_pay + (item.net_pay || 0),
           }
@@ -188,7 +192,6 @@ export function useMonthlyPayrollCSV() {
       generateCSV(filename, csvData)
 
       console.log(`CSV exported successfully: ${filename}.csv`)
-
     } catch (error) {
       console.error('Error generating CSV:', error)
     } finally {

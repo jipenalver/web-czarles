@@ -12,7 +12,7 @@ import AttendanceDaysTooltip from '@/views/system/admin/manage-payroll/payroll/A
 function calculateEmployeePresentDays(
   attendanceRecords: AttendanceRecord[],
   holidays: Holiday[],
-  isAdmin: boolean = false
+  isAdmin: boolean = false,
 ): number {
   if (!attendanceRecords || attendanceRecords.length === 0) {
     return 0
@@ -45,7 +45,7 @@ function calculateEmployeePresentDays(
 
     // Check if this attendance date is a Regular Holiday
     const attendanceDate = attendance.attendance_date || attendance.date
-    const holiday = holidays?.find(h => {
+    const holiday = holidays?.find((h) => {
       if (!h.holiday_at || !attendanceDate) return false
       const holidayDate = new Date(h.holiday_at).toISOString().split('T')[0]
       const attDate = new Date(attendanceDate).toISOString().split('T')[0]
@@ -96,12 +96,16 @@ const emit = defineEmits<{
 // Items with client-side calculations
 // Note: Items are now pre-filtered in parent component (SummaryTable.vue)
 const itemsWithCalculations = computed(() => {
-  return props.items.map(item => {
+  return props.items.map((item) => {
     // For admin employees, prioritize days_worked_calculated which uses the special AM-only logic
     // For non-admin employees, calculate from attendance records
     let effectiveDaysWorked = 0
 
-    if (item.is_admin && item.days_worked_calculated !== null && item.days_worked_calculated !== undefined) {
+    if (
+      item.is_admin &&
+      item.days_worked_calculated !== null &&
+      item.days_worked_calculated !== undefined
+    ) {
       // Admin employees: use pre-calculated value from SummaryTable.vue
       effectiveDaysWorked = item.days_worked_calculated
     } else {
@@ -110,13 +114,14 @@ const itemsWithCalculations = computed(() => {
       const calculatedPresentDays = calculateEmployeePresentDays(
         item.attendance_records || [],
         item.holidays || [],
-        item.is_admin || false
+        item.is_admin || false,
       )
 
       // Use calculated present days if we have attendance records, otherwise fall back to existing logic
-      effectiveDaysWorked = calculatedPresentDays > 0
-        ? calculatedPresentDays
-        : (item.days_worked_calculated ?? item.days_worked) || 0
+      effectiveDaysWorked =
+        calculatedPresentDays > 0
+          ? calculatedPresentDays
+          : (item.days_worked_calculated ?? item.days_worked) || 0
     }
 
     // Recalculate basic_pay based on effective days worked
@@ -125,27 +130,29 @@ const itemsWithCalculations = computed(() => {
 
     // Calculate gross pay safely
     // Include sunday_amount as it's a separate premium (30% of daily rate per Sunday worked)
-    const grossPay = basicPay +
-                    (item.allowance || 0) +
-                    (item.overtime_pay || 0) +
-                    (item.trips_pay || 0) +
-                    (item.holidays_pay || 0) +
-                    (item.sunday_amount || 0) +
-                    (item.utilizations_pay || 0) +
-                    (item.benefits_pay || 0) +
-                    (item.cash_adjustment_addon || 0)
+    const grossPay =
+      basicPay +
+      (item.allowance || 0) +
+      (item.overtime_pay || 0) +
+      (item.trips_pay || 0) +
+      (item.holidays_pay || 0) +
+      (item.sunday_amount || 0) +
+      (item.utilizations_pay || 0) +
+      (item.benefits_pay || 0) +
+      (item.cash_adjustment_addon || 0)
 
     // Calculate total deductions safely
-    const totalDeductions = (item.deductions.cash_advance || 0) +
-                           (item.deductions.sss || 0) +
-                           (item.deductions.phic || 0) +
-                           (item.deductions.pagibig || 0) +
-                           (item.deductions.sss_loan || 0) +
-                           (item.deductions.savings || 0) +
-                           (item.deductions.salary_deposit || 0) +
-                           (item.deductions.late || 0) +
-                           (item.deductions.undertime || 0) +
-                           (item.deductions.cash_adjustment || 0)
+    const totalDeductions =
+      (item.deductions.cash_advance || 0) +
+      (item.deductions.sss || 0) +
+      (item.deductions.phic || 0) +
+      (item.deductions.pagibig || 0) +
+      (item.deductions.sss_loan || 0) +
+      (item.deductions.savings || 0) +
+      (item.deductions.salary_deposit || 0) +
+      (item.deductions.late || 0) +
+      (item.deductions.undertime || 0) +
+      (item.deductions.cash_adjustment || 0)
 
     // Calculate net pay safely
     const netPay = grossPay - totalDeductions
@@ -156,7 +163,7 @@ const itemsWithCalculations = computed(() => {
       basic_pay: basicPay,
       gross_pay: grossPay,
       total_deductions: totalDeductions,
-      net_pay: netPay
+      net_pay: netPay,
     }
   })
 })
@@ -202,7 +209,8 @@ const totals = computed(() => {
         salary_deposit: acc.salary_deposit + (item.deductions.salary_deposit || 0),
         late: acc.late + (item.deductions.late || 0),
         undertime: acc.undertime + (item.deductions.undertime || 0),
-        cash_adjustment_deduction: acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
+        cash_adjustment_deduction:
+          acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
         total_deductions: acc.total_deductions + (item.total_deductions || 0),
         net_pay: acc.net_pay + (item.net_pay || 0),
       }
@@ -329,7 +337,9 @@ const totals = computed(() => {
             <td class="text-center border">{{ formatCurrency(item.trips_pay) }}</td>
             <td class="text-center border">{{ formatCurrency(item.utilizations_pay) }}</td>
             <td class="text-center border">{{ formatCurrency(item.benefits_pay || 0) }}</td>
-            <td class="text-center border">{{ formatCurrency(item.cash_adjustment_addon || 0) }}</td>
+            <td class="text-center border">
+              {{ formatCurrency(item.cash_adjustment_addon || 0) }}
+            </td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(item.gross_pay) }}</td>
 
             <!-- Deduction Columns -->
@@ -350,7 +360,11 @@ const totals = computed(() => {
               {{ formatCurrency(item.deductions.undertime) }}
             </td>
             <td class="text-end text-error border">
-              {{ formatCurrency((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)) }}
+              {{
+                formatCurrency(
+                  (item.deductions.savings || 0) + (item.deductions.salary_deposit || 0),
+                )
+              }}
             </td>
             <td class="text-end text-error border">
               {{ formatCurrency(item.deductions.cash_adjustment || 0) }}
@@ -363,7 +377,14 @@ const totals = computed(() => {
 
             <!-- Net Pay -->
             <td class="text-end font-weight-bold text-success border">
-              {{ Math.round(item.net_pay).toLocaleString('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}
+              {{
+                Math.round(item.net_pay).toLocaleString('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              }}
             </td>
           </tr>
 
@@ -372,12 +393,16 @@ const totals = computed(() => {
             <td class="font-weight-bold border">TOTAL</td>
 
             <!-- Payable Totals -->
-            <td class="text-center font-weight-bold border">{{ roundDecimal(totals.days_worked, 2) }} days</td>
+            <td class="text-center font-weight-bold border">
+              {{ roundDecimal(totals.days_worked, 2) }} days
+            </td>
             <td class="text-center font-weight-bold border">{{ totals.sunday_days }}</td>
             <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.sunday_amount) }}
             </td>
-            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.allowance) }}</td>
+            <td class="text-center font-weight-bold border">
+              {{ formatCurrency(totals.allowance) }}
+            </td>
             <td class="text-center font-weight-bold border">
               {{ roundDecimal(totals.overtime_hrs, 2) }}
             </td>
@@ -387,10 +412,18 @@ const totals = computed(() => {
             <td class="text-center font-weight-bold border">
               {{ formatCurrency(totals.holidays_pay) }}
             </td>
-            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.trips_pay) }}</td>
-            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.utilizations_pay) }}</td>
-            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.benefits_pay) }}</td>
-            <td class="text-center font-weight-bold border">{{ formatCurrency(totals.cash_adjustment_addon) }}</td>
+            <td class="text-center font-weight-bold border">
+              {{ formatCurrency(totals.trips_pay) }}
+            </td>
+            <td class="text-center font-weight-bold border">
+              {{ formatCurrency(totals.utilizations_pay) }}
+            </td>
+            <td class="text-center font-weight-bold border">
+              {{ formatCurrency(totals.benefits_pay) }}
+            </td>
+            <td class="text-center font-weight-bold border">
+              {{ formatCurrency(totals.cash_adjustment_addon) }}
+            </td>
             <td class="text-end font-weight-bold border">{{ formatCurrency(totals.gross_pay) }}</td>
 
             <!-- Deduction Totals -->
@@ -430,7 +463,14 @@ const totals = computed(() => {
 
             <!-- Net Pay Total -->
             <td class="text-end font-weight-bold text-success border">
-              {{ Math.round(totals.net_pay).toLocaleString('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 0, maximumFractionDigits: 0 }) }}
+              {{
+                Math.round(totals.net_pay).toLocaleString('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              }}
             </td>
           </tr>
         </tbody>

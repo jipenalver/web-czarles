@@ -7,13 +7,11 @@ import { useDisplay } from 'vuetify'
 const { mobile, lgAndUp } = useDisplay()
 
 // Computed properties for responsive classes
-const heroTitleClass = computed(() => 
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+const heroTitleClass = computed(() =>
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
 )
 
-const heroSubtitleClass = computed(() => 
-  mobile.value ? 'text-body-1' : 'text-h6'
-)
+const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
 
 // const companyStats = ref([
 //   { icon: 'mdi-calendar-check', value: '15+', label: 'Years of Excellence' },
@@ -86,22 +84,47 @@ onMounted(() => {
     ctaVisible.value = true
   }, 1600)
 })
-
-
 </script>
 
 <template>
   <LandingLayout :hideBg="true">
     <template #hero>
-      <div class="text-center white--text animate-hero-container" :class="{ 'animate-hero-container-visible': isVisible }" style="max-width: 900px">
+      <div
+        class="text-center white--text animate-hero-container"
+        :class="{ 'animate-hero-container-visible': isVisible }"
+        style="max-width: 900px"
+      >
         <div class="hero-content">
-          <h1 :class="[heroTitleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-hero-title', { 'animate-hero-title-visible': isVisible }]">About C'zarles</h1>
-          <p :class="[heroSubtitleClass, 'mb-6', 'text-white', 'font-weight-light', 'animate-hero-subtitle', { 'animate-hero-subtitle-visible': isVisible }]">
+          <h1
+            :class="[
+              heroTitleClass,
+              'font-weight-bold',
+              'mb-4',
+              'text-white',
+              'animate-hero-title',
+              { 'animate-hero-title-visible': isVisible },
+            ]"
+          >
+            About C'zarles
+          </h1>
+          <p
+            :class="[
+              heroSubtitleClass,
+              'mb-6',
+              'text-white',
+              'font-weight-light',
+              'animate-hero-subtitle',
+              { 'animate-hero-subtitle-visible': isVisible },
+            ]"
+          >
             Building Excellence. Delivering Dreams. Creating Lasting Value.
           </p>
         </div>
 
-        <div class="text-caption text-white animate-hero-breadcrumb" :class="{ 'animate-hero-breadcrumb-visible': isVisible }">
+        <div
+          class="text-caption text-white animate-hero-breadcrumb"
+          :class="{ 'animate-hero-breadcrumb-visible': isVisible }"
+        >
           <v-icon size="small" class="mr-1 text-orange-lighten-2">mdi-home</v-icon>
           <RouterLink to="/" class="text-white text-decoration-none hover-orange">Home</RouterLink>
           <span class="mx-2 text-white">/</span>
@@ -147,11 +170,23 @@ onMounted(() => {
       </v-container> -->
 
       <!-- Mission & Vision Section -->
-      <v-container class="py-8 animate-container" :class="{ 'animate-slide-up-container': missionVisible }">
+      <v-container
+        class="py-8 animate-container"
+        :class="{ 'animate-slide-up-container': missionVisible }"
+      >
         <v-row justify="center">
-          <v-col cols="12" md="10" lg="8" class="animate-card-left" :class="{ 'animate-card-left-visible': missionVisible }">
+          <v-col
+            cols="12"
+            md="10"
+            lg="8"
+            class="animate-card-left"
+            :class="{ 'animate-card-left-visible': missionVisible }"
+          >
             <v-card class="pa-8" elevation="3" style="height: 100%">
-              <div class="text-center mb-8 animate-fade-in" :class="{ 'animate-fade-in-visible': missionVisible }">
+              <div
+                class="text-center mb-8 animate-fade-in"
+                :class="{ 'animate-fade-in-visible': missionVisible }"
+              >
                 <h2 class="text-h4 font-weight-bold text-primary mb-4">Our Mission & Commitment</h2>
                 <v-divider
                   class="mx-auto animate-expand"
@@ -162,7 +197,12 @@ onMounted(() => {
               </div>
 
               <v-row align="center">
-                <v-col cols="12" md="6" class="animate-slide-right" :class="{ 'animate-slide-right-visible': missionVisible }">
+                <v-col
+                  cols="12"
+                  md="6"
+                  class="animate-slide-right"
+                  :class="{ 'animate-slide-right-visible': missionVisible }"
+                >
                   <h3 class="text-h5 font-weight-bold mb-4 text-primary">
                     <v-icon class="mr-2" color="secondary">mdi-target</v-icon>
                     Our Mission
@@ -175,7 +215,12 @@ onMounted(() => {
                     clients.
                   </p>
                 </v-col>
-                <v-col cols="12" md="6" class="animate-slide-left" :class="{ 'animate-slide-left-visible': missionVisible }">
+                <v-col
+                  cols="12"
+                  md="6"
+                  class="animate-slide-left"
+                  :class="{ 'animate-slide-left-visible': missionVisible }"
+                >
                   <h3 class="text-h5 font-weight-bold mb-4 text-primary">
                     <v-icon class="mr-2" color="secondary">mdi-handshake</v-icon>
                     Our Commitment
@@ -185,7 +230,12 @@ onMounted(() => {
                     <strong>integrity, quality, performance, teamwork, safety,</strong> and client
                     satisfaction.
                   </p>
-                  <v-alert type="info" variant="tonal" class="mt-4 animate-pulse-subtle" icon="mdi-shield-star">
+                  <v-alert
+                    type="info"
+                    variant="tonal"
+                    class="mt-4 animate-pulse-subtle"
+                    icon="mdi-shield-star"
+                  >
                     <div class="font-weight-bold">
                       RIGHT THE FIRST TIME, EVERYTIME and ALL THE TIME.
                     </div>
@@ -194,14 +244,20 @@ onMounted(() => {
               </v-row>
             </v-card>
           </v-col>
-          <v-col cols="12" md="10" lg="4" class="animate-card-right" :class="{ 'animate-card-right-visible': valuesVisible }">
+          <v-col
+            cols="12"
+            md="10"
+            lg="4"
+            class="animate-card-right"
+            :class="{ 'animate-card-right-visible': valuesVisible }"
+          >
             <v-row>
-              <v-col 
-                v-for="(value, index) in coreValues" 
-                :key="value.title" 
-                cols="12" 
-                sm="6" 
-                md="3" 
+              <v-col
+                v-for="(value, index) in coreValues"
+                :key="value.title"
+                cols="12"
+                sm="6"
+                md="3"
                 lg="6"
                 class="animate-scale-up"
                 :class="{ 'animate-scale-up-visible': valuesVisible }"
@@ -225,9 +281,14 @@ onMounted(() => {
       </v-container>
 
       <!-- Leadership Section -->
-      <v-container fluid class="py-12 animate-gradient-bg" :class="{ 'animate-gradient-bg-visible': ctaVisible }"  style="background: linear-gradient(135deg, #352c73 0%, #6159a9 100%)">
+      <v-container
+        fluid
+        class="py-12 animate-gradient-bg"
+        :class="{ 'animate-gradient-bg-visible': ctaVisible }"
+        style="background: linear-gradient(135deg, #352c73 0%, #6159a9 100%)"
+      >
         <v-row justify="center">
-         <!--  <v-col cols="12" md="10" lg="4">
+          <!--  <v-col cols="12" md="10" lg="4">
             <div class="text-center mb-8 ">
               <h2 class="text-h4 font-weight-bold text-white mb-4">Leadership Team</h2>
               <p class="text-h6 font-weight-light  text-white">
@@ -255,14 +316,28 @@ onMounted(() => {
             </v-row>
           </v-col> -->
 
-          <v-col cols="12" md="12" lg="12" class="animate-zoom-in" :class="{ 'animate-zoom-in-visible': ctaVisible }">
+          <v-col
+            cols="12"
+            md="12"
+            lg="12"
+            class="animate-zoom-in"
+            :class="{ 'animate-zoom-in-visible': ctaVisible }"
+          >
             <div class="text-center text-white">
-              <h2 class="text-h4 font-weight-bold mb-4 animate-text-glow">Ready to Build Your Dream Project?</h2>
-              <p class="text-h6 font-weight-light mb-6 opacity-90 px-5 animate-slide-up" :class="{ 'animate-slide-up-visible': ctaVisible }">
+              <h2 class="text-h4 font-weight-bold mb-4 animate-text-glow">
+                Ready to Build Your Dream Project?
+              </h2>
+              <p
+                class="text-h6 font-weight-light mb-6 opacity-90 px-5 animate-slide-up"
+                :class="{ 'animate-slide-up-visible': ctaVisible }"
+              >
                 Let's discuss how we can bring your vision to life with our expertise and commitment
                 to excellence.
               </p>
-              <div class="d-flex flex-column flex-sm-row justify-center ga-4 animate-buttons" :class="{ 'animate-buttons-visible': ctaVisible }">
+              <div
+                class="d-flex flex-column flex-sm-row justify-center ga-4 animate-buttons"
+                :class="{ 'animate-buttons-visible': ctaVisible }"
+              >
                 <v-btn
                   color="secondary"
                   size="large"
@@ -422,7 +497,9 @@ onMounted(() => {
 
 /* Hover Effects */
 .animate-hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .animate-hover-lift:hover {
   transform: translateY(-8px);
@@ -499,48 +576,63 @@ onMounted(() => {
 
 /* Keyframe Animations */
 @keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px) }
-  to { opacity: 1; transform: translateY(0) }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes bounceIn {
-  0% { 
+  0% {
     opacity: 0;
     transform: scale(0.3);
   }
-  50% { 
+  50% {
     opacity: 1;
     transform: scale(1.05);
   }
-  70% { transform: scale(0.9); }
-  100% { 
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
     opacity: 1;
     transform: scale(1);
   }
 }
 
 @keyframes pulseSubtle {
-  0%, 100% { 
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.3);
   }
-  50% { 
+  50% {
     transform: scale(1.02);
     box-shadow: 0 0 20px 10px rgba(33, 150, 243, 0.1);
   }
 }
 
 @keyframes textGlow {
-  0% { 
+  0% {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   }
-  100% { 
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4);
+  100% {
+    text-shadow:
+      0 0 20px rgba(255, 255, 255, 0.8),
+      0 0 30px rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -550,17 +642,17 @@ onMounted(() => {
   .animate-card-right {
     transform: translateY(50px);
   }
-  
+
   .animate-card-left-visible,
   .animate-card-right-visible {
     transform: translateY(0);
   }
-  
+
   .animate-slide-right,
   .animate-slide-left {
     transform: translateY(30px);
   }
-  
+
   .animate-slide-right-visible,
   .animate-slide-left-visible {
     transform: translateY(0);
