@@ -1,50 +1,46 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
-import { useDisplay } from 'vuetify'
+import { onMounted, ref } from 'vue'
 import LandingLayout from '@/components/landing/LandingLayout.vue'
+import AppAlert from '@/components/common/AppAlert.vue'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import { useHeroComputed } from '@/utils/helpers/style'
+import { useForm, type GenericObject } from 'vee-validate'
+import * as yup from 'yup'
+import { useContact, type SendMessageProps } from '@/views/landing/contact/composables/contact.composable'
 
-// Vuetify display composable
-const { mobile, lgAndUp } = useDisplay()
+const schema = yup.object({
+  name: yup.string().required('Name is required'),
+  email: yup.string().email('Invalid email address').required('Email is required'),
+  subject: yup.string().required('Subject is required'),
+  message: yup.string().min(10, 'Message must be at least 10 characters').required('Message is required'),
+})
 
-// Computed properties for responsive classes
-const heroTitleClass = computed(() =>
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
-)
+const { handleSubmit, defineField, errors, resetForm } = useForm<SendMessageProps>({ validationSchema: schema })
 
-const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
+const heroComputed = useHeroComputed()
+const { mapRef, lat, lng, mobile, sendMessage } = useContact()
 
-const cardPadding = computed(() => (mobile.value ? 'pa-4' : 'pa-6'))
+const alertVisible = ref(false)
+const alertMessage = ref('')
+const alertStatus = ref(0)
 
-const formTitleClass = computed(() => (mobile.value ? 'text-h6' : 'text-h6'))
+const onSubmit = handleSubmit(async (values: GenericObject & SendMessageProps) => {
+  const data = await sendMessage(values)
 
-const bodyTextClass = computed(() => (mobile.value ? 'text-body-2' : 'text-body-1'))
+  alertMessage.value = data?.success ? 'Message sent! We will get back to you shortly.' : 'Failed to send message. Please try again later.'
+  alertStatus.value = data?.success ? 200 : 500
+  alertVisible.value = true
 
-const mapRef = ref<HTMLDivElement | null>(null)
-const lat = 8.949607490217725
-const lng = 125.52513812447586
-
-const name = ref('')
-const email = ref('')
-const subject = ref('')
-const message = ref('')
+  if (data?.success) resetForm()
+})
 
 const isVisible = ref(false)
 
-function sendMessage() {
-  // Minimal submit handler — adapt to your API later
-  console.log('send message', {
-    name: name.value,
-    email: email.value,
-    subject: subject.value,
-    message: message.value,
-  })
-  name.value = ''
-  email.value = ''
-  subject.value = ''
-  message.value = ''
-}
+const [name, nameAttrs] = defineField('name')
+const [email, emailAttrs] = defineField('email')
+const [subject, subjectAttrs] = defineField('subject')
+const [message, messageAttrs] = defineField('message')
 
 onMounted(() => {
   // trigger hero animation
@@ -85,18 +81,24 @@ onMounted(() => {
 </script>
 
 <template>
+  <AppAlert
+    :isAlertVisible="alertVisible"
+    :formMessage="alertMessage"
+    :formStatus="alertStatus"
+    @update:isAlertVisible="alertVisible = $event"
+  />
   <LandingLayout :hideBg="true">
     <template #hero>
       <div class="text-center white--text" style="max-width: 900px">
         <div class="hero-content" :class="{ 'animate-fade-in': isVisible }">
           <h1
-            :class="[heroTitleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']"
+            :class="[heroComputed.titleClass, 'font-weight-bold', 'mb-4', 'text-white', 'animate-slide-up']"
           >
             Contact
           </h1>
           <p
             :class="[
-              heroSubtitleClass,
+              heroComputed.subtitleClass,
               'mb-6',
               'text-white',
               'font-weight-light',
@@ -130,7 +132,7 @@ onMounted(() => {
           <v-col cols="12" md="6" lg="6">
             <v-row class="mb-4" dense>
               <v-col cols="12" md="6">
-                <v-card :class="[cardPadding, 'info-card']" elevation="1">
+                <v-card :class="[heroComputed.cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-map-marker</v-icon></div>
                   </div>
@@ -144,7 +146,7 @@ onMounted(() => {
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-card :class="[cardPadding, 'info-card']" elevation="1">
+                <v-card :class="[heroComputed.cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-email-outline</v-icon></div>
                   </div>
@@ -158,7 +160,7 @@ onMounted(() => {
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-card :class="[cardPadding, 'info-card']" elevation="1">
+                <v-card :class="[heroComputed.cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-phone</v-icon></div>
                   </div>
@@ -170,7 +172,7 @@ onMounted(() => {
               </v-col>
 
               <v-col cols="12" md="6">
-                <v-card :class="[cardPadding, 'info-card']" elevation="1">
+                <v-card :class="[heroComputed.cardPadding, 'info-card']" elevation="1">
                   <div class="info-left">
                     <div class="icon-circle"><v-icon color="orange">mdi-clock-outline</v-icon></div>
                   </div>
@@ -184,19 +186,20 @@ onMounted(() => {
               </v-col>
             </v-row>
 
-            <v-card :class="[cardPadding, 'contact-form-card']" elevation="2">
-              <div :class="[formTitleClass, 'mb-4', 'font-weight-bold']">Get in Touch</div>
-              <div :class="[bodyTextClass, 'mb-4']">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua consectetur adipiscing.
+            <v-card :class="[heroComputed.cardPadding, 'contact-form-card']" elevation="2">
+              <div :class="[heroComputed.contentTitleClass, 'mb-4', 'font-weight-bold']">Get in Touch</div>
+              <div :class="[heroComputed.bodyTextClass, 'mb-4']">
+                Have a project in mind or need a quote? Fill out the form and our team will get
+                back to you as soon as possible.
               </div>
 
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="name"
+                    v-bind="nameAttrs"
+                    :error-messages="errors.name"
                     label="Your Name"
-                    hide-details
                     dense
                     outlined
                     class="text-body-2"
@@ -205,8 +208,9 @@ onMounted(() => {
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="email"
+                    v-bind="emailAttrs"
+                    :error-messages="errors.email"
                     label="Your Email"
-                    hide-details
                     dense
                     outlined
                     class="text-body-2"
@@ -215,8 +219,9 @@ onMounted(() => {
                 <v-col cols="12">
                   <v-text-field
                     v-model="subject"
+                    v-bind="subjectAttrs"
+                    :error-messages="errors.subject"
                     label="Subject"
-                    hide-details
                     dense
                     outlined
                     class="text-body-2"
@@ -225,15 +230,16 @@ onMounted(() => {
                 <v-col cols="12">
                   <v-textarea
                     v-model="message"
+                    v-bind="messageAttrs"
+                    :error-messages="errors.message"
                     label="Message"
                     rows="4"
-                    hide-details
                     outlined
                     class="text-body-2"
                   />
                 </v-col>
                 <v-col cols="12" class="d-flex align-center justify-space-between">
-                  <v-btn color="orange" class="white--text" @click="sendMessage"
+                  <v-btn color="orange" class="white--text" @click="onSubmit"
                     >Send Message</v-btn
                   >
                   <div class="socials">

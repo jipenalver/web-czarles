@@ -1,88 +1,36 @@
 <script setup lang="ts">
 import LandingLayout from '@/components/landing/LandingLayout.vue'
-import { ref, onMounted, computed } from 'vue'
-import { useDisplay } from 'vuetify'
+import { ref, onMounted, type Ref } from 'vue'
+import { useHeroComputed } from '@/utils/helpers/style'
+import { coreValues } from '@/views/landing/company/data/company.data';
 
-// Vuetify display composable
-const { mobile, lgAndUp } = useDisplay()
-
-// Computed properties for responsive classes
-const heroTitleClass = computed(() =>
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
-)
-
-const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
-
-// const companyStats = ref([
-//   { icon: 'mdi-calendar-check', value: '15+', label: 'Years of Excellence' },
-//   { icon: 'mdi-account-group', value: '200+', label: 'Projects Completed' },
-//   { icon: 'mdi-star', value: '99%', label: 'Client Satisfaction' },
-//   { icon: 'mdi-shield-check', value: '100%', label: 'Safety Record' }
-// ])
-
-const coreValues = ref([
-  {
-    icon: 'mdi-handshake',
-    title: 'Integrity',
-    description: 'We build trust through honest communication and ethical business practices.',
-  },
-  {
-    icon: 'mdi-diamond-stone',
-    title: 'Quality',
-    description: 'Excellence in every detail, from materials to craftsmanship.',
-  },
-  {
-    icon: 'mdi-account-multiple',
-    title: 'Teamwork',
-    description: 'Collaborative approach ensuring seamless project execution.',
-  },
-  {
-    icon: 'mdi-shield-account',
-    title: 'Safety',
-    description: 'Zero-compromise safety standards protecting our team and clients.',
-  },
-])
-
-// const leadership = ref([
-//   {
-//     name: 'John Doe',
-//     position: 'Chief Executive Officer',
-//     image: '/src/assets/misc/illustration-john-light.png',
-//     description: 'Leading with 20+ years of construction industry expertise.',
-//   },
-//   {
-//     name: 'Daisy Smith',
-//     position: 'Operations Director',
-//     image: '/src/assets/misc/illustration-daisy-light.png',
-//     description: 'Ensuring operational excellence and project delivery.',
-//   },
-// ])
+const heroComputed = useHeroComputed()
 
 const isVisible = ref(false)
 const missionVisible = ref(false)
 const valuesVisible = ref(false)
 const ctaVisible = ref(false)
 
+ const stateRefs: Record<string, Ref<boolean>> = {                                                                                                                        
+    isVisible,    
+    missionVisible,
+    valuesVisible,
+    ctaVisible,
+  }
+
+const delayPerState: Record<string, number> = {
+  isVisible: 300,
+  missionVisible: 800,
+  valuesVisible: 1200,
+  ctaVisible: 1600,
+}
+
 onMounted(() => {
-  // trigger hero animation
-  setTimeout(() => {
-    isVisible.value = true
-  }, 300)
-
-  // trigger mission section animation
-  setTimeout(() => {
-    missionVisible.value = true
-  }, 800)
-
-  // trigger values section animation
-  setTimeout(() => {
-    valuesVisible.value = true
-  }, 1200)
-
-  // trigger CTA section animation
-  setTimeout(() => {
-    ctaVisible.value = true
-  }, 1600)
+  Object.entries(delayPerState).forEach(([key, delay]) => {                                                                                                              
+    setTimeout(() => {
+      stateRefs[key].value = true                                                                                                                                                   
+    }, Number(delay))
+  })
 })
 </script>
 
@@ -97,7 +45,7 @@ onMounted(() => {
         <div class="hero-content">
           <h1
             :class="[
-              heroTitleClass,
+              heroComputed.titleClass,
               'font-weight-bold',
               'mb-4',
               'text-white',
@@ -109,7 +57,7 @@ onMounted(() => {
           </h1>
           <p
             :class="[
-              heroSubtitleClass,
+              heroComputed.subtitleClass,
               'mb-6',
               'text-white',
               'font-weight-light',

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { type SendMessageProps } from '@/views/landing/contact/composables/contact.composable'
 
 // 👉 Create a single supabase client for interacting with your database
 export const supabase = createClient(
@@ -28,6 +29,12 @@ export type EmailPayload = {
 // 👉 Trigger Edge functions on email sending
 export const onEmailNotification = async (payload: EmailPayload) => {
   return await supabase.functions.invoke('send-notification', {
+    body: payload,
+  })
+}
+
+export const clientEmailSending = async (payload: SendMessageProps) => {
+  return await supabase.functions.invoke('send-client-email', {
     body: payload,
   })
 }
