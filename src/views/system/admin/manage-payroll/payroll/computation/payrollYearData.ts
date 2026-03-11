@@ -52,7 +52,7 @@ const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
  */
 export async function getPayrollYearData(
   employeeId: number,
-  year: number
+  year: number,
 ): Promise<PayrollYearDataResponse> {
   const cacheKey = `${employeeId}-${year}`
 
@@ -73,7 +73,7 @@ export async function getPayrollYearData(
     const { data, error } = await supabase.rpc('get_payroll_year_data', {
       p_employee_id: employeeId,
       p_start_date: startDate,
-      p_end_date: endDate
+      p_end_date: endDate,
     })
 
     if (error) {
@@ -87,7 +87,7 @@ export async function getPayrollYearData(
         cash_advances: [],
         utilizations: [],
         allowances: [],
-        cash_adjustments: []
+        cash_adjustments: [],
       }
     }
 
@@ -107,13 +107,13 @@ export async function getPayrollYearData(
         (data.cash_advances?.length || 0) +
         (data.utilizations?.length || 0) +
         (data.allowances?.length || 0) +
-        (data.cash_adjustments?.length || 0)
+        (data.cash_adjustments?.length || 0),
     })
 
     // Cache the result
     payrollYearDataCache.set(cacheKey, {
       data: data as PayrollYearDataResponse,
-      timestamp: performance.now()
+      timestamp: performance.now(),
     })
 
     return data as PayrollYearDataResponse
@@ -127,7 +127,7 @@ export async function getPayrollYearData(
       cash_advances: [],
       utilizations: [],
       allowances: [],
-      cash_adjustments: []
+      cash_adjustments: [],
     }
   }
 }
@@ -155,7 +155,7 @@ export function clearPayrollYearDataCacheFor(employeeId: number, year: number) {
 export function filterPayrollDataByMonth(
   yearData: PayrollYearDataResponse,
   monthIndex: number,
-  year: number
+  year: number,
 ) {
   const monthStr = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`
 
@@ -170,22 +170,22 @@ export function filterPayrollDataByMonth(
 
   return {
     trips: yearData.trips.filter(
-      (t) => t.trip_at >= `${monthStr}-01` && t.trip_at < `${nextMonthStr}-01`
+      (t) => t.trip_at >= `${monthStr}-01` && t.trip_at < `${nextMonthStr}-01`,
     ),
     holidays: yearData.holidays.filter(
-      (h) => h.holiday_at >= `${monthStr}-01` && h.holiday_at < `${nextMonthStr}-01`
+      (h) => h.holiday_at >= `${monthStr}-01` && h.holiday_at < `${nextMonthStr}-01`,
     ),
     cashAdvances: yearData.cash_advances.filter(
-      (ca) => ca.request_at >= `${monthStr}-01` && ca.request_at < `${nextMonthStr}-01`
+      (ca) => ca.request_at >= `${monthStr}-01` && ca.request_at < `${nextMonthStr}-01`,
     ),
     utilizations: yearData.utilizations.filter(
-      (u) => u.utilization_at >= `${monthStr}-01` && u.utilization_at < `${nextMonthStr}-01`
+      (u) => u.utilization_at >= `${monthStr}-01` && u.utilization_at < `${nextMonthStr}-01`,
     ),
     allowances: yearData.allowances.filter(
-      (a) => a.trip_at >= `${monthStr}-01` && a.trip_at < `${nextMonthStr}-01`
+      (a) => a.trip_at >= `${monthStr}-01` && a.trip_at < `${nextMonthStr}-01`,
     ),
     cashAdjustments: yearData.cash_adjustments.filter(
-      (ca) => ca.adjustment_at >= `${monthStr}-01` && ca.adjustment_at < `${nextMonthStr}-01`
-    )
+      (ca) => ca.adjustment_at >= `${monthStr}-01` && ca.adjustment_at < `${nextMonthStr}-01`,
+    ),
   }
 }

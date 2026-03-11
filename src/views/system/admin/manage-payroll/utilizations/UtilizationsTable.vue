@@ -33,7 +33,7 @@ const {
   utilizationsStore,
   employeesStore,
   isLoadingPDF,
-  formActionPDF
+  formActionPDF,
 } = useUtilizationsTable()
 </script>
 

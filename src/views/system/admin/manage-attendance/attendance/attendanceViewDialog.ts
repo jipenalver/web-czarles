@@ -16,7 +16,7 @@ export function useAttendanceViewDialog(
       | 'overtime_in'
       | 'overtime_out'
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const imageTypeMap = {
     am_time_in: 'AM - Time In',
@@ -24,7 +24,7 @@ export function useAttendanceViewDialog(
     pm_time_in: 'PM - Time In',
     pm_time_out: 'PM - Time Out',
     overtime_in: 'Overtime - Time In',
-    overtime_out: 'Overtime - Time Out'
+    overtime_out: 'Overtime - Time Out',
   }
 
   // States
@@ -39,7 +39,7 @@ export function useAttendanceViewDialog(
       imageData.value =
         props.itemData?.attendance_images.find((image) => image.image_type === props.viewType) ||
         null
-    }
+    },
   )
 
   // Actions
@@ -48,7 +48,7 @@ export function useAttendanceViewDialog(
 
     await fileDownload(
       imagePath,
-      `${getDate(imageData.value?.created_at as string)}-${props.itemData?.employee.id}_${props.viewType}.jpg`
+      `${getDate(imageData.value?.created_at as string)}-${props.itemData?.employee.id}_${props.viewType}.jpg`,
     )
 
     formAction.value.formMessage = 'Image downloaded.'
@@ -67,6 +67,6 @@ export function useAttendanceViewDialog(
     imageType,
     imageData,
     onDownload,
-    onDialogClose
+    onDialogClose,
   }
 }

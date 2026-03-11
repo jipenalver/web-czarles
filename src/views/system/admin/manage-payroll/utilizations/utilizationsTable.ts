@@ -25,18 +25,18 @@ export function useUtilizationsTable() {
     { title: 'Hours', key: 'hours', align: 'start' },
     { title: 'Per Hour', key: 'per_hour', align: 'start' },
     { title: 'Amount', key: 'amount', sortable: false, align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
   const tableFilters = ref({
     employee_id: null,
-    utilization_at: getFirstAndLastDateOfMonth() as Date[] | null
+    utilization_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -123,7 +123,7 @@ export function useUtilizationsTable() {
         'PM - Time In',
         'PM - Time Out',
         'Overtime In',
-        'Overtime Out'
+        'Overtime Out',
       ].join(',')
 
       const csvRows = utilizationsStore.utilizationsExport.map((item) => {
@@ -146,7 +146,7 @@ export function useUtilizationsTable() {
           item.pm_time_in ? getTime(item.pm_time_in) : '',
           item.pm_time_out ? getTime(item.pm_time_out) : '',
           item.overtime_in ? getTime(item.overtime_in) : '',
-          item.overtime_out ? getTime(item.overtime_out) : ''
+          item.overtime_out ? getTime(item.overtime_out) : '',
         ]
 
         return csvData.join(',')
@@ -189,6 +189,6 @@ export function useUtilizationsTable() {
     utilizationsStore,
     employeesStore,
     isLoadingPDF,
-    formActionPDF
+    formActionPDF,
   }
 }

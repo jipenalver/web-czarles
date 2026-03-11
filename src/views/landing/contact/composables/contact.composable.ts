@@ -33,6 +33,6 @@ export function useContact() {
     sendMessage,
     alertVisible,
     alertMessage,
-    alertStatus
+    alertStatus,
   }
 }

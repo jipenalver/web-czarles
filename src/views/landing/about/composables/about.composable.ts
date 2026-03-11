@@ -70,6 +70,6 @@ export function useAbout(props: AboutPageProps) {
     animatedYears,
     animatedProjects,
     animatedSatisfaction,
-    cameraOrbit
+    cameraOrbit,
   }
 }

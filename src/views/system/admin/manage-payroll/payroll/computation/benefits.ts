@@ -14,11 +14,11 @@ export async function fetchEmployeeDeductions(employeeId: number | undefined) {
     if (employee && Array.isArray(employee.employee_deductions)) {
       // filter ang deductions nga is_deduction === true
       const filtered = employee.employee_deductions.filter(
-        (deduction: EmployeeDeduction) => deduction.benefit?.is_deduction === true
+        (deduction: EmployeeDeduction) => deduction.benefit?.is_deduction === true,
       )
       // filter ang deductions nga is_deduction === false
       const filteredFalse = employee.employee_deductions.filter(
-        (deduction: EmployeeDeduction) => deduction.benefit?.is_deduction === false
+        (deduction: EmployeeDeduction) => deduction.benefit?.is_deduction === false,
       )
 
       employeeDeductions.value = filtered
@@ -33,7 +33,7 @@ export async function fetchEmployeeDeductions(employeeId: number | undefined) {
   }
   const result = {
     deductions: employeeDeductions.value,
-    nonDeductions: employeeNonDeductions.value
+    nonDeductions: employeeNonDeductions.value,
   }
   // Debug: log the return value
   // console.log('[fetchEmployeeDeductions] return:', result)

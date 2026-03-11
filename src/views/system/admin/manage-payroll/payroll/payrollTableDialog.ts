@@ -6,7 +6,7 @@ import { type Employee } from '@/stores/employees'
 import {
   getCurrentMonthInPhilippines,
   getCurrentYearInPhilippines,
-  monthNames
+  monthNames,
 } from './currentMonth'
 
 // Table row type para sa payroll data
@@ -34,20 +34,20 @@ export function usePayrollTableDialog(
     isDialogVisible: boolean
     itemData: Employee | null
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   // Track crossmonth configuration
   const crossMonthConfig = ref<CrossMonthConfig>({
     crossMonthEnabled: false,
     dayFrom: null,
-    dayTo: null
+    dayTo: null,
   })
 
   // Simplified payroll data generator - returns only month name
   const generatePayrollData = async (monthIndex: number): Promise<TableData> => {
     const monthName = monthNames[monthIndex]
     return {
-      month: monthName
+      month: monthName,
     }
   }
 
@@ -56,12 +56,12 @@ export function usePayrollTableDialog(
     page: 1,
     itemsPerPage: 12,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
 
   const tableFilters = ref<{ year: number; attendance_at?: Date[] | null }>({
     year: getCurrentYearInPhilippines(), // Start with current year, will be updated when employee data loads
-    attendance_at: null
+    attendance_at: null,
   })
   const tableData = ref<TableData[]>([])
   // Simple cache tracker to prevent unnecessary refetches
@@ -76,7 +76,7 @@ export function usePayrollTableDialog(
   const payrollData = ref<PayrollData>({
     year: 0,
     month: '',
-    employee_id: 0
+    employee_id: 0,
   })
 
   const selectedData = ref<TableData | null>(null)
@@ -190,7 +190,7 @@ export function usePayrollTableDialog(
 
       // Generate payroll data for each available month (just month names)
       const payrollPromises = availableMonths.value.map((monthIndex) =>
-        generatePayrollData(monthIndex)
+        generatePayrollData(monthIndex),
       )
 
       tableData.value = await Promise.all(payrollPromises)
@@ -198,7 +198,7 @@ export function usePayrollTableDialog(
       lastLoaded.value = {
         employeeId: props.itemData?.id ?? null,
         year: tableFilters.value.year,
-        monthsKey
+        monthsKey,
       }
     } catch (error) {
       console.error('Error loading payroll data:', error)
@@ -234,7 +234,7 @@ export function usePayrollTableDialog(
         crossMonthConfig.value = {
           crossMonthEnabled: false, // TODO: Change to: Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
           dayFrom: null, // TODO: Change to: props.itemData?.payroll_start ?? null
-          dayTo: null // TODO: Change to: props.itemData?.payroll_end ?? null
+          dayTo: null, // TODO: Change to: props.itemData?.payroll_end ?? null
         }
 
         // console.log('[DIALOG OPEN] Initialized crossMonthConfig (DISABLED):', crossMonthConfig.value)
@@ -256,7 +256,7 @@ export function usePayrollTableDialog(
           updateInterval = undefined
         }
       }
-    }
+    },
   )
 
   // Watch: employee data changes para sa year filter update
@@ -268,7 +268,7 @@ export function usePayrollTableDialog(
         // Update year filter to most recent available year or current year
         tableFilters.value.year = Math.max(employeeStartingYear, currentYear.value)
       }
-    }
+    },
   )
 
   // Clear cached payroll data when the selected employee changes
@@ -279,7 +279,7 @@ export function usePayrollTableDialog(
         tableData.value = []
         lastLoaded.value = { employeeId: null, year: null, monthsKey: null }
       }
-    }
+    },
   )
 
   // Watch: year filter changes
@@ -287,7 +287,7 @@ export function usePayrollTableDialog(
     () => tableFilters.value.year,
     async () => {
       await loadPayrollData()
-    }
+    },
   )
 
   // Watch: available months (month transition)
@@ -314,7 +314,7 @@ export function usePayrollTableDialog(
     payrollData.value = {
       year: tableFilters.value.year,
       month: item.month,
-      employee_id: props.itemData?.id ?? 0 // gamita 0 kung wala
+      employee_id: props.itemData?.id ?? 0, // gamita 0 kung wala
     }
     selectedData.value = item
     isPrintDialogVisible.value = true
@@ -393,6 +393,6 @@ export function usePayrollTableDialog(
     onFilterDate,
     onView,
     onDialogClose,
-    reloadTableData
+    reloadTableData,
   }
 }

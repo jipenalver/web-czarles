@@ -53,7 +53,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
   async function getUserInformation() {
     const {
-      data: { user }
+      data: { user },
     } = await supabase.auth.getUser()
 
     if (user) {
@@ -67,9 +67,9 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
     const {
       data: { user },
-      error
+      error,
     } = await supabase.auth.updateUser({
-      data: otherData
+      data: otherData,
     })
 
     if (user) {
@@ -85,7 +85,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
       .from('czarles')
       .upload('avatars/' + userData.value?.id + '-avatar.' + file.name.split('.').pop(), file, {
         cacheControl: '3600',
-        upsert: true
+        upsert: true,
       })
 
     if (error) return { data, error }
@@ -125,7 +125,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
         const userRole = await getUserRole(user.user_role as string)
 
         return userRole.is_approver ? user : null
-      })
+      }),
     )
 
     usersApprovers.value = filterUsers.filter((user) => user !== null) as AdminUser[]
@@ -155,6 +155,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
     getAuthPages,
     getUserRole,
     getUsersApprovers,
-    sendToApprovers
+    sendToApprovers,
   }
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type AttendanceRequest,
-  type AttendanceRequestTableFilter
+  type AttendanceRequestTableFilter,
 } from '@/stores/attendanceRequests'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { useOvertimeFormDialog } from './overtimeFormDialog'
@@ -33,7 +33,7 @@ const {
   onSubmit,
   onFormSubmit,
   onFormReset,
-  employeesStore
+  employeesStore,
 } = useOvertimeFormDialog(props, emit)
 </script>
 

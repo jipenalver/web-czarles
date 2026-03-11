@@ -8,7 +8,7 @@ const { mobile, mdAndDown, lgAndUp } = useDisplay()
 
 // Computed properties for responsive classes and sizes
 const heroTitleClass = computed(() =>
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
 )
 
 const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
@@ -18,11 +18,11 @@ const contentTitleClass = computed(() => (mobile.value ? 'text-h5' : 'text-h4'))
 const sectionTitleClass = computed(() => (mobile.value ? 'text-subtitle-1' : 'text-h6'))
 
 const bodyTextClass = computed(() =>
-  mobile.value ? 'text-body-2' : mdAndDown.value ? 'text-body-1' : 'text-body-1'
+  mobile.value ? 'text-body-2' : mdAndDown.value ? 'text-body-1' : 'text-body-1',
 )
 
 const listTextClass = computed(() =>
-  mobile.value ? 'text-caption' : mdAndDown.value ? 'text-body-2' : 'text-body-1'
+  mobile.value ? 'text-caption' : mdAndDown.value ? 'text-body-2' : 'text-body-1',
 )
 
 const cardPadding = computed(() => (mobile.value ? 'pa-8' : 'pa-8'))
@@ -47,7 +47,7 @@ onMounted(() => {
             :class="[
               heroTitleClass,
               'font-weight-bold mb-4 text-white animate-hero-title',
-              { 'animate-hero-title-visible': isVisible }
+              { 'animate-hero-title-visible': isVisible },
             ]"
           >
             Terms & Conditions
@@ -56,7 +56,7 @@ onMounted(() => {
             :class="[
               heroSubtitleClass,
               'mb-6 text-white font-weight-light animate-hero-subtitle',
-              { 'animate-hero-subtitle-visible': isVisible }
+              { 'animate-hero-subtitle-visible': isVisible },
             ]"
           >
             Please read and understand our Terms & Conditions — they outline your rights,

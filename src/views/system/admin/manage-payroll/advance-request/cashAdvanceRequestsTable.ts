@@ -18,18 +18,18 @@ export function useCashAdvanceRequestsTable() {
     { title: 'Description', key: 'description', align: 'start' },
     { title: 'Date Requested', key: 'request_at', align: 'center' },
     { title: 'Status', key: 'status', align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
   const tableFilters = ref({
     employee_id: null,
-    request_at: getFirstAndLastDateOfMonth() as Date[] | null
+    request_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isApprover = ref(false)
   const isRequestor = ref(false)
@@ -103,7 +103,7 @@ export function useCashAdvanceRequestsTable() {
 
     await cashAdvanceRequestsStore.getCashAdvanceRequestsTable(
       { page, itemsPerPage, sortBy },
-      tableFilters.value
+      tableFilters.value,
     )
 
     tableOptions.value.isLoading = false
@@ -148,6 +148,6 @@ export function useCashAdvanceRequestsTable() {
     onFilterItems,
     onLoadItems,
     cashAdvanceRequestsStore,
-    employeesStore
+    employeesStore,
   }
 }

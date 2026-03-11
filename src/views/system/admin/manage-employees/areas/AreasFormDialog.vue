@@ -19,7 +19,7 @@ const { mdAndDown } = useDisplay()
 
 const { formData, formAction, refVForm, isUpdate, onFormSubmit, onFormReset } = useAreasFormDialog(
   props,
-  emit
+  emit,
 )
 </script>
 

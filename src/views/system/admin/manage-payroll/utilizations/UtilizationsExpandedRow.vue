@@ -3,7 +3,7 @@ import {
   getOvertimeHoursDecimal,
   getOvertimeHoursString,
   getWorkHoursDecimal,
-  getWorkHoursString
+  getWorkHoursString,
 } from '@/utils/helpers/attendance'
 import { type Utilization } from '@/stores/utilizations'
 import { getTime } from '@/utils/helpers/dates'
@@ -83,7 +83,7 @@ const { mobile } = useDisplay()
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
                 false,
-                true
+                true,
               )
             }}
 
@@ -95,7 +95,7 @@ const { mobile } = useDisplay()
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
                   false,
-                  true
+                  true,
                 )
               }})
             </span>

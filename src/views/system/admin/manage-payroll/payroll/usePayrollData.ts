@@ -3,7 +3,7 @@ import { useTripsStore } from '@/stores/trips'
 import {
   fetchHolidaysByDateString,
   fetchHolidaysByRange,
-  type HolidayWithAttendance
+  type HolidayWithAttendance,
 } from './computation/holidays'
 import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
@@ -74,7 +74,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       if (typeof window !== 'undefined') {
         return {
           fromDate: localStorage.getItem('czarles_payroll_fromDate'),
-          toDate: localStorage.getItem('czarles_payroll_toDate')
+          toDate: localStorage.getItem('czarles_payroll_toDate'),
         }
       }
     } catch {
@@ -121,7 +121,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
           ? await fetchHolidaysByRange(fromDate, toDate, String(params.value.employeeId))
           : await fetchHolidaysByDateString(
               params.value.holidayDateString,
-              String(params.value.employeeId)
+              String(params.value.employeeId),
             )
     } catch (error) {
       console.error('[PayrollData] Error fetching holidays:', error)
@@ -248,7 +248,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
         params.value.filterDateString,
         params.value.employeeId,
         fromDate,
-        toDate
+        toDate,
       )
 
       sundayDutyRecords.value = records
@@ -324,7 +324,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
         loadUtilizations(),
         loadAllowances(),
         loadCashAdjustments(),
-        fetchEmployeeHolidays()
+        fetchEmployeeHolidays(),
       ])
 
       // Compute overtime
@@ -465,6 +465,6 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
     fetchEmployeeHolidays,
     updateEmployeeDeductions,
     initializePayrollCalculations,
-    reloadAllFunctions
+    reloadAllFunctions,
   }
 }

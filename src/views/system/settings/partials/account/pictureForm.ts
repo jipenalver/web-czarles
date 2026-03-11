@@ -9,7 +9,7 @@ export function usePictureForm() {
 
   // States
   const formDataDefault = {
-    avatar: null as File | null
+    avatar: null as File | null,
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -37,18 +37,18 @@ export function usePictureForm() {
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formAlert: true
+        formAlert: true,
       }
     } else if (data) {
       formAction.value = {
         ...formActionDefault,
         formMessage: `Successfully Updated Profile Image. ${imgPreview.value !== profileDefault ? 'Image will be updated after 3 hours due to caching.' : ''}`,
-        formAlert: true
+        formAlert: true,
       }
 
       await authUserStore.updateUserInformation({
         ...authUserStore.userData,
-        avatar: data.publicUrl
+        avatar: data.publicUrl,
       })
     }
 

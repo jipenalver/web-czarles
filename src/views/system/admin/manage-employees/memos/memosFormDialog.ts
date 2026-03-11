@@ -12,7 +12,7 @@ export function useMemosFormDialog(
     tableOptions: TableOptions
     tableFilters: MemoTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const memosStore = useMemosStore()
   const employeesStore = useEmployeesStore()
@@ -23,7 +23,7 @@ export function useMemosFormDialog(
     description: '',
     is_everybody: false,
     file: null as File | null,
-    employee_ids: [] as number[]
+    employee_ids: [] as number[],
   }
   const formData = ref<Partial<MemoForm>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -37,10 +37,10 @@ export function useMemosFormDialog(
       formData.value = props.itemData
         ? {
             ...props.itemData,
-            employee_ids: props.itemData.employee_memos.map(({ employee_id }) => employee_id)
+            employee_ids: props.itemData.employee_memos.map(({ employee_id }) => employee_id),
           }
         : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -65,7 +65,7 @@ export function useMemosFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Memo.`
@@ -106,6 +106,6 @@ export function useMemosFormDialog(
     onFileReset,
     onFormSubmit,
     onFormReset,
-    employeesStore
+    employeesStore,
   }
 }

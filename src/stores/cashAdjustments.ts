@@ -53,7 +53,7 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
 
   async function getCashAdjustmentsExport(
     tableOptions: TableOptions,
-    tableFilters: CashAdjustmentTableFilter
+    tableFilters: CashAdjustmentTableFilter,
   ) {
     const { column, order } = tablePagination(tableOptions, 'adjustment_at', false)
 
@@ -71,12 +71,12 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
 
   async function getCashAdjustmentsTable(
     tableOptions: TableOptions,
-    tableFilters: CashAdjustmentTableFilter
+    tableFilters: CashAdjustmentTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'adjustment_at',
-      false
+      false,
     )
 
     let query = supabase
@@ -106,7 +106,7 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
   function getCashAdjustmentsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, adjustment_at }: CashAdjustmentTableFilter
+    { employee_id, adjustment_at }: CashAdjustmentTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -152,6 +152,6 @@ export const useCashAdjustmentsStore = defineStore('cashAdjustment', () => {
     getCashAdjustmentsTable,
     addCashAdjustment,
     updateCashAdjustment,
-    deleteCashAdjustment
+    deleteCashAdjustment,
   }
 })

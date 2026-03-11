@@ -54,7 +54,7 @@ function getCacheKey(
   employeeId: number | string,
   dateString: string,
   fromDateISO?: string,
-  toDateISO?: string
+  toDateISO?: string,
 ): string {
   return `${employeeId}-${dateString}-${fromDateISO || ''}-${toDateISO || ''}`
 }
@@ -67,7 +67,7 @@ export async function getEmployeesAttendanceBatch(
   employeeIds: (number | string)[],
   dateString: string,
   fromDateISO?: string,
-  toDateISO?: string
+  toDateISO?: string,
 ): Promise<Map<number, AttendanceRecord[]>> {
   // Calculate date range for filtering
   let startDate: string
@@ -100,7 +100,7 @@ export async function getEmployeesAttendanceBatch(
     const { data, error } = await supabase.rpc('get_attendance_batch', {
       p_employee_ids: numericIds,
       p_start_date: startISO,
-      p_end_date: endISO
+      p_end_date: endISO,
     })
 
     if (error) {
@@ -147,9 +147,9 @@ export async function getEmployeesAttendanceBatch(
               leave_type: row.leave_type as string | undefined,
               leave_reason: row.leave_reason as string | undefined,
               attendance_date: attendanceDate,
-              date: attendanceDate // Alias for compatibility
+              date: attendanceDate, // Alias for compatibility
             }
-          }
+          },
         )
         grouped.set(empId, records)
 
@@ -175,7 +175,7 @@ export async function getEmployeeAttendanceById(
   employeeId: number | string,
   dateString: string,
   fromDateISO?: string,
-  toDateISO?: string
+  toDateISO?: string,
 ): Promise<AttendanceRecord[] | null> {
   // Clear expired cache entries periodically
   clearExpiredCache()
@@ -231,11 +231,11 @@ export async function getEmployeeAttendanceById(
   const { data, error } = await supabase
     .from('attendances')
     .select(
-      'id, am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_overtime_applied, is_leave_with_pay, leave_type, leave_reason'
+      'id, am_time_in, am_time_out, pm_time_in, pm_time_out, overtime_in, overtime_out, is_overtime_applied, is_leave_with_pay, leave_type, leave_reason',
     )
     .eq('employee_id', employeeId)
     .or(
-      `and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(am_time_in.is.null,pm_time_in.gte.${startISO},pm_time_in.lt.${endISO})`
+      `and(am_time_in.gte.${startISO},am_time_in.lt.${endISO}),and(am_time_in.is.null,pm_time_in.gte.${startISO},pm_time_in.lt.${endISO})`,
     )
     .order('am_time_in', { ascending: false })
   if (error) {
@@ -288,7 +288,7 @@ export async function getEmployeeAttendanceById(
           leave_reason: row.leave_reason,
           attendance_date: attendanceDate, // Extract date from timestamp
           date: attendanceDate, // Alias for compatibility with Sunday detection
-          _debug_dayHours: dayHours // Add debug info
+          _debug_dayHours: dayHours, // Add debug info
         }
       })
     : null
@@ -341,7 +341,7 @@ export function getEmployeeByIdemp(id: number): Employee | undefined {
 // Handles overnight shifts (e.g., 5:00 PM to 1:00 AM next day)
 export function computeOvertimeHours(
   overtimeIn: string | null,
-  overtimeOut: string | null
+  overtimeOut: string | null,
 ): number {
   if (!overtimeIn || !overtimeOut) {
     // console.log('[computeOvertimeHours] Missing overtime in/out:', { overtimeIn, overtimeOut })
@@ -378,7 +378,7 @@ export async function computeOverallOvertimeCalculation(
   employeeId?: number,
   dateString?: string,
   fromDateISO?: string,
-  toDateISO?: string
+  toDateISO?: string,
 ): Promise<number> {
   // console.log('[computeOverallOvertimeCalculation] Starting calculation:', {
   //   employeeId,
@@ -447,7 +447,7 @@ export async function computeOverallOvertimeCalculation(
             overtimeIn: a.overtime_in,
             overtimeOut: a.overtime_out,
             hours,
-            isApplied: a.is_overtime_applied || false
+            isApplied: a.is_overtime_applied || false,
           })
         }
       })
@@ -519,7 +519,7 @@ export async function getEmployeeAttendanceForEmployee55(
   employeeId: number | string,
   dateString: string,
   fromDateISO?: string,
-  toDateISO?: string
+  toDateISO?: string,
 ): Promise<AttendanceRecord[] | null> {
   // Only apply this special logic for employee ID 55
   if (Number(employeeId) !== 55) {
@@ -531,7 +531,7 @@ export async function getEmployeeAttendanceForEmployee55(
     employeeId,
     dateString,
     fromDateISO,
-    toDateISO
+    toDateISO,
   )
 
   if (!Array.isArray(actualAttendance)) {
@@ -579,7 +579,7 @@ export async function getEmployeeAttendanceForEmployee55(
         ...record,
         am_time_out: amTimeOut,
         pm_time_in: pmTimeIn,
-        pm_time_out: pmTimeOut
+        pm_time_out: pmTimeOut,
       }
     }
 

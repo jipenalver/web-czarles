@@ -29,12 +29,12 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
   // Actions
   async function getCashAdvanceRequestsTable(
     tableOptions: TableOptions,
-    tableFilters: CashAdvanceRequestTableFilter
+    tableFilters: CashAdvanceRequestTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(
       tableOptions,
       'request_at',
-      false
+      false,
     )
 
     let query = supabase
@@ -64,7 +64,7 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
   function getCashAdvanceRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, request_at }: CashAdvanceRequestTableFilter
+    { employee_id, request_at }: CashAdvanceRequestTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -105,6 +105,6 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
     getCashAdvanceRequestsTable,
     addCashAdvanceRequest,
     updateCashAdvanceRequest,
-    deleteCashAdvanceRequest
+    deleteCashAdvanceRequest,
   }
 })

@@ -38,7 +38,7 @@ const getEmployeeName = (id: number) => {
             v-for="header in props.tableHeaders.filter(
               (h) =>
                 h.key !== 'actions' &&
-                (props.tableFilters.employee_id ? h.key !== 'employee' : true)
+                (props.tableFilters.employee_id ? h.key !== 'employee' : true),
             )"
             :key="header.key"
             class="pdf-th"

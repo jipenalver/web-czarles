@@ -11,10 +11,10 @@ export function useAreasTable() {
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
   const tableFilters = ref({
-    search: ''
+    search: '',
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -88,6 +88,6 @@ export function useAreasTable() {
     onConfirmDelete,
     onSearchItems,
     onLoadItems,
-    areasStore
+    areasStore,
   }
 }

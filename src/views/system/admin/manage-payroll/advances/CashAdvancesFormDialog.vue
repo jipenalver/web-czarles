@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type CashAdvanceRequest,
-  type CashAdvanceRequestTableFilter
+  type CashAdvanceRequestTableFilter,
 } from '@/stores/cashAdvanceRequests'
 import { useCashAdvancesFormDialog } from './cashAdvancesFormDialog'
 import { type TableOptions } from '@/utils/helpers/tables'

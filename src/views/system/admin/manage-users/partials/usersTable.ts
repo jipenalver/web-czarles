@@ -13,7 +13,7 @@ export function useUsersTable() {
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
   const isDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
@@ -76,6 +76,6 @@ export function useUsersTable() {
     onConfirmDelete,
     onLoadItems,
     usersStore,
-    authUserStore
+    authUserStore,
   }
 }

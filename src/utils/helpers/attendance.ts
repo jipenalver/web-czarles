@@ -34,7 +34,7 @@ const getFieldMinutesWithPenalties = (
   sessionStart: number,
   sessionEnd: number,
   lateAllowanceMinutes: number,
-  earlyDepartureAllowanceMinutes: number
+  earlyDepartureAllowanceMinutes: number,
 ) => {
   const checkIn = parseLocalTime(timeIn as string)
   const checkOut = parseLocalTime(timeOut as string)
@@ -50,20 +50,20 @@ const getFieldMinutesWithPenalties = (
     checkIn.getMonth(),
     checkIn.getDate(),
     sessionStart,
-    lateAllowanceMinutes
+    lateAllowanceMinutes,
   )
   const acceptableEndTime = new Date(
     checkIn.getFullYear(),
     checkIn.getMonth(),
     checkIn.getDate(),
     sessionEnd,
-    earlyDepartureAllowanceMinutes
+    earlyDepartureAllowanceMinutes,
   )
 
   // ✅ Calculate late penalty
   if (checkIn > acceptableStartTime) {
     const lateMinutes = Math.floor(
-      (checkIn.getTime() - acceptableStartTime.getTime()) / (1000 * 60)
+      (checkIn.getTime() - acceptableStartTime.getTime()) / (1000 * 60),
     )
     totalMinutes -= lateMinutes
   }
@@ -71,7 +71,7 @@ const getFieldMinutesWithPenalties = (
   // ✅ Calculate early departure penalty
   if (checkOut < acceptableEndTime) {
     const earlyMinutes = Math.floor(
-      (acceptableEndTime.getTime() - checkOut.getTime()) / (1000 * 60)
+      (acceptableEndTime.getTime() - checkOut.getTime()) / (1000 * 60),
     )
     totalMinutes -= earlyMinutes
   }
@@ -87,7 +87,7 @@ const getOfficeMinutesWithAllowance = (
   sessionStart: number,
   sessionEnd: number,
   lateAllowanceMinutes = 0,
-  earlyDepartureAllowanceMinutes = 0
+  earlyDepartureAllowanceMinutes = 0,
 ) => {
   const checkIn = parseLocalTime(timeIn as string)
   const checkOut = parseLocalTime(timeOut as string)
@@ -99,13 +99,13 @@ const getOfficeMinutesWithAllowance = (
     checkIn.getFullYear(),
     checkIn.getMonth(),
     checkIn.getDate(),
-    sessionStart
+    sessionStart,
   )
   const sessionEndTime = new Date(
     checkIn.getFullYear(),
     checkIn.getMonth(),
     checkIn.getDate(),
-    sessionEnd
+    sessionEnd,
   )
 
   // If check-out is before session start or check-in is after session end, no overlap
@@ -146,7 +146,7 @@ const getTotalMinutes = (
   amTimeOut: string | null,
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
-  isField = false
+  isField = false,
 ) => {
   let totalMinutes = 0
 
@@ -173,7 +173,7 @@ const getTotalMinutes = (
       13,
       17,
       0,
-      isFridayOrSaturday ? 30 : 0
+      isFridayOrSaturday ? 30 : 0,
     )
 
     totalMinutes = amMinutes + pmMinutes
@@ -212,12 +212,12 @@ export const getWorkHoursString = (
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
   isField = false,
-  isStandard = false
+  isStandard = false,
 ) =>
   convertTimeToString(
     isStandard
       ? getFieldMinutes(amTimeIn, amTimeOut) + getFieldMinutes(pmTimeIn, pmTimeOut)
-      : getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
+      : getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField),
   )
 
 // 👉 Get total work hours (AM + PM) in decimal
@@ -227,12 +227,12 @@ export const getWorkHoursDecimal = (
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
   isField = false,
-  isStandard = false
+  isStandard = false,
 ) =>
   convertTimeToDecimal(
     isStandard
       ? getFieldMinutes(amTimeIn, amTimeOut) + getFieldMinutes(pmTimeIn, pmTimeOut)
-      : getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
+      : getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField),
   )
 
 // 👉 Get total overtime hours as string
@@ -249,7 +249,7 @@ export const getLateUndertimeHoursString = (
   amTimeOut: string | null,
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
-  isField = false
+  isField = false,
 ) => {
   const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
   const lateUndertime = 8 * 60 - totalMinutes
@@ -262,7 +262,7 @@ export const getLateUndertimeHoursDecimal = (
   amTimeOut: string | null,
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
-  isField = false
+  isField = false,
 ) => {
   const totalMinutes = getTotalMinutes(amTimeIn, amTimeOut, pmTimeIn, pmTimeOut, isField)
   const lateUndertime = 8 * 60 - totalMinutes

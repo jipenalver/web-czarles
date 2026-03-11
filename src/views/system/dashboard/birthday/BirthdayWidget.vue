@@ -6,7 +6,7 @@ import {
   getZodiacSign,
   getDaysUntilBirthday,
   getAgeMilestone,
-  getBirthdayEmoji
+  getBirthdayEmoji,
 } from './birthdayWidget'
 import { useEmployeesStore, type EmployeeTableFilter } from '@/stores/employees'
 import { getYearsOfService } from '@/utils/helpers/dates'
@@ -31,7 +31,7 @@ const tableFilters = ref<EmployeeTableFilter>({ search: '', designation_id: null
 const tableHeaders: TableHeader[] = [
   { title: 'Celebrant', key: 'lastname', align: 'start' },
   { title: 'Birthday Details', key: 'birthdate', align: 'start' },
-  { title: 'Age & Fun Facts', key: 'age', align: 'center' }
+  { title: 'Age & Fun Facts', key: 'age', align: 'center' },
 ]
 
 // Load employees export which we will filter locally for birthdays
@@ -45,7 +45,7 @@ watch(
   async () => {
     // refresh export when searching
     await loadEmployees(employeesStore, tableOptions, tableFilters, usersStore)
-  }
+  },
 )
 
 const currentMonth = new Date().getMonth()
@@ -199,7 +199,7 @@ const todaysBirthdays = computed(() => {
               <div
                 :class="[
                   'text-h6 font-weight-bold',
-                  isToday(item) ? 'text-pink animate-bounce' : 'text-primary'
+                  isToday(item) ? 'text-pink animate-bounce' : 'text-primary',
                 ]"
               >
                 {{ getAge(item.birthdate) }}

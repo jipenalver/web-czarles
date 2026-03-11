@@ -14,34 +14,34 @@ const tableHeaders: TableHeader[] = [
   {
     title: 'Date',
     key: 'holiday_at',
-    align: 'start'
+    align: 'start',
   },
   {
     title: 'Holiday',
     key: 'name',
-    align: 'start'
+    align: 'start',
   },
   {
     title: 'Type',
     key: 'type',
-    align: 'start'
+    align: 'start',
   },
   {
     title: 'Description',
     key: 'description',
-    align: 'start'
+    align: 'start',
   },
   {
     title: 'Added Date',
     key: 'created_at',
-    align: 'center'
+    align: 'center',
   },
   {
     title: 'Actions',
     key: 'actions',
     sortable: false,
-    align: 'center'
-  }
+    align: 'center',
+  },
 ]
 
 const {
@@ -57,7 +57,7 @@ const {
   onConfirmDelete,
   onFilterItems,
   onLoadItems,
-  holidaysStore
+  holidaysStore,
 } = useHolidaysTable()
 </script>
 

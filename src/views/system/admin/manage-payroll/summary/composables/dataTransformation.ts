@@ -36,10 +36,10 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
       late: Number(row.late_deduction) || 0, // For field staff: calculated in SQL, for non-field staff: calculated client-side
       undertime: Number(row.undertime_deduction) || 0, // For field staff: calculated in SQL, for non-field staff: calculated client-side
       cash_adjustment: 0, // Will be calculated client-side
-      total: 0 // Will be calculated client-side
+      total: 0, // Will be calculated client-side
     },
     total_deductions: 0, // Will be calculated client-side
-    net_pay: 0 // Will be calculated client-side
+    net_pay: 0, // Will be calculated client-side
   }))
 }
 
@@ -48,7 +48,7 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
  */
 export function createDateStringForCalculation(
   selectedMonth: string,
-  selectedYear: number
+  selectedYear: number,
 ): string {
   const monthIndex = [
     'January',
@@ -62,7 +62,7 @@ export function createDateStringForCalculation(
     'September',
     'October',
     'November',
-    'December'
+    'December',
   ].indexOf(selectedMonth)
 
   return `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-01`

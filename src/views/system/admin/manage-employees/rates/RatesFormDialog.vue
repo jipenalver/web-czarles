@@ -26,7 +26,7 @@ const {
   isConfirmSubmitDialog,
   onSubmit,
   onFormSubmit,
-  onFormReset
+  onFormReset,
 } = useRatesFormDialog(props, emit)
 </script>
 

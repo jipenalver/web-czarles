@@ -26,7 +26,7 @@ const {
   onFormReset,
   employeesStore,
   unitsStore,
-  tripLocationsStore
+  tripLocationsStore,
 } = useTripsFormDialog(props, emit)
 </script>
 

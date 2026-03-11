@@ -10,14 +10,14 @@ export function useAreasFormDialog(
     tableOptions: TableOptions
     tableFilters: AreaTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const areasStore = useAreasStore()
 
   // States
   const formDataDefault = {
     area: '',
-    description: ''
+    description: '',
   }
   const formData = ref<Partial<Area>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -29,7 +29,7 @@ export function useAreasFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -45,7 +45,7 @@ export function useAreasFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Area.`
@@ -80,6 +80,6 @@ export function useAreasFormDialog(
     refVForm,
     isUpdate,
     onFormSubmit,
-    onFormReset
+    onFormReset,
   }
 }

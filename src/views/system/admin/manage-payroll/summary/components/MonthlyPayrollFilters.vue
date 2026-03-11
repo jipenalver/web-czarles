@@ -22,8 +22,8 @@ const monthOptions = computed(() =>
   monthNames.map((month, index) => ({
     title: month,
     value: month,
-    index: index
-  }))
+    index: index,
+  })),
 )
 
 // Year options (last 5 years)

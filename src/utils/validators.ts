@@ -168,7 +168,7 @@ export const compareDatesValidator = (
   date2: Date | string,
   operator: '===' | '==' | '!==' | '!=' | '>' | '>=' | '<' | '<=',
   date1Name = 'first',
-  date2Name = 'second'
+  date2Name = 'second',
 ) => {
   if (isEmpty(date1)) return true
 
@@ -186,7 +186,7 @@ export const compareDatesValidator = (
     '>': `The ${date1Name} date must be later than the ${date2Name} date`,
     '>=': `The ${date1Name} date must be the same or later than the ${date2Name} date`,
     '<': `The ${date1Name} date must be earlier than the ${date2Name} date`,
-    '<=': `The ${date1Name} date must be the same or earlier than the ${date2Name} date`
+    '<=': `The ${date1Name} date must be the same or earlier than the ${date2Name} date`,
   }
 
   if (!(operator in messages)) return `Invalid operator: ${operator}`
@@ -199,7 +199,7 @@ export const compareDatesValidator = (
     '>': time1 > time2,
     '>=': time1 >= time2,
     '<': time1 < time2,
-    '<=': time1 <= time2
+    '<=': time1 <= time2,
   }
 
   return comparisons[operator] || messages[operator]

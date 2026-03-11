@@ -22,18 +22,18 @@ export function useCashAdvancesTable() {
     { title: 'Amount', key: 'amount', align: 'start' },
     { title: 'Description', key: 'description', align: 'start' },
     { title: 'Date Requested', key: 'request_at', align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' },
   ]
   const tableHeaders = ref<TableHeader[]>(baseHeaders)
   const tableOptions = ref({
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
   const tableFilters = ref({
     employee_id: null,
-    request_at: getFirstAndLastDateOfMonth() as Date[] | null
+    request_at: getFirstAndLastDateOfMonth() as Date[] | null,
   })
   const isConfirmDeleteDialog = ref(false)
   const deleteId = ref<number>(0)
@@ -107,7 +107,7 @@ export function useCashAdvancesTable() {
 
           prepareCSV(item.amount.toString()),
           prepareCSV(item.description),
-          item.request_at ? prepareCSV(date.format(item.request_at, 'fullDate')) : ''
+          item.request_at ? prepareCSV(date.format(item.request_at, 'fullDate')) : '',
         ]
 
         return csvData.join(',')
@@ -147,6 +147,6 @@ export function useCashAdvancesTable() {
     cashAdvancesStore,
     employeesStore,
     isLoadingPDF,
-    formActionPDF
+    formActionPDF,
   }
 }

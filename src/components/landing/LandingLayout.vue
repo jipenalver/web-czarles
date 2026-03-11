@@ -28,7 +28,7 @@ watch(
   () => route.path,
   (p) => {
     tab.value = p
-  }
+  },
 )
 
 function onToggleTheme() {
@@ -163,7 +163,7 @@ function onToggleTheme() {
             backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${imageBg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            marginTop: '64px'
+            marginTop: '64px',
           }"
         >
           <slot name="hero" />

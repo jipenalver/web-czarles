@@ -10,7 +10,7 @@ import {
   reloadAllPayrollFunctions,
   manualRefreshPayroll,
   preloadEmployeesAttendance,
-  clearAttendanceCacheHelper
+  clearAttendanceCacheHelper,
 } from './helpers'
 import AppAlert from '@/components/common/AppAlert.vue'
 import LoadingDialog from '@/components/common/LoadingDialog.vue'
@@ -34,9 +34,9 @@ const { formAction, isPrinting, onPrint, onDialogClose } = usePayrollPrintDialog
     isDialogVisible: props.isDialogVisible,
     itemId: props.employeeData?.id,
     employeeData: props.employeeData,
-    payrollData: props.payrollData
+    payrollData: props.payrollData,
   }),
-  emit
+  emit,
 )
 
 // Ref para sa PayrollPrint component para ma-trigger ang reload
@@ -96,7 +96,7 @@ watch(
       await reloadAllPayrollFunctionsLocal()
     }
   },
-  { immediate: false }
+  { immediate: false },
 )
 
 // Watch for critical prop changes para mag-reload din
@@ -108,7 +108,7 @@ watch(
       await reloadAllPayrollFunctionsLocal()
     }
   },
-  { deep: true }
+  { deep: true },
 )
 
 // Debug logging for loading states coordination
@@ -122,7 +122,7 @@ watch(
     //   hasPayrollRef: !!payrollPrintRef.value
     // })
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 

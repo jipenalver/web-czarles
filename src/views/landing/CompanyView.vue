@@ -15,14 +15,14 @@ const stateRefs: Record<string, Ref<boolean>> = {
   isVisible,
   missionVisible,
   valuesVisible,
-  ctaVisible
+  ctaVisible,
 }
 
 const delayPerState: Record<string, number> = {
   isVisible: 300,
   missionVisible: 800,
   valuesVisible: 1200,
-  ctaVisible: 1600
+  ctaVisible: 1600,
 }
 
 onMounted(() => {
@@ -50,7 +50,7 @@ onMounted(() => {
               'mb-4',
               'text-white',
               'animate-hero-title',
-              { 'animate-hero-title-visible': isVisible }
+              { 'animate-hero-title-visible': isVisible },
             ]"
           >
             About C'zarles
@@ -62,7 +62,7 @@ onMounted(() => {
               'text-white',
               'font-weight-light',
               'animate-hero-subtitle',
-              { 'animate-hero-subtitle-visible': isVisible }
+              { 'animate-hero-subtitle-visible': isVisible },
             ]"
           >
             Building Excellence. Delivering Dreams. Creating Lasting Value.

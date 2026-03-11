@@ -27,7 +27,7 @@ export function useUtilizationPDF() {
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -60,7 +60,7 @@ export function useUtilizationPDF() {
         maxWidth: utilizationTableElement.style.maxWidth || '',
         backgroundColor: utilizationTableElement.style.backgroundColor || '',
         display: utilizationTableElement.style.display || '',
-        fontSize: utilizationTableElement.style.fontSize || ''
+        fontSize: utilizationTableElement.style.fontSize || '',
       }
 
       // Apply styles para sa PDF generation - optimized para sa portrait
@@ -85,13 +85,13 @@ export function useUtilizationPDF() {
           scale: 1.5, // Reduced scale para sa portrait fit
           useCORS: true,
           allowTaint: true,
-          letterRendering: true
+          letterRendering: true,
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'portrait' // Changed to portrait orientation
-        }
+          orientation: 'portrait', // Changed to portrait orientation
+        },
       })
 
       // Restore original styles
@@ -101,7 +101,7 @@ export function useUtilizationPDF() {
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -119,7 +119,7 @@ export function useUtilizationPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'PDF successfully generated!',
-        formStatus: 200
+        formStatus: 200,
       }
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -127,7 +127,7 @@ export function useUtilizationPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'Error occurred while generating PDF. Please try again.',
-        formStatus: 500
+        formStatus: 500,
       }
     } finally {
       // Reset printing state
@@ -159,6 +159,6 @@ export function useUtilizationPDF() {
   return {
     formAction,
     isLoadingPDF,
-    onExport
+    onExport,
   }
 }

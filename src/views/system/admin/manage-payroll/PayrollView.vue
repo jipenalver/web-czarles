@@ -14,18 +14,18 @@ const tabsItems = [
   {
     icon: 'mdi-account-cash',
     text: 'Payroll',
-    value: 'payroll'
+    value: 'payroll',
   },
   {
     icon: 'mdi-calendar-month',
     text: 'Summary',
-    value: 'summary'
+    value: 'summary',
   },
   {
     icon: 'mdi-bed',
     text: 'Holidays',
-    value: 'holidays'
-  }
+    value: 'holidays',
+  },
 ]
 
 const tabWindow = ref('payroll')

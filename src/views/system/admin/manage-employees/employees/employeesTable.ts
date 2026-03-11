@@ -13,7 +13,7 @@ export function useEmployeesTable(
   props: {
     componentView: 'employees' | 'benefits' | 'payroll'
   },
-  tableHeaders: TableHeader[]
+  tableHeaders: TableHeader[],
 ) {
   const date = useDate()
 
@@ -28,11 +28,11 @@ export function useEmployeesTable(
     page: 1,
     itemsPerPage: 10,
     sortBy: [],
-    isLoading: false
+    isLoading: false,
   })
   const tableFilters = ref({
     search: '',
-    designation_id: null
+    designation_id: null,
   })
   const isDialogVisible = ref(false)
   const isRateDialogVisible = ref(false)
@@ -151,10 +151,10 @@ export function useEmployeesTable(
               'Accident Insurance',
               'Payroll Option',
               ...benefitsStore.addons.map(({ benefit }) => benefit),
-              ...benefitsStore.deductions.map(({ benefit }) => benefit)
+              ...benefitsStore.deductions.map(({ benefit }) => benefit),
             ]
           : []),
-        ...(props.componentView === 'payroll' ? [] : [])
+        ...(props.componentView === 'payroll' ? [] : []),
       ].join(',')
 
       const csvRows = employeesStore.employeesExport.map((item) => {
@@ -178,14 +178,14 @@ export function useEmployeesTable(
           prepareCSV(item.philhealth_no),
           prepareCSV(item.pagibig_no),
           item.area_origin ? prepareCSV(item.area_origin.area) : '',
-          item.area_assignment ? prepareCSV(item.area_assignment.area) : ''
+          item.area_assignment ? prepareCSV(item.area_assignment.area) : '',
         ]
 
         if (props.componentView === 'benefits') {
           const getBenefits = (benefitType: 'addons' | 'deductions') => {
             return benefitsStore[benefitType].map((benefit) => {
               const activeBenefit = item.employee_deductions.find(
-                ({ benefit_id }) => benefit_id === benefit.id
+                ({ benefit_id }) => benefit_id === benefit.id,
               )?.amount
 
               return activeBenefit ? activeBenefit.toString() : '0.00'
@@ -199,7 +199,7 @@ export function useEmployeesTable(
             item.is_atm_payroll ? 'ATM' : 'Cash',
 
             ...getBenefits('addons'),
-            ...getBenefits('deductions')
+            ...getBenefits('deductions'),
           ]
         }
 
@@ -249,6 +249,6 @@ export function useEmployeesTable(
     employeesStore,
     designationsStore,
     isLoadingPDF,
-    formActionPDF
+    formActionPDF,
   }
 }

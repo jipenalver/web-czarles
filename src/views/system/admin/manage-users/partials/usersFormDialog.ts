@@ -10,7 +10,7 @@ export function useUsersFormDialog(
     itemData: AdminUser | null
     tableOptions: TableOptions
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const userRolesStore = useUserRolesStore()
   const usersStore = useUsersStore()
@@ -23,7 +23,7 @@ export function useUsersFormDialog(
     middlename: '',
     lastname: '',
     phone: '',
-    user_role: null
+    user_role: null,
   }
   const formData = ref<Partial<AdminUser>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -35,7 +35,7 @@ export function useUsersFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -51,7 +51,7 @@ export function useUsersFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} User.`
@@ -90,6 +90,6 @@ export function useUsersFormDialog(
     isUpdate,
     onFormSubmit,
     onFormReset,
-    userRolesStore
+    userRolesStore,
   }
 }

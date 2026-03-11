@@ -48,7 +48,7 @@ const {
   onLoadOvertimes,
   hasAttendanceImage,
   attendanceRequestsStore,
-  employeesStore
+  employeesStore,
 } = useAttendanceRequestsTable(props)
 </script>
 

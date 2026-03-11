@@ -1,7 +1,7 @@
 import {
   getEmployeeAttendanceById,
   getEmployeeAttendanceForEmployee55,
-  type AttendanceRecord
+  type AttendanceRecord,
 } from './computation'
 // this script is naka connect sa computation.ts file IMPORTANT
 // 👉 Get total paid leave days para sa employee sa specific month
@@ -82,7 +82,7 @@ const getOfficeMinutes = (
   timeIn: string | Date | null,
   timeOut: string | Date | null,
   sessionStart: number,
-  sessionEnd: number
+  sessionEnd: number,
 ) => {
   // Strip timezone information and parse as local time
   const parseLocalTime = (timeString: string | Date) => {
@@ -104,13 +104,13 @@ const getOfficeMinutes = (
     checkIn.getFullYear(),
     checkIn.getMonth(),
     checkIn.getDate(),
-    sessionStart
+    sessionStart,
   )
   const sessionEndTime = new Date(
     checkIn.getFullYear(),
     checkIn.getMonth(),
     checkIn.getDate(),
-    sessionEnd
+    sessionEnd,
   )
 
   // If check-out is before session start or check-in is after session end, no overlap
@@ -139,7 +139,7 @@ export const getTotalMinutes = (
   amTimeOut: string | null,
   pmTimeIn: string | null = null,
   pmTimeOut: string | null = null,
-  isField = false
+  isField = false,
 ) => {
   //   console.log('[getTotalMinutes] Input:', {
   //     amTimeIn,
@@ -178,7 +178,7 @@ export const getTotalMinutesForMonth = async (
   employeeId: number,
   isField = false,
   fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
-  toDateISO?: string // Optional: Custom end date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
@@ -223,7 +223,7 @@ export const getTotalMinutesForMonth = async (
         attendance.am_time_out,
         attendance.pm_time_in,
         attendance.pm_time_out,
-        isField
+        isField,
       )
 
       // console.log(`[getTotalMinutesForMonth] Daily minutes calculated:`, dailyMinutes)
@@ -242,7 +242,7 @@ export const getPaidLeaveDaysForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
   fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
-  toDateISO?: string // Optional: Custom end date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
@@ -319,7 +319,7 @@ export const getSundayDutyRecordsForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
   fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
-  toDateISO?: string // Optional: Custom end date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<SundayDutyRecord[]> => {
   // Extract year-month from filterDateString para sa month range
   const dateStringForQuery = filterDateString.substring(0, 7) // "YYYY-MM"
@@ -333,7 +333,7 @@ export const getSundayDutyRecordsForMonth = async (
             employeeId,
             dateStringForQuery,
             fromDateISO,
-            toDateISO
+            toDateISO,
           )
         : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
     const attendances: AttendanceRecord[] = attendancesResult || []
@@ -365,7 +365,7 @@ export const getSundayDutyRecordsForMonth = async (
           if (attendance_fraction > 0) {
             sundayDutyRecords.push({
               date: attendance.date,
-              attendance_fraction
+              attendance_fraction,
             })
           }
 
@@ -397,14 +397,14 @@ export const getSundayDutyDaysForMonth = async (
   filterDateString: string, // Format: "YYYY-MM-01"
   employeeId: number,
   fromDateISO?: string, // Optional: Custom start date for crossmonth (YYYY-MM-DD)
-  toDateISO?: string // Optional: Custom end date for crossmonth (YYYY-MM-DD)
+  toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   try {
     const sundayRecords = await getSundayDutyRecordsForMonth(
       filterDateString,
       employeeId,
       fromDateISO,
-      toDateISO
+      toDateISO,
     )
 
     // Sum up all attendance fractions to get total days

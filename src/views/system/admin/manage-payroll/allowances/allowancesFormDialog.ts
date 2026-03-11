@@ -2,7 +2,7 @@ import {
   type Allowance,
   type AllowanceForm,
   type AllowanceTableFilter,
-  useAllowancesStore
+  useAllowancesStore,
 } from '@/stores/allowances'
 import { useTripLocationsStore } from '@/stores/tripLocations'
 import { formActionDefault } from '@/utils/helpers/constants'
@@ -17,7 +17,7 @@ export function useAllowancesFormDialog(
     tableOptions: TableOptions
     tableFilters: AllowanceTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const allowancesStore = useAllowancesStore()
   const employeesStore = useEmployeesStore()
@@ -29,7 +29,7 @@ export function useAllowancesFormDialog(
     trip_location_id: null,
     trip_range_at: [new Date()],
     activities: '',
-    amount: undefined
+    amount: undefined,
   }
   const formData = ref<Partial<AllowanceForm>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -43,7 +43,7 @@ export function useAllowancesFormDialog(
       formData.value = props.itemData
         ? { ...props.itemData, trip_range_at: [new Date(props.itemData.trip_at)] }
         : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -59,7 +59,7 @@ export function useAllowancesFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Allowance.`
@@ -100,6 +100,6 @@ export function useAllowancesFormDialog(
     onFormSubmit,
     onFormReset,
     employeesStore,
-    tripLocationsStore
+    tripLocationsStore,
   }
 }

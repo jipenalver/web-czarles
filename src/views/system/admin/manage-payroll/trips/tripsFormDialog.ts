@@ -13,7 +13,7 @@ export function useTripsFormDialog(
     tableOptions: TableOptions
     tableFilters: TripTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const tripsStore = useTripsStore()
   const employeesStore = useEmployeesStore()
@@ -29,7 +29,7 @@ export function useTripsFormDialog(
     materials: '',
     km: undefined,
     trip_no: undefined,
-    per_trip: undefined
+    per_trip: undefined,
   }
   const formData = ref<Partial<Trip>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -41,7 +41,7 @@ export function useTripsFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -57,7 +57,7 @@ export function useTripsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Trip.`
@@ -100,6 +100,6 @@ export function useTripsFormDialog(
     onFormReset,
     employeesStore,
     unitsStore,
-    tripLocationsStore
+    tripLocationsStore,
   }
 }

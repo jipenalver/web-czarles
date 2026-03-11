@@ -74,7 +74,7 @@ export const useEmployeesStore = defineStore('employees', () => {
     employees.value = data?.map((item) => ({
       ...item,
       label: `${item.firstname} ${item.middlename ? item.middlename + ' ' : ''}${item.lastname}`,
-      value: item.id
+      value: item.id,
     })) as Employee[]
   }
 
@@ -98,7 +98,7 @@ export const useEmployeesStore = defineStore('employees', () => {
 
   async function getEmployeesTable(
     tableOptions: TableOptions,
-    { search, designation_id }: EmployeeTableFilter
+    { search, designation_id }: EmployeeTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'lastname')
     search = tableSearch(search)
@@ -134,11 +134,11 @@ export const useEmployeesStore = defineStore('employees', () => {
   function getEmployeesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { search, designation_id }: EmployeeTableFilter
+    { search, designation_id }: EmployeeTableFilter,
   ) {
     if (search)
       query = query.or(
-        `firstname.ilike.%${search}%, lastname.ilike.%${search}%, email.ilike.%${search}%`
+        `firstname.ilike.%${search}%, lastname.ilike.%${search}%, email.ilike.%${search}%`,
       )
 
     if (designation_id) query = query.eq('designation_id', designation_id)
@@ -180,6 +180,6 @@ export const useEmployeesStore = defineStore('employees', () => {
     getEmployeesTable,
     addEmployee,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
   }
 })

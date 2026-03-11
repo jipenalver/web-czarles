@@ -14,7 +14,7 @@ const {
   animatedYears,
   animatedProjects,
   animatedSatisfaction,
-  cameraOrbit
+  cameraOrbit,
 } = useAbout({ orbitals: [orbitA, orbitB] })
 </script>
 
@@ -29,7 +29,7 @@ const {
               'font-weight-bold',
               'mb-4',
               'text-white',
-              'animate-slide-up'
+              'animate-slide-up',
             ]"
           >
             About Us
@@ -41,7 +41,7 @@ const {
               'text-white',
               'font-weight-light',
               'animate-slide-up',
-              'delay-1'
+              'delay-1',
             ]"
           >
             Welcome to
@@ -78,7 +78,7 @@ const {
                   heroComputed.contentTitleClass,
                   'font-weight-bold',
                   'gradient-text',
-                  'mb-2'
+                  'mb-2',
                 ]"
               >
                 C&apos;ZARLES CONSTRUCTION & SUPPLY
@@ -102,7 +102,7 @@ const {
                   heroComputed.bodyTextClass,
                   'grey--text',
                   'text--darken-1',
-                  'line-height-relaxed'
+                  'line-height-relaxed',
                 ]"
               >
                 (CCS) shall endeavor to deliver quality, credible and safe Construction Operations
@@ -135,7 +135,7 @@ const {
                       :class="[
                         mobile ? 'text-subtitle-2' : 'text-subtitle-1',
                         'font-weight-medium',
-                        'mb-2'
+                        'mb-2',
                       ]"
                     >
                       {{ commitment.title }}
@@ -144,7 +144,7 @@ const {
                       :class="[
                         mobile ? 'text-caption' : 'text-body-2',
                         'grey--text',
-                        'text--darken-1'
+                        'text--darken-1',
                       ]"
                     >
                       {{ commitment.description }}
@@ -165,7 +165,7 @@ const {
                   heroComputed.sectionTitleClass,
                   'mb-6',
                   'text-center',
-                  'font-weight-medium'
+                  'font-weight-medium',
                 ]"
               >
                 Our Track Record
@@ -178,7 +178,7 @@ const {
                         mobile ? 'text-h4' : 'text-h3',
                         'orange--text',
                         'font-weight-bold',
-                        'mb-2'
+                        'mb-2',
                       ]"
                     >
                       {{ animatedYears }}+
@@ -189,7 +189,7 @@ const {
                         mobile ? 'text-caption' : 'text-body-2',
                         'grey--text',
                         'text--darken-1',
-                        'font-weight-medium'
+                        'font-weight-medium',
                       ]"
                     >
                       Years Experience
@@ -204,7 +204,7 @@ const {
                         mobile ? 'text-h4' : 'text-h3',
                         'orange--text',
                         'font-weight-bold',
-                        'mb-2'
+                        'mb-2',
                       ]"
                     >
                       {{ animatedProjects }}+
@@ -215,7 +215,7 @@ const {
                         mobile ? 'text-caption' : 'text-body-2',
                         'grey--text',
                         'text--darken-1',
-                        'font-weight-medium'
+                        'font-weight-medium',
                       ]"
                     >
                       Projects Completed
@@ -230,7 +230,7 @@ const {
                         mobile ? 'text-h4' : 'text-h3',
                         'orange--text',
                         'font-weight-bold',
-                        'mb-2'
+                        'mb-2',
                       ]"
                     >
                       {{ animatedSatisfaction }}%
@@ -241,7 +241,7 @@ const {
                         mobile ? 'text-caption' : 'text-body-2',
                         'grey--text',
                         'text--darken-1',
-                        'font-weight-medium'
+                        'font-weight-medium',
                       ]"
                     >
                       Client Satisfaction

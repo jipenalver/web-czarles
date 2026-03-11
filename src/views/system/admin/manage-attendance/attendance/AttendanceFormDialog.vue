@@ -29,7 +29,7 @@ const {
   onSubmit,
   onFormSubmit,
   onFormReset,
-  employeesStore
+  employeesStore,
 } = useAttendanceFormDialog(props, emit)
 </script>
 

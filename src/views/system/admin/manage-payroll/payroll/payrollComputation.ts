@@ -4,7 +4,7 @@ import {
   computeOverallOvertimeCalculation,
   getExcessMinutes,
   getUndertimeMinutes,
-  type AttendanceRecord
+  type AttendanceRecord,
 } from './computation/computation'
 import { getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
@@ -36,7 +36,7 @@ export function usePayrollComputation(
   employeeId?: number,
   payrollMonth?: string,
   payrollYear?: number,
-  dateString?: string
+  dateString?: string,
 ) {
   // Initialize employees store
   const employeesStore = useEmployeesStore()
@@ -54,7 +54,7 @@ export function usePayrollComputation(
       employeeId,
       dateString,
       fromDate,
-      toDate
+      toDate,
     )
     // console.log(`[OVERTIME CALCULATION] Employee ${employeeId}:`, {
     //   dateString,
@@ -188,7 +188,7 @@ export function usePayrollComputation(
           usedDateString,
           employeeId,
           fromDateForAttendance,
-          toDateForAttendance
+          toDateForAttendance,
         )
         // console.log(
         //   `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
@@ -290,7 +290,7 @@ export function usePayrollComputation(
               if (!h.holiday_at) return null
               return new Date(h.holiday_at).toISOString().split('T')[0]
             })
-            .filter(Boolean)
+            .filter(Boolean),
         )
 
         attendances.forEach((attendance) => {
@@ -373,7 +373,7 @@ export function usePayrollComputation(
 
   // Watch for changes and recompute
   watch([dailyRate, workDays, () => employeeId, () => dateString], computeRegularWorkTotal, {
-    immediate: true
+    immediate: true,
   })
 
   // Overtime calculations
@@ -403,7 +403,7 @@ export function usePayrollComputation(
     'philhealth_deduction',
     'pagibig_deduction',
     'tax_deduction',
-    'other_deductions'
+    'other_deductions',
     // add more deduction keys diri in the future
   ] as const
 
@@ -416,7 +416,7 @@ export function usePayrollComputation(
       philhealth_deduction: 0,
       pagibig_deduction: 0,
       tax_deduction: 0,
-      other_deductions: 0
+      other_deductions: 0,
     }
     if (tableData.value) {
       deductionFields.forEach((key) => {
@@ -476,6 +476,6 @@ export function usePayrollComputation(
     attendanceRecords,
 
     // Compute function for regular work total
-    computeRegularWorkTotal
+    computeRegularWorkTotal,
   }
 }

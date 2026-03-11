@@ -32,7 +32,7 @@ export function usePayrollWatchers(
     payrollMonth: ComputedRef<string>
     payrollYear: ComputedRef<number>
   },
-  callbacks: PayrollWatcherCallbacks
+  callbacks: PayrollWatcherCallbacks,
 ) {
   // Watch for earnings recalculation - removed immediate: true to prevent initial double calculation
   watch(
@@ -44,12 +44,12 @@ export function usePayrollWatchers(
       params.employeeDailyRate,
       params.dailyRate,
       params.codaAllowance,
-      params.employeeNonDeductions
+      params.employeeNonDeductions,
     ],
     () => {
       callbacks.recalculateEarnings()
     },
-    { deep: true }
+    { deep: true },
   )
 
   // Watch for full payroll initialization - this will trigger trips and holidays reload
@@ -64,6 +64,6 @@ export function usePayrollWatchers(
         await callbacks.initializePayrollCalculations()
       }
     },
-    { deep: true }
+    { deep: true },
   )
 }

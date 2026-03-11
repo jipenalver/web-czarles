@@ -25,7 +25,7 @@ const {
   onFormSubmit,
   onFormReset,
   employeesStore,
-  tripLocationsStore
+  tripLocationsStore,
 } = useAllowancesFormDialog(props, emit)
 </script>
 

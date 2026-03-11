@@ -18,7 +18,7 @@ export function useOverallEarningsTotal(
   monthlyUtilizationsTotal?: ComputedRef<number>,
   monthlyAllowancesTotal?: ComputedRef<number>,
   monthlyCashAdjustmentsTotal?: ComputedRef<number>,
-  sundayDutyAmount?: Ref<number>
+  sundayDutyAmount?: Ref<number>,
   /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<number> {
   return computed(() => {
@@ -115,7 +115,7 @@ export function useEarningsBreakdown(
   dailyRate: ComputedRef<number>,
   employeeDailyRate: ComputedRef<number>,
   overallOvertime: Ref<number>,
-  codaAllowance: Ref<number>
+  codaAllowance: Ref<number>,
   /* isFieldStaff?: ComputedRef<boolean>, */
 ): ComputedRef<Record<string, number>> {
   return computed(() => {
@@ -164,7 +164,7 @@ export function useEarningsBreakdown(
       holidays: holidayTotal,
       overtime,
       allowances,
-      total: regular + tripsTotal + holidayTotal + overtime + allowances
+      total: regular + tripsTotal + holidayTotal + overtime + allowances,
     }
   })
 }
@@ -178,7 +178,7 @@ export function useNetSalaryCalculation(
   lateDeduction: Ref<number>,
   employeeDeductions?: Ref<EmployeeDeduction[]>,
   cashAdvance?: Ref<number>,
-  undertimeDeduction?: Ref<number>
+  undertimeDeduction?: Ref<number>,
 ): ComputedRef<{
   grossSalary: number
   deductions: Record<string, number>
@@ -194,7 +194,7 @@ export function useNetSalaryCalculation(
       late: showLateDeduction.value ? Number(lateDeduction.value) || 0 : 0,
       undertime:
         showLateDeduction.value && undertimeDeduction ? Number(undertimeDeduction.value) || 0 : 0,
-      cashAdvance: cashAdvance ? Number(cashAdvance.value) || 0 : 0
+      cashAdvance: cashAdvance ? Number(cashAdvance.value) || 0 : 0,
     }
 
     // Process dynamic employee deductions (from PayrollDeductions.vue)
@@ -210,7 +210,7 @@ export function useNetSalaryCalculation(
         .map((deduction) => ({
           id: deduction.id,
           amount: Number(deduction.amount) || 0,
-          benefit: deduction.benefit?.benefit || 'Deduction'
+          benefit: deduction.benefit?.benefit || 'Deduction',
         }))
       dynamicDeductionsTotal = dynamicDeductions.reduce((sum, d) => sum + d.amount, 0)
     }
@@ -224,7 +224,7 @@ export function useNetSalaryCalculation(
       deductions,
       totalDeductions: totalDeductionsAmount,
       netSalary: totalEarnings - totalDeductionsAmount,
-      dynamicDeductions
+      dynamicDeductions,
     }
 
     return result

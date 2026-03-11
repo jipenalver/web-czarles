@@ -11,7 +11,7 @@ export function useRatesFormDialog(
     tableOptions: TableOptions
     tableFilters: EmployeeTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const employeesStore = useEmployeesStore()
   const logsStore = useLogsStore()
@@ -21,7 +21,7 @@ export function useRatesFormDialog(
     daily_rate: undefined,
     payroll_start: undefined,
     payroll_end: undefined,
-    is_insured: false
+    is_insured: false,
   }
   const formData = ref<Partial<Employee>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -32,7 +32,7 @@ export function useRatesFormDialog(
     () => props.isDialogVisible,
     () => {
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -46,7 +46,7 @@ export function useRatesFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully Updated Employee Rate.`
@@ -54,7 +54,7 @@ export function useRatesFormDialog(
       await logsStore.addLog({
         type: 'rates',
         employee_id: formData.value.id,
-        description: `Updated employee rate to ${formData.value.daily_rate}, insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}, and Payroll Option to ${formData.value.is_atm_payroll ? 'ATM' : 'Cash'}. With Payroll Period: ${formData.value.payroll_start} - ${formData.value.payroll_end}.`
+        description: `Updated employee rate to ${formData.value.daily_rate}, insurance status to ${formData.value.is_insured ? 'Insured' : 'Not Insured'}, and Payroll Option to ${formData.value.is_atm_payroll ? 'ATM' : 'Cash'}. With Payroll Period: ${formData.value.payroll_start} - ${formData.value.payroll_end}.`,
       })
 
       await employeesStore.getEmployeesTable(props.tableOptions, props.tableFilters)
@@ -87,6 +87,6 @@ export function useRatesFormDialog(
     isConfirmSubmitDialog,
     onSubmit,
     onFormSubmit,
-    onFormReset
+    onFormReset,
   }
 }

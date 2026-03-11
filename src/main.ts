@@ -27,14 +27,14 @@ createFont()
 
 const vuetify = createVuetify({
   theme: {
-    themes: customTheme
+    themes: customTheme,
   },
   defaults: customDefaults,
   components: {
     ...components,
-    VDateInput
+    VDateInput,
   },
-  directives
+  directives,
 })
 
 const app = createApp(App)

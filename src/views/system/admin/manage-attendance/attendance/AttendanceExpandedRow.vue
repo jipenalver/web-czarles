@@ -5,7 +5,7 @@ import {
   getOvertimeHoursDecimal,
   getOvertimeHoursString,
   getWorkHoursDecimal,
-  getWorkHoursString
+  getWorkHoursString,
 } from '@/utils/helpers/attendance'
 import AttendanceViewDialog from './AttendanceViewDialog.vue'
 import { type Attendance } from '@/stores/attendances'
@@ -156,7 +156,7 @@ const isQRGenerator = computed(() => {
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
-                isFieldStaff
+                isFieldStaff,
               )
             }}
 
@@ -167,7 +167,7 @@ const isQRGenerator = computed(() => {
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
-                  isFieldStaff
+                  isFieldStaff,
                 )
               }})
             </span>
@@ -188,7 +188,7 @@ const isQRGenerator = computed(() => {
                 props.itemData.am_time_out,
                 props.itemData.pm_time_in,
                 props.itemData.pm_time_out,
-                isFieldStaff
+                isFieldStaff,
               )
             }}
 
@@ -199,7 +199,7 @@ const isQRGenerator = computed(() => {
                   props.itemData.am_time_out,
                   props.itemData.pm_time_in,
                   props.itemData.pm_time_out,
-                  isFieldStaff
+                  isFieldStaff,
                 )
               }})
             </span>

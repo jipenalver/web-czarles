@@ -3,7 +3,7 @@ import {
   getEmployeeAttendanceById,
   getEmployeeAttendanceForEmployee55,
   getExcessMinutes,
-  getUndertimeMinutes
+  getUndertimeMinutes,
 } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 
 /**
@@ -20,7 +20,7 @@ function calculateUnifiedLateUndertime(
     pm_time_out?: string | null
     attendance_date?: string | null
   }>,
-  isFieldStaff: boolean
+  isFieldStaff: boolean,
 ): { lateMinutes: number; undertimeMinutes: number } {
   let totalLateMinutes = 0
   let totalUndertimeMinutes = 0
@@ -83,7 +83,7 @@ export async function calculateLateAndUndertimeDeductions(
   isFieldStaff: boolean,
   fromDate?: string,
   toDate?: string,
-  isAdmin: boolean = false
+  isAdmin: boolean = false,
 ): Promise<{ lateDeductionAmount: number; undertimeDeductionAmount: number }> {
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
@@ -92,13 +92,13 @@ export async function calculateLateAndUndertimeDeductions(
           employeeId,
           dateStringForCalculation.substring(0, 7),
           fromDate,
-          toDate
+          toDate,
         )
       : await getEmployeeAttendanceById(
           employeeId,
           dateStringForCalculation.substring(0, 7),
           fromDate,
-          toDate
+          toDate,
         )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -111,7 +111,7 @@ export async function calculateLateAndUndertimeDeductions(
     // Use unified calculation for both field staff and office staff
     const { lateMinutes, undertimeMinutes } = calculateUnifiedLateUndertime(
       attendances,
-      isFieldStaff
+      isFieldStaff,
     )
     totalLateMinutes = lateMinutes
     totalUndertimeMinutes = undertimeMinutes
@@ -126,7 +126,7 @@ export async function calculateLateAndUndertimeDeductions(
 
     return {
       lateDeductionAmount: Number(lateDeductionAmount.toFixed(2)),
-      undertimeDeductionAmount: Number(undertimeDeductionAmount.toFixed(2))
+      undertimeDeductionAmount: Number(undertimeDeductionAmount.toFixed(2)),
     }
   } catch (error) {
     console.error('[calculateLateAndUndertimeDeductions] Error calculating deductions:', error)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type AttendanceRequest,
-  type AttendanceRequestTableFilter
+  type AttendanceRequestTableFilter,
 } from '@/stores/attendanceRequests'
 import EmployeeLogs from '../../manage-employees/employees/EmployeeLogs.vue'
 import { getDateWithWeekday } from '@/utils/helpers/dates'

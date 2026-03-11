@@ -25,7 +25,7 @@ export const getMoneyText = (value: string | number) => {
     style: 'currency',
     currency: 'PHP',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   }).format(Number(value))
 }
 
@@ -34,7 +34,7 @@ export const getPaddedText = (
   value: string | number,
   length = 4,
   char = '0',
-  direction = 'left' as 'left' | 'right'
+  direction = 'left' as 'left' | 'right',
 ) => {
   value = String(value)
   if (value.length >= length) return value
@@ -72,7 +72,7 @@ export const getRandomCode = (length = 6, isAllCaps = false) => {
     : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
   return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join(
-    ''
+    '',
   )
 }
 

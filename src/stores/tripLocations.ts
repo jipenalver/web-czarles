@@ -37,7 +37,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
 
   async function getTripLocationsTable(
     tableOptions: TableOptions,
-    { search }: TripLocationTableFilter
+    { search }: TripLocationTableFilter,
   ) {
     const { rangeStart, rangeEnd, column, order } = tablePagination(tableOptions, 'location')
     search = tableSearch(search)
@@ -69,7 +69,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
   function getTripLocationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { search }: TripLocationTableFilter
+    { search }: TripLocationTableFilter,
   ) {
     if (search) query = query.or(`location.ilike.%${search}%, description.ilike.%${search}%`)
 
@@ -98,6 +98,6 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
     getTripLocationsTable,
     addTripLocation,
     updateTripLocation,
-    deleteTripLocation
+    deleteTripLocation,
   }
 })

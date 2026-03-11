@@ -38,7 +38,7 @@ const totals = computed(() => {
       cash_adjustment_deduction:
         acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
       total_deductions: acc.total_deductions + (item.total_deductions || 0),
-      net_pay: acc.net_pay + (item.net_pay || 0)
+      net_pay: acc.net_pay + (item.net_pay || 0),
     }),
     {
       days_worked: 0,
@@ -63,8 +63,8 @@ const totals = computed(() => {
       undertime: 0,
       cash_adjustment_deduction: 0,
       total_deductions: 0,
-      net_pay: 0
-    }
+      net_pay: 0,
+    },
   )
 })
 </script>

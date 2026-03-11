@@ -35,7 +35,7 @@ export function useEmployeeDisplay(employeeData: ComputedRef<Employee | null>) {
     address,
     dailyRate,
     isFieldStaff,
-    isAdmin
+    isAdmin,
   }
 }
 
@@ -50,7 +50,7 @@ export function usePayrollFormatting(isAdmin?: ComputedRef<boolean>) {
 
   return {
     formattedDate,
-    showLateDeduction
+    showLateDeduction,
   }
 }
 
@@ -60,7 +60,7 @@ export function usePayrollFormatting(isAdmin?: ComputedRef<boolean>) {
 export function useHoursCalculation(
   isFieldStaff: ComputedRef<boolean>,
   employeeDailyRate: Ref<number> | ComputedRef<number>,
-  regularWorkTotal: Ref<number> | ComputedRef<number>
+  regularWorkTotal: Ref<number> | ComputedRef<number>,
 ) {
   const totalHoursWorked = computed(() => {
     if (isFieldStaff.value && employeeDailyRate.value > 0) {
@@ -71,6 +71,6 @@ export function useHoursCalculation(
   })
 
   return {
-    totalHoursWorked
+    totalHoursWorked,
   }
 }

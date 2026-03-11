@@ -14,24 +14,24 @@ const tableHeaders: TableHeader[] = [
   {
     title: 'Designation',
     key: 'designation',
-    align: 'start'
+    align: 'start',
   },
   {
     title: 'Description',
     key: 'description',
-    align: 'start'
+    align: 'start',
   },
   {
     title: 'Added Date',
     key: 'created_at',
-    align: 'center'
+    align: 'center',
   },
   {
     title: 'Actions',
     key: 'actions',
     sortable: false,
-    align: 'center'
-  }
+    align: 'center',
+  },
 ]
 
 const {
@@ -47,7 +47,7 @@ const {
   onConfirmDelete,
   onSearchItems,
   onLoadItems,
-  designationsStore
+  designationsStore,
 } = useDesignationsTable()
 </script>
 

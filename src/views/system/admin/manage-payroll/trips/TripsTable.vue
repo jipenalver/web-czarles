@@ -32,7 +32,7 @@ const {
   tripsStore,
   employeesStore,
   isLoadingPDF,
-  formActionPDF
+  formActionPDF,
 } = useTripsTable()
 </script>
 

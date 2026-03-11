@@ -10,7 +10,7 @@ import {
   getDateRangeForMonth,
   getDateRangeForMonthNoCross,
   getLastDayOfMonth,
-  onView as onViewHelper
+  onView as onViewHelper,
 } from './helpers'
 import { ref, computed, watch } from 'vue'
 
@@ -35,7 +35,7 @@ const {
   availableYears,
   isCurrentEmployeeFieldStaff,
   onView: baseOnView,
-  onDialogClose
+  onDialogClose,
 } = usePayrollTableDialog(props, emit)
 
 const chosenMonth = ref<string>('')
@@ -43,7 +43,7 @@ const chosenMonth = ref<string>('')
 const dayFrom = ref<number | null>(props.itemData?.payroll_start ?? null)
 const dayTo = ref<number | null>(props.itemData?.payroll_end ?? null)
 const crossMonthEnabled = ref<boolean>(
-  Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+  Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end),
 )
 
 const daysInSelectedMonth = computed(() => {
@@ -70,10 +70,10 @@ const daysInPreviousMonth = computed(() => {
 })
 
 const dayOptionsFrom = computed(() =>
-  Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1)
+  Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1),
 )
 const dayOptionsTo = computed(() =>
-  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1)
+  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
 )
 
 function getDaysInMonth(monthName: string): number {
@@ -102,7 +102,7 @@ watch(
 
     crossMonthEnabled.value = Boolean(newData?.payroll_start && newData?.payroll_end)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(
@@ -118,7 +118,7 @@ watch(
         dayTo.value = props.itemData?.payroll_end ?? daysInSelectedMonth.value
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 function onView(item: TableData) {
@@ -129,7 +129,7 @@ function onView(item: TableData) {
     dayTo,
     crossMonthEnabled,
     tableFilters: { value: tableFilters.value as Record<string, unknown> | undefined },
-    baseOnView
+    baseOnView,
   })
 }
 
@@ -168,7 +168,7 @@ watch(
       /* ignore storage errors */
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>
 

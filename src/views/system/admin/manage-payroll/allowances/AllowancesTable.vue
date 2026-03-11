@@ -30,7 +30,7 @@ const {
   onExportCSV,
   // onExportPDF,
   allowancesStore,
-  employeesStore
+  employeesStore,
   // isLoadingPDF,
   // formActionPDF,
 } = useAllowancesTable()

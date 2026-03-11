@@ -14,18 +14,18 @@ const tabsItems = [
   {
     icon: 'mdi-account-multiple',
     text: 'Employees',
-    value: 'employees'
+    value: 'employees',
   },
   {
     icon: 'mdi-account-tag',
     text: 'Designations',
-    value: 'designations'
+    value: 'designations',
   },
   {
     icon: 'mdi-map-marker',
     text: 'Areas',
-    value: 'areas'
-  }
+    value: 'areas',
+  },
 ]
 
 const tabWindow = ref('employees')

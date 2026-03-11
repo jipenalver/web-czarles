@@ -27,7 +27,7 @@ export function useTripsPDF() {
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -60,7 +60,7 @@ export function useTripsPDF() {
         maxWidth: tripsTableElement.style.maxWidth || '',
         backgroundColor: tripsTableElement.style.backgroundColor || '',
         display: tripsTableElement.style.display || '',
-        fontSize: tripsTableElement.style.fontSize || ''
+        fontSize: tripsTableElement.style.fontSize || '',
       }
 
       // Apply styles para sa PDF generation - optimized para sa portrait
@@ -85,15 +85,15 @@ export function useTripsPDF() {
           scale: 1.5, // Reduced scale para sa portrait fit
           useCORS: true,
           allowTaint: true,
-          letterRendering: true
+          letterRendering: true,
           /*  width: 794, // Portrait width (A4)
           height: 1123, // Portrait height (A4) */
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
-          orientation: 'portrait' // Changed to portrait orientation
-        }
+          orientation: 'portrait', // Changed to portrait orientation
+        },
       })
 
       // Restore original styles
@@ -103,7 +103,7 @@ export function useTripsPDF() {
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -121,7 +121,7 @@ export function useTripsPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'PDF successfully generated!',
-        formStatus: 200
+        formStatus: 200,
       }
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -129,7 +129,7 @@ export function useTripsPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'Error occurred while generating PDF. Please try again.',
-        formStatus: 500
+        formStatus: 500,
       }
     } finally {
       // Reset printing state
@@ -161,6 +161,6 @@ export function useTripsPDF() {
   return {
     formAction,
     isLoadingPDF,
-    onExport
+    onExport,
   }
 }

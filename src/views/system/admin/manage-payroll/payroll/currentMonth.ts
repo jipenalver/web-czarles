@@ -1,14 +1,14 @@
 // Import date helpers from others.ts
 import {
   // getDateISO, getDate, getDateWithWeekday,
-  prepareDate
+  prepareDate,
 } from '@/utils/helpers/dates'
 
 // Payroll sample data helpers (for demo/sample only)
 export const baseBasicSalary = 25000
 export const variations = [0, 0, 0, 100, -100, 200, -50, -300, 500, 300, 100, 400]
 export const deductionVariations = [
-  3200, 3100, 2900, 3400, 3000, 3600, 3300, 3150, 3500, 3250, 3800, 4200
+  3200, 3100, 2900, 3400, 3000, 3600, 3300, 3150, 3500, 3250, 3800, 4200,
 ]
 
 export function getSampleBasicSalary(monthIndex: number): number {
@@ -71,5 +71,5 @@ export const monthNames: string[] = [
   'September',
   'October',
   'November',
-  'December'
+  'December',
 ]

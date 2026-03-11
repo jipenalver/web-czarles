@@ -8,23 +8,23 @@ const statistics = ref([
   {
     number: '116',
     label: 'PROJECTS',
-    description: 'COMPLETED'
+    description: 'COMPLETED',
   },
   {
     number: '27',
     label: 'YEARS',
-    description: ' EXPERIENCEs'
+    description: ' EXPERIENCEs',
   },
   {
     number: '98',
     label: '% CLIENT',
-    description: 'SATISFACTION'
+    description: 'SATISFACTION',
   },
   {
     number: '50',
     label: 'EXPERT TEAM',
-    description: 'MEMBERS'
-  }
+    description: 'MEMBERS',
+  },
 ])
 
 // Vuetify breakpoint composable (reactive)

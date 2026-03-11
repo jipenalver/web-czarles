@@ -30,7 +30,7 @@ type UsePayrollRefsProps = {
 export function usePayrollRefs(
   props: UsePayrollRefsProps,
   dailyRate: ComputedRef<number>,
-  grossSalary: ComputedRef<number>
+  grossSalary: ComputedRef<number>,
 ) {
   const dailyRateRef = computed(() => dailyRate.value)
   const grossSalaryRef = computed(() => grossSalary.value)
@@ -43,12 +43,12 @@ export function usePayrollPrint(
   props: UsePayrollRefsProps,
   dailyRate: ComputedRef<number>,
   grossSalary: ComputedRef<number>,
-  filterDateString: ComputedRef<string>
+  filterDateString: ComputedRef<string>,
 ) {
   const { dailyRateRef, grossSalaryRef, tableDataRef } = usePayrollRefs(
     props,
     dailyRate,
-    grossSalary
+    grossSalary,
   )
   // Use payrollComputation composable and expose its return
   return usePayrollComputation(
@@ -58,7 +58,7 @@ export function usePayrollPrint(
     props.employeeData?.id,
     props.payrollData.month,
     props.payrollData.year,
-    filterDateString.value
+    filterDateString.value,
   )
 }
 
@@ -69,6 +69,6 @@ export function usePayrollFilters(dateString: string, employeeId: number | undef
   }
 
   return {
-    fetchTrips
+    fetchTrips,
   }
 }

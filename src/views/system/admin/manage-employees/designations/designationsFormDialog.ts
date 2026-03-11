@@ -1,7 +1,7 @@
 import {
   type Designation,
   type DesignationTableFilter,
-  useDesignationsStore
+  useDesignationsStore,
 } from '@/stores/designations'
 import { formActionDefault } from '@/utils/helpers/constants'
 import { type TableOptions } from '@/utils/helpers/tables'
@@ -14,14 +14,14 @@ export function useDesignationsFormDialog(
     tableOptions: TableOptions
     tableFilters: DesignationTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const designationsStore = useDesignationsStore()
 
   // States
   const formDataDefault = {
     designation: '',
-    description: ''
+    description: '',
   }
   const formData = ref<Partial<Designation>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -33,7 +33,7 @@ export function useDesignationsFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -49,7 +49,7 @@ export function useDesignationsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Designation.`
@@ -84,6 +84,6 @@ export function useDesignationsFormDialog(
     refVForm,
     isUpdate,
     onFormSubmit,
-    onFormReset
+    onFormReset,
   }
 }

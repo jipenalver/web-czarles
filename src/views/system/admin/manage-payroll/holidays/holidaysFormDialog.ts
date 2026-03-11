@@ -10,7 +10,7 @@ export function useHolidaysFormDialog(
     tableOptions: TableOptions
     tableFilters: HolidayTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const holidaysStore = useHolidaysStore()
 
@@ -19,7 +19,7 @@ export function useHolidaysFormDialog(
     name: '',
     type: null,
     description: '',
-    holiday_at: ''
+    holiday_at: '',
   }
   const formData = ref<Partial<Holiday>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -31,7 +31,7 @@ export function useHolidaysFormDialog(
     () => {
       isUpdate.value = props.itemData ? true : false
       formData.value = props.itemData ? { ...props.itemData } : { ...formDataDefault }
-    }
+    },
   )
 
   // Actions
@@ -47,7 +47,7 @@ export function useHolidaysFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Holiday.`
@@ -82,6 +82,6 @@ export function useHolidaysFormDialog(
     refVForm,
     isUpdate,
     onFormSubmit,
-    onFormReset
+    onFormReset,
   }
 }

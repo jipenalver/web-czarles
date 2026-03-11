@@ -2,7 +2,7 @@
 import {
   type AttendanceRequest,
   type AttendanceRequestTableFilter,
-  useAttendanceRequestsStore
+  useAttendanceRequestsStore,
 } from '@/stores/attendanceRequests'
 import { getDate, getDateWithWeekday, getTime, getTime24Hour } from '@/utils/helpers/dates'
 import { type Attendance, useAttendancesStore } from '@/stores/attendances'
@@ -19,7 +19,7 @@ export function useOvertimeFormDialog(
     tableOptions: TableOptions
     tableFilters: AttendanceRequestTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const attendanceRequestsStore = useAttendanceRequestsStore()
   const attendancesStore = useAttendancesStore()
@@ -33,11 +33,11 @@ export function useOvertimeFormDialog(
     overtime_in: '',
     overtime_out: '',
     overtime_status: 'Pending' as 'Pending' | 'Approved' | 'Rejected',
-    type: 'Overtime' as 'Leave' | 'Overtime'
+    type: 'Overtime' as 'Leave' | 'Overtime',
   }
   const formCheckBoxDefault = {
     isRectifyOvertimeIn: false,
-    isRectifyOvertimeOut: false
+    isRectifyOvertimeOut: false,
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -62,10 +62,10 @@ export function useOvertimeFormDialog(
           ...itemData,
           overtime_in: getTime24Hour(itemData.overtime_in) as string,
           overtime_out: getTime24Hour(itemData.overtime_out) as string,
-          date: getDate(itemData.overtime_in)
+          date: getDate(itemData.overtime_in),
         }
       } else formData.value = { ...formDataDefault }
-    }
+    },
   )
 
   watch(
@@ -77,7 +77,7 @@ export function useOvertimeFormDialog(
         await attendancesStore.getAttendances(formData.value.employee_id)
 
       formAction.value = { ...formActionDefault, formProcess: false }
-    }
+    },
   )
 
   // Actions
@@ -97,7 +97,7 @@ export function useOvertimeFormDialog(
       overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string),
       is_overtime_in_rectified: formCheckBox.value.isRectifyOvertimeIn,
       is_overtime_out_rectified: formCheckBox.value.isRectifyOvertimeOut,
-      attendance_id: attendanceData.value ? attendanceData.value.id : null
+      attendance_id: attendanceData.value ? attendanceData.value.id : null,
     }
 
     const { data, error } = isUpdate.value
@@ -109,7 +109,7 @@ export function useOvertimeFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated Overtime Request' : 'Applied for Overtime'}.`
@@ -122,13 +122,13 @@ export function useOvertimeFormDialog(
           message: `<p>Good Day!</p>
             <p>An overtime request has been applied by employee <strong>${employee?.firstname} ${employee?.lastname}</strong> for date <strong>${getDateWithWeekday(newFormData.overtime_in as string)}, ${getTime(newFormData.overtime_in)} to ${getTime(newFormData.overtime_out)}</strong>.</p>
             <p>Please review the request at your earliest convenience.</p>
-            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`
+            <p>Best Regards,<br>C'Zarles Construction and Supply System</p>`,
         })
       }
 
       await attendanceRequestsStore.getAttendanceRequestsTable(
         props.tableOptions,
-        props.tableFilters
+        props.tableFilters,
       )
 
       setTimeout(() => {
@@ -146,7 +146,7 @@ export function useOvertimeFormDialog(
         formMessage: message,
         formStatus: 400,
         formProcess: false,
-        formAlert: true
+        formAlert: true,
       }
       return true
     }
@@ -154,7 +154,7 @@ export function useOvertimeFormDialog(
     attendanceData.value = attendancesStore.attendances.find(
       (attendance) =>
         getDate(attendance.am_time_in) === getDate(formData.value.date as string) &&
-        attendance.employee_id === formData.value.employee_id
+        attendance.employee_id === formData.value.employee_id,
     )
 
     const isAttendanceBlank =
@@ -163,7 +163,7 @@ export function useOvertimeFormDialog(
         attendanceData.value.am_time_in,
         attendanceData.value.am_time_out,
         attendanceData.value.pm_time_in,
-        attendanceData.value.pm_time_out
+        attendanceData.value.pm_time_out,
       ].some((time) => time !== null)
 
     if (!isAttendanceBlank)
@@ -172,7 +172,7 @@ export function useOvertimeFormDialog(
     const isAttendanceHasLeave =
       attendanceData.value &&
       [attendanceData.value.is_am_leave, attendanceData.value.is_pm_leave].every(
-        (isLeave) => isLeave === true
+        (isLeave) => isLeave === true,
       )
 
     if (isAttendanceHasLeave)
@@ -229,6 +229,6 @@ export function useOvertimeFormDialog(
     onSubmit,
     onFormSubmit,
     onFormReset,
-    employeesStore
+    employeesStore,
   }
 }

@@ -23,7 +23,7 @@ const { mdAndDown } = useDisplay()
 
 const { formAction, imageType, imageData, onDownload, onDialogClose } = useAttendanceViewDialog(
   props,
-  emit
+  emit,
 )
 </script>
 

@@ -85,8 +85,8 @@ const getEmployeeName = (id: number) => {
                 getMoneyText(
                   utilizationsStore.utilizationsExport.reduce(
                     (sum, item) => sum + (item.hours + item.overtime_hours) * item.per_hour,
-                    0
-                  )
+                    0,
+                  ),
                 )
               }}
             </td>

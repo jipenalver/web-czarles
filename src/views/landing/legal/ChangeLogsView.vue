@@ -7,7 +7,7 @@ const isVisible = ref(false)
 const { mobile, lgAndUp } = useDisplay()
 
 const heroTitleClass = computed(() =>
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3'
+  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
 )
 
 const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
@@ -30,7 +30,7 @@ onMounted(() => {
             :class="[
               heroTitleClass,
               'font-weight-bold mb-4 text-white animate-hero-title',
-              { 'animate-hero-title-visible': isVisible }
+              { 'animate-hero-title-visible': isVisible },
             ]"
           >
             Change Logs
@@ -39,7 +39,7 @@ onMounted(() => {
             :class="[
               heroSubtitleClass,
               'mb-6 text-white font-weight-light animate-hero-subtitle',
-              { 'animate-hero-subtitle-visible': isVisible }
+              { 'animate-hero-subtitle-visible': isVisible },
             ]"
           >
             Change Logs provide a detailed history of updates, improvements, and fixes made to our

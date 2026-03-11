@@ -100,7 +100,7 @@ export const useTripsStore = defineStore('trips', () => {
   function getTripsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { employee_id, trip_at }: TripTableFilter
+    { employee_id, trip_at }: TripTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
 
@@ -121,7 +121,7 @@ export const useTripsStore = defineStore('trips', () => {
 
   async function updateTrip(formData: Partial<Trip>) {
     const { employee, unit, trip_location, ...updatedData } = prepareFormDates(formData, [
-      'trip_at'
+      'trip_at',
     ])
 
     return await supabase.from('trips').update(updatedData).eq('id', formData.id).select()
@@ -143,6 +143,6 @@ export const useTripsStore = defineStore('trips', () => {
     getTripsTable,
     addTrip,
     updateTrip,
-    deleteTrip
+    deleteTrip,
   }
 })

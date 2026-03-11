@@ -16,7 +16,7 @@ export function useEmployeesPDF() {
   // Actions
   const onExport = async (
     filters: EmployeesFilters,
-    componentView: 'employees' | 'benefits' | 'payroll'
+    componentView: 'employees' | 'benefits' | 'payroll',
   ) => {
     // Set printing state to true para ma-show ang loading overlay
     isLoadingPDF.value = true
@@ -30,7 +30,7 @@ export function useEmployeesPDF() {
       if (isDarkMode) {
         // Trigger theme toggle by simulating click on theme button
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -61,7 +61,7 @@ export function useEmployeesPDF() {
         position: employeesTableElement.style.position || '',
         width: employeesTableElement.style.width || '',
         backgroundColor: employeesTableElement.style.backgroundColor || '',
-        display: employeesTableElement.style.display || ''
+        display: employeesTableElement.style.display || '',
       }
 
       // Apply styles para sa PDF generation
@@ -85,12 +85,12 @@ export function useEmployeesPDF() {
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
-          width: 750 // Use full table width
+          width: 750, // Use full table width
         },
         jsPDF: {
           format: 'a4',
-          orientation: 'portrait' // Keep portrait orientation
-        }
+          orientation: 'portrait', // Keep portrait orientation
+        },
       })
 
       // Restore original styles
@@ -100,7 +100,7 @@ export function useEmployeesPDF() {
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
         const themeToggleButton = document.querySelector(
-          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)'
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
         )
         if (themeToggleButton) {
           ;(themeToggleButton as HTMLButtonElement).click()
@@ -118,7 +118,7 @@ export function useEmployeesPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'PDF successfully generated!',
-        formStatus: 200
+        formStatus: 200,
       }
     } catch (error) {
       console.error('Error generating PDF:', error)
@@ -126,7 +126,7 @@ export function useEmployeesPDF() {
         formProcess: false,
         formAlert: true,
         formMessage: 'Error occurred while generating PDF. Please try again.',
-        formStatus: 500
+        formStatus: 500,
       }
     } finally {
       // Reset printing state
@@ -136,7 +136,7 @@ export function useEmployeesPDF() {
 
   const generateFilename = (
     filters: EmployeesFilters,
-    componentView: 'employees' | 'benefits' | 'payroll'
+    componentView: 'employees' | 'benefits' | 'payroll',
   ) => {
     const baseDate = getDateISO(new Date())
     let filename = `${baseDate}-employees-${componentView}-report`
@@ -156,6 +156,6 @@ export function useEmployeesPDF() {
   return {
     formAction,
     isLoadingPDF,
-    onExport
+    onExport,
   }
 }

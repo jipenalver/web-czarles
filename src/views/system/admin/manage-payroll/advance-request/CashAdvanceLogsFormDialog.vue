@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type CashAdvanceRequest,
-  type CashAdvanceRequestTableFilter
+  type CashAdvanceRequestTableFilter,
 } from '@/stores/cashAdvanceRequests'
 import EmployeeLogs from '../../manage-employees/employees/EmployeeLogs.vue'
 import { useCashAdvanceLogsFormDialog } from './cashAdvanceLogsFormDialog'

@@ -66,7 +66,7 @@ export const useAreasStore = defineStore('areas', () => {
   function getAreasFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: PostgrestFilterBuilder<any, any, any, any>,
-    { search }: AreaTableFilter
+    { search }: AreaTableFilter,
   ) {
     if (search) query = query.or(`area.ilike.%${search}%, description.ilike.%${search}%`)
 
@@ -95,6 +95,6 @@ export const useAreasStore = defineStore('areas', () => {
     getAreasTable,
     addArea,
     updateArea,
-    deleteArea
+    deleteArea,
   }
 })

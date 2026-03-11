@@ -26,7 +26,7 @@ const {
   cashAdvancesStore,
   employeesStore,
   isLoadingPDF,
-  formActionPDF
+  formActionPDF,
 } = useCashAdvancesTable()
 </script>
 

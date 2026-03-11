@@ -47,7 +47,7 @@ export const useUsersStore = defineStore('users', () => {
       phone: user_metadata.phone,
       password: user_metadata.password,
       is_admin: user_metadata.is_admin,
-      avatar: user_metadata.avatar
+      avatar: user_metadata.avatar,
     }
   }
 
@@ -62,7 +62,7 @@ export const useUsersStore = defineStore('users', () => {
   async function getUsersTable({ page, itemsPerPage }: TableOptions) {
     const { data } = await supabaseAdmin.auth.admin.listUsers({
       page: page,
-      perPage: itemsPerPage
+      perPage: itemsPerPage,
     })
 
     const { users, total } = data as { users: User[]; total: number }
@@ -86,7 +86,7 @@ export const useUsersStore = defineStore('users', () => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { ...userMetadata, password }
+      user_metadata: { ...userMetadata, password },
     })
   }
 
@@ -94,7 +94,7 @@ export const useUsersStore = defineStore('users', () => {
     const { id, email, created_at, ...userMetadata } = formData
 
     return await supabaseAdmin.auth.admin.updateUserById(id as string, {
-      user_metadata: { ...userMetadata }
+      user_metadata: { ...userMetadata },
     })
   }
 
@@ -114,6 +114,6 @@ export const useUsersStore = defineStore('users', () => {
     getUserById,
     addUser,
     updateUser,
-    deleteUser
+    deleteUser,
   }
 })

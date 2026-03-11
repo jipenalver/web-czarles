@@ -91,8 +91,8 @@ const getEmployeeName = (id: number) => {
                 getMoneyText(
                   tripsStore.tripsExport.reduce(
                     (sum, item) => sum + item.trip_no * item.per_trip,
-                    0
-                  )
+                    0,
+                  ),
                 )
               }}
             </td>

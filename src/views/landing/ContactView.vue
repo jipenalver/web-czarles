@@ -9,7 +9,7 @@ import { useForm, type GenericObject } from 'vee-validate'
 import * as yup from 'yup'
 import {
   useContact,
-  type SendMessageProps
+  type SendMessageProps,
 } from '@/views/landing/contact/composables/contact.composable'
 
 const schema = yup.object({
@@ -19,11 +19,11 @@ const schema = yup.object({
   message: yup
     .string()
     .min(10, 'Message must be at least 10 characters')
-    .required('Message is required')
+    .required('Message is required'),
 })
 
 const { handleSubmit, defineField, errors, resetForm } = useForm<SendMessageProps>({
-  validationSchema: schema
+  validationSchema: schema,
 })
 
 const heroComputed = useHeroComputed()
@@ -60,11 +60,11 @@ onMounted(() => {
   if (!mapRef.value) return
   const map = L.map(mapRef.value, { zoomControl: true, attributionControl: false }).setView(
     [lat, lng],
-    15
+    15,
   )
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map)
 
   // use a custom SVG pin to avoid default icon asset issues
@@ -81,7 +81,7 @@ onMounted(() => {
     html: pinHtml,
     className: 'custom-pin',
     iconSize: [46, 58],
-    iconAnchor: [23, 58]
+    iconAnchor: [23, 58],
   })
   L.marker([lat, lng], { icon: pinIcon }).addTo(map).bindPopup('Our Location')
 
@@ -107,7 +107,7 @@ onMounted(() => {
               'font-weight-bold',
               'mb-4',
               'text-white',
-              'animate-slide-up'
+              'animate-slide-up',
             ]"
           >
             Contact
@@ -119,7 +119,7 @@ onMounted(() => {
               'text-white',
               'font-weight-light',
               'animate-slide-up',
-              'delay-1'
+              'delay-1',
             ]"
           >
             Get in touch with our team for inquiries, support, or partnerships.

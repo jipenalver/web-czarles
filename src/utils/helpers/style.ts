@@ -10,6 +10,6 @@ export function useHeroComputed() {
     contentTitleClass: mobile.value ? 'text-h5' : lgAndUp.value ? 'text-h2' : 'text-h3',
     sectionTitleClass: mobile.value ? 'text-h6' : 'text-h5',
     bodyTextClass: mobile.value ? 'text-body-2' : 'text-body-1',
-    cardPadding: mobile.value ? 'pa-4' : 'pa-6'
+    cardPadding: mobile.value ? 'pa-4' : 'pa-6',
   }))
 }

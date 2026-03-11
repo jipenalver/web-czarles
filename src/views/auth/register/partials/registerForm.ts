@@ -11,7 +11,7 @@ export function useRegisterForm() {
     email: '',
     password: '',
     firstname: '',
-    lastname: ''
+    lastname: '',
   }
   const formData = ref({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -27,8 +27,8 @@ export function useRegisterForm() {
       email,
       password,
       options: {
-        data: { ...otherData, is_admin: true }
-      }
+        data: { ...otherData, is_admin: true },
+      },
     })
 
     if (error) {
@@ -36,13 +36,13 @@ export function useRegisterForm() {
         ...formActionDefault,
         formMessage: error.message,
         formStatus: error.status as number,
-        formAlert: true
+        formAlert: true,
       }
     } else if (data) {
       formAction.value = {
         ...formActionDefault,
         formMessage: 'Successfully Created Account.',
-        formAlert: true
+        formAlert: true,
       }
 
       router.push('/dashboard')

@@ -1,14 +1,14 @@
 import {
   type Utilization,
   type UtilizationTableFilter,
-  useUtilizationsStore
+  useUtilizationsStore,
 } from '@/stores/utilizations'
 import {
   getDate,
   getDateISO,
   getDateTimeISO,
   getTime24Hour,
-  prepareDateTime
+  prepareDateTime,
 } from '@/utils/helpers/dates'
 import { getOvertimeHoursDecimal, getWorkHoursDecimal } from '@/utils/helpers/attendance'
 import { useTripLocationsStore } from '@/stores/tripLocations'
@@ -25,7 +25,7 @@ export function useUtilizationsFormDialog(
     tableOptions: TableOptions
     tableFilters: UtilizationTableFilter
   },
-  emit: (event: 'update:isDialogVisible', value: boolean) => void
+  emit: (event: 'update:isDialogVisible', value: boolean) => void,
 ) {
   const utilizationsStore = useUtilizationsStore()
   const employeesStore = useEmployeesStore()
@@ -46,7 +46,7 @@ export function useUtilizationsFormDialog(
     overtime_out: '',
     hours: undefined,
     per_hour: undefined,
-    overtime_hours: undefined
+    overtime_hours: undefined,
   }
   const formData = ref<Partial<Utilization>>({ ...formDataDefault })
   const formAction = ref({ ...formActionDefault })
@@ -66,11 +66,11 @@ export function useUtilizationsFormDialog(
             pm_time_in: getTime24Hour(props.itemData.pm_time_in) as string,
             pm_time_out: getTime24Hour(props.itemData.pm_time_out) as string,
             overtime_in: getTime24Hour(props.itemData.overtime_in) as string,
-            overtime_out: getTime24Hour(props.itemData.overtime_out) as string
+            overtime_out: getTime24Hour(props.itemData.overtime_out) as string,
           }
         : { ...formDataDefault }
       isOvertimeApplied.value = formData.value.overtime_hours ? true : false
-    }
+    },
   )
 
   // Actions
@@ -91,7 +91,7 @@ export function useUtilizationsFormDialog(
       pm_time_in: prepareTimeField(formData.value.pm_time_in as string, baseDate as string),
       pm_time_out: prepareTimeField(formData.value.pm_time_out as string, baseDate as string),
       overtime_in: prepareTimeField(formData.value.overtime_in as string, baseDate as string),
-      overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string)
+      overtime_out: prepareTimeField(formData.value.overtime_out as string, baseDate as string),
     }
 
     const { data, error } = isUpdate.value
@@ -103,7 +103,7 @@ export function useUtilizationsFormDialog(
         ...formActionDefault,
         formMessage: error.message,
         formStatus: 400,
-        formProcess: false
+        formProcess: false,
       }
     } else if (data) {
       formAction.value.formMessage = `Successfully ${isUpdate.value ? 'Updated' : 'Added'} Fuel Utilization.`
@@ -147,7 +147,7 @@ export function useUtilizationsFormDialog(
       getDateTimeISO(`${baseDate} ${pm_time_in}`),
       getDateTimeISO(`${baseDate} ${pm_time_out}`),
       false,
-      true
+      true,
     )
   })
 
@@ -160,14 +160,14 @@ export function useUtilizationsFormDialog(
 
     return getOvertimeHoursDecimal(
       getDateTimeISO(`${baseDate} ${overtime_in}`),
-      getDateTimeISO(`${baseDate} ${overtime_out}`)
+      getDateTimeISO(`${baseDate} ${overtime_out}`),
     )
   })
 
   watch(computedWorkHours, (newHours) => (formData.value.hours = newHours), { immediate: true })
 
   watch(computedOvertimeHours, (newHours) => (formData.value.overtime_hours = newHours), {
-    immediate: true
+    immediate: true,
   })
 
   // Expose State and Actions
@@ -181,6 +181,6 @@ export function useUtilizationsFormDialog(
     onFormReset,
     employeesStore,
     unitsStore,
-    tripLocationsStore
+    tripLocationsStore,
   }
 }

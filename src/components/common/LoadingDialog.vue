@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
   progressSize: 80,
   progressWidth: 6,
   progressColor: 'primary',
-  maxTimeout: 60000 // 60 seconds default timeout
+  maxTimeout: 60000, // 60 seconds default timeout
 })
 
 const emit = defineEmits<{
@@ -41,7 +41,7 @@ const dialogVisible = computed({
       hasBeenClosed.value = true
     }
     emit('update:isVisible', value)
-  }
+  },
 })
 
 // Safety timeout to prevent dialog from getting stuck
@@ -101,7 +101,7 @@ watch(
       clearSafetyTimeout()
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // Cleanup on unmount
