@@ -1,56 +1,33 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import LandingLayout from '@/components/landing/LandingLayout.vue'
 import AppAlert from '@/components/common/AppAlert.vue'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { useHeroComputed } from '@/utils/helpers/style'
-import { useForm, type GenericObject } from 'vee-validate'
-import * as yup from 'yup'
-import {
-  useContact,
-  type SendMessageProps,
-} from '@/views/landing/contact/composables/contact.composable'
-
-const schema = yup.object({
-  name: yup.string().required('Name is required'),
-  email: yup.string().email('Invalid email address').required('Email is required'),
-  subject: yup.string().required('Subject is required'),
-  message: yup
-    .string()
-    .min(10, 'Message must be at least 10 characters')
-    .required('Message is required'),
-})
-
-const { handleSubmit, defineField, errors, resetForm } = useForm<SendMessageProps>({
-  validationSchema: schema,
-})
+import { useContact } from '@/views/landing/contact/composables/contact.composable'
 
 const heroComputed = useHeroComputed()
-const { mapRef, lat, lng, mobile, sendMessage } = useContact()
-
-const alertVisible = ref(false)
-const alertMessage = ref('')
-const alertStatus = ref(0)
-
-const onSubmit = handleSubmit(async (values: GenericObject & SendMessageProps) => {
-  const data = await sendMessage(values)
-
-  alertMessage.value = data?.success
-    ? 'Message sent! We will get back to you shortly.'
-    : 'Failed to send message. Please try again later.'
-  alertStatus.value = data?.success ? 200 : 500
-  alertVisible.value = true
-
-  if (data?.success) resetForm()
-})
-
-const isVisible = ref(false)
-
-const [name, nameAttrs] = defineField('name')
-const [email, emailAttrs] = defineField('email')
-const [subject, subjectAttrs] = defineField('subject')
-const [message, messageAttrs] = defineField('message')
+const {
+  mapRef,
+  lat,
+  lng,
+  mobile,
+  isVisible,
+  alertVisible,
+  alertMessage,
+  alertStatus,
+  errors,
+  name,
+  nameAttrs,
+  email,
+  emailAttrs,
+  subject,
+  subjectAttrs,
+  message,
+  messageAttrs,
+  onSubmit,
+} = useContact()
 
 onMounted(() => {
   // trigger hero animation
