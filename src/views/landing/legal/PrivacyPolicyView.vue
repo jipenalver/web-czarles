@@ -2,32 +2,18 @@
 import LandingLayout from '@/components/landing/LandingLayout.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useDisplay } from 'vuetify'
+import { useHeroComputed } from '@/utils/helpers/style'
 
 const isVisible = ref(false)
-const { mobile, mdAndDown, lgAndUp } = useDisplay()
+const { mobile, mdAndDown } = useDisplay()
 
-// Computed properties for responsive classes and sizes
-const heroTitleClass = computed(() =>
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
-)
-
-const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
-
-const contentTitleClass = computed(() => (mobile.value ? 'text-h5' : 'text-h4'))
-
-const sectionTitleClass = computed(() => (mobile.value ? 'text-h6' : 'text-h5'))
+const heroComputed = useHeroComputed()
 
 const subsectionTitleClass = computed(() => (mobile.value ? 'text-subtitle-1' : 'text-h6'))
-
-const bodyTextClass = computed(() =>
-  mobile.value ? 'text-body-2' : mdAndDown.value ? 'text-body-1' : 'text-body-1',
-)
 
 const listTextClass = computed(() =>
   mobile.value ? 'text-caption' : mdAndDown.value ? 'text-body-2' : 'text-body-1',
 )
-
-const cardPadding = computed(() => (mobile.value ? 'pa-8' : 'pa-8'))
 
 const containerPadding = computed(() => (mobile.value ? 'py-8 px-2' : 'py-16 px-4'))
 
@@ -47,7 +33,7 @@ onMounted(() => {
         <div class="hero-content">
           <h1
             :class="[
-              heroTitleClass,
+              heroComputed.titleClass,
               'font-weight-bold mb-4 text-white animate-hero-title',
               { 'animate-hero-title-visible': isVisible },
             ]"
@@ -56,7 +42,7 @@ onMounted(() => {
           </h1>
           <p
             :class="[
-              heroSubtitleClass,
+              heroComputed.subtitleClass,
               'mb-6 text-white font-weight-light animate-hero-subtitle',
               { 'animate-hero-subtitle-visible': isVisible },
             ]"
@@ -81,13 +67,13 @@ onMounted(() => {
       <v-row :class="['d-flex align-center', containerPadding]">
         <v-col cols="12" lg="1"></v-col>
         <v-col cols="12" lg="10">
-          <v-card :class="[cardPadding, 'ma-2 ma-md-4']" outlined>
+          <v-card :class="[heroComputed.cardPadding, 'ma-2 ma-md-4']" outlined>
             <div class="privacy-policy-content">
-              <h2 :class="[contentTitleClass, 'mb-6 text-primary']">Privacy Policy</h2>
+              <h2 :class="[heroComputed.contentTitleClass, 'mb-6 text-primary']">Privacy Policy</h2>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-4 text-primary']">Introduction</h3>
-                <p :class="[bodyTextClass, 'mb-4']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Introduction</h3>
+                <p :class="[heroComputed.bodyTextClass, 'mb-4']">
                   Czarles ("we," "our," or "us") is committed to protecting your privacy. This
                   Privacy Policy explains how we collect, use, disclose, and safeguard your
                   information when you use our employee attendance management mobile application
@@ -96,12 +82,12 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-4 text-primary']">Information We Collect</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Information We Collect</h3>
 
                 <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">
                   Personal Information
                 </h4>
-                <p :class="[bodyTextClass, 'mb-3']">
+                <p :class="[heroComputed.bodyTextClass, 'mb-3']">
                   We collect the following personal information:
                 </p>
                 <ul :class="[listTextClass, 'mb-4']">
@@ -165,10 +151,10 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">How We Use Your Information</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">How We Use Your Information</h3>
                 <p class="mb-3">We use your information for the following purposes:</p>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Core Functionality</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Core Functionality</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Attendance Tracking:</strong> Record and manage your work attendance
@@ -191,7 +177,7 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Security and Compliance</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Security and Compliance</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Fraud Prevention:</strong> Detect fake locations and prevent attendance
@@ -207,7 +193,7 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Service Improvement</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Service Improvement</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Performance Optimization:</strong> Improve app functionality and user
@@ -224,9 +210,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Information Sharing and Disclosure</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Information Sharing and Disclosure</h3>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Employer Access</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Employer Access</h4>
                 <ul class="mb-4">
                   <li>
                     Your employer has access to attendance data, including clock-in/out times,
@@ -239,7 +225,7 @@ onMounted(() => {
                   <li>Performance and attendance analytics may be provided to management</li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Third-Party Services</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Third-Party Services</h4>
                 <p class="mb-3">We use the following third-party services:</p>
                 <ul class="mb-4">
                   <li>
@@ -252,7 +238,7 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Legal Requirements</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Legal Requirements</h4>
                 <p class="mb-3">We may disclose your information when required by law or to:</p>
                 <ul class="mb-4">
                   <li>Comply with legal processes or government requests</li>
@@ -263,9 +249,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Data Storage and Security</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Data Storage and Security</h3>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Security Measures</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Security Measures</h4>
                 <ul class="mb-4">
                   <li><strong>Encryption:</strong> All data is encrypted in transit and at rest</li>
                   <li>
@@ -282,7 +268,7 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Data Storage</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Data Storage</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Cloud Storage:</strong> Data is securely stored on Supabase servers
@@ -297,7 +283,7 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Data Retention</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Data Retention</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Active Employment:</strong> Data retained throughout your employment
@@ -315,9 +301,9 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Your Rights and Choices</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Your Rights and Choices</h3>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Access and Control</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Access and Control</h4>
                 <ul class="mb-4">
                   <li><strong>Data Access:</strong> Request a copy of your personal data</li>
                   <li>
@@ -330,7 +316,7 @@ onMounted(() => {
                   <li><strong>Data Portability:</strong> Request your data in a portable format</li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Privacy Controls</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Privacy Controls</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Location Services:</strong> You can disable location services, but this
@@ -346,7 +332,7 @@ onMounted(() => {
                   </li>
                 </ul>
 
-                <h4 class="text-h6 mb-3 font-weight-bold">Opt-Out Options</h4>
+                <h4 :class="[subsectionTitleClass, 'mb-3 font-weight-bold']">Opt-Out Options</h4>
                 <ul class="mb-4">
                   <li>
                     <strong>Data Processing:</strong> Contact your employer to opt-out of certain
@@ -360,7 +346,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">International Data Transfers</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">International Data Transfers</h3>
                 <p class="mb-4">
                   Your information may be transferred to and processed in countries other than your
                   country of residence. We ensure appropriate safeguards are in place to protect
@@ -369,7 +355,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Changes to This Privacy Policy</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Changes to This Privacy Policy</h3>
                 <p class="mb-3">
                   We may update this Privacy Policy from time to time. We will notify you of any
                   material changes by:
@@ -386,7 +372,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Third-Party Links and Services</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Third-Party Links and Services</h3>
                 <p class="mb-4">
                   Our App may contain links to third-party websites or services. We are not
                   responsible for the privacy practices of these third parties. We encourage you to
@@ -395,7 +381,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Data Breach Notification</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Data Breach Notification</h3>
                 <p class="mb-3">
                   In the event of a data breach that may affect your personal information, we will:
                 </p>
@@ -408,7 +394,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Contact Information</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Contact Information</h3>
                 <p class="mb-3">
                   If you have questions, concerns, or requests regarding this Privacy Policy or your
                   personal information, please contact us:
@@ -428,7 +414,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
                   Legal Basis for Processing (GDPR Compliance)
                 </h3>
                 <p class="mb-3">
@@ -450,7 +436,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">
                   California Privacy Rights (CCPA Compliance)
                 </h3>
                 <p class="mb-3">If you are a California resident, you have the right to:</p>
@@ -466,7 +452,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h5 mb-4 text-primary">Compliance and Certifications</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-4 text-primary']">Compliance and Certifications</h3>
                 <p class="mb-3">This App complies with applicable privacy laws including:</p>
                 <ul class="mb-4">
                   <li>General Data Protection Regulation (GDPR)</li>

@@ -2,30 +2,16 @@
 import LandingLayout from '@/components/landing/LandingLayout.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useDisplay } from 'vuetify'
+import { useHeroComputed } from '@/utils/helpers/style'
 
 const isVisible = ref(false)
-const { mobile, mdAndDown, lgAndUp } = useDisplay()
+const { mobile, mdAndDown } = useDisplay()
 
-// Computed properties for responsive classes and sizes
-const heroTitleClass = computed(() =>
-  mobile.value ? 'text-h4' : lgAndUp.value ? 'text-h2' : 'text-h3',
-)
-
-const heroSubtitleClass = computed(() => (mobile.value ? 'text-body-1' : 'text-h6'))
-
-const contentTitleClass = computed(() => (mobile.value ? 'text-h5' : 'text-h4'))
-
-const sectionTitleClass = computed(() => (mobile.value ? 'text-subtitle-1' : 'text-h6'))
-
-const bodyTextClass = computed(() =>
-  mobile.value ? 'text-body-2' : mdAndDown.value ? 'text-body-1' : 'text-body-1',
-)
+const heroComputed = useHeroComputed()
 
 const listTextClass = computed(() =>
   mobile.value ? 'text-caption' : mdAndDown.value ? 'text-body-2' : 'text-body-1',
 )
-
-const cardPadding = computed(() => (mobile.value ? 'pa-8' : 'pa-8'))
 
 const containerPadding = computed(() => (mobile.value ? 'py-8 px-2' : 'py-16 px-4'))
 
@@ -45,7 +31,7 @@ onMounted(() => {
         <div class="hero-content">
           <h1
             :class="[
-              heroTitleClass,
+              heroComputed.titleClass,
               'font-weight-bold mb-4 text-white animate-hero-title',
               { 'animate-hero-title-visible': isVisible },
             ]"
@@ -54,7 +40,7 @@ onMounted(() => {
           </h1>
           <p
             :class="[
-              heroSubtitleClass,
+              heroComputed.subtitleClass,
               'mb-6 text-white font-weight-light animate-hero-subtitle',
               { 'animate-hero-subtitle-visible': isVisible },
             ]"
@@ -79,17 +65,17 @@ onMounted(() => {
       <v-row :class="['d-flex align-center', containerPadding]">
         <v-col cols="12" lg="1"></v-col>
         <v-col cols="12" lg="10">
-          <v-card :class="[cardPadding, 'ma-2 ma-md-4']" outlined>
+          <v-card :class="[heroComputed.cardPadding, 'ma-2 ma-md-4']" outlined>
             <div class="terms-conditions-content">
-              <h2 :class="[contentTitleClass, 'mb-6 text-primary']">Terms and Conditions</h2>
+              <h2 :class="[heroComputed.contentTitleClass, 'mb-6 text-primary']">Terms and Conditions</h2>
 
-              <p :class="[bodyTextClass, 'mb-6']"><strong>Last updated:</strong> August 25, 2025</p>
+              <p :class="[heroComputed.bodyTextClass, 'mb-6']"><strong>Last updated:</strong> August 25, 2025</p>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   1. Acceptance of Terms
                 </h3>
-                <p :class="[bodyTextClass, 'mb-4']">
+                <p :class="[heroComputed.bodyTextClass, 'mb-4']">
                   By downloading, installing, or using the Czarles Mobile App ("the App"), you agree
                   to be bound by these Terms and Conditions ("Terms"). If you do not agree to these
                   Terms, do not use the App.
@@ -97,10 +83,10 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   2. Description of Service
                 </h3>
-                <p :class="[bodyTextClass, 'mb-3']">
+                <p :class="[heroComputed.bodyTextClass, 'mb-3']">
                   The Czarles Mobile App is an employee attendance management application that
                   provides:
                 </p>
@@ -114,7 +100,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   3. User Accounts and Authentication
                 </h3>
                 <ul :class="[listTextClass, 'mb-4']">
@@ -132,10 +118,10 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   4. Acceptable Use
                 </h3>
-                <p :class="[bodyTextClass, 'mb-3']">
+                <p :class="[heroComputed.bodyTextClass, 'mb-3']">
                   You agree to use the App only for legitimate attendance tracking purposes. You
                   must NOT:
                 </p>
@@ -150,7 +136,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   5. Location Services and Data Collection
                 </h3>
                 <ul :class="[listTextClass, 'mb-4']">
@@ -170,7 +156,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   6. Camera and Image Capture
                 </h3>
                 <ul :class="[listTextClass, 'mb-4']">
@@ -184,7 +170,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   7. Offline Functionality
                 </h3>
                 <ul :class="[listTextClass, 'mb-4']">
@@ -200,7 +186,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 :class="[sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   8. Data Accuracy and Integrity
                 </h3>
                 <ul :class="[listTextClass, 'mb-4']">
@@ -215,7 +201,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   9. Intellectual Property Rights
                 </h3>
                 <ul class="mb-4">
@@ -229,7 +215,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   10. Limitation of Liability
                 </h3>
                 <ul class="mb-4">
@@ -245,7 +231,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">11. Service Availability</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">11. Service Availability</h3>
                 <ul class="mb-4">
                   <li>
                     We strive to maintain App availability but do not guarantee uninterrupted
@@ -259,7 +245,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   12. Updates and Modifications
                 </h3>
                 <ul class="mb-4">
@@ -270,7 +256,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">13. Account Termination</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">13. Account Termination</h3>
                 <p class="mb-3">We may suspend or terminate your account if you:</p>
                 <ul class="mb-4">
                   <li>Violate these Terms and Conditions</li>
@@ -281,7 +267,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">14. Third-Party Services</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">14. Third-Party Services</h3>
                 <ul class="mb-4">
                   <li>
                     The App may integrate with third-party services (mapping, cloud storage, etc.)
@@ -294,7 +280,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">15. Compliance with Laws</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">15. Compliance with Laws</h3>
                 <ul class="mb-4">
                   <li>
                     You must comply with all applicable local, state, and federal laws while using
@@ -308,7 +294,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">
                   16. Data Retention and Deletion
                 </h3>
                 <ul class="mb-4">
@@ -325,7 +311,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">17. Support and Contact</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">17. Support and Contact</h3>
                 <p class="mb-3">For technical support or questions about these Terms:</p>
                 <ul class="mb-4">
                   <li><strong>Email:</strong> czarlesconst0897@gmail.com</li>
@@ -335,7 +321,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">18. Dispute Resolution</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">18. Dispute Resolution</h3>
                 <ul class="mb-4">
                   <li>
                     Any disputes will be resolved through binding arbitration in [JURISDICTION]
@@ -346,7 +332,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">19. Severability</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">19. Severability</h3>
                 <p class="mb-4">
                   If any provision of these Terms is found to be unenforceable, the remaining
                   provisions will continue in full force and effect.
@@ -354,7 +340,7 @@ onMounted(() => {
               </section>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">20. Entire Agreement</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">20. Entire Agreement</h3>
                 <p class="mb-4">
                   These Terms, along with our Privacy Policy, constitute the entire agreement
                   between you and C'Zarles Construction and Supplies regarding the use of the App.
@@ -364,7 +350,7 @@ onMounted(() => {
               <v-divider class="my-6"></v-divider>
 
               <section class="mb-6">
-                <h3 class="text-h6 mb-3 font-weight-bold text-primary">Company Information</h3>
+                <h3 :class="[heroComputed.sectionTitleClass, 'mb-3 font-weight-bold text-primary']">Company Information</h3>
                 <ul class="mb-4">
                   <li><strong>Company Name:</strong> C'Zarles Construction and Supplies</li>
                   <li><strong>Address:</strong> 360 R. Calo St, Butuan City, Agusan Del Norte</li>
