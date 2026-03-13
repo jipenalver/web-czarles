@@ -12,7 +12,7 @@ const getFieldMinutes = (timeIn: string | Date | null, timeOut: string | Date | 
   try {
     // Handle null or undefined inputs
     if (!timeIn || !timeOut) {
-      console.warn('[getFieldMinutes] Missing timeIn or timeOut:', { timeIn, timeOut })
+     /*  console.warn('[getFieldMinutes] Missing timeIn or timeOut:', { timeIn, timeOut }) */
       return 0
     }
 
