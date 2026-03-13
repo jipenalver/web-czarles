@@ -1,4 +1,8 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOvertimeHours } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import {
+  getEmployeeAttendanceById,
+  getEmployeeAttendanceForEmployee55,
+  computeOvertimeHours,
+} from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 
 /**
  * Calculate client-side overtime hours using PayrollPrint.vue logic
@@ -9,13 +13,23 @@ export async function calculateOvertimeHours(
   dateStringForCalculation: string,
   fromDate?: string,
   toDate?: string,
-  isAdmin: boolean = false
+  isAdmin: boolean = false,
 ): Promise<number> {
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
     const attendances = isAdmin
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
-      : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
+      ? await getEmployeeAttendanceForEmployee55(
+          employeeId,
+          dateStringForCalculation.substring(0, 7),
+          fromDate,
+          toDate,
+        )
+      : await getEmployeeAttendanceById(
+          employeeId,
+          dateStringForCalculation.substring(0, 7),
+          fromDate,
+          toDate,
+        )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       return 0

@@ -1,4 +1,11 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, computeOverallOvertimeCalculation, getExcessMinutes, getUndertimeMinutes, type AttendanceRecord } from './computation/computation'
+import {
+  getEmployeeAttendanceById,
+  getEmployeeAttendanceForEmployee55,
+  computeOverallOvertimeCalculation,
+  getExcessMinutes,
+  getUndertimeMinutes,
+  type AttendanceRecord,
+} from './computation/computation'
 import { getPaidLeaveDaysForMonth, isFridayOrSaturday } from './computation/attendance'
 import { fetchHolidaysByDateString, fetchHolidaysByRange } from './computation/holidays'
 import { useEmployeesStore } from '@/stores/employees'
@@ -22,8 +29,6 @@ export interface TableData {
   other_deductions?: number
 }
 
-
-
 export function usePayrollComputation(
   dailyRate: Ref<number>,
   grossSalary: Ref<number>,
@@ -45,7 +50,12 @@ export function usePayrollComputation(
       fromDate = localStorage.getItem('czarles_payroll_fromDate') || undefined
       toDate = localStorage.getItem('czarles_payroll_toDate') || undefined
     }
-    const overtimeResult = await computeOverallOvertimeCalculation(employeeId, dateString, fromDate, toDate)
+    const overtimeResult = await computeOverallOvertimeCalculation(
+      employeeId,
+      dateString,
+      fromDate,
+      toDate,
+    )
     // console.log(`[OVERTIME CALCULATION] Employee ${employeeId}:`, {
     //   dateString,
     //   fromDate,
@@ -158,7 +168,7 @@ export function usePayrollComputation(
         ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, fromDate, toDate)
         : await getEmployeeAttendanceById(employeeId, usedDateString, fromDate, toDate)
 
-          // Store attendance records for later use
+      // Store attendance records for later use
       attendanceRecords.value = Array.isArray(attendances) ? attendances : []
 
       // Debug: Log main calculation data
@@ -174,13 +184,16 @@ export function usePayrollComputation(
         }
 
         // Get paid leave days para sa month
-        const paidLeaveDays = await getPaidLeaveDaysForMonth(usedDateString, employeeId, fromDateForAttendance, toDateForAttendance)
+        const paidLeaveDays = await getPaidLeaveDaysForMonth(
+          usedDateString,
+          employeeId,
+          fromDateForAttendance,
+          toDateForAttendance,
+        )
         // console.log(
         //   `[computeRegularWorkTotal] Paid leave days for employee ${employeeId}:`,
         //   paidLeaveDays,
         // )
-
-
 
         // Use unified late/undertime calculation for both field staff and office staff
         // This logic matches the AttendanceDaysTooltip.vue calculation
@@ -189,7 +202,7 @@ export function usePayrollComputation(
         let totalUndertimeAM = 0
         let totalUndertimePM = 0
 
-        attendances.forEach((attendance, /* index */) => {
+        attendances.forEach((attendance /* index */) => {
           const attendanceDate = attendance.attendance_date
           const isFriSat = attendanceDate ? isFridayOrSaturday(attendanceDate) : false
           const isFieldStaff = emp?.is_field_staff || false
@@ -271,10 +284,13 @@ export function usePayrollComputation(
 
         // Create a Set of Regular Holiday dates for efficient lookup
         const regularHolidayDates = new Set(
-          holidays.filter(h => h.type?.toUpperCase().includes('RH')).map(h => {
-            if (!h.holiday_at) return null
-            return new Date(h.holiday_at).toISOString().split('T')[0]
-          }).filter(Boolean)
+          holidays
+            .filter((h) => h.type?.toUpperCase().includes('RH'))
+            .map((h) => {
+              if (!h.holiday_at) return null
+              return new Date(h.holiday_at).toISOString().split('T')[0]
+            })
+            .filter(Boolean),
         )
 
         attendances.forEach((attendance) => {
@@ -298,7 +314,9 @@ export function usePayrollComputation(
 
           // Check if this attendance date is a Regular Holiday
           const attendanceDate = attendance.attendance_date
-          const attDate = attendanceDate ? new Date(attendanceDate).toISOString().split('T')[0] : null
+          const attDate = attendanceDate
+            ? new Date(attendanceDate).toISOString().split('T')[0]
+            : null
           const isRegularHoliday = attDate ? regularHolidayDates.has(attDate) : false
 
           // For Regular Holidays where employee actually worked: Count in regular work

@@ -11,7 +11,7 @@ export async function getCashAdjustmentsForEmployee(
   selectedMonth: string,
   selectedYear: number,
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
 ): Promise<{ addOnAmount: number; deductionAmount: number }> {
   try {
     let startDateString: string
@@ -24,8 +24,18 @@ export async function getCashAdjustmentsForEmployee(
     } else {
       // Convert month name to month index
       const monthIndex = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
       ].indexOf(selectedMonth)
 
       if (monthIndex === -1) {
@@ -73,7 +83,7 @@ export async function getCashAdjustmentsForEmployee(
 
     return {
       addOnAmount: Number(addOnAmount.toFixed(2)),
-      deductionAmount: Number(deductionAmount.toFixed(2))
+      deductionAmount: Number(deductionAmount.toFixed(2)),
     }
   } catch (error) {
     console.error('[getCashAdjustmentsForEmployee] Unexpected error:', error)

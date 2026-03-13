@@ -1,4 +1,8 @@
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, type AttendanceRecord } from './computation'
+import {
+  getEmployeeAttendanceById,
+  getEmployeeAttendanceForEmployee55,
+  type AttendanceRecord,
+} from './computation'
 // this script is naka connect sa computation.ts file IMPORTANT
 // 👉 Get total paid leave days para sa employee sa specific month
 // 👉 Get Field minutes worked (handles overnight shifts) - Time-only calculation
@@ -183,9 +187,10 @@ export const getTotalMinutesForMonth = async (
     // Fetch tanan attendance records para sa specific month
     // Use special function for employee 55, regular function for others
     // If custom date range is provided, pass it to the query function
-    const attendances = employeeId === 55
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
-      : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
+    const attendances =
+      employeeId === 55
+        ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
+        : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
 
     // console.log(`[getTotalMinutesForMonth] Debug info:`, {
     //   employeeId,
@@ -205,8 +210,8 @@ export const getTotalMinutesForMonth = async (
     let totalMonthMinutes = 0
 
     // Process each attendance record using getTotalMinutes
-    attendances.forEach((attendance, /* index */) => {
-     /*  console.log(`[getTotalMinutesForMonth] Processing attendance ${index + 1}:`, {
+    attendances.forEach((attendance /* index */) => {
+      /*  console.log(`[getTotalMinutesForMonth] Processing attendance ${index + 1}:`, {
          am_time_in: attendance.am_time_in,
          am_time_out: attendance.am_time_out,
          pm_time_in: attendance.pm_time_in,
@@ -245,9 +250,10 @@ export const getPaidLeaveDaysForMonth = async (
   try {
     // Fetch tanan attendance records para sa specific month
     // Use special function for employee 55, regular function for others
-    const attendancesResult = employeeId === 55
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
-      : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
+    const attendancesResult =
+      employeeId === 55
+        ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery)
+        : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
     const attendances: AttendanceRecord[] = attendancesResult || []
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -259,7 +265,7 @@ export const getPaidLeaveDaysForMonth = async (
     // Simple iteration: if is_leave_with_pay is true, count it and use am_time_in as day indicator
     attendances.forEach((attendance) => {
       // Console log para check kung may data ang is_leave_with_pay
-     /*  console.log(`[getPaidLeaveDaysForMonth] Checking attendance record:`, {
+      /*  console.log(`[getPaidLeaveDaysForMonth] Checking attendance record:`, {
         am_time_in: attendance.am_time_in,
         is_leave_with_pay: attendance.is_leave_with_pay,
         has_leave_data:
@@ -269,7 +275,7 @@ export const getPaidLeaveDaysForMonth = async (
       if (attendance.is_leave_with_pay === true) {
         paidLeaveDaysCounter++
         // Use am_time_in as day indicator para sa paid leave
-       /*  console.log(`[getPaidLeaveDaysForMonth] Paid leave day found:`, {
+        /*  console.log(`[getPaidLeaveDaysForMonth] Paid leave day found:`, {
           day_indicator: attendance.am_time_in,
           leave_type: attendance.leave_type,
           leave_reason: attendance.leave_reason,
@@ -321,9 +327,15 @@ export const getSundayDutyRecordsForMonth = async (
   try {
     // Fetch tanan attendance records para sa specific month
     // Use special function for employee 55, regular function for others
-    const attendancesResult = employeeId === 55
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForQuery, fromDateISO, toDateISO)
-      : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
+    const attendancesResult =
+      employeeId === 55
+        ? await getEmployeeAttendanceForEmployee55(
+            employeeId,
+            dateStringForQuery,
+            fromDateISO,
+            toDateISO,
+          )
+        : await getEmployeeAttendanceById(employeeId, dateStringForQuery, fromDateISO, toDateISO)
     const attendances: AttendanceRecord[] = attendancesResult || []
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
@@ -353,7 +365,7 @@ export const getSundayDutyRecordsForMonth = async (
           if (attendance_fraction > 0) {
             sundayDutyRecords.push({
               date: attendance.date,
-              attendance_fraction
+              attendance_fraction,
             })
           }
 
@@ -369,7 +381,7 @@ export const getSundayDutyRecordsForMonth = async (
       }
     })
 
- /*    console.log(
+    /*    console.log(
       `[getSundayDutyRecordsForMonth] Sunday duty records for employee ${employeeId} in month ${dateStringForQuery}:`,
       sundayDutyRecords,
     ) */
@@ -388,7 +400,12 @@ export const getSundayDutyDaysForMonth = async (
   toDateISO?: string, // Optional: Custom end date for crossmonth (YYYY-MM-DD)
 ): Promise<number> => {
   try {
-    const sundayRecords = await getSundayDutyRecordsForMonth(filterDateString, employeeId, fromDateISO, toDateISO)
+    const sundayRecords = await getSundayDutyRecordsForMonth(
+      filterDateString,
+      employeeId,
+      fromDateISO,
+      toDateISO,
+    )
 
     // Sum up all attendance fractions to get total days
     const totalDays = sundayRecords.reduce((sum, record) => sum + record.attendance_fraction, 0)

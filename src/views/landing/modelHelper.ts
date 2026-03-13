@@ -2,7 +2,7 @@ export function startOrbitLoop(
   setCameraOrbit: (s: string) => void,
   orbitA: string,
   orbitB: string,
-  duration = 3000
+  duration = 3000,
 ) {
   let rafId: number | undefined
   let stopped = false
@@ -68,7 +68,7 @@ export type OrbitController = ReturnType<typeof startOrbitLoop>
 export function attachOrbitToScroll(
   setCameraOrbit: (s: string) => void,
   orbitA: string,
-  orbitB: string
+  orbitB: string,
 ) {
   let rafId: number | undefined
   let lastKnownScroll = 0

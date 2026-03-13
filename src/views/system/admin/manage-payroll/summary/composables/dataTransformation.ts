@@ -46,10 +46,23 @@ export function transformPayrollData(data: PayrollDatabaseRow[]): MonthlyPayroll
 /**
  * Create date string for calculations in YYYY-MM-01 format
  */
-export function createDateStringForCalculation(selectedMonth: string, selectedYear: number): string {
+export function createDateStringForCalculation(
+  selectedMonth: string,
+  selectedYear: number,
+): string {
   const monthIndex = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ].indexOf(selectedMonth)
 
   return `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-01`
@@ -58,13 +71,14 @@ export function createDateStringForCalculation(selectedMonth: string, selectedYe
 /**
  * Separate employees by field staff status
  */
-export function separateEmployeesByType(
-  employees: MonthlyPayrollRow[]
-): { fieldStaff: MonthlyPayrollRow[]; nonFieldStaff: MonthlyPayrollRow[] } {
+export function separateEmployeesByType(employees: MonthlyPayrollRow[]): {
+  fieldStaff: MonthlyPayrollRow[]
+  nonFieldStaff: MonthlyPayrollRow[]
+} {
   const fieldStaff: MonthlyPayrollRow[] = []
   const nonFieldStaff: MonthlyPayrollRow[] = []
 
-  employees.forEach(employee => {
+  employees.forEach((employee) => {
     if (employee.is_field_staff) {
       fieldStaff.push(employee)
     } else {
