@@ -58,9 +58,9 @@ export async function countActualAttendanceOnRegularHolidays(
 
         if (hasAnyAttendance) {
           actualRHAttendanceCount += 1
-          console.log(
+         /*  console.log(
             `[RH Actual Attendance] Employee ${employeeId} worked on Regular Holiday: ${attendanceDate}`,
-          )
+          ) */
         }
       }
     })
@@ -113,10 +113,10 @@ export async function calculateDaysWorked(
     }
 
     // Count Regular Holidays in the period - ALL employees get these days
-    const regularHolidaysCount = holidays.filter((h) => h.type?.toUpperCase().includes('RH')).length
+    /* const regularHolidaysCount = holidays.filter((h) => h.type?.toUpperCase().includes('RH')).length
     console.log(
       `[RH Days] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`,
-    )
+    ) */
 
     let employeePresentDays = 0
 
