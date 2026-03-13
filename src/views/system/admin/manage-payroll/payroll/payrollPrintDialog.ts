@@ -63,9 +63,11 @@ export function usePayrollPrintDialog(
     // If in dark mode, temporarily switch to light mode for printing
     if (isDarkMode) {
       // Trigger theme toggle by simulating click on theme button
-      const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+      const themeToggleButton = document.querySelector(
+        'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+      )
       if (themeToggleButton) {
-        (themeToggleButton as HTMLButtonElement).click()
+        ;(themeToggleButton as HTMLButtonElement).click()
       } else {
         // Fallback: directly update localStorage and trigger theme change
         localStorage.setItem('theme', 'light')
@@ -76,7 +78,7 @@ export function usePayrollPrintDialog(
       }
 
       // Wait a moment for theme to apply
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
 
     // Get the payroll element na naka-contain sa both full ug mini payroll
@@ -119,7 +121,6 @@ export function usePayrollPrintDialog(
     }
 
     try {
-
       // Inject a print-specific stylesheet to reduce font sizes for the generated PDF
       const printStyleId = 'pdf-print-styles'
       let styleEl = document.getElementById(printStyleId) as HTMLStyleElement | null
@@ -207,9 +208,11 @@ export function usePayrollPrintDialog(
       // Restore original theme only if we changed it (was in dark mode)
       if (isDarkMode) {
         // Trigger theme toggle again to restore dark mode
-        const themeToggleButton = document.querySelector('button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)')
+        const themeToggleButton = document.querySelector(
+          'button[aria-label*="weather"], button[title*="theme"], .v-btn:has(.mdi-weather-night), .v-btn:has(.mdi-weather-sunny)',
+        )
         if (themeToggleButton) {
-          (themeToggleButton as HTMLButtonElement).click()
+          ;(themeToggleButton as HTMLButtonElement).click()
         } else {
           // Fallback: directly restore dark theme
           localStorage.setItem('theme', 'dark')
@@ -219,17 +222,17 @@ export function usePayrollPrintDialog(
           }
         }
       }
-  // Remove PDF-specific classes so UI returns to normal
-  if (payrollElement) payrollElement.classList.remove('pdf-print-active')
-  const vAppElm2 = document.querySelector('.v-application') as HTMLElement | null
-  if (vAppElm2) vAppElm2.classList.remove('pdf-print-active')
+      // Remove PDF-specific classes so UI returns to normal
+      if (payrollElement) payrollElement.classList.remove('pdf-print-active')
+      const vAppElm2 = document.querySelector('.v-application') as HTMLElement | null
+      if (vAppElm2) vAppElm2.classList.remove('pdf-print-active')
 
-  // Remove the injected print stylesheet
-  const injected = document.getElementById('pdf-print-styles')
-  if (injected && injected.parentNode) injected.parentNode.removeChild(injected)
+      // Remove the injected print stylesheet
+      const injected = document.getElementById('pdf-print-styles')
+      if (injected && injected.parentNode) injected.parentNode.removeChild(injected)
 
-  // Reset printing state
-  isPrinting.value = false
+      // Reset printing state
+      isPrinting.value = false
     }
   }
 

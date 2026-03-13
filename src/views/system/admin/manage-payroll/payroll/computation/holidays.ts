@@ -72,9 +72,9 @@ export async function fetchHolidaysByDateString(
       return {
         ...holiday,
         attendance_fraction,
-        hasActualAttendance
+        hasActualAttendance,
       } as HolidayWithAttendance
-    })
+    }),
   )
 
   return holidaysWithAttendance
@@ -140,9 +140,9 @@ export async function fetchHolidaysByRange(
       return {
         ...holiday,
         attendance_fraction,
-        hasActualAttendance
+        hasActualAttendance,
       } as HolidayWithAttendance
-    })
+    }),
   )
 
   return holidaysWithAttendance

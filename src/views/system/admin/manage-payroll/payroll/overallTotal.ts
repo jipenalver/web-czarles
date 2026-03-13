@@ -58,10 +58,9 @@ export function useOverallEarningsTotal(
           additionalMultiplier = 0.3 // Local Holiday - 30% additional (130% total - 100% already in regular)
         else if (type.includes('ch'))
           additionalMultiplier = 0.0 // Company Holiday - 0% additional (100% already in regular)
-        else if (type.includes('swh'))
-          additionalMultiplier = 0.3 // Special Working Holiday - 30% additional (130% total - 100% already in regular)
+        else if (type.includes('swh')) additionalMultiplier = 0.3 // Special Working Holiday - 30% additional (130% total - 100% already in regular)
 
-        return sum + (baseRate * additionalMultiplier * attendanceFraction)
+        return sum + baseRate * additionalMultiplier * attendanceFraction
       }, 0) || 0
     total += holidayEarnings
 
@@ -149,7 +148,7 @@ export function useEarningsBreakdown(
           multiplier = 1.0 // Company Holiday - 100%
         else if (type.includes('swh')) multiplier = 1.3 // Special Working Holiday - 130%
 
-        return sum + (baseRate * multiplier * attendanceFraction)
+        return sum + baseRate * multiplier * attendanceFraction
       }, 0) || 0
 
     // Overtime earnings
@@ -193,7 +192,8 @@ export function useNetSalaryCalculation(
     // Fixed deductions
     const deductions = {
       late: showLateDeduction.value ? Number(lateDeduction.value) || 0 : 0,
-      undertime: showLateDeduction.value && undertimeDeduction ? Number(undertimeDeduction.value) || 0 : 0,
+      undertime:
+        showLateDeduction.value && undertimeDeduction ? Number(undertimeDeduction.value) || 0 : 0,
       cashAdvance: cashAdvance ? Number(cashAdvance.value) || 0 : 0,
     }
 

@@ -67,7 +67,11 @@ const formattedPeriod = computed(() => {
         const start = new Date(from)
         const end = new Date(to)
         if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-          const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+          const opts: Intl.DateTimeFormatOptions = {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          }
           return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', opts)}`
         }
       }
@@ -165,11 +169,11 @@ async function fetchCashAdjustmentsDeductions(filterDateString: string, employee
   // Fetch using store with filters
   await cashAdjustmentsStore.getCashAdjustmentsExport(
     { page: 1, itemsPerPage: -1, sortBy: [] },
-    { employee_id: employeeId, adjustment_at: adjustmentDates }
+    { employee_id: employeeId, adjustment_at: adjustmentDates },
   )
 
   // Filter for deductions only (is_deduction = true)
-  return cashAdjustmentsStore.cashAdjustmentsExport.filter(adj => adj.is_deduction === true)
+  return cashAdjustmentsStore.cashAdjustmentsExport.filter((adj) => adj.is_deduction === true)
 }
 
 // Watch for employeeId changes to fetch deductions
@@ -188,10 +192,13 @@ watch(
     if (typeof employeeId === 'number' && filterDateString) {
       // kuhaon ang cash advances ug cash adjustments para sa employee ug payroll month
       const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
-      const fetchedCashAdjustments = await fetchCashAdjustmentsDeductions(filterDateString as string, employeeId)
+      const fetchedCashAdjustments = await fetchCashAdjustmentsDeductions(
+        filterDateString as string,
+        employeeId,
+      )
 
       // Filter out dummy entries with amount: 0
-      cashAdvances.value = fetchedCashAdvances.filter(ca => ca.amount && ca.amount > 0)
+      cashAdvances.value = fetchedCashAdvances.filter((ca) => ca.amount && ca.amount > 0)
       cashAdjustments.value = fetchedCashAdjustments
     } else {
       cashAdvances.value = []
@@ -294,8 +301,8 @@ const overallEarningsTotal = useOverallEarningsTotal(
 const formatSundayDutyText = computed(() => {
   if (!sundayDutyRecords.value || sundayDutyRecords.value.length === 0) return ''
 
-  const fullDays = sundayDutyRecords.value.filter(r => r.attendance_fraction === 1.0).length
-  const halfDays = sundayDutyRecords.value.filter(r => r.attendance_fraction === 0.5).length
+  const fullDays = sundayDutyRecords.value.filter((r) => r.attendance_fraction === 1.0).length
+  const halfDays = sundayDutyRecords.value.filter((r) => r.attendance_fraction === 0.5).length
 
   const parts: string[] = []
   if (fullDays > 0) {
@@ -358,7 +365,15 @@ async function updateOverallOvertime() {
 
 // Enhanced mounted hook
 onMounted(async () => {
-  await Promise.all([loadTrips(), fetchEmployeeHolidays(), updateOverallOvertime(), loadAllowances(), loadUtilizations(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
+  await Promise.all([
+    loadTrips(),
+    fetchEmployeeHolidays(),
+    updateOverallOvertime(),
+    loadAllowances(),
+    loadUtilizations(),
+    loadCashAdjustments(),
+    loadSundayDuty(dailyRate.value),
+  ])
   recalculateEarnings()
 })
 
@@ -390,7 +405,15 @@ watch(
     () => props.payrollData?.year,
   ],
   async () => {
-    await Promise.all([updateOverallOvertime(), loadTrips(), fetchEmployeeHolidays(), loadAllowances(), loadUtilizations(), loadCashAdjustments(), loadSundayDuty(dailyRate.value)])
+    await Promise.all([
+      updateOverallOvertime(),
+      loadTrips(),
+      fetchEmployeeHolidays(),
+      loadAllowances(),
+      loadUtilizations(),
+      loadCashAdjustments(),
+      loadSundayDuty(dailyRate.value),
+    ])
     recalculateEarnings()
   },
   { deep: true },
@@ -466,14 +489,27 @@ const displayableHolidays = computed(() => {
           <v-col cols="6" class="text-caption pa-1">Monthly Trippings</v-col>
           <v-col cols="3" class="pa-1"></v-col>
           <v-col cols="3" class="text-body-2 text-end pa-1">
-            {{ safeCurrencyFormat(tripsStore.trips.reduce((total, trip) => total + ((trip.per_trip ?? 0) * (trip.trip_no ?? 1)), 0), formatCurrency) }}
+            {{
+              safeCurrencyFormat(
+                tripsStore.trips.reduce(
+                  (total, trip) => total + (trip.per_trip ?? 0) * (trip.trip_no ?? 1),
+                  0,
+                ),
+                formatCurrency,
+              )
+            }}
           </v-col>
         </v-row>
       </template>
 
       <!-- Holiday Work (All Types) -->
       <template v-if="displayableHolidays.length > 0">
-        <v-row dense class="mb-1" v-for="holiday in displayableHolidays" :key="'holiday-' + holiday.id">
+        <v-row
+          dense
+          class="mb-1"
+          v-for="holiday in displayableHolidays"
+          :key="'holiday-' + holiday.id"
+        >
           <v-col cols="6" class="text-caption pa-1">
             {{ holiday.name }} ({{ getHolidayTypeName(holiday.type || '') }})
           </v-col>
@@ -540,26 +576,43 @@ const displayableHolidays = computed(() => {
 
       <!-- Employee Non-Deductions (Benefits) -->
       <template v-if="employeeNonDeductions && employeeNonDeductions.length > 0">
-        <v-row dense class="mb-1" v-for="benefit in employeeNonDeductions" :key="'benefit-' + benefit.id" v-show="(benefit.amount || 0) > 0">
-          <v-col cols="6" class="text-caption pa-1">{{ benefit.benefit.benefit || 'Other Benefit' }}</v-col>
+        <v-row
+          dense
+          class="mb-1"
+          v-for="benefit in employeeNonDeductions"
+          :key="'benefit-' + benefit.id"
+          v-show="(benefit.amount || 0) > 0"
+        >
+          <v-col cols="6" class="text-caption pa-1">{{
+            benefit.benefit.benefit || 'Other Benefit'
+          }}</v-col>
           <v-col cols="3" class="pa-1"></v-col>
-          <v-col cols="3" class="text-body-2 text-end pa-1">{{ safeCurrencyFormat(benefit.amount || 0, formatCurrency) }}</v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">{{
+            safeCurrencyFormat(benefit.amount || 0, formatCurrency)
+          }}</v-col>
         </v-row>
       </template>
 
       <!-- Cash Adjustments (Additions) -->
       <template v-if="cashAdjustmentsAdditions && cashAdjustmentsAdditions.length > 0">
-        <v-row dense class="mb-1" v-for="adj in cashAdjustmentsAdditions" :key="'cashadjustment-add-' + adj.id">
-          <v-col cols="6" class="text-caption pa-1">{{ adj.name || 'Cash Adjustment' }}
-            <span v-if="adj.remarks" class="text-caption font-weight-bold ms-1">({{ adj.remarks }})</span>
+        <v-row
+          dense
+          class="mb-1"
+          v-for="adj in cashAdjustmentsAdditions"
+          :key="'cashadjustment-add-' + adj.id"
+        >
+          <v-col cols="6" class="text-caption pa-1"
+            >{{ adj.name || 'Cash Adjustment' }}
+            <span v-if="adj.remarks" class="text-caption font-weight-bold ms-1"
+              >({{ adj.remarks }})</span
+            >
           </v-col>
           <v-col cols="3" class="pa-1"></v-col>
-          <v-col cols="3" class="text-body-2 text-end pa-1">{{ safeCurrencyFormat(adj.amount || 0, formatCurrency) }}</v-col>
+          <v-col cols="3" class="text-body-2 text-end pa-1">{{
+            safeCurrencyFormat(adj.amount || 0, formatCurrency)
+          }}</v-col>
         </v-row>
       </template>
-
-
-
 
       <!-- Total -->
       <v-row dense class="mb-3">

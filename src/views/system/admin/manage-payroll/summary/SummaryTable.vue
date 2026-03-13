@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MonthlyPayrollTable from '@/views/system/admin/manage-payroll/summary/components/MonthlyPayrollTable.vue'
+import MonthlyPayrollFilters from '@/views/system/admin/manage-payroll/summary/components/MonthlyPayrollFilters.vue'
 import MonthlyPayrollPDF from '@/views/system/admin/manage-payroll/summary/pdf/MonthlyPayrollPDF.vue'
 import { useMonthlyPayroll } from '@/views/system/admin/manage-payroll/summary/composables/monthlyPayroll'
 import { useMonthlyPayrollPDF } from '@/views/system/admin/manage-payroll/summary/pdf/monthlyPayrollPDF'
@@ -41,29 +42,6 @@ const designationsStore = useDesignationsStore()
 
 // Use employees store
 const employeesStore = useEmployeesStore()
-
-// Computed properties for day options
-const daysInSelectedMonth = computed(() => {
-  const monthIndex = monthNames.findIndex((m) => m === selectedMonth.value)
-  const idx = monthIndex >= 0 ? monthIndex : 0
-  return new Date(selectedYear.value, idx + 1, 0).getDate()
-})
-
-const daysInPreviousMonth = computed(() => {
-  const monthIndex = monthNames.findIndex((m) => m === selectedMonth.value)
-  const startIdx = monthIndex >= 0 ? monthIndex : 0
-  const prevIdx = startIdx === 0 ? 11 : startIdx - 1
-  let prevYear = selectedYear.value
-  if (startIdx === 0) prevYear = selectedYear.value - 1
-  return new Date(prevYear, prevIdx + 1, 0).getDate()
-})
-
-const dayOptionsFrom = computed(() =>
-  Array.from({ length: daysInPreviousMonth.value }, (_, i) => i + 1),
-)
-const dayOptionsTo = computed(() =>
-  Array.from({ length: daysInSelectedMonth.value }, (_, i) => i + 1),
-)
 
 // Set default month to current month and load designations
 onMounted(async () => {
@@ -126,6 +104,9 @@ const selectedDesignation = ref<number | null>(null)
 // Payment option filter state
 const selectedPaymentOption = ref<boolean | null>(null)
 
+// Sort order state (default to A-Z)
+const sortOrder = ref<'asc' | 'desc' | null>('asc')
+
 // Filtered items based on search query and designation
 const filteredMonthlyPayrollData = computed(() => {
   let filtered = monthlyPayrollData.value
@@ -148,6 +129,20 @@ const filteredMonthlyPayrollData = computed(() => {
   if (searchQuery.value && searchQuery.value.trim() !== '') {
     const query = searchQuery.value.toLowerCase().trim()
     filtered = filtered.filter((item) => item.employee_name.toLowerCase().includes(query))
+  }
+
+  // Apply sorting
+  if (sortOrder.value) {
+    filtered = [...filtered].sort((a, b) => {
+      const nameA = a.employee_name.toLowerCase()
+      const nameB = b.employee_name.toLowerCase()
+
+      if (sortOrder.value === 'asc') {
+        return nameA.localeCompare(nameB)
+      } else {
+        return nameB.localeCompare(nameA)
+      }
+    })
   }
 
   return filtered
@@ -257,6 +252,10 @@ watch(selectedPaymentOption, () => {
   currentPage.value = 1
 })
 
+watch(sortOrder, () => {
+  currentPage.value = 1
+})
+
 // PDF Export handler
 const handleExportPDF = async () => {
   menuOpen.value = false
@@ -358,114 +357,20 @@ const handleExportCSV = () => {
       </v-card-text>
 
       <!-- Filters Section -->
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" md="2">
-            <v-select
-              v-model="selectedMonth"
-              :items="
-                monthNames.map((month, index) => ({
-                  title: month,
-                  value: month,
-                  index: index,
-                }))
-              "
-              label="Select Month"
-              variant="outlined"
-              density="compact"
-              prepend-inner-icon="mdi-calendar"
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12" md="2">
-            <v-select
-              v-model="selectedYear"
-              :items="Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)"
-              label="Select Year"
-              variant="outlined"
-              density="compact"
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12" md="1">
-            <v-select
-              v-model="dayFrom"
-              :items="dayOptionsFrom"
-              :label="`From Day (${
-                selectedMonth
-                  ? (() => {
-                      const currentIndex = monthNames.indexOf(selectedMonth)
-                      if (currentIndex === -1) return 'prev month'
-                      const prevIndex = (currentIndex - 1 + 12) % 12
-                      const isPrevYear = currentIndex === 0
-                      return monthNames[prevIndex].slice(0, 3) + (isPrevYear ? ' (prev)' : '')
-                    })()
-                  : 'prev month'
-              })`"
-              variant="outlined"
-              density="compact"
-              :disabled="!crossMonthEnabled"
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12" md="1">
-            <v-select
-              v-model="dayTo"
-              :items="dayOptionsTo"
-              :label="`To Day (${selectedMonth ? selectedMonth.slice(0, 3) : 'month'})`"
-              variant="outlined"
-              density="compact"
-              :disabled="!crossMonthEnabled"
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12" md="2">
-            <v-select
-              v-model="selectedDesignation"
-              :items="[
-                { title: 'All Designations', value: null },
-                ...designationsStore.designations.map((d) => ({
-                  title: d.designation,
-                  value: d.id,
-                })),
-              ]"
-              label="Filter by Designation"
-              variant="outlined"
-              density="compact"
-              prepend-inner-icon="mdi-briefcase"
-              clearable
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12" md="2">
-            <v-select
-              v-model="selectedPaymentOption"
-              :items="[
-                { title: 'All Payment Options', value: null },
-                { title: 'ATM', value: true },
-                { title: 'Cash', value: false },
-              ]"
-              label="Payment Option"
-              variant="outlined"
-              density="compact"
-              prepend-inner-icon="mdi-credit-card"
-              clearable
-            ></v-select>
-          </v-col>
-
-          <v-col cols="12" md="2">
-            <v-text-field
-              v-model="searchQuery"
-              label="Search Employee"
-              placeholder="Enter employee name..."
-              variant="outlined"
-              density="compact"
-              prepend-inner-icon="mdi-account-search"
-              clearable
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </v-card-text>
+      <MonthlyPayrollFilters
+        v-model:selected-month="selectedMonth"
+        v-model:selected-year="selectedYear"
+        v-model:search-query="searchQuery"
+        v-model:cross-month-enabled="crossMonthEnabled"
+        v-model:day-from="dayFrom"
+        v-model:day-to="dayTo"
+        v-model:selected-designation="selectedDesignation"
+        v-model:selected-payment-option="selectedPaymentOption"
+        v-model:sort-order="sortOrder"
+        :loading="loading"
+        :designations="designationsStore.designations"
+        @refresh="refreshMonthlyPayroll"
+      />
 
       <v-divider v-if="monthlyPayrollData.length > 0"></v-divider>
 

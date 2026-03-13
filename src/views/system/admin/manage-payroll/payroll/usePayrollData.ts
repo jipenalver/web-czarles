@@ -1,6 +1,10 @@
 import { ref, computed, type Ref } from 'vue'
 import { useTripsStore } from '@/stores/trips'
-import { fetchHolidaysByDateString, fetchHolidaysByRange, type HolidayWithAttendance } from './computation/holidays'
+import {
+  fetchHolidaysByDateString,
+  fetchHolidaysByRange,
+  type HolidayWithAttendance,
+} from './computation/holidays'
 import { fetchFilteredTrips, fetchTripsByRange } from './computation/trips'
 import { fetchFilteredUtilizations, fetchUtilizationsByRange } from './computation/utilizations'
 import { fetchFilteredAllowances, fetchAllowancesByRange } from './computation/allowances'
@@ -115,7 +119,10 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       holidays.value =
         fromDate && toDate
           ? await fetchHolidaysByRange(fromDate, toDate, String(params.value.employeeId))
-          : await fetchHolidaysByDateString(params.value.holidayDateString, String(params.value.employeeId))
+          : await fetchHolidaysByDateString(
+              params.value.holidayDateString,
+              String(params.value.employeeId),
+            )
     } catch (error) {
       console.error('[PayrollData] Error fetching holidays:', error)
       holidays.value = []
@@ -241,7 +248,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
         params.value.filterDateString,
         params.value.employeeId,
         fromDate,
-        toDate
+        toDate,
       )
 
       sundayDutyRecords.value = records
@@ -280,9 +287,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
   }
 
   // Initialize all payroll calculations
-  async function initializePayrollCalculations(
-    computeOvertimeCallback: () => Promise<number>,
-  ) {
+  async function initializePayrollCalculations(computeOvertimeCallback: () => Promise<number>) {
     isCalculationsCompleting.value = true
     try {
       // Reset all loading states
@@ -352,7 +357,7 @@ export function usePayrollData(params: Ref<PayrollDataParams>) {
       isAllowancesLoading.value = false
       isCashAdjustmentsLoading.value = false
       isDeductionsLoading.value = false
-      isSundayLoading.value = false  // Reset this too in case it was stuck
+      isSundayLoading.value = false // Reset this too in case it was stuck
       isCalculationsCompleting.value = false
     }
   }

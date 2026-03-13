@@ -85,11 +85,9 @@ export function useEmployeesPDF() {
           useCORS: true,
           allowTaint: true,
           letterRendering: true,
-          width:750, // Use full table width
-         
+          width: 750, // Use full table width
         },
         jsPDF: {
-         
           format: 'a4',
           orientation: 'portrait', // Keep portrait orientation
         },
