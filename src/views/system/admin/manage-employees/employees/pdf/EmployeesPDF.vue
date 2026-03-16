@@ -18,7 +18,7 @@ const employeesStore = useEmployeesStore()
 <template>
   <!-- PDF Export Container - hidden table para sa PDF generation -->
   <div style="display: none" id="employees-table">
-    <h2 class="report-title ">{{ props.componentView.toUpperCase() }} EMPLOYEES REPORT</h2>
+    <h2 class="report-title">{{ props.componentView.toUpperCase() }} EMPLOYEES REPORT</h2>
     <table class="pdf-table pa-2">
       <thead class="pdf-thead">
         <tr>
@@ -49,7 +49,7 @@ const employeesStore = useEmployeesStore()
       </thead>
       <tbody>
         <tr v-for="item in employeesStore.employeesExport" :key="item.id" class="pdf-tr">
-          <td class="pdf-td pdf-td--bold ">{{ item.lastname }}, {{ item.firstname }}</td>
+          <td class="pdf-td pdf-td--bold">{{ item.lastname }}, {{ item.firstname }}</td>
           <td class="pdf-td">{{ item.phone }}</td>
           <td class="pdf-td">{{ item.email }}</td>
           <td class="pdf-td">{{ item.designation.designation }}</td>
@@ -86,7 +86,7 @@ const employeesStore = useEmployeesStore()
             <td class="pdf-td pdf-td--bold pdf-td--narrow">
               {{ item.daily_rate ? getMoneyText(item.daily_rate) : 'n/a' }}
             </td>
-            <td class="pdf-td pdf-td--narrow ">
+            <td class="pdf-td pdf-td--narrow">
               {{ item.is_insured ? 'Yes' : 'No' }}
             </td>
           </template>

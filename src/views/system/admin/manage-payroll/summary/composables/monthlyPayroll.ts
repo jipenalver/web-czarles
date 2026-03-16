@@ -1,12 +1,22 @@
 import { supabase } from '@/utils/supabase'
 import { ref, computed } from 'vue'
-import { getEmployeesAttendanceBatch, getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
-import { fetchHolidaysByRange, fetchHolidaysByDateString } from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
+import {
+  getEmployeesAttendanceBatch,
+  getEmployeeAttendanceById,
+} from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import {
+  fetchHolidaysByRange,
+  fetchHolidaysByDateString,
+} from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
 import { useEmployeesStore } from '@/stores/employees'
 
 // Import modular components
 import type { MonthlyPayrollRow, MonthlyPayrollTotals } from './types'
-import { transformPayrollData, createDateStringForCalculation, separateEmployeesByType } from './dataTransformation'
+import {
+  transformPayrollData,
+  createDateStringForCalculation,
+  separateEmployeesByType,
+} from './dataTransformation'
 import { processFieldStaffEmployees } from './fieldStaffProcessor'
 import { processNonFieldStaffEmployees } from './nonFieldStaffProcessor'
 import { getCashAdjustmentsForEmployee } from './cashAdjustmentCalculations'
@@ -83,8 +93,8 @@ export function useMonthlyPayroll() {
       }
 
       // Set admin and field staff flags before processing to ensure correct late deduction calculations
-      transformedData.forEach(item => {
-        const employee = employeesStore.employees.find(emp => emp.id === item.employee_id)
+      transformedData.forEach((item) => {
+        const employee = employeesStore.employees.find((emp) => emp.id === item.employee_id)
         if (employee) {
           item.is_admin = employee.is_admin || false
           // is_field_staff already comes from SQL function, but ensure consistency
@@ -96,32 +106,51 @@ export function useMonthlyPayroll() {
       })
 
       // Create date string in format YYYY-MM-01 for calculations
-      const dateStringForCalculation = createDateStringForCalculation(selectedMonth.value, selectedYear.value)
+      const dateStringForCalculation = createDateStringForCalculation(
+        selectedMonth.value,
+        selectedYear.value,
+      )
 
       // Separate employees by type
-      const { fieldStaff: fieldStaffEmployees, nonFieldStaff: nonFieldStaffEmployees } = separateEmployeesByType(transformedData)
+      const { fieldStaff: fieldStaffEmployees, nonFieldStaff: nonFieldStaffEmployees } =
+        separateEmployeesByType(transformedData)
 
       // Batch fetch attendance data for non-field staff employees (optimization)
       if (nonFieldStaffEmployees.length > 0) {
-        const nonFieldStaffIds = nonFieldStaffEmployees.map(emp => emp.employee_id)
+        const nonFieldStaffIds = nonFieldStaffEmployees.map((emp) => emp.employee_id)
         const attendanceBatch = await getEmployeesAttendanceBatch(
           nonFieldStaffIds,
           dateStringForCalculation,
           fromDate,
-          toDate
+          toDate,
         )
 
         // Store batch attendance data in cache for potential future use
         // Client-side late/undertime calculations will use this cached data for performance
-        console.log(`[Batch Optimization] Loaded and cached attendance for ${nonFieldStaffIds.length} non-field staff employees:`, attendanceBatch.size)
-        console.log(`[Client-Side Calculations] Applied PayrollPrint.vue-consistent late/undertime calculations for ${nonFieldStaffIds.length} employees`)
+        console.log(
+          `[Batch Optimization] Loaded and cached attendance for ${nonFieldStaffIds.length} non-field staff employees:`,
+          attendanceBatch.size,
+        )
+        console.log(
+          `[Client-Side Calculations] Applied PayrollPrint.vue-consistent late/undertime calculations for ${nonFieldStaffIds.length} employees`,
+        )
       }
 
       // Process field staff employees with special calculations
-      await processFieldStaffEmployees(fieldStaffEmployees, dateStringForCalculation, fromDate, toDate)
+      await processFieldStaffEmployees(
+        fieldStaffEmployees,
+        dateStringForCalculation,
+        fromDate,
+        toDate,
+      )
 
       // Process non-field staff employees with late/undertime calculations
-      await processNonFieldStaffEmployees(nonFieldStaffEmployees, dateStringForCalculation, fromDate, toDate)
+      await processNonFieldStaffEmployees(
+        nonFieldStaffEmployees,
+        dateStringForCalculation,
+        fromDate,
+        toDate,
+      )
 
       // Combine field staff and non-field staff employees
       const finalData = [...fieldStaffEmployees, ...nonFieldStaffEmployees]
@@ -131,7 +160,9 @@ export function useMonthlyPayroll() {
       if (fromDate && toDate) {
         holidaysForPeriod = await fetchHolidaysByRange(fromDate, toDate)
       } else {
-        holidaysForPeriod = await fetchHolidaysByDateString(dateStringForCalculation.substring(0, 7))
+        holidaysForPeriod = await fetchHolidaysByDateString(
+          dateStringForCalculation.substring(0, 7),
+        )
       }
 
       // Fetch attendance records for each employee to populate attendance_records field
@@ -142,7 +173,7 @@ export function useMonthlyPayroll() {
               employee.employee_id,
               dateStringForCalculation.substring(0, 7),
               fromDate,
-              toDate
+              toDate,
             )
             employee.attendance_records = attendanceRecords || []
             // Assign filtered holidays for this period only
@@ -152,7 +183,7 @@ export function useMonthlyPayroll() {
             employee.attendance_records = []
             employee.holidays = []
           }
-        })
+        }),
       )
 
       // Fetch and apply cash adjustments for all employees
@@ -163,7 +194,7 @@ export function useMonthlyPayroll() {
             selectedMonth.value,
             selectedYear.value,
             fromDate,
-            toDate
+            toDate,
           )
 
           // Update employee with cash adjustment values
@@ -181,11 +212,13 @@ export function useMonthlyPayroll() {
 
           // Round to 2 decimal places
           employee.cash_adjustment_addon = Number(employee.cash_adjustment_addon.toFixed(2))
-          employee.deductions.cash_adjustment = Number(employee.deductions.cash_adjustment.toFixed(2))
+          employee.deductions.cash_adjustment = Number(
+            employee.deductions.cash_adjustment.toFixed(2),
+          )
           employee.gross_pay = Number(employee.gross_pay.toFixed(2))
           employee.total_deductions = Number(employee.total_deductions.toFixed(2))
           employee.net_pay = Number(employee.net_pay.toFixed(2))
-        })
+        }),
       )
 
       monthlyPayrollData.value = finalData

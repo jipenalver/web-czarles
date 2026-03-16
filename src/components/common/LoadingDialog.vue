@@ -87,18 +87,22 @@ const setSafetyTimeout = () => {
 }
 
 // Watch for visibility changes
-watch(() => props.isVisible, (isVisible, oldValue) => {
-  // Reset hasBeenClosed when dialog is freshly opened (was false, now true)
-  if (isVisible && !oldValue) {
-    hasBeenClosed.value = false
-  }
+watch(
+  () => props.isVisible,
+  (isVisible, oldValue) => {
+    // Reset hasBeenClosed when dialog is freshly opened (was false, now true)
+    if (isVisible && !oldValue) {
+      hasBeenClosed.value = false
+    }
 
-  if (isVisible && !hasBeenClosed.value) {
-    setSafetyTimeout()
-  } else {
-    clearSafetyTimeout()
-  }
-}, { immediate: true })
+    if (isVisible && !hasBeenClosed.value) {
+      setSafetyTimeout()
+    } else {
+      clearSafetyTimeout()
+    }
+  },
+  { immediate: true },
+)
 
 // Cleanup on unmount
 onUnmounted(() => {

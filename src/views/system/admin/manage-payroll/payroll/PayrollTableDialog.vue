@@ -43,7 +43,7 @@ const chosenMonth = ref<string>('')
 const dayFrom = ref<number | null>(props.itemData?.payroll_start ?? null)
 const dayTo = ref<number | null>(props.itemData?.payroll_end ?? null)
 const crossMonthEnabled = ref<boolean>(
-  Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end)
+  Boolean(props.itemData?.payroll_start && props.itemData?.payroll_end),
 )
 
 const daysInSelectedMonth = computed(() => {
@@ -78,7 +78,8 @@ const dayOptionsTo = computed(() =>
 
 function getDaysInMonth(monthName: string): number {
   const tf = tableFilters.value as Record<string, unknown> | undefined
-  const year = tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
+  const year =
+    tf && typeof tf['year'] === 'number' ? (tf['year'] as number) : new Date().getFullYear()
   const monthIndex = monthNames.findIndex((m) => m === monthName)
   const idx = monthIndex >= 0 ? monthIndex : 0
   return new Date(Number(year), idx + 1, 0).getDate()
@@ -169,7 +170,6 @@ watch(
   },
   { immediate: true },
 )
-
 </script>
 
 <template>
@@ -216,7 +216,11 @@ watch(
                   })()
                 : 'previous month'
             })`"
-            :placeholder="props.itemData?.payroll_start ? `Default: ${props.itemData.payroll_start}` : 'Previous Month'"
+            :placeholder="
+              props.itemData?.payroll_start
+                ? `Default: ${props.itemData.payroll_start}`
+                : 'Previous Month'
+            "
             clearable
             clear-icon="mdi-close"
             dense
@@ -230,7 +234,11 @@ watch(
             v-model="dayTo"
             :items="dayOptionsTo"
             :label="`To Day (${chosenMonth || '—'} ${tableFilters.year || ''})`"
-            :placeholder="props.itemData?.payroll_end ? `Default: ${props.itemData.payroll_end}` : 'Current Month'"
+            :placeholder="
+              props.itemData?.payroll_end
+                ? `Default: ${props.itemData.payroll_end}`
+                : 'Current Month'
+            "
             clearable
             clear-icon="mdi-close"
             dense
@@ -254,23 +262,10 @@ watch(
         <v-progress-linear v-if="tableOptions.isLoading" indeterminate></v-progress-linear>
 
         <v-row v-else>
-          <v-col
-            v-for="item in tableData"
-            :key="item.month"
-            cols="12"
-            sm="6"
-            md="4"
-            lg="3"
-          >
-            <v-card
-              class="month-card"
-              hover
-              @click="onView(item)"
-            >
+          <v-col v-for="item in tableData" :key="item.month" cols="12" sm="6" md="4" lg="3">
+            <v-card class="month-card" hover @click="onView(item)">
               <v-card-text class="text-center pa-6">
-                <v-icon size="48" class="mb-3" color="primary">
-                  mdi-calendar-month
-                </v-icon>
+                <v-icon size="48" class="mb-3" color="primary"> mdi-calendar-month </v-icon>
                 <div class="text-h6 font-weight-bold mb-2">
                   {{ item.month }}
                 </div>
@@ -279,17 +274,11 @@ watch(
                   color="primary"
                   variant="tonal"
                   size="small"
-
                 >
-                  Day {{ dayFrom || props.itemData?.payroll_start || '?' }} - {{ dayTo || props.itemData?.payroll_end || '?' }}
+                  Day {{ dayFrom || props.itemData?.payroll_start || '?' }} -
+                  {{ dayTo || props.itemData?.payroll_end || '?' }}
                 </v-chip>
-                <v-chip
-                  v-else
-                  color="secondary"
-                  variant="tonal"
-                  size="small"
-
-                >
+                <v-chip v-else color="secondary" variant="tonal" size="small">
                   Day 1 - {{ getDaysInMonth(item.month) }}
                 </v-chip>
               </v-card-text>

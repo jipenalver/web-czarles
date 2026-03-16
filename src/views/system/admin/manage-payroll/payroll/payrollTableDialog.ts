@@ -43,12 +43,8 @@ export function usePayrollTableDialog(
     dayTo: null,
   })
 
-
-
   // Simplified payroll data generator - returns only month name
-  const generatePayrollData = async (
-    monthIndex: number,
-  ): Promise<TableData> => {
+  const generatePayrollData = async (monthIndex: number): Promise<TableData> => {
     const monthName = monthNames[monthIndex]
     return {
       month: monthName,
@@ -69,9 +65,11 @@ export function usePayrollTableDialog(
   })
   const tableData = ref<TableData[]>([])
   // Simple cache tracker to prevent unnecessary refetches
-  const lastLoaded = ref<{ employeeId: number | null; year: number | null; monthsKey: string | null }>(
-    { employeeId: null, year: null, monthsKey: null },
-  )
+  const lastLoaded = ref<{
+    employeeId: number | null
+    year: number | null
+    monthsKey: string | null
+  }>({ employeeId: null, year: null, monthsKey: null })
   const formAction = ref({ ...formActionDefault })
   const isPrintDialogVisible = ref(false)
 
@@ -191,11 +189,17 @@ export function usePayrollTableDialog(
       }
 
       // Generate payroll data for each available month (just month names)
-      const payrollPromises = availableMonths.value.map((monthIndex) => generatePayrollData(monthIndex))
+      const payrollPromises = availableMonths.value.map((monthIndex) =>
+        generatePayrollData(monthIndex),
+      )
 
       tableData.value = await Promise.all(payrollPromises)
       // Update cache marker so subsequent opens/changes don't refetch unnecessarily
-      lastLoaded.value = { employeeId: props.itemData?.id ?? null, year: tableFilters.value.year, monthsKey }
+      lastLoaded.value = {
+        employeeId: props.itemData?.id ?? null,
+        year: tableFilters.value.year,
+        monthsKey,
+      }
     } catch (error) {
       console.error('Error loading payroll data:', error)
       tableData.value = []
@@ -386,8 +390,8 @@ export function usePayrollTableDialog(
     availableYears,
     availableMonths,
     isCurrentEmployeeFieldStaff,
-  onFilterDate,
-  onView,
+    onFilterDate,
+    onView,
     onDialogClose,
     reloadTableData,
   }

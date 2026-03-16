@@ -35,7 +35,8 @@ const totals = computed(() => {
       salary_deposit: acc.salary_deposit + (item.deductions.salary_deposit || 0),
       late: acc.late + (item.deductions.late || 0),
       undertime: acc.undertime + (item.deductions.undertime || 0),
-      cash_adjustment_deduction: acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
+      cash_adjustment_deduction:
+        acc.cash_adjustment_deduction + (item.deductions.cash_adjustment || 0),
       total_deductions: acc.total_deductions + (item.total_deductions || 0),
       net_pay: acc.net_pay + (item.net_pay || 0),
     }),
@@ -145,8 +146,12 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.overtime_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.holidays_pay) }}</td>
           <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.trips_pay) }}</td>
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.utilizations_pay || 0) }}</td>
-          <td class="pdf-td pdf-td--extra-narrow">{{ formatCurrency(item.cash_adjustment_addon || 0) }}</td>
+          <td class="pdf-td pdf-td--extra-narrow">
+            {{ formatCurrency(item.utilizations_pay || 0) }}
+          </td>
+          <td class="pdf-td pdf-td--extra-narrow">
+            {{ formatCurrency(item.cash_adjustment_addon || 0) }}
+          </td>
           <td class="pdf-td pdf-td--bold pdf-td--narrow pdf-td--highlight-green">
             {{ formatCurrency(item.gross_pay) }}
           </td>
@@ -166,7 +171,9 @@ const totals = computed(() => {
             {{ formatCurrency(item.deductions.undertime) }}
           </td>
           <td class="pdf-td pdf-td--extra-narrow">
-            {{ formatCurrency((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0)) }}
+            {{
+              formatCurrency((item.deductions.savings || 0) + (item.deductions.salary_deposit || 0))
+            }}
           </td>
           <td class="pdf-td pdf-td--extra-narrow">
             {{ formatCurrency(item.deductions.cash_adjustment || 0) }}
@@ -189,7 +196,9 @@ const totals = computed(() => {
           <td class="pdf-td pdf-td--bold pdf-td--wide">TOTAL</td>
 
           <!-- Payable Totals -->
-          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ roundDecimal(totals.days_worked, 2) }}</td>
+          <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
+            {{ roundDecimal(totals.days_worked, 2) }}
+          </td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">{{ totals.sunday_days }}</td>
           <td class="pdf-td pdf-td--bold pdf-td--extra-narrow">
             {{ formatCurrency(totals.sunday_amount) }}

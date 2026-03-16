@@ -1,5 +1,10 @@
 import { isFridayOrSaturday } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
-import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, getExcessMinutes, getUndertimeMinutes } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
+import {
+  getEmployeeAttendanceById,
+  getEmployeeAttendanceForEmployee55,
+  getExcessMinutes,
+  getUndertimeMinutes,
+} from '@/views/system/admin/manage-payroll/payroll/computation/computation'
 
 /**
  * Calculate unified late and undertime minutes for both field staff and office staff
@@ -8,8 +13,14 @@ import { getEmployeeAttendanceById, getEmployeeAttendanceForEmployee55, getExces
  * Office staff: 8:12 AM start, 11:50 AM end, PM varies by day
  */
 function calculateUnifiedLateUndertime(
-  attendances: Array<{ am_time_in?: string | null; pm_time_in?: string | null; am_time_out?: string | null; pm_time_out?: string | null; attendance_date?: string | null }>,
-  isFieldStaff: boolean
+  attendances: Array<{
+    am_time_in?: string | null
+    pm_time_in?: string | null
+    am_time_out?: string | null
+    pm_time_out?: string | null
+    attendance_date?: string | null
+  }>,
+  isFieldStaff: boolean,
 ): { lateMinutes: number; undertimeMinutes: number } {
   let totalLateMinutes = 0
   let totalUndertimeMinutes = 0
@@ -72,13 +83,23 @@ export async function calculateLateAndUndertimeDeductions(
   isFieldStaff: boolean,
   fromDate?: string,
   toDate?: string,
-  isAdmin: boolean = false
+  isAdmin: boolean = false,
 ): Promise<{ lateDeductionAmount: number; undertimeDeductionAmount: number }> {
   try {
     // Get attendance data using the same logic as PayrollPrint.vue
     const attendances = isAdmin
-      ? await getEmployeeAttendanceForEmployee55(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
-      : await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
+      ? await getEmployeeAttendanceForEmployee55(
+          employeeId,
+          dateStringForCalculation.substring(0, 7),
+          fromDate,
+          toDate,
+        )
+      : await getEmployeeAttendanceById(
+          employeeId,
+          dateStringForCalculation.substring(0, 7),
+          fromDate,
+          toDate,
+        )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       return { lateDeductionAmount: 0, undertimeDeductionAmount: 0 }
@@ -88,7 +109,10 @@ export async function calculateLateAndUndertimeDeductions(
     let totalUndertimeMinutes = 0
 
     // Use unified calculation for both field staff and office staff
-    const { lateMinutes, undertimeMinutes } = calculateUnifiedLateUndertime(attendances, isFieldStaff)
+    const { lateMinutes, undertimeMinutes } = calculateUnifiedLateUndertime(
+      attendances,
+      isFieldStaff,
+    )
     totalLateMinutes = lateMinutes
     totalUndertimeMinutes = undertimeMinutes
 
@@ -102,7 +126,7 @@ export async function calculateLateAndUndertimeDeductions(
 
     return {
       lateDeductionAmount: Number(lateDeductionAmount.toFixed(2)),
-      undertimeDeductionAmount: Number(undertimeDeductionAmount.toFixed(2))
+      undertimeDeductionAmount: Number(undertimeDeductionAmount.toFixed(2)),
     }
   } catch (error) {
     console.error('[calculateLateAndUndertimeDeductions] Error calculating deductions:', error)

@@ -32,3 +32,4 @@ github
 .env
 .vercel
 .env*.local
+.env

@@ -11,9 +11,7 @@ import { getFormattedCurrentDate } from '../helpers'
 export function useEmployeeDisplay(employeeData: ComputedRef<Employee | null>) {
   const fullName = computed(() => {
     if (!employeeData.value) return 'N/A'
-    const middleName = employeeData.value.middlename
-      ? ` ${employeeData.value.middlename} `
-      : ' '
+    const middleName = employeeData.value.middlename ? ` ${employeeData.value.middlename} ` : ' '
     return `${employeeData.value.firstname}${middleName}${employeeData.value.lastname}`
   })
 

@@ -63,10 +63,13 @@ watch(
     if (typeof employeeId === 'number' && filterDateString) {
       // kuhaon ang cash advances ug cash adjustments para sa employee ug payroll month
       const fetchedCashAdvances = await fetchCashAdvances(filterDateString as string, employeeId)
-      const fetchedCashAdjustments = await fetchCashAdjustments(filterDateString as string, employeeId)
+      const fetchedCashAdjustments = await fetchCashAdjustments(
+        filterDateString as string,
+        employeeId,
+      )
 
       // Filter out dummy entries with amount: 0
-      cashAdvances.value = fetchedCashAdvances.filter(ca => ca.amount && ca.amount > 0)
+      cashAdvances.value = fetchedCashAdvances.filter((ca) => ca.amount && ca.amount > 0)
       cashAdjustments.value = fetchedCashAdjustments
     } else {
       cashAdvances.value = []
@@ -78,7 +81,7 @@ watch(
 
 // Compute total cash advance from all ca.amount
 const totalCashAdvance = computed(() =>
-  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0)
+  cashAdvances.value.reduce((sum, ca) => sum + (Number(ca.amount) || 0), 0),
 )
 
 // Compute total cash adjustments (deductions only)
@@ -118,7 +121,9 @@ watch(
         // store as string for persistence
         localStorage.setItem('czarles_payroll_price', String(priceValue))
         // dispatch a custom event so same-window listeners receive updates in realtime
-        window.dispatchEvent(new CustomEvent('czarles_payroll_price_update', { detail: { price: priceValue } }))
+        window.dispatchEvent(
+          new CustomEvent('czarles_payroll_price_update', { detail: { price: priceValue } }),
+        )
       } catch {
         // noop
       }
@@ -136,12 +141,17 @@ watch(
     <td class="pa-1" colspan="3">
       <div class="d-flex flex-column pa-0 ma-0">
         <!-- Late Deduction -->
-        <template v-if="showLateDeduction && (lateDeduction > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0))">
+        <template
+          v-if="
+            showLateDeduction &&
+            (lateDeduction > 0 || (monthLateDeduction !== undefined && monthLateDeduction > 0))
+          "
+        >
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
-              <span class="text-caption " style="font-size: 12px">Late Deduction</span>
+              <span class="text-caption" style="font-size: 12px">Late Deduction</span>
               <span
-                class="text-caption font-weight-bold text-end  ms-1"
+                class="text-caption font-weight-bold text-end ms-1"
                 v-if="monthLateDeduction !== undefined && monthLateDeduction > 0"
                 style="font-size: 12px"
               >
@@ -149,7 +159,7 @@ watch(
               </span>
             </div>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 "
+              class="border-b-thin border-s-sm text-end pa-0"
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(netSalaryCalculation.deductions.late, formatCurrency) }}
@@ -157,12 +167,18 @@ watch(
           </div>
         </template>
         <!-- Undertime Deduction -->
-        <template v-if="showLateDeduction && (undertimeDeduction > 0 || (monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0))">
+        <template
+          v-if="
+            showLateDeduction &&
+            (undertimeDeduction > 0 ||
+              (monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0))
+          "
+        >
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
               <span class="text-caption" style="font-size: 12px">Undertime Deduction</span>
               <span
-                class="text-caption font-weight-bold text-end  ms-1"
+                class="text-caption font-weight-bold text-end ms-1"
                 v-if="monthUndertimeDeduction !== undefined && monthUndertimeDeduction > 0"
                 style="font-size: 12px"
               >
@@ -170,7 +186,7 @@ watch(
               </span>
             </div>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 "
+              class="border-b-thin border-s-sm text-end pa-0"
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(netSalaryCalculation.deductions.undertime, formatCurrency) }}
@@ -180,11 +196,11 @@ watch(
         <!-- Employee Deductions -->
         <template v-for="deduction in props.employeeDeductions" :key="deduction.id">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
-            <span class="text-caption " style="font-size: 12px">{{
+            <span class="text-caption" style="font-size: 12px">{{
               deduction.benefit?.benefit || 'Deduction'
             }}</span>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 "
+              class="border-b-thin border-s-sm text-end pa-0"
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(deduction.amount || 0, formatCurrency) }}
@@ -194,9 +210,9 @@ watch(
         <!-- Cash Advances (Merged) -->
         <template v-if="totalCashAdvance > 0">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
-            <span class="text-caption " style="font-size: 12px">Cash Advance</span>
+            <span class="text-caption" style="font-size: 12px">Cash Advance</span>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 "
+              class="border-b-thin border-s-sm text-end pa-0"
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(totalCashAdvance, formatCurrency) }}
@@ -207,13 +223,19 @@ watch(
         <template v-for="adj in cashAdjustments" :key="'cashadjustment-' + adj.id">
           <div class="d-flex align-center justify-space-between pa-0 ma-0">
             <div class="d-flex align-center">
-              <span class="text-caption " style="font-size: 12px">{{ adj.name || 'Cash Adjustment' }}</span>
-              <span v-if="adj.remarks" class="text-caption font-weight-bold text-end ms-1" style="font-size: 12px">
+              <span class="text-caption" style="font-size: 12px">{{
+                adj.name || 'Cash Adjustment'
+              }}</span>
+              <span
+                v-if="adj.remarks"
+                class="text-caption font-weight-bold text-end ms-1"
+                style="font-size: 12px"
+              >
                 ({{ adj.remarks }})
               </span>
             </div>
             <span
-              class="border-b-thin border-s-sm text-end pa-0 "
+              class="border-b-thin border-s-sm text-end pa-0"
               style="font-size: 12px; min-width: 70px"
             >
               {{ safeCurrencyFormat(adj.amount || 0, formatCurrency) }}
@@ -226,9 +248,9 @@ watch(
   <!-- Less Deductions and Net Salary Rows remain unchanged -->
   <tr>
     <td class="pa-1" colspan="2"></td>
-    <td class="text-caption pa-1 ">Less Deductions</td>
+    <td class="text-caption pa-1">Less Deductions</td>
     <td class="pa-1"></td>
-    <td class="border-b-thin border-s-sm text-end pa-1 ">
+    <td class="border-b-thin border-s-sm text-end pa-1">
       {{ safeCurrencyFormat(netSalaryCalculation.totalDeductions, formatCurrency) }}
     </td>
   </tr>

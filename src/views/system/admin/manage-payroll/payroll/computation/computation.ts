@@ -127,28 +127,30 @@ export async function getEmployeesAttendanceBatch(
 
       // Convert to final format
       deduplicatedByEmployee.forEach((recordsMap, empId) => {
-        const records: AttendanceRecord[] = Array.from(recordsMap.values()).map((row: Record<string, unknown>) => {
-          // Extract date from am_time_in first, fallback to pm_time_in for PM half-days
-          const attendanceDate = row.am_time_in
-            ? (row.am_time_in as string).split('T')[0]
-            : row.pm_time_in
-              ? (row.pm_time_in as string).split('T')[0]
-              : null
+        const records: AttendanceRecord[] = Array.from(recordsMap.values()).map(
+          (row: Record<string, unknown>) => {
+            // Extract date from am_time_in first, fallback to pm_time_in for PM half-days
+            const attendanceDate = row.am_time_in
+              ? (row.am_time_in as string).split('T')[0]
+              : row.pm_time_in
+                ? (row.pm_time_in as string).split('T')[0]
+                : null
 
-          return {
-            am_time_in: (row.am_time_in as string) || null,
-            am_time_out: (row.am_time_out as string) || null,
-            pm_time_in: (row.pm_time_in as string) || null,
-            pm_time_out: (row.pm_time_out as string) || null,
-            overtime_in: (row.overtime_in as string) || null,
-            overtime_out: (row.overtime_out as string) || null,
-            is_leave_with_pay: row.is_leave_with_pay as boolean | undefined,
-            leave_type: row.leave_type as string | undefined,
-            leave_reason: row.leave_reason as string | undefined,
-            attendance_date: attendanceDate,
-            date: attendanceDate, // Alias for compatibility
-          }
-        })
+            return {
+              am_time_in: (row.am_time_in as string) || null,
+              am_time_out: (row.am_time_out as string) || null,
+              pm_time_in: (row.pm_time_in as string) || null,
+              pm_time_out: (row.pm_time_out as string) || null,
+              overtime_in: (row.overtime_in as string) || null,
+              overtime_out: (row.overtime_out as string) || null,
+              is_leave_with_pay: row.is_leave_with_pay as boolean | undefined,
+              leave_type: row.leave_type as string | undefined,
+              leave_reason: row.leave_reason as string | undefined,
+              attendance_date: attendanceDate,
+              date: attendanceDate, // Alias for compatibility
+            }
+          },
+        )
         grouped.set(empId, records)
 
         // Update cache for each employee
@@ -243,7 +245,7 @@ export async function getEmployeeAttendanceById(
   //kuhaon tanan attendance records para sa employee, i-strip ang date, time ra ibalik (HH:MM)
 
   // Deduplicate records by id (in case OR query returns duplicates for records with both AM and PM)
-  const uniqueData = data ? Array.from(new Map(data.map(item => [item.id, item])).values()) : []
+  const uniqueData = data ? Array.from(new Map(data.map((item) => [item.id, item])).values()) : []
 
   // console.log('[getEmployeeAttendanceById] Raw attendance records fetched:', {
   //   totalRecords: data?.length || 0,
@@ -286,7 +288,7 @@ export async function getEmployeeAttendanceById(
           leave_reason: row.leave_reason,
           attendance_date: attendanceDate, // Extract date from timestamp
           date: attendanceDate, // Alias for compatibility with Sunday detection
-          _debug_dayHours: dayHours // Add debug info
+          _debug_dayHours: dayHours, // Add debug info
         }
       })
     : null
@@ -295,7 +297,6 @@ export async function getEmployeeAttendanceById(
   if (result && result.length > 0) {
     // const totalHours = result.reduce((sum, r) => sum + (r._debug_dayHours || 0), 0)
     // const daysWithAttendance = result.filter(r => r.am_time_in || r.pm_time_in).length
-
     //  console.log('[getEmployeeAttendanceById] PROCESSED ATTENDANCE BREAKDOWN:', {
     //   employeeId,
     //   totalDays: result.length,
@@ -307,7 +308,6 @@ export async function getEmployeeAttendanceById(
     //     to: toDateISO || 'end of month'
     //    }
     //  })
-
     // Create detailed table of each day
     // console.table(result.map(r => ({
     //   Date: r.attendance_date || r.date || 'N/A',
@@ -410,9 +410,10 @@ export async function computeOverallOvertimeCalculation(
 
   if (employeeId && usedDateString) {
     // Use special function for employee 55, regular function for others
-    const attendances = employeeId === 55
-      ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, usedFrom, usedTo)
-      : await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
+    const attendances =
+      employeeId === 55
+        ? await getEmployeeAttendanceForEmployee55(employeeId, usedDateString, usedFrom, usedTo)
+        : await getEmployeeAttendanceById(employeeId, usedDateString, usedFrom, usedTo)
 
     // console.log('[computeOverallOvertimeCalculation] Fetched attendances:', {
     //   employeeId,
@@ -423,7 +424,13 @@ export async function computeOverallOvertimeCalculation(
     if (Array.isArray(attendances) && attendances.length > 0) {
       // sum all overtime hours for the month
       let totalOvertime = 0
-      const overtimeDetails: Array<{ date: string; overtimeIn: string | null; overtimeOut: string | null; hours: number; isApplied: boolean }> = []
+      const overtimeDetails: Array<{
+        date: string
+        overtimeIn: string | null
+        overtimeOut: string | null
+        hours: number
+        isApplied: boolean
+      }> = []
 
       attendances.forEach((a) => {
         // Only count overtime if is_overtime_applied is true
@@ -520,7 +527,12 @@ export async function getEmployeeAttendanceForEmployee55(
   }
 
   // First get the actual attendance records for employee 55
-  const actualAttendance = await getEmployeeAttendanceById(employeeId, dateString, fromDateISO, toDateISO)
+  const actualAttendance = await getEmployeeAttendanceById(
+    employeeId,
+    dateString,
+    fromDateISO,
+    toDateISO,
+  )
 
   if (!Array.isArray(actualAttendance)) {
     return null
@@ -557,7 +569,6 @@ export async function getEmployeeAttendanceForEmployee55(
           // PM out: 4 hours after PM in
           const pmOutDate = new Date(pmInDate.getTime() + 4 * 60 * 60 * 1000)
           pmTimeOut = `${pmOutDate.getHours().toString().padStart(2, '0')}:${pmOutDate.getMinutes().toString().padStart(2, '0')}`
-
         } catch {
           // console.warn('Error parsing am_time_in for employee 55:', error)
           // Use default times if parsing fails

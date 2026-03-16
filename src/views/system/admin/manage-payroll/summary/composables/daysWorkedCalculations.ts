@@ -1,6 +1,9 @@
 import { getPaidLeaveDaysForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
 import { getEmployeeAttendanceById } from '@/views/system/admin/manage-payroll/payroll/computation/computation'
-import { fetchHolidaysByRange, fetchHolidaysByDateString } from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
+import {
+  fetchHolidaysByRange,
+  fetchHolidaysByDateString,
+} from '@/views/system/admin/manage-payroll/payroll/computation/holidays'
 
 /**
  * Check if an employee has actual attendance records on regular holidays
@@ -10,11 +13,16 @@ export async function countActualAttendanceOnRegularHolidays(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
 ): Promise<number> {
   try {
     // Get attendance data
-    const attendances = await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
+    const attendances = await getEmployeeAttendanceById(
+      employeeId,
+      dateStringForCalculation.substring(0, 7),
+      fromDate,
+      toDate,
+    )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       return 0
@@ -32,21 +40,27 @@ export async function countActualAttendanceOnRegularHolidays(
 
     attendances.forEach((attendance) => {
       // Get the attendance date for Regular Holiday checking
-      const attendanceDate = attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
+      const attendanceDate =
+        attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
 
       // Check if this date is a Regular Holiday
       const isRegularHoliday = holidays.some(
-        (h) => h.holiday_at === attendanceDate && h.type?.toUpperCase().includes('RH')
+        (h) => h.holiday_at === attendanceDate && h.type?.toUpperCase().includes('RH'),
       )
 
       if (isRegularHoliday) {
         // Check if there's any actual attendance record
         const hasAnyAttendance =
-          attendance.am_time_in || attendance.am_time_out || attendance.pm_time_in || attendance.pm_time_out
+          attendance.am_time_in ||
+          attendance.am_time_out ||
+          attendance.pm_time_in ||
+          attendance.pm_time_out
 
         if (hasAnyAttendance) {
           actualRHAttendanceCount += 1
-          console.log(`[RH Actual Attendance] Employee ${employeeId} worked on Regular Holiday: ${attendanceDate}`)
+         /*  console.log(
+            `[RH Actual Attendance] Employee ${employeeId} worked on Regular Holiday: ${attendanceDate}`,
+          ) */
         }
       }
     })
@@ -67,18 +81,28 @@ export async function calculateDaysWorked(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
 ): Promise<number> {
   try {
     // Get attendance data using standard fetch for all employees
-    const attendances = await getEmployeeAttendanceById(employeeId, dateStringForCalculation.substring(0, 7), fromDate, toDate)
+    const attendances = await getEmployeeAttendanceById(
+      employeeId,
+      dateStringForCalculation.substring(0, 7),
+      fromDate,
+      toDate,
+    )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       return 0
     }
 
     // Get paid leave days
-    const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
+    const paidLeaveDays = await getPaidLeaveDaysForMonth(
+      dateStringForCalculation,
+      employeeId,
+      fromDate,
+      toDate,
+    )
 
     // Fetch holidays for the date range to check for Regular Holidays
     let holidays: Array<{ holiday_at: string; type: string | null }> = []
@@ -89,20 +113,23 @@ export async function calculateDaysWorked(
     }
 
     // Count Regular Holidays in the period - ALL employees get these days
-    const regularHolidaysCount = holidays.filter(h => h.type?.toUpperCase().includes('RH')).length
-    console.log(`[RH Days] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`)
+    /* const regularHolidaysCount = holidays.filter((h) => h.type?.toUpperCase().includes('RH')).length
+    console.log(
+      `[RH Days] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`,
+    ) */
 
     let employeePresentDays = 0
 
     // Track which dates are regular holidays for exclusion from regular attendance counting
     const regularHolidayDates = new Set(
-      holidays.filter(h => h.type?.toUpperCase().includes('RH')).map(h => h.holiday_at)
+      holidays.filter((h) => h.type?.toUpperCase().includes('RH')).map((h) => h.holiday_at),
     )
 
     // Use the same logic as payrollComputation.ts
     attendances.forEach((attendance) => {
       // Get the attendance date for Regular Holiday checking
-      const attendanceDate = attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
+      const attendanceDate =
+        attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
 
       // Skip counting attendance on Regular Holidays since we already counted them above
       if (regularHolidayDates.has(attendanceDate)) {
@@ -157,7 +184,7 @@ export async function calculateDaysWorkedForAdminByAmOnly(
   employeeId: number,
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
 ): Promise<number> {
   try {
     // Fetch holidays for the date range first
@@ -169,19 +196,26 @@ export async function calculateDaysWorkedForAdminByAmOnly(
     }
 
     // Count Regular Holidays in the period - ALL employees get these days
-    const regularHolidaysCount = holidays.filter(h => h.type?.toUpperCase().includes('RH')).length
-    console.log(`[RH Days - Admin] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`)
+    const regularHolidaysCount = holidays.filter((h) => h.type?.toUpperCase().includes('RH')).length
+    console.log(
+      `[RH Days - Admin] Adding ${regularHolidaysCount} Regular Holiday days for employee ${employeeId}`,
+    )
 
     // Use standard attendance fetch but apply admin-specific logic
     const attendances = await getEmployeeAttendanceById(
       employeeId,
       dateStringForCalculation.substring(0, 7),
       fromDate,
-      toDate
+      toDate,
     )
 
     // Get paid leave days
-    const paidLeaveDays = await getPaidLeaveDaysForMonth(dateStringForCalculation, employeeId, fromDate, toDate)
+    const paidLeaveDays = await getPaidLeaveDaysForMonth(
+      dateStringForCalculation,
+      employeeId,
+      fromDate,
+      toDate,
+    )
 
     if (!Array.isArray(attendances) || attendances.length === 0) {
       // Return regular holidays + paid leave days even if no attendance
@@ -192,12 +226,13 @@ export async function calculateDaysWorkedForAdminByAmOnly(
 
     // Track which dates are regular holidays for exclusion from regular attendance counting
     const regularHolidayDates = new Set(
-      holidays.filter(h => h.type?.toUpperCase().includes('RH')).map(h => h.holiday_at)
+      holidays.filter((h) => h.type?.toUpperCase().includes('RH')).map((h) => h.holiday_at),
     )
 
     attendances.forEach((attendance) => {
       // Get the attendance date for Regular Holiday checking
-      const attendanceDate = attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
+      const attendanceDate =
+        attendance.am_time_in?.split('T')[0] || attendance.pm_time_in?.split('T')[0] || ''
 
       // Skip counting attendance on Regular Holidays since we already counted them above
       if (regularHolidayDates.has(attendanceDate)) {
@@ -220,7 +255,10 @@ export async function calculateDaysWorkedForAdminByAmOnly(
 
     return employeePresentDays
   } catch (error) {
-    console.error('[calculateDaysWorkedForAdminByAmOnly] Error calculating days worked for admin:', error)
+    console.error(
+      '[calculateDaysWorkedForAdminByAmOnly] Error calculating days worked for admin:',
+      error,
+    )
     return 0
   }
 }

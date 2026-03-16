@@ -1,4 +1,7 @@
-import { getTotalMinutesForMonth, getSundayDutyDaysForMonth } from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
+import {
+  getTotalMinutesForMonth,
+  getSundayDutyDaysForMonth,
+} from '@/views/system/admin/manage-payroll/payroll/computation/attendance'
 import { calculateOvertimeHours } from './overtimeCalculations'
 import { calculateDaysWorked } from './daysWorkedCalculations'
 import { calculateLateAndUndertimeDeductions } from './lateUndertimeCalculations'
@@ -11,7 +14,7 @@ export async function processFieldStaffEmployees(
   fieldStaffEmployees: MonthlyPayrollRow[],
   dateStringForCalculation: string,
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
 ): Promise<void> {
   await Promise.all(
     fieldStaffEmployees.map(async (employee: MonthlyPayrollRow) => {
@@ -20,7 +23,7 @@ export async function processFieldStaffEmployees(
         employee.employee_id,
         dateStringForCalculation,
         fromDate,
-        toDate
+        toDate,
       )
       employee.days_worked = Number(accurateDaysWorked.toFixed(1))
 
@@ -30,7 +33,7 @@ export async function processFieldStaffEmployees(
         employee.employee_id,
         true, // isField = true
         fromDate,
-        toDate
+        toDate,
       )
       employee.hours_worked = totalWorkMinutes / 60 // Convert minutes to hours
 
@@ -39,7 +42,7 @@ export async function processFieldStaffEmployees(
         dateStringForCalculation,
         employee.employee_id,
         fromDate,
-        toDate
+        toDate,
       )
       employee.sunday_days = sundayDays
       // Sunday amount is 30% premium (0.3x daily rate per Sunday worked)
@@ -51,7 +54,7 @@ export async function processFieldStaffEmployees(
         employee.employee_id,
         dateStringForCalculation,
         fromDate,
-        toDate
+        toDate,
       )
       employee.overtime_hrs = clientOvertimeHours
 
@@ -67,15 +70,16 @@ export async function processFieldStaffEmployees(
 
       // Calculate client-side late and undertime deductions for field staff
       // Field staff uses updated unified time rules: 7:20 AM start, 11:50 AM end
-      const { lateDeductionAmount, undertimeDeductionAmount } = await calculateLateAndUndertimeDeductions(
-        employee.employee_id,
-        dateStringForCalculation,
-        employee.daily_rate,
-        true, // isFieldStaff = true
-        fromDate,
-        toDate,
-        employee.is_admin || false // isAdmin parameter
-      )
+      const { lateDeductionAmount, undertimeDeductionAmount } =
+        await calculateLateAndUndertimeDeductions(
+          employee.employee_id,
+          dateStringForCalculation,
+          employee.daily_rate,
+          true, // isFieldStaff = true
+          fromDate,
+          toDate,
+          employee.is_admin || false, // isAdmin parameter
+        )
 
       // Update deductions with client-side calculated values
       employee.deductions.late = lateDeductionAmount
@@ -113,6 +117,6 @@ export async function processFieldStaffEmployees(
 
       // Update basic_pay
       employee.basic_pay = Number(newBasicPay.toFixed(2))
-    })
+    }),
   )
 }
