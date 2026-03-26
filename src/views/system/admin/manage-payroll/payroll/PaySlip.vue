@@ -753,4 +753,48 @@ const displayableHolidays = computed(() => {
 .pdf-print-active .thick-border {
   border: 1px solid !important;
 }
+
+/* Enhanced font sizes for PDF printing */
+@media print {
+  .text-caption {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+
+  .text-body-2 {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+
+  .text-h6 {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+  }
+
+  .v-card-title {
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Font sizes for PDF generation (when pdf-print-active class is present) */
+.pdf-print-active .text-caption {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active .text-body-2 {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active .text-h6 {
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+}
+
+.pdf-print-active .v-card-title {
+  font-size: 22px !important;
+  line-height: 1.3 !important;
+}
 </style>

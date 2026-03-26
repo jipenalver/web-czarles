@@ -641,4 +641,81 @@ onMounted(async () => {
     border: 3px solid !important;
   }
 }
+
+/* Enhanced font sizes for PDF printing */
+@media print {
+  .text-caption {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+
+  .text-body-1 {
+    font-size: 17px !important;
+    line-height: 1.4 !important;
+  }
+
+  .text-body-2 {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+
+  .text-h5 {
+    font-size: 24px !important;
+    line-height: 1.3 !important;
+  }
+
+  .text-h6 {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Table cell font sizes */
+  td {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Larger fonts for totals and important cells */
+  .total-cell {
+    font-size: 16px !important;
+    font-weight: bold !important;
+  }
+}
+
+/* Font sizes for PDF generation (when pdf-print-active class is present) */
+.pdf-print-active .text-caption {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active .text-body-1 {
+  font-size: 17px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active .text-body-2 {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active .text-h5 {
+  font-size: 24px !important;
+  line-height: 1.3 !important;
+}
+
+.pdf-print-active .text-h6 {
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+}
+
+/* Table cell font sizes for PDF */
+.pdf-print-active td {
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active .total-cell {
+  font-size: 16px !important;
+  font-weight: bold !important;
+}
 </style>

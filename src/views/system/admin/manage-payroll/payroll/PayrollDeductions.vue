@@ -263,3 +263,57 @@ watch(
     </td>
   </tr>
 </template>
+
+<style scoped>
+/* Enhanced font sizes for PDF printing - Override inline font-size: 12px */
+@media print {
+  .text-caption {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Override all inline font-size styles for deduction items */
+  span[style*="font-size: 12px"] {
+    font-size: 16px !important;
+  }
+
+  /* Specific targeting for deduction text elements */
+  .d-flex .text-caption {
+    font-size: 16px !important;
+  }
+
+  /* Amount values in deductions */
+  .border-b-thin.border-s-sm {
+    font-size: 16px !important;
+    font-weight: bold !important;
+  }
+
+  /* Table cells in deductions */
+  td {
+    font-size: 15px !important;
+  }
+}
+
+/* Font sizes for PDF generation (when pdf-print-active class is present) */
+.pdf-print-active .text-caption {
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+
+.pdf-print-active span[style*="font-size: 12px"] {
+  font-size: 16px !important;
+}
+
+.pdf-print-active .d-flex .text-caption {
+  font-size: 16px !important;
+}
+
+.pdf-print-active .border-b-thin.border-s-sm {
+  font-size: 16px !important;
+  font-weight: bold !important;
+}
+
+.pdf-print-active td {
+  font-size: 15px !important;
+}
+</style>

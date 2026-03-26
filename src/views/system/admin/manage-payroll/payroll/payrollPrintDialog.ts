@@ -157,7 +157,7 @@ export function usePayrollPrintDialog(
         miniPayrollSection.style.transformOrigin = 'top left'
         miniPayrollSection.style.position = 'absolute'
         miniPayrollSection.style.top = '750px'
-        miniPayrollSection.style.left = '680px'
+        miniPayrollSection.style.left = '880px'
         miniPayrollSection.style.width = '800px'
         miniPayrollSection.style.height = '800px'
       }
