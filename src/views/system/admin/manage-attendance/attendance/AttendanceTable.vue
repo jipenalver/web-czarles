@@ -23,6 +23,7 @@ const {
   isDialogVisible,
   isViewDialogVisible,
   isConfirmDeleteDialog,
+  isConfirmDeleteOvertimeDialog,
   itemData,
   formAction,
   viewType,
@@ -30,7 +31,9 @@ const {
   onView,
   onUpdate,
   onDelete,
+  onDeleteOvertime,
   onConfirmDelete,
+  onConfirmDeleteOvertime,
   onFilterDate,
   onFilterItems,
   onLoadItems,
@@ -247,6 +250,19 @@ const {
                 <v-tooltip activator="parent" location="top">Delete Leave</v-tooltip>
               </v-btn>
             </template>
+
+            <template v-else-if="props.componentView === 'overtime'">
+              <v-btn
+                v-if="item.is_overtime_applied"
+                variant="text"
+                density="comfortable"
+                @click="onDeleteOvertime(item.id)"
+                icon
+              >
+                <v-icon icon="mdi-trash-can" color="secondary"></v-icon>
+                <v-tooltip activator="parent" location="top">Delete Overtime</v-tooltip>
+              </v-btn>
+            </template>
           </div>
         </template>
 
@@ -293,5 +309,13 @@ const {
     subtitle="Are you sure you want to delete this attendance?"
     :confirm-text="getRandomCode(6, true)"
     @confirm="onConfirmDelete"
+  ></ConfirmFieldDialog>
+
+  <ConfirmFieldDialog
+    v-model:is-dialog-visible="isConfirmDeleteOvertimeDialog"
+    title="Confirm Delete"
+    subtitle="Are you sure you want to delete this overtime?"
+    :confirm-text="getRandomCode(6, true)"
+    @confirm="onConfirmDeleteOvertime"
   ></ConfirmFieldDialog>
 </template>
