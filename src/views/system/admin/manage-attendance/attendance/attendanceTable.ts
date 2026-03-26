@@ -28,11 +28,11 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const getTableHeaders = (componentView: string): TableHeader[] => {
     const headers = [...baseHeaders]
 
-    if (componentView === 'attendance' || componentView === 'leave')
-      headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
-
     if (componentView === 'overtime')
       headers.push({ title: 'Overtime Applied?', key: 'is_overtime_applied', align: 'center' })
+
+    if (componentView === 'attendance' || componentView === 'leave' || componentView === 'overtime')
+      headers.push({ title: 'Actions', key: 'actions', sortable: false, align: 'center' })
 
     return headers
   }
@@ -51,6 +51,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
   const isDialogVisible = ref(false)
   const isViewDialogVisible = ref(false)
   const isConfirmDeleteDialog = ref(false)
+  const isConfirmDeleteOvertimeDialog = ref(false)
   const deleteId = ref<number>(0)
   const itemData = ref<Attendance | null>(null)
   const formAction = ref({ ...formActionDefault })
@@ -89,6 +90,11 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     isConfirmDeleteDialog.value = true
   }
 
+  const onDeleteOvertime = (id: number) => {
+    deleteId.value = id
+    isConfirmDeleteOvertimeDialog.value = true
+  }
+
   const onConfirmDelete = async () => {
     formAction.value = { ...formActionDefault, formProcess: true }
 
@@ -99,6 +105,24 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
       formAction.value.formStatus = 400
     } else if (data) {
       formAction.value.formMessage = 'Successfully Deleted Attendance.'
+
+      await onLoadItems(tableOptions.value)
+    }
+
+    formAction.value.formAlert = true
+    formAction.value.formProcess = false
+  }
+
+  const onConfirmDeleteOvertime = async () => {
+    formAction.value = { ...formActionDefault, formProcess: true }
+
+    const { data, error } = await attendancesStore.deleteOvertime(deleteId.value)
+
+    if (error) {
+      formAction.value.formMessage = error.message
+      formAction.value.formStatus = 400
+    } else if (data) {
+      formAction.value.formMessage = 'Successfully Deleted Overtime.'
 
       await onLoadItems(tableOptions.value)
     }
@@ -221,6 +245,7 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     isDialogVisible,
     isViewDialogVisible,
     isConfirmDeleteDialog,
+    isConfirmDeleteOvertimeDialog,
     itemData,
     formAction,
     viewType,
@@ -228,7 +253,9 @@ export function useAttendanceTable(props: { componentView: 'attendance' | 'leave
     onView,
     onUpdate,
     onDelete,
+    onDeleteOvertime,
     onConfirmDelete,
+    onConfirmDeleteOvertime,
     onFilterDate,
     onFilterItems,
     onLoadItems,
