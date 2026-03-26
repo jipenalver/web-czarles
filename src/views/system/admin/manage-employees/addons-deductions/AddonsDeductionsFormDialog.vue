@@ -54,10 +54,10 @@ const {
                   <h2 class="text-body-1 font-weight-black mb-3 ms-2">Add-ons</h2>
                 </v-col>
 
-                <template v-for="(benefit, index) in benefitsStore.addons" :key="benefit.id">
+                <template v-for="benefit in benefitsStore.addons" :key="benefit.id">
                   <v-col cols="12">
                     <v-text-field
-                      v-model="formAddons.amount[index]"
+                      v-model="formAddons.amount[benefit.id]"
                       prepend-inner-icon="mdi-currency-php"
                       :label="benefit.benefit"
                       type="number"
@@ -66,14 +66,14 @@ const {
 
                   <v-col v-if="false" cols="12" sm="4">
                     <v-switch
-                      v-model="formAddons.is_quincena[index]"
+                      v-model="formAddons.is_quincena[benefit.id]"
                       class="ms-2"
                       color="primary"
                       hide-details
                     >
                       <template #label>
                         <span class="font-weight-black ms-1">
-                          {{ formAddons.is_quincena[index] ? 'Quincena' : 'Monthly' }}
+                          {{ formAddons.is_quincena[benefit.id] ? 'Quincena' : 'Monthly' }}
                         </span>
                       </template>
                     </v-switch>
@@ -84,10 +84,10 @@ const {
                   <h2 class="text-body-1 font-weight-black mb-3 ms-2">Deductions</h2>
                 </v-col>
 
-                <template v-for="(benefit, index) in benefitsStore.deductions" :key="benefit.id">
+                <template v-for="benefit in benefitsStore.deductions" :key="benefit.id">
                   <v-col cols="12">
                     <v-text-field
-                      v-model="formDeductions.amount[index]"
+                      v-model="formDeductions.amount[benefit.id]"
                       prepend-inner-icon="mdi-currency-php"
                       :label="benefit.benefit"
                       type="number"
@@ -96,14 +96,14 @@ const {
 
                   <v-col v-if="false" cols="12" sm="4">
                     <v-switch
-                      v-model="formDeductions.is_quincena[index]"
+                      v-model="formDeductions.is_quincena[benefit.id]"
                       class="ms-2"
                       color="primary"
                       hide-details
                     >
                       <template #label>
                         <span class="font-weight-black ms-1">
-                          {{ formDeductions.is_quincena[index] ? 'Quincena' : 'Monthly' }}
+                          {{ formDeductions.is_quincena[benefit.id] ? 'Quincena' : 'Monthly' }}
                         </span>
                       </template>
                     </v-switch>

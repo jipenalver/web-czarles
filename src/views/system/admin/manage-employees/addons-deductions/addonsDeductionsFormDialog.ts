@@ -36,20 +36,18 @@ export function useAddonsDeductionsFormDialog(
     async () => {
       const benefitsData = await benefitsStore.getDeductionsById(props.itemId as number)
 
-      const sortedBenefits = benefitsData.sort((a, b) =>
-        a.benefit.benefit.localeCompare(b.benefit.benefit),
-      )
-
       const addons: EmployeeDeductionForm = { amount: [], is_quincena: [] }
       const deductions: EmployeeDeductionForm = { amount: [], is_quincena: [] }
 
-      sortedBenefits.forEach((item) => {
+      benefitsData.forEach((item) => {
+        const id = item.benefit_id
+
         if (item.benefit.is_deduction) {
-          deductions.amount.push(item.amount)
-          deductions.is_quincena.push(item.is_quincena)
+          deductions.amount[id] = item.amount
+          deductions.is_quincena[id] = item.is_quincena
         } else {
-          addons.amount.push(item.amount)
-          addons.is_quincena.push(item.is_quincena)
+          addons.amount[id] = item.amount
+          addons.is_quincena[id] = item.is_quincena
         }
       })
 
@@ -63,17 +61,17 @@ export function useAddonsDeductionsFormDialog(
     formAction.value = { ...formActionDefault, formProcess: true }
 
     formData.value = [
-      ...benefitsStore.addons.map((benefit, index) => ({
+      ...benefitsStore.addons.map((benefit) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formAddons.value.amount[index] || undefined,
-        is_quincena: formAddons.value.is_quincena[index],
+        amount: formAddons.value.amount[benefit.id] || undefined,
+        is_quincena: formAddons.value.is_quincena[benefit.id],
       })),
-      ...benefitsStore.deductions.map((benefit, index) => ({
+      ...benefitsStore.deductions.map((benefit) => ({
         employee_id: props.itemId as number,
         benefit_id: benefit.id,
-        amount: formDeductions.value.amount[index] || undefined,
-        is_quincena: formDeductions.value.is_quincena[index],
+        amount: formDeductions.value.amount[benefit.id] || undefined,
+        is_quincena: formDeductions.value.is_quincena[benefit.id],
       })),
     ]
 

@@ -198,6 +198,14 @@ export const useAttendancesStore = defineStore('attendances', () => {
     return await supabase.from('attendances').delete().eq('id', id).select()
   }
 
+  async function deleteOvertime(id: number) {
+    return await supabase
+      .from('attendances')
+      .update({ is_overtime_applied: false })
+      .eq('id', id)
+      .select()
+  }
+
   // Expose States and Actions
   return {
     attendances,
@@ -211,5 +219,6 @@ export const useAttendancesStore = defineStore('attendances', () => {
     addAttendance,
     updateAttendance,
     deleteAttendance,
+    deleteOvertime,
   }
 })
