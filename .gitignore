@@ -33,3 +33,4 @@ github
 .vercel
 .env*.local
 .env
+.husky
