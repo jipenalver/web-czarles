@@ -2,7 +2,6 @@
 import { type CashAdvance, type CashAdvanceTableFilter } from './cashAdvances'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -63,7 +62,7 @@ export const useCashAdvanceRequestsStore = defineStore('cashAdvanceRequests', ()
 
   function getCashAdvanceRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { employee_id, request_at }: CashAdvanceRequestTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
