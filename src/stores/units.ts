@@ -1,5 +1,4 @@
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -65,7 +64,7 @@ export const useUnitsStore = defineStore('units', () => {
 
   function getUnitsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { search }: UnitTableFilter,
   ) {
     if (search) query = query.or(`name.ilike.%${search}%, description.ilike.%${search}%`)

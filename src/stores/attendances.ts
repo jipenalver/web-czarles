@@ -1,5 +1,4 @@
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { getDate, prepareDateRange } from '@/utils/helpers/dates'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
@@ -157,7 +156,7 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   function getAttendancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { employee_id, attendance_at, component_view }: AttendanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)

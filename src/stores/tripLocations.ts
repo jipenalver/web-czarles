@@ -1,5 +1,4 @@
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -68,7 +67,7 @@ export const useTripLocationsStore = defineStore('tripLocations', () => {
 
   function getTripLocationsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { search }: TripLocationTableFilter,
   ) {
     if (search) query = query.or(`location.ilike.%${search}%, description.ilike.%${search}%`)

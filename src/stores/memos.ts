@@ -1,5 +1,4 @@
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Employee } from './employees'
 import { supabase } from '@/utils/supabase'
 import { defineStore } from 'pinia'
@@ -89,7 +88,7 @@ export const useMemosStore = defineStore('memos', () => {
 
   function getMemosFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { search }: MemoTableFilter,
   ) {
     if (search) query = query.or(`name.ilike.%${search}%, description.ilike.%${search}%`)
