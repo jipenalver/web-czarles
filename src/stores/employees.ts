@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination, tableSearch } from '@/utils/helpers/tables'
 import { prepareDateTime, prepareFormDates } from '@/utils/helpers/dates'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Benefit, type EmployeeDeduction } from './benefits'
 import { type Designation } from './designations'
 import { supabase } from '@/utils/supabase'
@@ -133,7 +132,7 @@ export const useEmployeesStore = defineStore('employees', () => {
 
   function getEmployeesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { search, designation_id }: EmployeeTableFilter,
   ) {
     if (search)

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
 import { prepareDateRange, prepareFormDates } from '@/utils/helpers/dates'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type TripLocation } from './tripLocations'
 import { supabase } from '@/utils/supabase'
 import { type Employee } from './employees'
@@ -104,7 +103,7 @@ export const useAllowancesStore = defineStore('allowances', () => {
 
   function getAllowancesFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { employee_id, trip_at }: AllowanceTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)

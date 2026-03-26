@@ -7,7 +7,6 @@ import {
   prepareFormDates,
 } from '@/utils/helpers/dates'
 import { type TableOptions, tablePagination } from '@/utils/helpers/tables'
-import { type PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { type Attendance } from './attendances'
 import { useAuthUserStore } from './authUser'
 import { type Employee } from './employees'
@@ -109,7 +108,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
   function getAttendanceRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { employee_id, attendance_at, component_view }: AttendanceRequestTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
@@ -224,7 +223,7 @@ export const useAttendanceRequestsStore = defineStore('attendanceRequests', () =
 
   function syncOverTimeRequestsFilter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: PostgrestFilterBuilder<any, any, any, any>,
+    query: any,
     { employee_id, attendance_at }: AttendanceRequestTableFilter,
   ) {
     if (employee_id) query = query.eq('employee_id', employee_id)
