@@ -259,6 +259,45 @@ async function updateOverallOvertime() {
   }
 }
 
+// Counter for visible particulars rows (excluding header and gross salary)
+const visibleParticularsCount = computed(() => {
+  let count = 1 // Start with 1 for the regular work row (always visible)
+
+  // Count visible holidays
+  if (holidaysArray.value && holidaysArray.value.length > 0) {
+    count += holidaysArray.value.filter((holiday) => calculateHolidayAmount(holiday) > 0).length
+  }
+
+  // Count overtime if visible
+  if (overallOvertime.value > 0) count++
+
+  // Count Sunday duty if visible
+  if (sundayDutyDays.value > 0) count++
+
+  // Count visible benefits
+  if (employeeNonDeductions.value && employeeNonDeductions.value.length > 0) {
+    count += employeeNonDeductions.value.filter((benefit) =>
+      hasBenefitAmount(benefit.amount),
+    ).length
+  }
+
+  // Count monthly trippings if visible
+  if (monthlyTrippingsTotal.value > 0) count++
+
+  // Count monthly utilizations if visible
+  if (monthlyUtilizationsTotal.value > 0) count++
+
+  // Count monthly allowances if visible
+  if (monthlyAllowancesTotal.value > 0) count++
+
+  // Count cash adjustments
+  if (cashAdjustmentsAdditions.value && cashAdjustmentsAdditions.value.length > 0) {
+    count += cashAdjustmentsAdditions.value.length
+  }
+
+  return count
+})
+
 // Expose methods and state to parent components
 defineExpose({
   initializePayrollCalculations,
@@ -272,6 +311,7 @@ defineExpose({
   updateOverallOvertime,
   updateEmployeeDeductions: () => updateEmployeeDeductions(props.employeeData?.id),
   isPayrollCalculating, // Expose comprehensive loading state
+  visibleParticularsCount, // Expose row count for pagination
 })
 
 // Setup watchers using composable
@@ -683,6 +723,7 @@ onMounted(async () => {
 }
 
 /* Font sizes for PDF generation (when pdf-print-active class is present) */
+/* These will be overridden by the dynamic styles injected in payrollPrintDialog.ts based on row count */
 .pdf-print-active .text-caption {
   font-size: 14px !important;
   line-height: 1.4 !important;
@@ -717,5 +758,19 @@ onMounted(async () => {
 .pdf-print-active .total-cell {
   font-size: 16px !important;
   font-weight: bold !important;
+}
+
+/* Compact mode for payroll with many rows */
+.pdf-print-active.compact-mode .v-container {
+  padding: 4px !important;
+}
+
+.pdf-print-active.compact-mode .v-table {
+  margin-top: 4px !important;
+}
+
+.pdf-print-active.compact-mode td,
+.pdf-print-active.compact-mode th {
+  padding: 1px 2px !important;
 }
 </style>

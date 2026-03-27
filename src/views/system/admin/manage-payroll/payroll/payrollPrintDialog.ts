@@ -1,6 +1,7 @@
 import { formActionDefault } from '@/utils/helpers/constants'
 import html2pdf from 'html2pdf.js'
-import { ref, watch } from 'vue'
+import { ref, watch, type Ref } from 'vue'
+import type PayrollPrint from './PayrollPrint.vue'
 
 export function usePayrollPrintDialog(
   propsGetter: () => {
@@ -16,6 +17,7 @@ export function usePayrollPrintDialog(
     }
   },
   emit: (event: 'update:isDialogVisible', value: boolean) => void,
+  payrollPrintRef?: Ref<InstanceType<typeof PayrollPrint> | null>,
 ) {
   // States
   const formAction = ref({ ...formActionDefault })
@@ -121,57 +123,131 @@ export function usePayrollPrintDialog(
     }
 
     try {
+      // Get the count from PayrollPrint component if available, otherwise count manually
+      let actualParticularsCount = 0
+
+      if (payrollPrintRef?.value?.visibleParticularsCount) {
+        // Use the computed count from PayrollPrint component
+        actualParticularsCount = payrollPrintRef.value.visibleParticularsCount
+        console.log(
+          '[PayrollPrintDialog] Using computed particulars count:',
+          actualParticularsCount,
+        )
+      } else {
+        // Fallback: Count the number of particulars rows manually (excluding header and gross salary rows)
+        const particularsTable = payrollElement.querySelector(
+          '.v-table:nth-child(3)',
+        ) as HTMLElement
+        const particularsRows = particularsTable?.querySelectorAll('tbody tr') || []
+        // Exclude header row (1st), gross salary row (last), and loading/empty rows
+        actualParticularsCount = Array.from(particularsRows).filter((row) => {
+          const rowElement = row as HTMLElement
+          // Skip header rows with colspan="4" or "5" that contain "PARTICULARS"
+          const hasParticularsHeader = rowElement.textContent?.includes('PARTICULARS')
+          // Skip gross salary row
+          const hasGrossSalary = rowElement.textContent?.includes('Gross Salary')
+          // Skip loading/empty rows
+          const hasLoadingOrEmpty = rowElement.querySelector('.v-progress-circular') !== null
+
+          return !hasParticularsHeader && !hasGrossSalary && !hasLoadingOrEmpty
+        }).length
+        console.log('[PayrollPrintDialog] Using manual particulars count:', actualParticularsCount)
+      }
+
       // Inject a print-specific stylesheet to reduce font sizes for the generated PDF
       const printStyleId = 'pdf-print-styles'
       let styleEl = document.getElementById(printStyleId) as HTMLStyleElement | null
       if (!styleEl) {
         styleEl = document.createElement('style')
         styleEl.id = printStyleId
-        // Make fonts much smaller for PDF output. Use !important to override component styles.
+
+        // Adjust font sizes based on number of particulars
+        const baseFontSize = actualParticularsCount > 6 ? 8 : 10
+        const tableFontSize = actualParticularsCount > 6 ? 7 : 9
+        const headingH1Size = actualParticularsCount > 6 ? 12 : 14
+        const headingH2Size = actualParticularsCount > 6 ? 10 : 12
+        const headingH3Size = actualParticularsCount > 6 ? 9 : 11
+
+        // Make fonts smaller for PDF output. Use !important to override component styles.
         styleEl.innerHTML = `
           /* Scoped to the element(s) we mark with .pdf-print-active */
           .pdf-print-active, .pdf-print-active * {
-            font-size: 10px !important;
+            font-size: ${baseFontSize}px !important;
             line-height: 1.1 !important;
           }
           .pdf-print-active table, .pdf-print-active th, .pdf-print-active td {
-            font-size: 9px !important;
+            font-size: ${tableFontSize}px !important;
+            padding: 2px !important;
           }
           /* Reduce heading sizes */
-          .pdf-print-active h1 { font-size: 14px !important; }
-          .pdf-print-active h2 { font-size: 12px !important; }
-          .pdf-print-active h3 { font-size: 11px !important; }
+          .pdf-print-active h1 { font-size: ${headingH1Size}px !important; }
+          .pdf-print-active h2 { font-size: ${headingH2Size}px !important; }
+          .pdf-print-active h3 { font-size: ${headingH3Size}px !important; }
+          /* Reduce spacing when many rows */
+          ${
+            actualParticularsCount > 6
+              ? `
+          .pdf-print-active .v-container { padding: 8px !important; }
+          .pdf-print-active .mt-6 { margin-top: 8px !important; }
+          .pdf-print-active .mt-3 { margin-top: 4px !important; }
+          .pdf-print-active .v-img { max-height: 40px !important; }
+          `
+              : ''
+          }
         `
         document.head.appendChild(styleEl)
       }
 
       // Add class to enable PDF-specific styles (components can target .pdf-print-active)
-      if (payrollElement) payrollElement.classList.add('pdf-print-active')
+      if (payrollElement) {
+        payrollElement.classList.add('pdf-print-active')
+        // Add compact mode class when there are many rows
+        if (actualParticularsCount > 6) {
+          payrollElement.classList.add('compact-mode')
+        }
+      }
       const vAppElm = document.querySelector('.v-application') as HTMLElement | null
       if (vAppElm) vAppElm.classList.add('pdf-print-active')
 
       // Apply transformations para sa PDF generation
       if (miniPayrollSection) {
         miniPayrollSection.style.display = 'block'
-        miniPayrollSection.style.transform = 'rotate(90deg) scale(0.8)'
         miniPayrollSection.style.transformOrigin = 'top left'
         miniPayrollSection.style.position = 'absolute'
-        miniPayrollSection.style.top = '750px'
-        miniPayrollSection.style.left = '880px'
+
+        // Adjust scale and position based on number of particulars
+        if (actualParticularsCount > 6) {
+          // Smaller scale to fit more content on one page
+          miniPayrollSection.style.transform = 'rotate(90deg) scale(0.65)'
+          miniPayrollSection.style.top = '1000px' // Position higher to fit on one page
+          miniPayrollSection.style.left = '800px'
+        } else {
+          // Original position and scale
+          miniPayrollSection.style.transform = 'rotate(90deg) scale(0.8)'
+          miniPayrollSection.style.top = '800px'
+          miniPayrollSection.style.left = '790px'
+        }
+
         miniPayrollSection.style.width = '800px'
         miniPayrollSection.style.height = '800px'
       }
 
       if (mainContainer) {
-        mainContainer.style.transform = 'scale(1.4)'
+        // Adjust scale based on content size
+        const containerScale = actualParticularsCount > 6 ? 1.2 : 1.4
+        mainContainer.style.transform = `scale(${containerScale})`
         mainContainer.style.transformOrigin = 'top center'
         mainContainer.style.position = 'absolute'
-        mainContainer.style.left = '320px'
+        mainContainer.style.left = actualParticularsCount > 6 ? '300px' : '320px'
       }
 
-      // Generate PDF with optimized settings para sa scaled content
+      // Generate PDF with optimized settings - always use single page height
+      const pdfHeight = 1850
+      // Remove margins when there are many rows to maximize space
+      const pdfMargin = actualParticularsCount > 6 ? 0 : 0.1
+
       await html2pdf(payrollElement, {
-        margin: 0.1,
+        margin: pdfMargin,
         filename: generateFilename(),
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
@@ -179,7 +255,7 @@ export function usePayrollPrintDialog(
           useCORS: true,
           allowTaint: true,
           width: 1400, // Larger width para sa bigger content
-          height: 1850, // Larger height
+          height: pdfHeight, // Single page height
         },
         jsPDF: {
           unit: 'in',
@@ -223,7 +299,10 @@ export function usePayrollPrintDialog(
         }
       }
       // Remove PDF-specific classes so UI returns to normal
-      if (payrollElement) payrollElement.classList.remove('pdf-print-active')
+      if (payrollElement) {
+        payrollElement.classList.remove('pdf-print-active')
+        payrollElement.classList.remove('compact-mode')
+      }
       const vAppElm2 = document.querySelector('.v-application') as HTMLElement | null
       if (vAppElm2) vAppElm2.classList.remove('pdf-print-active')
 

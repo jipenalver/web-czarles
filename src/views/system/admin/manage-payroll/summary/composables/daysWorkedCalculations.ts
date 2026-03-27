@@ -58,7 +58,7 @@ export async function countActualAttendanceOnRegularHolidays(
 
         if (hasAnyAttendance) {
           actualRHAttendanceCount += 1
-         /*  console.log(
+          /*  console.log(
             `[RH Actual Attendance] Employee ${employeeId} worked on Regular Holiday: ${attendanceDate}`,
           ) */
         }

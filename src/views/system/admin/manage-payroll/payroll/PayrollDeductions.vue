@@ -273,7 +273,7 @@ watch(
   }
 
   /* Override all inline font-size styles for deduction items */
-  span[style*="font-size: 12px"] {
+  span[style*='font-size: 12px'] {
     font-size: 16px !important;
   }
 
@@ -300,7 +300,7 @@ watch(
   line-height: 1.4 !important;
 }
 
-.pdf-print-active span[style*="font-size: 12px"] {
+.pdf-print-active span[style*='font-size: 12px'] {
   font-size: 16px !important;
 }
 
