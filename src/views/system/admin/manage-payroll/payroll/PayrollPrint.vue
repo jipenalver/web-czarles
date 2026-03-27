@@ -276,7 +276,9 @@ const visibleParticularsCount = computed(() => {
 
   // Count visible benefits
   if (employeeNonDeductions.value && employeeNonDeductions.value.length > 0) {
-    count += employeeNonDeductions.value.filter((benefit) => hasBenefitAmount(benefit.amount)).length
+    count += employeeNonDeductions.value.filter((benefit) =>
+      hasBenefitAmount(benefit.amount),
+    ).length
   }
 
   // Count monthly trippings if visible

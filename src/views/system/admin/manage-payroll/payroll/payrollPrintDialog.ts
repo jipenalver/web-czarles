@@ -129,10 +129,15 @@ export function usePayrollPrintDialog(
       if (payrollPrintRef?.value?.visibleParticularsCount) {
         // Use the computed count from PayrollPrint component
         actualParticularsCount = payrollPrintRef.value.visibleParticularsCount
-        console.log('[PayrollPrintDialog] Using computed particulars count:', actualParticularsCount)
+        console.log(
+          '[PayrollPrintDialog] Using computed particulars count:',
+          actualParticularsCount,
+        )
       } else {
         // Fallback: Count the number of particulars rows manually (excluding header and gross salary rows)
-        const particularsTable = payrollElement.querySelector('.v-table:nth-child(3)') as HTMLElement
+        const particularsTable = payrollElement.querySelector(
+          '.v-table:nth-child(3)',
+        ) as HTMLElement
         const particularsRows = particularsTable?.querySelectorAll('tbody tr') || []
         // Exclude header row (1st), gross salary row (last), and loading/empty rows
         actualParticularsCount = Array.from(particularsRows).filter((row) => {
@@ -179,12 +184,16 @@ export function usePayrollPrintDialog(
           .pdf-print-active h2 { font-size: ${headingH2Size}px !important; }
           .pdf-print-active h3 { font-size: ${headingH3Size}px !important; }
           /* Reduce spacing when many rows */
-          ${actualParticularsCount > 6 ? `
+          ${
+            actualParticularsCount > 6
+              ? `
           .pdf-print-active .v-container { padding: 8px !important; }
           .pdf-print-active .mt-6 { margin-top: 8px !important; }
           .pdf-print-active .mt-3 { margin-top: 4px !important; }
           .pdf-print-active .v-img { max-height: 40px !important; }
-          ` : ''}
+          `
+              : ''
+          }
         `
         document.head.appendChild(styleEl)
       }

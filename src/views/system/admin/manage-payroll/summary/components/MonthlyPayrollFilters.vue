@@ -109,7 +109,7 @@ const paymentOptions = [
         ></v-select>
       </v-col>
 
-      <v-col style="max-width: 90px;">
+      <v-col style="max-width: 90px">
         <v-select
           :model-value="dayFrom"
           @update:model-value="emit('update:dayFrom', $event)"
@@ -130,7 +130,7 @@ const paymentOptions = [
         ></v-select>
       </v-col>
 
-      <v-col style="max-width: 90px;">
+      <v-col style="max-width: 90px">
         <v-select
           :model-value="dayTo"
           @update:model-value="emit('update:dayTo', $event)"
@@ -181,13 +181,13 @@ const paymentOptions = [
         ></v-text-field>
       </v-col>
 
-      <v-col style="max-width: 120px;">
+      <v-col style="max-width: 120px">
         <v-select
           :model-value="sortOrder || 'asc'"
           @update:model-value="emit('update:sortOrder', $event)"
           :items="[
             { title: 'A-Z', value: 'asc', icon: 'mdi-sort-alphabetical-ascending' },
-            { title: 'Z-A', value: 'desc', icon: 'mdi-sort-alphabetical-descending' }
+            { title: 'Z-A', value: 'desc', icon: 'mdi-sort-alphabetical-descending' },
           ]"
           label="Sort"
           variant="outlined"
