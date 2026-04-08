@@ -157,16 +157,12 @@ export function useOvertimeFormDialog(
         attendance.employee_id === formData.value.employee_id,
     )
 
-    const isAttendanceBlank =
-      attendanceData.value &&
-      [
-        attendanceData.value.am_time_in,
-        attendanceData.value.am_time_out,
-        attendanceData.value.pm_time_in,
-        attendanceData.value.pm_time_out,
-      ].some((time) => time !== null)
-
-    if (!isAttendanceBlank)
+    const attendance = attendanceData.value
+    const hasAttendance = [
+      [attendance?.am_time_in, attendance?.am_time_out],
+      [attendance?.pm_time_in, attendance?.pm_time_out],
+    ].some(([timeIn, timeOut]) => timeIn && timeOut)
+    if (!hasAttendance)
       return setError('Cannot apply for overtime - attendance is not yet recorded for this date.')
 
     const isAttendanceHasLeave =
@@ -174,14 +170,12 @@ export function useOvertimeFormDialog(
       [attendanceData.value.is_am_leave, attendanceData.value.is_pm_leave].every(
         (isLeave) => isLeave === true,
       )
-
     if (isAttendanceHasLeave)
       return setError('Cannot apply for overtime - full leave already recorded for this date.')
 
     if (!formData.value.overtime_in) return setError('Overtime - Time In is required.')
 
     const hasChecked = Object.values(formCheckBox.value).some((value) => value)
-
     if (!hasChecked) return setError('Please check at least one checkbox to rectify the overtime.')
   }
 
