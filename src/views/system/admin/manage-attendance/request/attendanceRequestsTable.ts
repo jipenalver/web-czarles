@@ -99,7 +99,9 @@ export function useAttendanceRequestsTable(props: {
     isLeaveDialogVisible.value = true
   }
 
-  const onOvertime = (item: AttendanceRequest | null = null) => {
+  const onOvertime = async (item: AttendanceRequest | null = null) => {
+    await onLoadOvertimes()
+
     itemData.value = item
     isOvertimeDialogVisible.value = true
   }
