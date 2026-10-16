@@ -72,13 +72,9 @@ export const useAttendancesStore = defineStore('attendances', () => {
 
   // Actions
   async function getAttendances(employee_id: number | null = null) {
-    let query = supabase
-      .from('attendances')
-      .select(selectQuery)
-      .order('created_at', { ascending: false })
+    let query = supabase.from('attendances').select('*').order('created_at', { ascending: false })
 
-    if (employee_id)
-      query = query.eq('employee_id', employee_id).eq('is_overtime_applied', false).limit(90)
+    if (employee_id) query = query.eq('employee_id', employee_id).limit(90)
 
     const { data } = await query
 
